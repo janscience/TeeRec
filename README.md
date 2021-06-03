@@ -1,4 +1,4 @@
-# teerec - Teensy recorder
+# TeeRec - Teensy recorder
 
 Libraries for recording analog input data on Teensy 3.5 microcontroller.
 
