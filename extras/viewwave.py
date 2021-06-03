@@ -40,9 +40,9 @@ def load_n_plot(path):
     #print(data.shape)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
-    tmin = 5.0
-    trange = 0.004
-    trange = 5.0
+    tmin = 0.0
+    trange = 0.1
+    #trange = 5.0
     time = np.arange(len(data))/rate
     sel = (time>tmin) & (time<tmin+trange)
     #ascale = 1000.0*0.5*3.3/100.0

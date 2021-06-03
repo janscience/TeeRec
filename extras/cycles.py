@@ -33,12 +33,9 @@ def load_n_plot(path):
     except EOFError:
         return
     basename = path.split('/')[-1]
-    c = 0
-    thresh = 5000
-    """
-    c = 2
+    c = 6
     thresh = 0
-    """
+    maxipi = 80
     up, down = threshold_crossings(data[:,c], thresh)
     isi = np.diff(up)
     fig, ax = plt.subplots(figsize=(12,6))
@@ -49,17 +46,18 @@ def load_n_plot(path):
     ax.plot(up, np.zeros(len(up))+thresh, 'o')
     ax.plot(down, np.zeros(len(down))+thresh, 'o')
     ax.set_xlim(0, 1000)
-    """
     #fig.savefig(basename.split('.')[0] + '-noise.png')
+    """
     plt.show()
-    print(np.diff(up[:-1][isi<40]))
-    for i in np.where(isi<40)[0]:
+    print(np.diff(up[:-1][isi<maxipi]))
+    for i in np.where(isi<maxipi)[0]:
         print(i, isi[i])
         k = up[i]
         plt.title('%s: %d isi=%d' % (basename, i, isi[i]))
         plt.plot(data[k-200:k+200,0])
         plt.plot(data[k-200:k+200,2])
         plt.plot(data[k-200:k+200,4])
+        plt.plot(data[k-200:k+200,6])
         plt.show()
 
     

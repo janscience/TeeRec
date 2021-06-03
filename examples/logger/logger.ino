@@ -3,10 +3,10 @@
 
 // Settings: --------------------------------------------------------------------------------
 
-uint32_t sampling_rate = 100000;  // samples per second and channel in Hertz
+uint32_t sampling_rate = 40000;  // samples per second and channel in Hertz
 
-int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
-int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
+int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
+int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A10, A11, -1};  // input pins for ADC1
 
 int stimulus_frequency = 500;  // Hertz
 
