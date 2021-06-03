@@ -1,0 +1,267 @@
+/*
+  ContinuousADC - library for sampling from multiple pins into a cyclic buffer.
+  Created by Jan Benda, May 25th, 2021.
+  Based on https://github.com/pedvide/ADC
+  and on contributions from Stefan Mucha, Lydia Federman, and Sebastian Volkmer.
+
+  Features
+  --------
+  
+  - Continuous DMA based data acquisition into a circular buffer.
+  - Single channel or multiplexed acquisition from multiple channels.
+  - Highspeed acquisition up to 500kHz.
+  - Acquisition from a single or both ADCs.
+  - A single multiplexed circular data buffer.
+  - Conversion of data to signed 16bit for direct storage into WAV files.
+
+
+  Setup
+  -----
+  #include <ContinuousADC.h>
+
+  uint32_t sampling_rate = 40000;  // samples per second and channel in Hertz
+
+  uint8_t channels0 [] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0
+  uint8_t channels1 [] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1
+
+  ContinuousADC aidata;
+
+  void setup() {
+    aidata.setChannels(0, channels0);
+    aidata.setChannels(1, channels1);
+    aidata.setRate(sampling_rate);
+    aidata.setResolution(12);         // 10bit 12bit, 16bit 
+    aidata.initBuffer(1024*64);
+    aidata.setMaxFileSamples(60*sampling_rate*aidata.nchannels());  // 60 seconds
+    aidata.check();
+    aidata.start();
+  }
+
+  Now, acquisition is continuously running and the cyclic buffer is filled.
+  Use aidata.getData() and aidata.writeData() functions to work with the acquired data.
+
+
+  Teensy 3.5
+  ----------
+
+  Maximum sampling rates in kHz:
+
+  channels0 channels1 16bit 12bit
+  1         0           440   520
+  2         0           185   210
+  4         0            95   110
+  8         0            45    50
+  1         1           440   520
+  2         2           160   180
+  4         4            85    90
+  8         8            40    45
+
+
+  Output of pinAssignment():
+
+  pin ADC0 ADC1
+  A0     1    0
+  A1     1    0
+  A2     1    1
+  A3     1    1
+  A4     1    0
+  A5     1    0
+  A6     1    0
+  A7     1    0
+  A8     1    0
+  A9     1    0
+  A10    1    1
+  A11    0    1
+  A12    0    1
+  A13    0    1
+  A14    1    0
+  A15    1    0
+  A16    0    1
+  A17    0    1
+  A18    0    1
+  A19    0    1
+  A20    0    1
+  A21    1    0
+  A22    0    1
+*/
+
+#ifndef ContinuousADC_h
+#define ContinuousADC_h
+
+
+#include <Arduino.h>
+#include <ADC.h>
+#include <DMAChannel.h>
+#include <SdFat.h>
+
+
+// DMA buffer:
+static const size_t MajorSize = 256;  // why can it be no more?
+static const size_t NMajors = 2;
+volatile DMAMEM static uint16_t __attribute__((aligned(32))) ADCBuffer[2][NMajors*MajorSize];
+
+
+class ContinuousADC {
+ public:
+
+  static ContinuousADC *ADCC;
+
+  // Initialize.
+  ContinuousADC();
+  
+  // Configure for acquisition of a single channel.
+  // channel is a pin specifier like A6, A19.
+  void setChannel(uint8_t adc, uint8_t channel);
+
+  // Configure for acquisition from several channels on a single ADC.
+  // channels is an array with pin specifications like A6, A19.
+  // nchannels must be a power of two,
+  // because the channels have to fit into the 256 samples DMA buffer.
+  void setChannels(uint8_t adc, const int8_t *channels);
+
+  // Return number of channels on specified ADC.
+  uint8_t nchannels(uint8_t adc) const;
+
+  // Return total number of channels on both ADCs.
+  uint8_t nchannels() const;
+  
+  // Set the sampling rate per channel in Hertz.
+  void setRate(uint32_t rate);
+
+  // Return sampling rate per channel in Hertz.
+  uint32_t rate() const;
+  
+  // Set the resolution in bits per sample (valid values are 10, 12, 16 bit).
+  void setResolution(uint8_t bits);
+
+  // Return ADC resolution in bits per sample.
+  uint8_t resolution() const;
+
+  // Return resolution of data buffer in bits per sample (always 16 bits).
+  uint8_t dataResolution() const;
+
+  // Initialize internal buffer for specified number of samples.
+  // Max 64kB = 65536 bytes.
+  void initBuffer(size_t samples);
+
+  // Time the buffer can hold in seconds.
+  float bufferTime() const;
+
+  // Return string with ADC settings.
+  void settingsStr(char *str);
+
+  // Print the assignment of AI pins to ADC0 and ADC1 to Serial.
+  void pinAssignment();
+
+  // Check validity of buffers and channels.
+  // Returns true if everything is ok.
+  // Otherwise print warnings on Serial.
+  // If successfull, you can remove this check from your code.
+  bool check();
+ 
+  // Start the acquisition based on the channel, rate, and buffer settings.
+  void start();
+
+  // Number of samples of a single channel corresponding to time.
+  size_t samples(float time) const;
+
+  // Number of ADCs in use (0, 1, or 2).
+  uint8_t adcs() const;
+
+
+  // Return index right after most current data value in data buffer.
+  size_t currentIndex(size_t decr=0);
+
+  // Decrement index into data buffer by decr times number of channels.
+  size_t decrementIndex(size_t idx, size_t decr);
+
+  // Increment index into data buffer by decr times number of channels.
+  size_t incrementIndex(size_t idx, size_t incr);
+
+  // Get the nbuffer most recent data from a channel scaled to (-1, 1).
+  void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
+
+
+  // Write available data to file.
+  // If maxFileSamples() is set (>0), then stop writing after that many samples. 
+  // Returns number of written samples.
+  size_t writeData(FsFile &file);
+
+  // Start writing to a file from the current data position on.
+  void startWrite();
+
+  // Return current file size in samples.
+  size_t fileSamples() const;
+
+  // Return current file size in seconds.
+  float fileTime() const;
+
+  // Return current file size as a string displaying minutes and seconds.
+  // str must hold at least 6 characters.
+  void fileTimeStr(char *str) const;
+
+  // Set maximum file size to a fixed number of samples modulo 256.
+  void setMaxFileSamples(size_t samples);
+
+  // Set maximum file size to a fixed time.
+  void setMaxFileTime(float secs);
+
+  // Return actually used maximum file size in samples.
+  size_t maxFileSamples() const;
+
+  // Return true if maximum number of samples have been written
+  // and a new file needs to be opened.
+  bool endWrite();
+
+  // Interrupt service routine. For internal usage.
+  void isr(uint8_t adc);
+
+
+ protected:
+
+  // ADC:
+  static const int MaxChannels = 20;
+  uint8_t Channels[2][MaxChannels];
+  uint8_t SC1AChannels[2][MaxChannels];
+  uint8_t NChannels[2];
+  uint8_t ADCUse;
+
+  uint8_t Bits;
+  uint32_t Rate;
+  ADC ADConv;
+  
+  // DMA:
+  DMAChannel DMABuffer[2];        // transfer data from ADCs to ADCBuffer
+  DMAChannel DMASwitch[2];        // tell ADC from which pin to sample
+  volatile size_t DMAIndex[2];    // currently active ADCBuffer segment
+  volatile size_t DMACounter[2];  // total count of ADCBuffer segments
+  DMAChannel::TCD_t TCDs[2][NMajors] __attribute__ ((aligned (32))) ;
+
+  // Data (large buffer holding converted and multiplexed data from both ADCs):
+  const uint8_t DataBits = 16;
+  typedef int16_t sample_t;
+  volatile sample_t *Buffer;      // the one and only buffer
+  volatile size_t NBuffer;        // size of this buffer.
+  volatile size_t BufferWrite[2]; // current index for each ADC for writing.
+  size_t BufferRead;              // index for reading the buffer and writing to file.
+  volatile uint16_t DataShift;    // number of bits ADC data need to be shifted to make them 16 bit.
+
+  size_t FileSamples;             // current number of samples stored in a file.
+  size_t FileMaxSamples;          // maximum number of samples to be stored in a file.
+  
+  void setupChannels(uint8_t adc);
+  void setupADC(uint8_t adc);
+  void setupDMA(uint8_t adc);
+#if defined(ADC_USE_PDB)
+  void startPDB(uint32_t freq);   // start both ADCs from PDB at the same time
+#else
+  #error "Need to implement startTimer() for Teensy 4 for both ADCs"
+#endif
+};
+
+
+void DMAISR0();
+void DMAISR1();
+
+
+#endif
