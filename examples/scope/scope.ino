@@ -12,13 +12,14 @@ int stimulus_frequency = 500;  // Hertz
 uint updateScreen = 500;       // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
-int n_plots = 1;
+
 
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
-Display screen(1);
 
+Display screen(1);
+int n_plots = 1;
 elapsedMillis screenTime;
 
 

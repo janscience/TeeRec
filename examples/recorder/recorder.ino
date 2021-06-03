@@ -13,23 +13,26 @@ int stimulus_frequency = 500;  // Hertz
 uint updateScreen = 500;       // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
-int n_plots = 1;
 
 bool startimmediately = false;  // immediately start saving to files
 bool logging = false;           // keep saving to files
-bool saving = false;
-char file_name[] = "data-NUM.wav";
+char file_name[] = "data-ANUM.wav";
+float fileSaveTime = 10;
 int startPin = 24;
-uint updateFile = 0;
+
 
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
-SDWriter file;
-Display screen(1);
 
-elapsedMillis screenTime;
+SDWriter file;
+bool saving = false;
+uint updateFile = 0;
 elapsedMillis saveTime;
+
+Display screen(1);
+int n_plots = 1;
+elapsedMillis screenTime;
 
 
 void setupADC() {
@@ -38,7 +41,7 @@ void setupADC() {
   aidata.setRate(sampling_rate);
   aidata.setResolution(12);  // 10bit 12bit, or 16bit 
   aidata.initBuffer(1024*64);
-  aidata.setMaxFileTime(10);
+  aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
   Serial.print("buffer time: ");
   Serial.print(aidata.bufferTime());
@@ -145,7 +148,7 @@ void storeData() {
       aidata.startWrite();
     }
     if (push == 1)
-      aidata.setMaxFileTime(10);
+      aidata.setMaxFileTime(fileSaveTime);
   }
   if (saving && saveTime > updateFile) {
     saveTime -= updateFile;

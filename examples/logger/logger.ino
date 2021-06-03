@@ -10,16 +10,18 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input p
 
 int stimulus_frequency = 500;  // Hertz
 
-bool saving = false;
-char file_name[] = "data-NUM.wav";
-uint updateFile = 0;
+char file_name[] = "data-ANUM.wav";
+float fileSaveTime = 60;
+
 
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
-SDWriter file;
 
+SDWriter file;
 elapsedMillis saveTime;
+uint updateFile = 0;
+bool saving = false;
 
 
 void setupADC() {
@@ -28,7 +30,7 @@ void setupADC() {
   aidata.setRate(sampling_rate);
   aidata.setResolution(12);  // 10bit 12bit, or 16bit 
   aidata.initBuffer(1024*64);
-  aidata.setMaxFileTime(10);
+  aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
   Serial.print("buffer time: ");
   Serial.print(aidata.bufferTime());
