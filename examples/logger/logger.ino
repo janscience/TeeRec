@@ -45,8 +45,6 @@ void openNextFile() {
     return;
   file.setupWaveHeader(aidata);
   file.openWave(name.c_str());
-  screen.pushText(0, name.c_str());
-  screen.writeText(1, "00:00");
   Serial.println(name);
   saving = true;
 }
@@ -82,7 +80,6 @@ void writeData() {
   aidata.writeData(file.file());
   char ts[6];
   aidata.fileTimeStr(ts);
-  screen.writeText(1, ts);
 }
 
 
@@ -92,8 +89,6 @@ void storeData() {
     writeData();
     if (aidata.endWrite()) {
       file.closeWave();
-      screen.popText(0);
-      screen.clearText(1);
       saving = false;
       openNextFile();
     }
