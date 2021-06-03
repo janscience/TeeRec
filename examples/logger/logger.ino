@@ -3,14 +3,14 @@
 
 // Settings: --------------------------------------------------------------------------------
 
-uint32_t sampling_rate = 40000;  // samples per second and channel in Hertz
-
+int bits = 12;                  // resolution: 10bit 12bit, or 16bit
+uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
 int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A10, A11, -1};  // input pins for ADC1
 
-int stimulus_frequency = 500;  // Hertz
+int stimulusFrequency = 500;  // Hertz
 
-char file_name[] = "data-ANUM.wav";
+char fileName[] = "data-ANUM.wav";
 float fileSaveTime = 60;
 
 
@@ -27,14 +27,11 @@ bool saving = false;
 void setupADC() {
   aidata.setChannels(0, channels0);
   aidata.setChannels(1, channels1);
-  aidata.setRate(sampling_rate);
-  aidata.setResolution(12);  // 10bit 12bit, or 16bit 
-  aidata.initBuffer(1024*64);
+  aidata.setRate(samplingRate);
+  aidata.setResolution(bits);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
-  Serial.print("buffer time: ");
-  Serial.print(aidata.bufferTime());
-  Serial.println("s");
+  Serial.printf("buffer time: %.3fs\n", aidata.bufferTime());
 }
 
 
@@ -42,7 +39,7 @@ void openNextFile() {
   saving = false;
   if (!file.available())
     return;
-  String name = file.incrementFileName(file_name);
+  String name = file.incrementFileName(fileName);
   if (name.length() == 0 )
     return;
   file.setupWaveHeader(aidata);
@@ -55,7 +52,7 @@ void openNextFile() {
 void setupStorage() {
   if (file.available())
     file.dataDir("recordings");
-  updateFile = uint(250*aidata.bufferTime());
+  updateFile = uint(250*aidata.bufferTime()); // a quarter of the buffer
   aidata.startWrite();
   openNextFile();
 }
@@ -69,7 +66,7 @@ void setupTestStimulus() {
   for (int pin=2; pin<=6; pin++) {
     pinMode(pin, OUTPUT);
     int freqi = pinfreqs[pin];
-    analogWriteFrequency(pin, stimulus_frequency*freqi);
+    analogWriteFrequency(pin, stimulusFrequency*freqi);
     analogWrite(pin, pinfreqdc[pinfreqcount[freqi]]);
     pinfreqcount[freqi]++;
   }

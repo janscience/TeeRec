@@ -4,19 +4,19 @@
 
 // Settings: --------------------------------------------------------------------------------
 
-uint32_t sampling_rate = 100000;  // samples per second and channel in Hertz
-
+int bits = 12;                   // resolution: 10bit 12bit, or 16bit 
+uint32_t samplingRate = 100000;  // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
-int stimulus_frequency = 500;  // Hertz
+int stimulusFrequency = 500;   // Hertz
 uint updateScreen = 500;       // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool startimmediately = false;  // immediately start saving to files
+bool startImmediately = false;  // immediately start saving to files
 bool logging = false;           // keep saving to files
-char file_name[] = "data-ANUM.wav";
+char fileName[] = "data-ANUM.wav";
 float fileSaveTime = 10;
 int startPin = 24;
 
@@ -38,14 +38,11 @@ elapsedMillis screenTime;
 void setupADC() {
   aidata.setChannels(0, channels0);
   aidata.setChannels(1, channels1);
-  aidata.setRate(sampling_rate);
-  aidata.setResolution(12);  // 10bit 12bit, or 16bit 
-  aidata.initBuffer(1024*64);
+  aidata.setRate(samplingRate);
+  aidata.setResolution(bits);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
-  Serial.print("buffer time: ");
-  Serial.print(aidata.bufferTime());
-  Serial.println("s");
+  Serial.printf("buffer time: %.3fs\n", aidata.bufferTime());
 }
 
 
@@ -53,7 +50,7 @@ void openNextFile() {
   saving = false;
   if (!file.available())
     return;
-  String name = file.incrementFileName(file_name);
+  String name = file.incrementFileName(fileName);
   if (name.length() == 0 )
     return;
   file.setupWaveHeader(aidata);
@@ -68,8 +65,8 @@ void openNextFile() {
 void setupStorage() {
   if (file.available())
     file.dataDir("recordings");
-  updateFile = uint(250*aidata.bufferTime());
-  if (startimmediately) {
+  updateFile = uint(250*aidata.bufferTime()); // a quarter of the buffer
+  if (startImmediately) {
     aidata.startWrite();
     openNextFile();
   }
@@ -99,7 +96,7 @@ void setupTestStimulus() {
   for (int pin=2; pin<=6; pin++) {
     pinMode(pin, OUTPUT);
     int freqi = pinfreqs[pin];
-    analogWriteFrequency(pin, stimulus_frequency*freqi);
+    analogWriteFrequency(pin, stimulusFrequency*freqi);
     analogWrite(pin, pinfreqdc[pinfreqcount[freqi]]);
     pinfreqcount[freqi]++;
   }
@@ -117,9 +114,9 @@ void plotData() {
     screenTime -= updateScreen;
     screen.scrollText(0);
     screen.clearData();
-    size_t n = aidata.samples(displayTime);
+    size_t n = aidata.frames(displayTime);
     float data[n];
-    size_t start = aidata.currentIndex(n);
+    size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
       aidata.getData(k, start, data, n);
       screen.plotData(k%n_plots, data, n, k/n_plots);
@@ -168,10 +165,8 @@ void storeData() {
 // ------------------------------------------------------------------------------------------
 
 void setup() {
-  //Serial.begin(115200);
   Serial.begin(9600);
   delay(100);
-  Serial.println("Begin Setup\n");
   setupTestStimulus();
   setupInput();
   setupADC();

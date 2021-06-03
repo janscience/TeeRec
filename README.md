@@ -12,7 +12,7 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 
 - Continuous DMA based data acquisition into a circular buffer.
 - Single channel or multiplexed acquisition from multiple channels.
-- Highspeed acquisition up to 500kHz.
+- Highspeed timed acquisition up to 500kHz.
 - Acquisition from a single or both ADCs.
 - Data are combined into a single multiplexed circular data buffer.
 - Conversion of data to signed 16bit for direct storage into WAV files.

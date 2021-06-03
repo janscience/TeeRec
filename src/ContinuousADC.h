@@ -9,7 +9,7 @@
   
   - Continuous DMA based data acquisition into a circular buffer.
   - Single channel or multiplexed acquisition from multiple channels.
-  - Highspeed acquisition up to 500kHz.
+  - Highspeed timed acquisition up to 500kHz.
   - Acquisition from a single or both ADCs.
   - A single multiplexed circular data buffer.
   - Conversion of data to signed 16bit for direct storage into WAV files.
@@ -17,10 +17,10 @@
 
   Setup
   -----
+  ```
   #include <ContinuousADC.h>
 
-  uint32_t sampling_rate = 40000;  // samples per second and channel in Hertz
-
+  uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
   uint8_t channels0 [] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0
   uint8_t channels1 [] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1
 
@@ -29,13 +29,13 @@
   void setup() {
     aidata.setChannels(0, channels0);
     aidata.setChannels(1, channels1);
-    aidata.setRate(sampling_rate);
-    aidata.setResolution(12);         // 10bit 12bit, 16bit 
-    aidata.initBuffer(1024*64);
-    aidata.setMaxFileSamples(60*sampling_rate*aidata.nchannels());  // 60 seconds
+    aidata.setRate(samplingRate);
+    aidata.setResolution(12);   // 10bit 12bit, 16bit 
+    aidata.setMaxFileTime(60);  // seconds
     aidata.check();
     aidata.start();
   }
+  ```
 
   Now, acquisition is continuously running and the cyclic buffer is filled.
   Use aidata.getData() and aidata.writeData() functions to work with the acquired data.
@@ -95,12 +95,6 @@
 #include <SdFat.h>
 
 
-// DMA buffer:
-static const size_t MajorSize = 256;  // why can it be no more?
-static const size_t NMajors = 2;
-volatile DMAMEM static uint16_t __attribute__((aligned(32))) ADCBuffer[2][NMajors*MajorSize];
-
-
 class ContinuousADC {
  public:
 
@@ -140,11 +134,7 @@ class ContinuousADC {
   // Return resolution of data buffer in bits per sample (always 16 bits).
   uint8_t dataResolution() const;
 
-  // Initialize internal buffer for specified number of samples.
-  // Max 64kB = 65536 bytes.
-  void initBuffer(size_t samples);
-
-  // Time the buffer can hold in seconds.
+  // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;
 
   // Return string with ADC settings.
@@ -162,21 +152,21 @@ class ContinuousADC {
   // Start the acquisition based on the channel, rate, and buffer settings.
   void start();
 
-  // Number of samples of a single channel corresponding to time.
-  size_t samples(float time) const;
-
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
 
+  // Number of frames (samples of a single channel) corresponding to time.
+  size_t frames(float time) const;
 
-  // Return index right after most current data value in data buffer.
-  size_t currentIndex(size_t decr=0);
 
-  // Decrement index into data buffer by decr times number of channels.
-  size_t decrementIndex(size_t idx, size_t decr);
+  // Return sample right after most current data value in data buffer.
+  size_t currentSample(size_t decr=0);
 
-  // Increment index into data buffer by decr times number of channels.
-  size_t incrementIndex(size_t idx, size_t incr);
+  // Decrement sample index into data buffer by decr times number of channels.
+  size_t decrementSample(size_t idx, size_t decr);
+
+  // Increment sample index into data buffer by decr times number of channels.
+  size_t incrementSample(size_t idx, size_t incr);
 
   // Get the nbuffer most recent data from a channel scaled to (-1, 1).
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
@@ -203,7 +193,7 @@ class ContinuousADC {
   // Set maximum file size to a fixed number of samples modulo 256.
   void setMaxFileSamples(size_t samples);
 
-  // Set maximum file size to a fixed time.
+  // Set maximum file size to approximately that many seconds.
   void setMaxFileTime(float secs);
 
   // Return actually used maximum file size in samples.
@@ -231,20 +221,23 @@ class ContinuousADC {
   ADC ADConv;
   
   // DMA:
+  static const size_t MajorSize = 256;
+  static const size_t NMajors = 2;
   DMAChannel DMABuffer[2];        // transfer data from ADCs to ADCBuffer
   DMAChannel DMASwitch[2];        // tell ADC from which pin to sample
   volatile size_t DMAIndex[2];    // currently active ADCBuffer segment
   volatile size_t DMACounter[2];  // total count of ADCBuffer segments
+  volatile DMAMEM static uint16_t __attribute__((aligned(32))) ADCBuffer[2][NMajors*MajorSize];
   DMAChannel::TCD_t TCDs[2][NMajors] __attribute__ ((aligned (32))) ;
 
   // Data (large buffer holding converted and multiplexed data from both ADCs):
   const uint8_t DataBits = 16;
   typedef int16_t sample_t;
-  volatile sample_t *Buffer;      // the one and only buffer
-  volatile size_t NBuffer;        // size of this buffer.
-  volatile size_t BufferWrite[2]; // current index for each ADC for writing.
-  size_t BufferRead;              // index for reading the buffer and writing to file.
-  volatile uint16_t DataShift;    // number of bits ADC data need to be shifted to make them 16 bit.
+  static const size_t NBuffer = 64*1024;    // size of this buffer: 64kB
+  volatile static sample_t Buffer[NBuffer]; // the one and only buffer
+  volatile size_t BufferWrite[2];           // current index for each ADC for writing.
+  size_t BufferRead;                        // index for reading the buffer and writing to file.
+  volatile uint16_t DataShift;              // number of bits ADC data need to be shifted to make them 16 bit.
 
   size_t FileSamples;             // current number of samples stored in a file.
   size_t FileMaxSamples;          // maximum number of samples to be stored in a file.
