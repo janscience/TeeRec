@@ -29,14 +29,14 @@
  */
 
 
-#ifndef EFishMonitor_h
-#define EFishMonitor_h
+#ifndef Display_h
+#define Display_h
 
 
 #include <Arduino.h>
-#include <Adafruit_GFX.h>       // Core graphics library
-#include <Adafruit_ST7735.h>    // Hardware-specific library
-#include "FreeSans7pt7b.h"      // Nice font
+#include <Adafruit_GFX.h>        // Core graphics library
+#include <Adafruit_ST7735.h>     // Hardware-specific library
+#include "fonts/FreeSans7pt7b.h" // Nice font
 #include <SPI.h> 
 
 
@@ -48,11 +48,11 @@
 #define TFT_DC    8 
 
 
-class EFishMonitor {
+class Display {
 
  public:
 
-  EFishMonitor(uint8_t rotation=0);
+  Display(uint8_t rotation=0);
 
   // Clear the entire screen with the background color.
   void clear();

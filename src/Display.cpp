@@ -1,14 +1,14 @@
 #include <Arduino.h>
-#include "EFishMonitor.h"
+#include "Display.h"
 
 
-const uint16_t EFishMonitor::DataLines[8] = {ST7735_GREEN, ST7735_YELLOW,
+const uint16_t Display::DataLines[8] = {ST7735_GREEN, ST7735_YELLOW,
 					     ST7735_BLUE, ST7735_RED,
 					     ST7735_CYAN, ST7735_ORANGE,
 					     ST7735_MAGENTA, ST7735_WHITE};
 
 
-EFishMonitor::EFishMonitor(uint8_t rotation) {
+Display::Display(uint8_t rotation) {
   for (int k=0; k<MaxAreas; k++) {
     DataX[k] = 0;
     DataY[k] = 0;
@@ -38,12 +38,12 @@ EFishMonitor::EFishMonitor(uint8_t rotation) {
 }
 
 
-void EFishMonitor::clear() {
+void Display::clear() {
   Screen->fillScreen(Background);
 }
 
 
-void EFishMonitor::setDataArea(uint8_t area, float x0, float y0, float x1, float y1) {
+void Display::setDataArea(uint8_t area, float x0, float y0, float x1, float y1) {
   DataX[area] = uint16_t(x0*Width);
   DataY[area] = uint16_t((1.0-y1)*Height);
   DataW[area] = uint16_t((x1-x0)*Width);
@@ -53,12 +53,12 @@ void EFishMonitor::setDataArea(uint8_t area, float x0, float y0, float x1, float
 }
   
 
-void EFishMonitor::setDataArea(float x0, float y0, float x1, float y1) {
+void Display::setDataArea(float x0, float y0, float x1, float y1) {
   setDataArea(0, x0, y0, x1, y1);
 }
   
 
-void EFishMonitor::clearData(uint8_t area) {
+void Display::clearData(uint8_t area) {
   if (DataW[area] == 0 )
     return;
   Screen->fillRect(DataX[area], DataY[area], DataW[area], DataH[area]+1, DataBackground);
@@ -66,13 +66,13 @@ void EFishMonitor::clearData(uint8_t area) {
 }
 
 
-void EFishMonitor::clearData() {
+void Display::clearData() {
   for (int k=0; k<MaxAreas; k++)
     clearData(k);
 }
 
 
-void EFishMonitor::plotData(uint8_t area, float *buffer, int nbuffer, int color) {
+void Display::plotData(uint8_t area, float *buffer, int nbuffer, int color) {
   if (DataW[area] == 0 )
     return;
   color %= 8;
@@ -88,22 +88,22 @@ void EFishMonitor::plotData(uint8_t area, float *buffer, int nbuffer, int color)
 }
 
 
-void EFishMonitor::plotData(float *buffer, int nbuffer, int channel) {
+void Display::plotData(float *buffer, int nbuffer, int channel) {
   plotData(0, buffer, nbuffer, channel);
 }
 
 
-uint16_t EFishMonitor::dataX(uint8_t area, float x, float maxx) {
+uint16_t Display::dataX(uint8_t area, float x, float maxx) {
   return DataX[area] + uint16_t(x/maxx*DataW[area]);
 }
 
 
-uint16_t EFishMonitor::dataY(uint8_t area, float y) {
+uint16_t Display::dataY(uint8_t area, float y) {
   return uint16_t(DataYOffs[area] - DataYScale[area]*y);
 }
 
 
-float EFishMonitor::setTextArea(uint8_t area, float x0, float y0, float x1, float y1) {
+float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1) {
   TextX[area] = uint16_t(x0*Width);
   TextY[area] = uint16_t((1.0-y1)*Height);
   TextW[area] = uint16_t((x1-x0)*Width);
@@ -131,7 +131,7 @@ float EFishMonitor::setTextArea(uint8_t area, float x0, float y0, float x1, floa
 }
   
 
-void EFishMonitor::clearText(uint8_t area) {
+void Display::clearText(uint8_t area) {
   if (TextW[area] == 0 )
     return;
   if (TextT != 0) {
@@ -144,13 +144,13 @@ void EFishMonitor::clearText(uint8_t area) {
 }
 
 
-void EFishMonitor::clearText() {
+void Display::clearText() {
   for (int k=0; k<MaxAreas; k++)
     clearText(k);
 }
 
 
-void EFishMonitor::drawText(uint8_t area, const char *text) {
+void Display::drawText(uint8_t area, const char *text) {
   TextCanvas[area]->fillScreen(0x0000);
   TextCanvas[area]->setCursor(0, TextB[area]);
   TextCanvas[area]->print(text);
@@ -159,7 +159,7 @@ void EFishMonitor::drawText(uint8_t area, const char *text) {
 }
 
 
-void EFishMonitor::writeText(uint8_t area, const char *text) {
+void Display::writeText(uint8_t area, const char *text) {
   drawText(area, text);
   if (TextT != 0)
     delete [] TextT[area];
@@ -169,7 +169,7 @@ void EFishMonitor::writeText(uint8_t area, const char *text) {
 }
 
 
-void EFishMonitor::scrollText(uint8_t area) {
+void Display::scrollText(uint8_t area) {
   if (TextT[area] == 0)
     return;
   if (! TextS[area])
@@ -181,7 +181,7 @@ void EFishMonitor::scrollText(uint8_t area) {
 }
 
 
-void EFishMonitor::pushText(uint8_t area, const char *text) {
+void Display::pushText(uint8_t area, const char *text) {
   if (TextHead[area] < MaxTexts && TextT != 0) {
     Text[area][TextHead[area]] = TextT[area];
     TextT[area] = 0;
@@ -191,7 +191,7 @@ void EFishMonitor::pushText(uint8_t area, const char *text) {
 }
 
 
-void EFishMonitor::popText(uint8_t area) {
+void Display::popText(uint8_t area) {
   if (TextT != 0) {
     delete [] TextT[area];
     TextT[area] = 0;
