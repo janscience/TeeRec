@@ -90,7 +90,7 @@ class SDWriter {
 
  protected:
 
-  SdFs SD;
+  SdFs SD;    // Lydia: SdFatSdio SD;
   bool SDAvailable;
   FsFile File;
 

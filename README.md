@@ -25,6 +25,7 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - ContinousADC: Sample from multiple pins into a cyclic buffer.
 - SDWrite: Write data on SD card.
 - Display: Display data on a monitor.
+- RTClock: Time and date strings from the real time clock.
 
 
 ## Examples

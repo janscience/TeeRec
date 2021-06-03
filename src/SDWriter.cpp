@@ -170,19 +170,3 @@ void SDWriter::closeWave(uint32_t samples) {
   }
   close();
 }
-
-
-
-/*
-void SDWriter::createNewFile() {
-  String Date = String(year()) + "-" + String(month()) + "-" + String(day()) + "-" + String(hour()) + "-" + String(minute()) + "-" + String(second());
-  fileNr++;
-  String filename = Date + "-N" + fileNr + ".wav";                               // create filenames
-  char fname[30];
-  filename.toCharArray(fname, 30);
-#ifdef DEBUG
-  Serial.print("filename: ");
-  Serial.println(filename);
-#endif
-}
-*/

@@ -96,6 +96,7 @@
 
 
 class ContinuousADC {
+
  public:
 
   static ContinuousADC *ADCC;

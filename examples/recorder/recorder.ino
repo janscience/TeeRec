@@ -1,22 +1,23 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <Display.h>
+#include <RTClock.h>
 
 // Settings: --------------------------------------------------------------------------------
 
-int bits = 12;                   // resolution: 10bit 12bit, or 16bit 
-uint32_t samplingRate = 100000;  // samples per second and channel in Hertz
+int bits = 12;                     // resolution: 10bit 12bit, or 16bit 
+uint32_t samplingRate = 100000;    // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
-int stimulusFrequency = 500;   // Hertz
-uint updateScreen = 500;       // milliseconds
+int stimulusFrequency = 500;       // Hertz
+uint updateScreen = 500;           // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool startImmediately = false;  // immediately start saving to files
-bool logging = false;           // keep saving to files
-char fileName[] = "data-ANUM.wav";
+bool startImmediately = false;     // immediately start saving to files
+bool logging = false;              // keep saving to files
+char fileName[] = "SDATELNUM.wav"; // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;
 int startPin = 24;
 
@@ -34,6 +35,8 @@ Display screen(1);
 int n_plots = 1;
 elapsedMillis screenTime;
 
+RTClock rtclock;
+
 
 void setupADC() {
   aidata.setChannels(0, channels0);
@@ -50,7 +53,8 @@ void openNextFile() {
   saving = false;
   if (!file.available())
     return;
-  String name = file.incrementFileName(fileName);
+  String name = rtclock.makeStr(fileName, true);
+  name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
   file.setupWaveHeader(aidata);
@@ -113,6 +117,11 @@ void plotData() {
   if (screenTime > updateScreen) {
     screenTime -= updateScreen;
     screen.scrollText(0);
+    /*
+    char ts[20];
+    rtclock.time(ts);
+    screen.writeText(0, ts);
+    */
     screen.clearData();
     size_t n = aidata.frames(displayTime);
     float data[n];
@@ -167,6 +176,7 @@ void storeData() {
 void setup() {
   Serial.begin(9600);
   delay(100);
+  rtclock.check();
   setupTestStimulus();
   setupInput();
   setupADC();

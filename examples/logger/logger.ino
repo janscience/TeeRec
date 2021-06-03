@@ -1,5 +1,6 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
+#include <RTClock.h>
 
 // Settings: --------------------------------------------------------------------------------
 
@@ -23,6 +24,8 @@ elapsedMillis saveTime;
 uint updateFile = 0;
 bool saving = false;
 
+RTClock rtclock;
+
 
 void setupADC() {
   aidata.setChannels(0, channels0);
@@ -39,7 +42,8 @@ void openNextFile() {
   saving = false;
   if (!file.available())
     return;
-  String name = file.incrementFileName(fileName);
+  String name = rtclock.makeStr(fileName, true);
+  name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
   file.setupWaveHeader(aidata);
@@ -98,9 +102,9 @@ void storeData() {
 // ------------------------------------------------------------------------------------------
 
 void setup() {
-  //Serial.begin(115200);
   Serial.begin(9600);
   delay(100);
+  rtclock.check();
   setupTestStimulus();
   setupADC();
   setupStorage();
