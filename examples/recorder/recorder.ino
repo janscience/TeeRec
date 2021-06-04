@@ -27,7 +27,6 @@ int startPin = 24;
 ContinuousADC aidata;
 
 SDWriter file;
-bool saving = false;
 uint updateFile = 0;
 elapsedMillis saveTime;
 
@@ -50,9 +49,6 @@ void setupADC() {
 
 
 void openNextFile() {
-  saving = false;
-  if (!file.available())
-    return;
   String name = rtclock.makeStr(fileName, true);
   name = file.incrementFileName(name);
   if (name.length() == 0 )
@@ -62,7 +58,6 @@ void openNextFile() {
   screen.pushText(0, name.c_str());
   screen.writeText(1, "00:00");
   Serial.println(name);
-  saving = true;
 }
 
 
@@ -135,8 +130,6 @@ void plotData() {
 
 
 void writeData() {
-  if (!file.available())
-    return;
   aidata.writeData(file.file());
   char ts[6];
   aidata.fileTimeStr(ts);
@@ -147,7 +140,7 @@ void writeData() {
 void storeData() {
   if (startPin >= 0) {
     int push = digitalRead(startPin);
-    if (push == 0 && file.available() && !saving) {
+    if (push == 0 && file.available() && !file.isOpen()) {
       openNextFile();
       saveTime = 0;
       aidata.setMaxFileSamples(0);
@@ -156,14 +149,13 @@ void storeData() {
     if (push == 1)
       aidata.setMaxFileTime(fileSaveTime);
   }
-  if (saving && saveTime > updateFile) {
+  if (saveTime > updateFile) {
     saveTime -= updateFile;
     writeData();
     if (aidata.endWrite()) {
       file.closeWave();
       screen.popText(0);
       screen.clearText(1);
-      saving = false;
       if (logging)
         openNextFile();
     }

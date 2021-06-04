@@ -173,7 +173,7 @@ class ContinuousADC {
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
 
 
-  // Write available data to file.
+  // Write available data to file (if the file is open).
   // If maxFileSamples() is set (>0), then stop writing after that many samples. 
   // Returns number of written samples.
   size_t writeData(FsFile &file);

@@ -62,6 +62,9 @@ class SDWriter {
   // fname is the name of the file inclusively extension.
   void open(const char *fname);
 
+  // True if file is open.
+  bool isOpen() const;
+
   // Close file.
   void close();
 

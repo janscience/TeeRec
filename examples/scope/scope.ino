@@ -69,7 +69,7 @@ void plotData() {
     screen.clearData();
     size_t n = aidata.frames(displayTime);
     float data[n];
-    size_t start = aidata.currentIndex(n);
+    size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
       aidata.getData(k, start, data, n);
       screen.plotData(k%n_plots, data, n, k/n_plots);

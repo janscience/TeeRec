@@ -22,7 +22,6 @@ ContinuousADC aidata;
 SDWriter file;
 elapsedMillis saveTime;
 uint updateFile = 0;
-bool saving = false;
 
 RTClock rtclock;
 
@@ -39,23 +38,18 @@ void setupADC() {
 
 
 void openNextFile() {
-  saving = false;
-  if (!file.available())
-    return;
   String name = rtclock.makeStr(fileName, true);
   name = file.incrementFileName(name);
-  if (name.length() == 0 )
+  if (name.length() == 0)
     return;
   file.setupWaveHeader(aidata);
   file.openWave(name.c_str());
   Serial.println(name);
-  saving = true;
 }
 
 
 void setupStorage() {
-  if (file.available())
-    file.dataDir("recordings");
+  file.dataDir("recordings");
   updateFile = uint(250*aidata.bufferTime()); // a quarter of the buffer
   aidata.startWrite();
   openNextFile();
@@ -77,22 +71,12 @@ void setupTestStimulus() {
 }
 
 
-void writeData() {
-  if (!file.available())
-    return;
-  aidata.writeData(file.file());
-  char ts[6];
-  aidata.fileTimeStr(ts);
-}
-
-
 void storeData() {
-  if (saving && saveTime > updateFile) {
+  if (saveTime > updateFile) {
     saveTime -= updateFile;
-    writeData();
+    aidata.writeData(file.file());
     if (aidata.endWrite()) {
       file.closeWave();
-      saving = false;
       openNextFile();
     }
   }

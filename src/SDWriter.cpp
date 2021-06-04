@@ -8,11 +8,11 @@ SDWriter::SDWriter() {
   // start sdio interface to SD card:
   if (!SD.begin(SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50)))) {
     SDAvailable = false;
-    SD.initErrorPrint();
     return;
   }    
   SD.chvol();
   SDAvailable = true;
+  File.close();
 }
 
 
@@ -27,15 +27,18 @@ bool SDWriter::available() {
 
 
 void SDWriter::end() {
-  if ( SDAvailable )  // end sdio interface to SD card:
+  if (SDAvailable) {  // end sdio interface to SD card:
+    if (File.isOpen())
+      File.close();
     SD.end();
+  }
 }
 
 
 void SDWriter::dataDir(const char *path) {
-  if ( ! SDAvailable )
+  if (! SDAvailable)
     return;
-  if ( ! SD.exists(path) )
+  if (! SD.exists(path))
     SD.mkdir(path);
   SD.chdir(path);
   NameCounter = 0;
@@ -43,7 +46,7 @@ void SDWriter::dataDir(const char *path) {
 
 
 String SDWriter::incrementFileName(const String &fname) {
-  if ( ! SDAvailable )
+  if (! SDAvailable)
     return "";
   bool num = false;
   bool anum = (fname.indexOf("ANUM") >= 0);
@@ -58,7 +61,7 @@ String SDWriter::incrementFileName(const String &fname) {
       if (anum) {
 	aa[1] = char('a' + ((NameCounter-1) % 26));
 	uint16_t major = (NameCounter-1) / 26;
-	if ( major > 25 ) {
+	if (major > 25) {
 	  Serial.println("file name overflow");
 	  return "";
 	}
@@ -66,7 +69,7 @@ String SDWriter::incrementFileName(const String &fname) {
 	name.replace("ANUM", aa);
       }
       else if (num) {
-	if ( NameCounter > 99 ) {
+	if (NameCounter > 99) {
 	  Serial.println("file name overflow");
 	  return "";
 	}
@@ -83,16 +86,25 @@ String SDWriter::incrementFileName(const String &fname) {
 
 
 void SDWriter::open(const char *fname) {
-  if ( ! SDAvailable )
+  if (! SDAvailable || strlen(fname) == 0)
     return;
+  if ( File.isOpen()) {
+    Serial.println("failed to open file because a file is still open.");
+    return;
+  }
   if (!File.open(fname, O_WRITE | O_CREAT)) {
-    SD.errorHalt("failed to open file");
+    Serial.printf("failed to open file %s\n", fname);
   }
 }
 
 
+bool SDWriter::isOpen() const {
+  return File.isOpen();
+}
+
+
 void SDWriter::close() {
-  if ( ! SDAvailable )
+  if (! SDAvailable || ! File.isOpen())
     return;
   if (!File.close())
     Serial.println("failed to close file");
@@ -140,14 +152,14 @@ void SDWriter::setupWaveHeader(uint8_t nchannels, uint32_t samplerate,
 
 
 void SDWriter::setupWaveHeader(const ContinuousADC &adcc, int32_t samples) {
-  if ( samples < 0 )
+  if (samples < 0)
     samples = adcc.maxFileSamples();
   setupWaveHeader(adcc.nchannels(), adcc.rate(), adcc.dataResolution(), samples);
 }
 
 
 void SDWriter::openWave(const char *fname) {
-  if ( ! SDAvailable )
+  if (! SDAvailable)
     return;
   String name(fname);
   if (name.indexOf('.') < 0 )
@@ -158,9 +170,9 @@ void SDWriter::openWave(const char *fname) {
 
 
 void SDWriter::closeWave(uint32_t samples) {
-  if ( ! SDAvailable )
+  if (! SDAvailable || ! File.isOpen())
     return;
-  if ( samples > 0 ) {
+  if (samples > 0) {
     uint32_t datasize = samples * NBytes;   // in bytes
     uint32_t mainchunksize = 36 + datasize;
     File.seek((char *)&WaveHeader.mainChunkSize - (char *)&WaveHeader);
