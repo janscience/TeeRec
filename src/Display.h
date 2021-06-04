@@ -58,19 +58,22 @@ class Display {
   void clear();
 
   // Define area where to plot traces.
-  void setDataArea(uint8_t area, float x0, float y0, float x1, float y1);
-  // Define the first area where to plot traces.
-  void setDataArea(float x0, float y0, float x1, float y1);
+  void setPlotArea(uint8_t area, float x0, float y0, float x1, float y1);
 
-  // Clear specified data area.
-  void clearData(uint8_t area);
-  // Clear all data areas.
-  void clearData();
+  // Define multiple areas where to plot traces.
+  void setPlotAreas(int num, float x0, float y0, float x1, float y1);
 
-  // Plot data trace from buffer in data area with some color (index into DataLines).
-  void plotData(uint8_t area, float *buffer, int nbuffer, int color=0);
-  // Plot data trace from buffer in first data area with some color (index into DataLines).
-  void plotData(float *buffer, int nbuffer, int color=0);
+  // Number of defined plot areas.
+  int numPlots() const;
+
+  // Clear specified plot area.
+  void clearPlot(uint8_t area);
+
+  // Clear all plot areas.
+  void clearPlots();
+
+  // Plot data trace from buffer in plot area with some color (index into PlotLines).
+  void plot(uint8_t area, float *buffer, int nbuffer, int color=0);
 
   // Define text area. 
   // Returns the actually needed and used text height as fraction of screen height.
@@ -78,6 +81,7 @@ class Display {
 
   // Clear specified text area.
   void clearText(uint8_t area);
+
   // Clear all text areas.
   void clearText();
 
@@ -100,9 +104,9 @@ class Display {
 
   // Colors:
   static const uint16_t Background = ST7735_BLACK;
-  static const uint16_t DataBackground = ST7735_BLACK;
-  static const uint16_t DataGrid = 0x7BEF;
-  static const uint16_t DataLines[8];
+  static const uint16_t PlotBackground = ST7735_BLACK;
+  static const uint16_t PlotGrid = 0x7BEF;
+  static const uint16_t PlotLines[8];
   static const uint16_t TextBackground = ST7735_BLACK;
   static const uint16_t TextColor = ST7735_WHITE;
 
@@ -113,14 +117,15 @@ class Display {
   uint16_t Width;
   uint16_t Height;
 
-  // Data area position and extent:
+  // Plot area position and extent:
   static const uint8_t MaxAreas = 8;
-  int16_t DataX[MaxAreas];
-  int16_t DataY[MaxAreas];
-  int16_t DataW[MaxAreas];
-  int16_t DataH[MaxAreas];
-  float DataYOffs[MaxAreas];
-  float DataYScale[MaxAreas];
+  int NPlots = 0;
+  int16_t PlotX[MaxAreas];
+  int16_t PlotY[MaxAreas];
+  int16_t PlotW[MaxAreas];
+  int16_t PlotH[MaxAreas];
+  float PlotYOffs[MaxAreas];
+  float PlotYScale[MaxAreas];
 
   // Translate x value to x-coordinate.
   uint16_t dataX(uint8_t area, float x, float maxx);

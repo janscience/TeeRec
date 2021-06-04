@@ -2,20 +2,21 @@
 #include "Display.h"
 
 
-const uint16_t Display::DataLines[8] = {ST7735_GREEN, ST7735_YELLOW,
+const uint16_t Display::PlotLines[8] = {ST7735_GREEN, ST7735_YELLOW,
 					     ST7735_BLUE, ST7735_RED,
 					     ST7735_CYAN, ST7735_ORANGE,
 					     ST7735_MAGENTA, ST7735_WHITE};
 
 
 Display::Display(uint8_t rotation) {
+  NPlots = 0;
   for (int k=0; k<MaxAreas; k++) {
-    DataX[k] = 0;
-    DataY[k] = 0;
-    DataW[k] = 0;
-    DataH[k] = 0;
-    DataYOffs[k] = 0;
-    DataYScale[k] = 0;
+    PlotX[k] = 0;
+    PlotY[k] = 0;
+    PlotW[k] = 0;
+    PlotH[k] = 0;
+    PlotYOffs[k] = 0;
+    PlotYScale[k] = 0;
     TextX[k] = 0;
     TextY[k] = 0;
     TextW[k] = 0;
@@ -43,37 +44,46 @@ void Display::clear() {
 }
 
 
-void Display::setDataArea(uint8_t area, float x0, float y0, float x1, float y1) {
-  DataX[area] = uint16_t(x0*Width);
-  DataY[area] = uint16_t((1.0-y1)*Height);
-  DataW[area] = uint16_t((x1-x0)*Width);
-  DataH[area] = uint16_t((y1-y0)*Height);
-  DataYOffs[area] = DataY[area] + 0.5*DataH[area];
-  DataYScale[area] = 0.5*DataH[area];
+void Display::setPlotArea(uint8_t area, float x0, float y0, float x1, float y1) {
+  PlotX[area] = uint16_t(x0*Width);
+  PlotY[area] = uint16_t((1.0-y1)*Height);
+  PlotW[area] = uint16_t((x1-x0)*Width);
+  PlotH[area] = uint16_t((y1-y0)*Height);
+  PlotYOffs[area] = PlotY[area] + 0.5*PlotH[area];
+  PlotYScale[area] = 0.5*PlotH[area];
+  NPlots = area + 1;
 }
-  
 
-void Display::setDataArea(float x0, float y0, float x1, float y1) {
-  setDataArea(0, x0, y0, x1, y1);
+
+void Display::setPlotAreas(int num, float x0, float y0, float x1, float y1) {
+  float h = (y1-y0)/num;
+  for (int k=0; k<num; k++)
+    setPlotArea(num-k-1, x0, y0+k*h, x1, y0+(k+0.9)*h);
+  NPlots = num;
 }
-  
 
-void Display::clearData(uint8_t area) {
-  if (DataW[area] == 0 )
+  
+int Display::numPlots() const {
+  return NPlots;
+}
+
+
+void Display::clearPlot(uint8_t area) {
+  if (PlotW[area] == 0 )
     return;
-  Screen->fillRect(DataX[area], DataY[area], DataW[area], DataH[area]+1, DataBackground);
-  Screen->drawFastHLine(DataX[area], dataY(area, 0), DataW[area], DataGrid);
+  Screen->fillRect(PlotX[area], PlotY[area], PlotW[area], PlotH[area]+1, PlotBackground);
+  Screen->drawFastHLine(PlotX[area], dataY(area, 0), PlotW[area], PlotGrid);
 }
 
 
-void Display::clearData() {
+void Display::clearPlots() {
   for (int k=0; k<MaxAreas; k++)
-    clearData(k);
+    clearPlot(k);
 }
 
 
-void Display::plotData(uint8_t area, float *buffer, int nbuffer, int color) {
-  if (DataW[area] == 0 )
+void Display::plot(uint8_t area, float *buffer, int nbuffer, int color) {
+  if (PlotW[area] == 0 )
     return;
   color %= 8;
   uint16_t x0 = dataX(area, 0, nbuffer);
@@ -81,25 +91,20 @@ void Display::plotData(uint8_t area, float *buffer, int nbuffer, int color) {
   for (uint16_t k=1; k<nbuffer; k++) {
     uint16_t x = dataX(area, k, nbuffer);
     uint16_t y = dataY(area, buffer[k]);
-    Screen->drawLine(x0, y0, x, y, DataLines[color]);
+    Screen->drawLine(x0, y0, x, y, PlotLines[color]);
     x0 = x;
     y0 = y;
   }
 }
 
 
-void Display::plotData(float *buffer, int nbuffer, int channel) {
-  plotData(0, buffer, nbuffer, channel);
-}
-
-
 uint16_t Display::dataX(uint8_t area, float x, float maxx) {
-  return DataX[area] + uint16_t(x/maxx*DataW[area]);
+  return PlotX[area] + uint16_t(x/maxx*PlotW[area]);
 }
 
 
 uint16_t Display::dataY(uint8_t area, float y) {
-  return uint16_t(DataYOffs[area] - DataYScale[area]*y);
+  return uint16_t(PlotYOffs[area] - PlotYScale[area]*y);
 }
 
 

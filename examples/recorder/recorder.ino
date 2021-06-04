@@ -18,7 +18,7 @@ float displayTime = 0.005;
 
 bool logging = false;              // keep saving to files
 char fileName[] = "SDATELNUM.wav"; // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-float fileSaveTime = 10;
+float fileSaveTime = 10;           // seconds
 
 int startPin = 24;
 
@@ -32,7 +32,6 @@ ContinuousADC aidata;
 SDWriter file;
 
 Display screen(1);
-int n_plots = 1;
 elapsedMillis screenTime;
 
 RTClock rtclock;
@@ -75,12 +74,10 @@ void setupScreen() {
   aidata.settingsStr(msg);
   screen.pushText(0, msg);
   screen.setTextArea(1, 0.71, 0.8, 1.0, 1.0);
-  n_plots = aidata.nchannels();
-  if (n_plots > 8)
-    n_plots = 8;
-  float h = 0.8/n_plots;
-  for (int k=0; k<n_plots; k++)
-    screen.setDataArea(n_plots-k-1, 0.0, k*h, 1.0, (k+0.9)*h);
+  int nplots = aidata.nchannels();
+  if (nplots > 8)
+    nplots = 8;
+  screen.setPlotAreas(nplots, 0.0, 0.0, 1.0, 0.8);
 }
 
 
@@ -99,13 +96,13 @@ void plotData() {
     rtclock.time(ts);
     screen.writeText(0, ts);
     */
-    screen.clearData();
+    screen.clearPlots();
     size_t n = aidata.frames(displayTime);
     float data[n];
     size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
       aidata.getData(k, start, data, n);
-      screen.plotData(k%n_plots, data, n, k/n_plots);
+      screen.plot(k%screen.numPlots(), data, n, k/screen.numPlots());
     }
   }
 }
