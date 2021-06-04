@@ -10,7 +10,6 @@
 
 
 #include <Arduino.h>
-#include <ContinuousADC.h>
 #include <SdFat.h>
 
 #define SD_FAT_TYPE 3
@@ -34,6 +33,9 @@
 #endif
 
 
+class ContinuousADC;
+
+
 class SDWriter {
 
  public:
@@ -51,6 +53,14 @@ class SDWriter {
 
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
+
+  // Set write interval depending on adc settings.
+  // Call this *after* setting up ContinusADC in setup().
+  void setWriteInterval(const ContinuousADC &adc);
+
+  // True if data need to be written to file.
+  // Check this regularly in loop().
+  bool needToWrite();
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
@@ -96,6 +106,9 @@ class SDWriter {
   SdFs SD;    // Lydia: SdFatSdio SD;
   bool SDAvailable;
   FsFile File;
+
+  elapsedMillis WriteTime;
+  uint WriteInterval;
 
   uint16_t NameCounter;
 

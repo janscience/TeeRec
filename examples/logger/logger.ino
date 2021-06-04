@@ -1,6 +1,8 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <TestSignals.h>
+
 
 // Settings: --------------------------------------------------------------------------------
 
@@ -9,20 +11,16 @@ uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
 int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A10, A11, -1};  // input pins for ADC1
 
-int stimulusFrequency = 500;  // Hertz
-
 char fileName[] = "data-ANUM.wav";
 float fileSaveTime = 60;
+
+int stimulusFrequency = 500;  // Hertz
 
 
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
-
 SDWriter file;
-elapsedMillis saveTime;
-uint updateFile = 0;
-
 RTClock rtclock;
 
 
@@ -50,30 +48,14 @@ void openNextFile() {
 
 void setupStorage() {
   file.dataDir("recordings");
-  updateFile = uint(250*aidata.bufferTime()); // a quarter of the buffer
+  file.setWriteInterval(aidata);
   aidata.startWrite();
   openNextFile();
 }
 
 
-void setupTestStimulus() {
-  // Teensy 3.5 & 3.6, pins with same frequency:
-  int pinfreqs[] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
-  int pinfreqcount[] = {0, 0, 0, 0};
-  int pinfreqdc[] = {128, 32, 224, 64};
-  for (int pin=2; pin<=6; pin++) {
-    pinMode(pin, OUTPUT);
-    int freqi = pinfreqs[pin];
-    analogWriteFrequency(pin, stimulusFrequency*freqi);
-    analogWrite(pin, pinfreqdc[pinfreqcount[freqi]]);
-    pinfreqcount[freqi]++;
-  }
-}
-
-
 void storeData() {
-  if (saveTime > updateFile) {
-    saveTime -= updateFile;
+  if (file.needToWrite()) {
     aidata.writeData(file.file());
     if (aidata.endWrite()) {
       file.closeWave();
@@ -89,10 +71,9 @@ void setup() {
   Serial.begin(9600);
   delay(100);
   rtclock.check();
-  setupTestStimulus();
+  setupTestSignals(2, 6, stimulusFrequency);
   setupADC();
   setupStorage();
-  saveTime = 0;
   aidata.start();
 }
 

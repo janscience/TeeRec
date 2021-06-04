@@ -2,6 +2,8 @@
 #include <SDWriter.h>
 #include <Display.h>
 #include <RTClock.h>
+#include <TestSignals.h>
+
 
 // Settings: --------------------------------------------------------------------------------
 
@@ -10,16 +12,17 @@ uint32_t samplingRate = 100000;    // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
-int stimulusFrequency = 500;       // Hertz
 uint updateScreen = 500;           // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool startImmediately = false;     // immediately start saving to files
 bool logging = false;              // keep saving to files
 char fileName[] = "SDATELNUM.wav"; // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;
+
 int startPin = 24;
+
+int stimulusFrequency = 500;       // Hertz
 
 
 // ------------------------------------------------------------------------------------------
@@ -27,8 +30,6 @@ int startPin = 24;
 ContinuousADC aidata;
 
 SDWriter file;
-uint updateFile = 0;
-elapsedMillis saveTime;
 
 Display screen(1);
 int n_plots = 1;
@@ -64,11 +65,7 @@ void openNextFile() {
 void setupStorage() {
   if (file.available())
     file.dataDir("recordings");
-  updateFile = uint(250*aidata.bufferTime()); // a quarter of the buffer
-  if (startImmediately) {
-    aidata.startWrite();
-    openNextFile();
-  }
+  file.setWriteInterval(aidata);
 }
 
 
@@ -84,21 +81,6 @@ void setupScreen() {
   float h = 0.8/n_plots;
   for (int k=0; k<n_plots; k++)
     screen.setDataArea(n_plots-k-1, 0.0, k*h, 1.0, (k+0.9)*h);
-}
-
-
-void setupTestStimulus() {
-  // Teensy 3.5 & 3.6, pins with same frequency:
-  int pinfreqs[] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
-  int pinfreqcount[] = {0, 0, 0, 0};
-  int pinfreqdc[] = {128, 32, 224, 64};
-  for (int pin=2; pin<=6; pin++) {
-    pinMode(pin, OUTPUT);
-    int freqi = pinfreqs[pin];
-    analogWriteFrequency(pin, stimulusFrequency*freqi);
-    analogWrite(pin, pinfreqdc[pinfreqcount[freqi]]);
-    pinfreqcount[freqi]++;
-  }
 }
 
 
@@ -142,15 +124,13 @@ void storeData() {
     int push = digitalRead(startPin);
     if (push == 0 && file.available() && !file.isOpen()) {
       openNextFile();
-      saveTime = 0;
       aidata.setMaxFileSamples(0);
       aidata.startWrite();
     }
     if (push == 1)
       aidata.setMaxFileTime(fileSaveTime);
   }
-  if (saveTime > updateFile) {
-    saveTime -= updateFile;
+  if (file.needToWrite()) {
     writeData();
     if (aidata.endWrite()) {
       file.closeWave();
@@ -169,13 +149,12 @@ void setup() {
   Serial.begin(9600);
   delay(100);
   rtclock.check();
-  setupTestStimulus();
+  setupTestSignals(2, 6, stimulusFrequency);
   setupInput();
   setupADC();
   setupScreen();
   setupStorage();
   screenTime = 0;
-  saveTime = 0;
   aidata.start();
 }
 

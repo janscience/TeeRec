@@ -1,5 +1,7 @@
 #include <ContinuousADC.h>
 #include <Display.h>
+#include <TestSignals.h>
+
 
 // Settings: --------------------------------------------------------------------------------
 
@@ -47,21 +49,6 @@ void setupScreen() {
 }
 
 
-void setupTestStimulus() {
-  // Teensy 3.5 & 3.6, pins with same frequency:
-  int pinfreqs[] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
-  int pinfreqcount[] = {0, 0, 0, 0};
-  int pinfreqdc[] = {128, 32, 224, 64};
-  for (int pin=2; pin<=6; pin++) {
-    pinMode(pin, OUTPUT);
-    int freqi = pinfreqs[pin];
-    analogWriteFrequency(pin, stimulusFrequency*freqi);
-    analogWrite(pin, pinfreqdc[pinfreqcount[freqi]]);
-    pinfreqcount[freqi]++;
-  }
-}
-
-
 void plotData() {
   if (screenTime > updateScreen) {
     screenTime -= updateScreen;
@@ -83,7 +70,7 @@ void plotData() {
 void setup() {
   Serial.begin(9600);
   delay(100);
-  setupTestStimulus();
+  setupTestSignals(2, 6, stimulusFrequency);
   setupADC();
   setupScreen();
   screenTime = 0;

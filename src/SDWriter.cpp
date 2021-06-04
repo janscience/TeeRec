@@ -1,7 +1,7 @@
 #include <Arduino.h>
+#include <ContinuousADC.h>
 #include <SDWriter.h>
 
-// TODO: What happens if there is no SD card?
 
 SDWriter::SDWriter() {
   NameCounter = 0;
@@ -13,6 +13,7 @@ SDWriter::SDWriter() {
   SD.chvol();
   SDAvailable = true;
   File.close();
+  WriteInterval = 100;
 }
 
 
@@ -42,6 +43,21 @@ void SDWriter::dataDir(const char *path) {
     SD.mkdir(path);
   SD.chdir(path);
   NameCounter = 0;
+}
+
+
+void SDWriter::setWriteInterval(const ContinuousADC &adc) {
+  WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
+}
+
+
+bool SDWriter::needToWrite() {
+  if (File.isOpen() && WriteTime > WriteInterval) {
+    WriteTime -= WriteInterval;
+    return true;
+  }
+  else
+    return false;
 }
 
 
@@ -88,13 +104,13 @@ String SDWriter::incrementFileName(const String &fname) {
 void SDWriter::open(const char *fname) {
   if (! SDAvailable || strlen(fname) == 0)
     return;
-  if ( File.isOpen()) {
+  if (File.isOpen()) {
     Serial.println("failed to open file because a file is still open.");
     return;
   }
-  if (!File.open(fname, O_WRITE | O_CREAT)) {
+  if (!File.open(fname, O_WRITE | O_CREAT))
     Serial.printf("failed to open file %s\n", fname);
-  }
+  WriteTime = 0;
 }
 
 

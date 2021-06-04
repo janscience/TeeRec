@@ -26,6 +26,8 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - SDWrite: Write data on SD card.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
+- TestSignals: Generate test signals on pulse-width modulation pins.
+- TeensyBoard: Find out which Teensy board we are running on.
 
 
 ## Examples
