@@ -63,12 +63,14 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
-  wave.open(file.file(), name.c_str(), aidata);
+  wave.open(file, name.c_str(), aidata);
   fileSamples = 0;
-  screen.clearText(0);
-  screen.writeText(1, name.c_str());
-  screen.writeText(2, "00:00");
-  Serial.println(name);
+  if (file.isOpen()) {
+    screen.clearText(0);
+    screen.writeText(1, name.c_str());
+    screen.writeText(2, "00:00");
+    Serial.println(name);
+  }
 }
 
 
@@ -155,7 +157,7 @@ void storeData() {
     aidata.fileTimeStr(ts);
     screen.writeText(2, ts);
     if (aidata.endWrite()) {
-      wave.close(file.file(), aidata, fileSamples);
+      wave.close(file, aidata, fileSamples);
       screen.clearText(1);
       screen.clearText(2);
       if (logging)

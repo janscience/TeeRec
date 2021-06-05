@@ -100,16 +100,17 @@ String SDWriter::incrementFileName(const String &fname) {
 }
 
 
-void SDWriter::open(const char *fname) {
+bool SDWriter::open(const char *fname) {
   if (! SDAvailable || strlen(fname) == 0)
-    return;
+    return false;
   if (File.isOpen()) {
     Serial.println("failed to open file because a file is still open.");
-    return;
+    return false;
   }
   if (!File.open(fname, O_WRITE | O_CREAT))
     Serial.printf("failed to open file %s\n", fname);
   WriteTime = 0;
+  return File.isOpen();
 }
 
 

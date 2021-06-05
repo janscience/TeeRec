@@ -70,7 +70,7 @@ class SDWriter {
 
   // Open new file for writing.
   // fname is the name of the file inclusively extension.
-  void open(const char *fname);
+  bool open(const char *fname);
 
   // True if file is open.
   bool isOpen() const;

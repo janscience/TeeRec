@@ -42,7 +42,7 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0)
     return;
-  wave.open(file.file(), name.c_str(), aidata);
+  wave.open(file, name.c_str(), aidata);
   Serial.println(name);
 }
 
