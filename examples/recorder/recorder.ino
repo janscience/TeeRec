@@ -69,6 +69,7 @@ void setupStorage() {
 
 
 void startWrite(int id) {
+  // on button press:
   if (file.available() && !file.isOpen()) {
     openNextFile();
     aidata.setMaxFileSamples(0);
@@ -78,6 +79,7 @@ void startWrite(int id) {
 
 
 void stopWrite(int id) {
+  // on button release:
   aidata.setMaxFileTime(fileSaveTime);
 }
 
@@ -95,7 +97,7 @@ void setupScreen() {
 }
 
 
-void setupInput() {
+void setupButtons() {
   buttons.add(startPin, INPUT_PULLUP, startWrite, stopWrite);
 }
 
@@ -121,17 +123,12 @@ void plotData() {
 }
 
 
-void writeData() {
-  aidata.writeData(file.file());
-  char ts[6];
-  aidata.fileTimeStr(ts);
-  screen.writeText(1, ts);
-}
-
-
 void storeData() {
   if (file.needToWrite()) {
-    writeData();
+    aidata.writeData(file.file());
+    char ts[6];
+    aidata.fileTimeStr(ts);
+    screen.writeText(1, ts);
     if (aidata.endWrite()) {
       file.closeWave();
       screen.popText(0);
@@ -150,7 +147,7 @@ void setup() {
   delay(100);
   rtclock.check();
   setupTestSignals(signalPins, stimulusFrequency);
-  setupInput();
+  setupButtons();
   setupADC();
   setupScreen();
   setupStorage();
