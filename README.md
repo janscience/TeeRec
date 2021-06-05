@@ -18,12 +18,14 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - Conversion of data to signed 16bit for direct storage into WAV files.
 - Storing recorded data as wave files on SD cards.
 - Display recorded data on a monitor.
+- React to push buttons.
 
 
 ## Libraries
 
 - ContinousADC: Sample from multiple pins into a cyclic buffer.
 - SDWrite: Write data on SD card.
+- WaveFile: Wave file format with metadata support.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
 - TestSignals: Generate test signals on pulse-width modulation pins.

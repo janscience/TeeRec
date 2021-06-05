@@ -1,5 +1,6 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
+#include <WaveFile.h>
 #include <RTClock.h>
 #include <TestSignals.h>
 
@@ -22,6 +23,7 @@ int stimulusFrequency = 500;          // Hertz
  
 ContinuousADC aidata;
 SDWriter file;
+WaveFile wave;
 RTClock rtclock;
 
 
@@ -40,7 +42,7 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0)
     return;
-  file.openWave(name.c_str(), aidata);
+  wave.open(file.file(), name.c_str(), aidata);
   Serial.println(name);
 }
 
