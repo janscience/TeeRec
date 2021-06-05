@@ -138,9 +138,6 @@ class ContinuousADC {
   // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;
 
-  // Return string with ADC settings.
-  void settingsStr(char *str);
-
   // Print the assignment of AI pins to ADC0 and ADC1 to Serial.
   void pinAssignment();
 

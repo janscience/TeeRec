@@ -32,7 +32,6 @@ void setupADC() {
   aidata.setResolution(bits);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
-  Serial.printf("buffer time: %.3fs\n", aidata.bufferTime());
 }
 
 

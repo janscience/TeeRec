@@ -44,7 +44,11 @@ void setupADC() {
   aidata.setResolution(bits);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
-  Serial.printf("buffer time: %.3fs\n", aidata.bufferTime());
+  float bt = aidata.bufferTime();
+  if (bt < 1.0)
+    Serial.printf("buffer time: %.0fms\n", 1000.0*bt);
+  else
+    Serial.printf("buffer time: %.2fs\n", bt);
 }
 
 
@@ -55,8 +59,9 @@ void openNextFile() {
     return;
   file.setupWaveHeader(aidata);
   file.openWave(name.c_str());
-  screen.pushText(0, name.c_str());
-  screen.writeText(1, "00:00");
+  screen.clearText(0);
+  screen.writeText(1, name.c_str());
+  screen.writeText(2, "00:00");
   Serial.println(name);
 }
 
@@ -84,16 +89,28 @@ void stopWrite(int id) {
 }
 
 
+void splashScreen() {
+  screen.setTextArea(0, 0.0, 0.1, 0.4, 0.9, true);
+  screen.setTextArea(1, 0.4, 0.1, 1.0, 0.9, true);
+  screen.writeText(0, "rate:\nres.:\nADC0:\nADC1:");
+  char msg[100];
+  sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels",
+          0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1));
+  screen.writeText(1, msg);
+  delay(2000);
+  screen.clearText();
+}
+
+
 void setupScreen() {
-  screen.setTextArea(0, 0.0, 0.8, 0.65, 1.0);
-  char msg[30];
-  aidata.settingsStr(msg);
-  screen.pushText(0, msg);
-  screen.setTextArea(1, 0.71, 0.8, 1.0, 1.0);
+  screen.setTextArea(0, 0.0, 0.8, 1.0, 1.0);
+  screen.setTextArea(1, 0.0, 0.8, 0.65, 1.0);
+  screen.setTextArea(2, 0.71, 0.8, 1.0, 1.0);
   int nplots = aidata.nchannels();
   if (nplots > 8)
     nplots = 8;
   screen.setPlotAreas(nplots, 0.0, 0.0, 1.0, 0.8);
+  screenTime = 0;
 }
 
 
@@ -105,12 +122,14 @@ void setupButtons() {
 void plotData() {
   if (screenTime > updateScreen) {
     screenTime -= updateScreen;
-    screen.scrollText(0);
-    /*
-    char ts[20];
-    rtclock.time(ts);
-    screen.writeText(0, ts);
-    */
+    if (file.isOpen())
+      screen.scrollText(1);
+    else {
+      char ts[20];
+      rtclock.dateTime(ts);
+      ts[strlen(ts)-3] = '\0';
+      screen.writeText(0, ts);
+    }
     screen.clearPlots();
     size_t n = aidata.frames(displayTime);
     float data[n];
@@ -128,11 +147,11 @@ void storeData() {
     aidata.writeData(file.file());
     char ts[6];
     aidata.fileTimeStr(ts);
-    screen.writeText(1, ts);
+    screen.writeText(2, ts);
     if (aidata.endWrite()) {
       file.closeWave();
-      screen.popText(0);
       screen.clearText(1);
+      screen.clearText(2);
       if (logging)
         openNextFile();
     }
@@ -149,6 +168,7 @@ void setup() {
   setupTestSignals(signalPins, stimulusFrequency);
   setupButtons();
   setupADC();
+  splashScreen();
   setupScreen();
   setupStorage();
   screenTime = 0;

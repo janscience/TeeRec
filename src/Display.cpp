@@ -108,7 +108,7 @@ uint16_t Display::dataY(uint8_t area, float y) {
 }
 
 
-float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1) {
+float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1, bool top) {
   TextX[area] = uint16_t(x0*Width);
   TextY[area] = uint16_t((1.0-y1)*Height);
   TextW[area] = uint16_t((x1-x0)*Width);
@@ -126,9 +126,13 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1)
   int16_t  x, y;
   uint16_t w, h;
   TextCanvas[area]->getTextBounds("Agy", 0, 4*TextH[area]/5, &x, &y, &w, &h);
-  TextB[area] = TextH[area] - (y + h - 4*TextH[area]/5) - 1;
-  if (TextH[area] > h)
-    TextB[area] -= (TextH[area] - h - 1)/2;
+  if (top)
+    TextB[area] = 4*TextH[area]/5 - y + 1;
+  else {
+    TextB[area] = TextH[area] - (y + h - 4*TextH[area]/5) - 1;
+    if (TextH[area] > h)
+      TextB[area] -= (TextH[area] - h - 1)/2;
+  }
   TextC[area] = TextW[area]*3/w;
   TextI[area] = 0;
   TextT[area] = 0;
@@ -156,6 +160,8 @@ void Display::clearText() {
 
 
 void Display::drawText(uint8_t area, const char *text) {
+  if (TextW[area] == 0 )
+    return;
   TextCanvas[area]->fillScreen(0x0000);
   TextCanvas[area]->setCursor(0, TextB[area]);
   TextCanvas[area]->print(text);
@@ -165,6 +171,8 @@ void Display::drawText(uint8_t area, const char *text) {
 
 
 void Display::writeText(uint8_t area, const char *text) {
+  if (TextW[area] == 0 )
+    return;
   drawText(area, text);
   if (TextT != 0)
     delete [] TextT[area];
@@ -187,6 +195,8 @@ void Display::scrollText(uint8_t area) {
 
 
 void Display::pushText(uint8_t area, const char *text) {
+  if (TextW[area] == 0 )
+    return;
   if (TextHead[area] < MaxTexts && TextT != 0) {
     Text[area][TextHead[area]] = TextT[area];
     TextT[area] = 0;
@@ -197,6 +207,8 @@ void Display::pushText(uint8_t area, const char *text) {
 
 
 void Display::popText(uint8_t area) {
+  if (TextW[area] == 0 )
+    return;
   if (TextT != 0) {
     delete [] TextT[area];
     TextT[area] = 0;

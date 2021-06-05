@@ -76,8 +76,10 @@ class Display {
   void plot(uint8_t area, float *buffer, int nbuffer, int color=0);
 
   // Define text area. 
+  // By default center the text vertically into the area. If top is set to true,
+  // align the text vertically at the top.
   // Returns the actually needed and used text height as fraction of screen height.
-  float setTextArea(uint8_t area, float x0, float y0, float x1, float y1);
+  float setTextArea(uint8_t area, float x0, float y0, float x1, float y1, bool top=false);
 
   // Clear specified text area.
   void clearText(uint8_t area);
