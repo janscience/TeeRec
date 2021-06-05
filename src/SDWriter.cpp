@@ -132,69 +132,57 @@ FsFile &SDWriter::file() {
 }
 
 
-void SDWriter::setupWaveHeader(uint8_t nchannels, uint32_t samplerate,
+void SDWriter::writeWaveHeader(uint8_t nchannels, uint32_t samplerate,
                                uint16_t resolution, int32_t samples) {
-  NChannels = nchannels;
-  NBytes = (resolution-1)/8  + 1;       // bytes per sample
-  uint32_t datasize = samples * NBytes; // in bytes, nchannels is already in samples
+  size_t nbytes = (resolution-1)/8  + 1; // bytes per sample
+  uint32_t datasize = samples * nbytes;  // in bytes, nchannels is already in samples
 
+  WaveHeader header;
   // RIFF chunk descriptor:
-  char riff[] = "RIFF";
-  strncpy(WaveHeader.mainChunkId, riff, 4);
-  WaveHeader.mainChunkSize = 36 + datasize;
+  strncpy(header.mainChunkId, "RIFF", 4);
+  header.mainChunkSize = 36 + datasize;
     // Size of the entire file -8 bytes for the two fields not included in this count (ChunkID and ChunkSize) 
-  char wav[] = "WAVE";
-  strncpy(WaveHeader.mainChunkFormat, wav, 4);
+  strncpy(header.mainChunkFormat, "WAVE", 4);
   
   // Subchunk1 --> fmt sub-chunk:
-  char fmt[] = "fmt ";
-  strncpy(WaveHeader.fmtChunkId, fmt, 4);
-  WaveHeader.fmtChunkSize = 16; // 16 for PCM
-  WaveHeader.formatTag = 1;     // 1 is PCM
-  WaveHeader.numChannels = nchannels;
-  WaveHeader.sampleRate = samplerate;
-  WaveHeader.byteRate = samplerate * NBytes * NChannels;
-  WaveHeader.blockAlign = NChannels * NBytes;
-  WaveHeader.bitsPerSample = resolution;
+  strncpy(header.fmtChunkId, "fmt ", 4);
+  header.fmtChunkSize = 16; // 16 for PCM
+  header.formatTag = 1;     // 1 is PCM
+  header.numChannels = nchannels;
+  header.sampleRate = samplerate;
+  header.byteRate = samplerate * nchannels * nbytes;
+  header.blockAlign = nchannels * nbytes;
+  header.bitsPerSample = resolution;
   
   // Subchunk2 contains size of data and the actual data:
-  char data[] = "data";
-  strncpy(WaveHeader.SubtwoChunkId, data, 4);
-  WaveHeader.SubtwoChunkSize = datasize;
+  strncpy(header.SubtwoChunkId, "data", 4);
+  header.SubtwoChunkSize = datasize;
   
   // This header makes a total of 44 bytes in size.
   // For more information visit http://soundfile.sapp.org/doc/WaveFormat/
+  File.write((const uint8_t *)&header, 44);
 }
 
 
-void SDWriter::setupWaveHeader(const ContinuousADC &adcc, int32_t samples) {
-  if (samples < 0)
-    samples = adcc.maxFileSamples();
-  setupWaveHeader(adcc.nchannels(), adcc.rate(), adcc.dataResolution(), samples);
-}
-
-
-void SDWriter::openWave(const char *fname) {
+void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t samples) {
   if (! SDAvailable)
     return;
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
   open(name.c_str());
-  File.write((const uint8_t *)&WaveHeader, 44);
+  if (samples < 0)
+    samples = adc.maxFileSamples();
+  writeWaveHeader(adc.nchannels(), adc.rate(), adc.dataResolution(), samples);
 }
 
 
-void SDWriter::closeWave(uint32_t samples) {
+void SDWriter::closeWave(const ContinuousADC &adc, uint32_t samples) {
   if (! SDAvailable || ! File.isOpen())
     return;
   if (samples > 0) {
-    uint32_t datasize = samples * NBytes;   // in bytes
-    uint32_t mainchunksize = 36 + datasize;
-    File.seek((char *)&WaveHeader.mainChunkSize - (char *)&WaveHeader);
-    File.write((const uint8_t *)&mainchunksize, 4);
-    File.seek((const uint8_t *)&WaveHeader.SubtwoChunkSize - (const uint8_t *)&WaveHeader);
-    File.write((const uint8_t *)&datasize, 4);
+    File.seek(0);
+    writeWaveHeader(adc.nchannels(), adc.rate(), adc.dataResolution(), samples);
   }
   close();
 }

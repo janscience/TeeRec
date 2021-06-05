@@ -81,24 +81,18 @@ class SDWriter {
   // Return file object.
   FsFile &file();
 
-  // Initialize wave file header.
-  // If samples=0, you need to supply the number of samples to closeWave().
-  void setupWaveHeader(uint8_t nchannels, uint32_t samplerate,
-		       uint16_t resolution, int32_t samples=0);
-  // Initialize wave file header from adc settings.
-  // If samples=0, you need to supply the number of samples to closeWave().
-  // If samples is negative, then adcc.maxFileSamples() is used.
-  void setupWaveHeader(const ContinuousADC &adcc, int32_t samples=-1);
-
-  // Open new file for writing and write wave header.
-  // You need to setup the wave header before!
+  // Open new file for writing and write wave header for settings from adcc.
+  // For samples<0, take max file size from adc.
+  // For samples=1, initialize wave header with unsepcified size.
+  // You then need to close the file with closeWave() and provide the number of samples there.
   // If no file extension is provided, ".wav" is added.
-  // Takes about 1ms.
-  void openWave(const char *fname);
+  void openWave(const char *fname, const ContinuousADC &adc, int32_t samples=-1);
 
-  // Close wave file and update header with file size.
+  // Update wave header with proper file size and close file.
+  // If you supplied the right number of samples already to openWave(), 
+  // then it is sufficient to simply close() the file.
   // Takes about 5ms.
-  void closeWave(uint32_t samples=0);
+  void closeWave(const ContinuousADC &adc, uint32_t samples);
 
 
  protected:
@@ -113,7 +107,7 @@ class SDWriter {
   uint16_t NameCounter;
 
   // WAVE header:
-  struct fileheader {
+  typedef struct {
     char mainChunkId[4];       // "RIFF"
     uint32_t mainChunkSize;    // file length in bytes
     char mainChunkFormat[4];   // "WAVE"
@@ -129,8 +123,11 @@ class SDWriter {
     uint32_t SubtwoChunkSize;  // data length in bytes (filelength - 44)
   } WaveHeader;
 
-  uint8_t NChannels;
-  uint8_t NBytes;
+  // Write wave file header to file.
+  // If samples=0, you need to supply the number of samples to closeWave().
+  void writeWaveHeader(uint8_t nchannels, uint32_t samplerate,
+		       uint16_t resolution, int32_t samples=0);
+
 
 };
 

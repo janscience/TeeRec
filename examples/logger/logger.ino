@@ -14,8 +14,8 @@ int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A10, A11, -1};  // input p
 char fileName[] = "data-ANUM.wav";    // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 60;              // seconds
 
-iint signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
-nt stimulusFrequency = 500;           // Hertz
+int signalPins[] = {5, 4, 3, 2, -1};  // pins where to put out test signals
+int stimulusFrequency = 500;          // Hertz
 
 
 // ------------------------------------------------------------------------------------------
@@ -40,8 +40,7 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0)
     return;
-  file.setupWaveHeader(aidata);
-  file.openWave(name.c_str());
+  file.openWave(name.c_str(), aidata);
   Serial.println(name);
 }
 
@@ -58,7 +57,7 @@ void storeData() {
   if (file.needToWrite()) {
     aidata.writeData(file.file());
     if (aidata.endWrite()) {
-      file.closeWave();
+      file.close();  // file size was set by openWave()
       openNextFile();
     }
   }

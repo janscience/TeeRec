@@ -30,9 +30,13 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
+
 SDWriter file;
+size_t fileSamples = 0;
+
 Display screen(1);
 elapsedMillis screenTime;
+
 RTClock rtclock;
 PushButtons buttons;
 
@@ -57,8 +61,8 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
-  file.setupWaveHeader(aidata);
-  file.openWave(name.c_str());
+  file.openWave(name.c_str(), aidata);
+  fileSamples = 0;
   screen.clearText(0);
   screen.writeText(1, name.c_str());
   screen.writeText(2, "00:00");
@@ -144,12 +148,12 @@ void plotData() {
 
 void storeData() {
   if (file.needToWrite()) {
-    aidata.writeData(file.file());
+    fileSamples += aidata.writeData(file.file());
     char ts[6];
     aidata.fileTimeStr(ts);
     screen.writeText(2, ts);
     if (aidata.endWrite()) {
-      file.closeWave();
+      file.closeWave(aidata, fileSamples);
       screen.clearText(1);
       screen.clearText(2);
       if (logging)
