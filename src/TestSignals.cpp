@@ -20,9 +20,11 @@ void setupTestSignals(int *pins, int frequency) {
 #else
   #error "Board not supported for PWM signal generation."
 #endif
-  int timerfreqs[] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
-  int pintimercount[] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
-  float pintimerdc[] = {0.5, 0.2, 0.8, 0.33};  // duty cycle
+  const int maxtimers = 9;
+  int timerfreqs[maxtimers] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
+  int pintimercount[maxtimers] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
+  const int maxdcs = 4;
+  float pintimerdc[maxdcs] = {0.5, 0.2, 0.8, 0.33};  // duty cycle
   float maxfreqfac = 0.5;
   for (int k=0; k<MaxSignalPins && pins[k]>=0; k++) {
     int pin = pins[k];
@@ -32,7 +34,7 @@ void setupTestSignals(int *pins, int frequency) {
 	maxfreqfac *= 2.0;
 	timerfreqs[timerid] = maxfreqfac*frequency;
       }
-      testSignal(pin, timerfreqs[timerid], pintimerdc[pintimercount[timerid]]);
+      testSignal(pin, timerfreqs[timerid], pintimerdc[pintimercount[timerid]%maxdcs]);
       pintimercount[timerid]++;
     }
   }
