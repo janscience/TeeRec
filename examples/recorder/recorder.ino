@@ -2,6 +2,7 @@
 #include <SDWriter.h>
 #include <Display.h>
 #include <RTClock.h>
+#include <PushButtons.h>
 #include <TestSignals.h>
 
 
@@ -29,13 +30,11 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
 // ------------------------------------------------------------------------------------------
  
 ContinuousADC aidata;
-
 SDWriter file;
-
 Display screen(1);
 elapsedMillis screenTime;
-
 RTClock rtclock;
+PushButtons buttons;
 
 
 void setupADC() {
@@ -69,6 +68,20 @@ void setupStorage() {
 }
 
 
+void startWrite(int id) {
+  if (file.available() && !file.isOpen()) {
+    openNextFile();
+    aidata.setMaxFileSamples(0);
+    aidata.startWrite();
+  }
+}
+
+
+void stopWrite(int id) {
+  aidata.setMaxFileTime(fileSaveTime);
+}
+
+
 void setupScreen() {
   screen.setTextArea(0, 0.0, 0.8, 0.65, 1.0);
   char msg[30];
@@ -83,8 +96,7 @@ void setupScreen() {
 
 
 void setupInput() {
-  if (startPin >= 0)
-    pinMode(startPin, INPUT_PULLUP);
+  buttons.add(startPin, INPUT_PULLUP, startWrite, stopWrite);
 }
 
 
@@ -118,16 +130,6 @@ void writeData() {
 
 
 void storeData() {
-  if (startPin >= 0) {
-    int push = digitalRead(startPin);
-    if (push == 0 && file.available() && !file.isOpen()) {
-      openNextFile();
-      aidata.setMaxFileSamples(0);
-      aidata.startWrite();
-    }
-    if (push == 1)
-      aidata.setMaxFileTime(fileSaveTime);
-  }
   if (file.needToWrite()) {
     writeData();
     if (aidata.endWrite()) {
@@ -158,6 +160,7 @@ void setup() {
 
 
 void loop() {
-  plotData();
+  buttons.update();
   storeData();
+  plotData();
 } 

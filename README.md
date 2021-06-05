@@ -28,6 +28,7 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - RTClock: Time and date strings from the real time clock.
 - TestSignals: Generate test signals on pulse-width modulation pins.
 - TeensyBoard: Find out which Teensy board we are running on.
+- PushButtons: Manage and query push buttons with calback functions.
 
 
 ## Examples
@@ -35,3 +36,4 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - scope: Show acquired data on a display.
 - logger: Continuously store data on SD card.
 - recorder: Show acquired data on a display and store data on SD card upon user request.
+- pushbuttons: Demonstrate usage of PushButtons class.
