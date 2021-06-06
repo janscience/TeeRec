@@ -3,75 +3,58 @@
 #include <WaveFile.h>
 
 
-WaveFile::ChunkBuffer::ChunkBuffer() {
-  Header = 0;
-  Data = 0;
-  Buffer = 0;
-  NBuffer = 0;
-}
-
-
-WaveFile::ChunkBuffer::ChunkBuffer(const char *id, uint32_t size) {
+WaveFile::Chunk::Chunk(const char *id, uint32_t size) {
   size = ((size+1) >> 1) << 1; // even size
-  NBuffer = sizeof(Chunk) + size;
-  Buffer = new char[NBuffer];
-  memset(Buffer, 0, NBuffer);
-  Header = (Chunk *)Buffer;
-  strncpy(Header->Id, id, 4);
-  Header->Size = size;
-  Data = &Buffer[sizeof(Chunk)];
+  strncpy(Header.Id, id, 4);
+  Header.Size = size;
+  NBuffer = sizeof(Header) + Header.Size;
+  Buffer = (char *)&this->Header;
 }
 
 
-WaveFile::ChunkBuffer::~ChunkBuffer() {
-  delete [] Buffer;
+void WaveFile::Chunk::addSize(uint32_t size) {
+  Header.Size += size;
 }
 
 
-void WaveFile::ChunkBuffer::addSize(uint32_t size) {
-  Header->Size += size;
-}
-
-
-WaveFile::RiffChunk::RiffChunk() :
-  ChunkBuffer("RIFF", 4) {
-  strncpy(Data, "WAVE", 4);
+WaveFile::ListChunk::ListChunk(const char *id, const char *listid) :
+  Chunk(id, sizeof(ListId)) {
+  strncpy(ListId, listid, 4);
 }
 
 
 WaveFile::FormatChunk::FormatChunk(uint8_t nchannels, uint32_t samplerate,
 				   uint16_t resolution) :
-  ChunkBuffer("fmt ", sizeof(Format_t)) {
-  Format = (Format_t *)Data;
-  size_t nbytes = (resolution-1)/8  + 1;    // bytes per sample
-  Format->formatTag = 1;                    // 1 is PCM
-  Format->numChannels = nchannels;
-  Format->sampleRate = samplerate;
-  Format->byteRate = samplerate * nchannels * nbytes;
-  Format->blockAlign = nchannels * nbytes;
-  Format->bitsPerSample = resolution;
+  Chunk("fmt ", sizeof(Format)) {
+  size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
+  Format.formatTag = 1;                   // 1 is PCM
+  Format.numChannels = nchannels;
+  Format.sampleRate = samplerate;
+  Format.byteRate = samplerate * nchannels * nbytes;
+  Format.blockAlign = nchannels * nbytes;
+  Format.bitsPerSample = resolution;
 }
 
 
 WaveFile::DataChunk::DataChunk(uint16_t resolution, int32_t samples) :
-  ChunkBuffer("data", 0) {
+  Chunk("data", 0) {
   size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
-  Header->Size = samples * nbytes;        // in bytes, nchannels is already in samples
+  Header.Size = samples * nbytes;         // in bytes, nchannels is already in samples
 }
 
 
 void WaveFile::writeHeader(FsFile &file, uint8_t nchannels, uint32_t samplerate,
 			   uint16_t resolution, int32_t samples) {
-  RiffChunk riff;
+  ListChunk riff("RIFF", "WAVE");
   FormatChunk format(nchannels, samplerate, resolution);
   DataChunk data(resolution, samples);
-  ChunkBuffer *chunks[3] = {&riff, &format, &data};
+  Chunk *chunks[3] = {&riff, &format, &data};
   // update file size:
-  riff.Header->Size = 4;
+  riff.Header.Size = 4;
   for (int k=1; k<3; k++)
-    riff.Header->Size += chunks[k]->NBuffer;
-  uint32_t nheader = 8 + riff.Header->Size;
-  riff.Header->Size += data.Header->Size;
+    riff.Header.Size += chunks[k]->NBuffer;
+  uint32_t nheader = 8 + riff.Header.Size;
+  riff.Header.Size += data.Header.Size;
   // make header:
   char header[nheader];
   uint32_t idx = 0;

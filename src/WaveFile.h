@@ -38,26 +38,24 @@ class WaveFile {
   typedef struct {
     char Id[4];        // 4 character chunck ID.
     uint32_t Size;     // size of chunk in bytes
-  } Chunk;
+  } ChunkHead;
 
-  class ChunkBuffer {
+  class Chunk {
   public:
-    ChunkBuffer();
-    ChunkBuffer(const char *id, uint32_t size);
-    ~ChunkBuffer();
+    Chunk(const char *id, uint32_t size);
     void addSize(uint32_t size);
-    Chunk *Header;
-    char *Data;
     char *Buffer;
     uint32_t NBuffer;
+    ChunkHead Header;
   };
 
-  class RiffChunk : public ChunkBuffer {
+  class ListChunk : public Chunk {
   public:
-    RiffChunk();
+    ListChunk(const char *id, const char *listid);
+    char ListId[4];
   };
 
-  class FormatChunk : public ChunkBuffer {
+  class FormatChunk : public Chunk {
 
     typedef struct {
       uint16_t formatTag;        // 1=PCM, 257=Mu-Law, 258=A-Law, 259=ADPCM
@@ -71,10 +69,10 @@ class WaveFile {
   public:
     FormatChunk(uint8_t nchannels, uint32_t samplerate,
 		uint16_t resolution);
-    Format_t *Format;
+    Format_t Format;
   };
 
-  class DataChunk : public ChunkBuffer {
+  class DataChunk : public Chunk {
   public:
     DataChunk(uint16_t resolution, int32_t samples);
   };
