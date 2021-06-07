@@ -1,21 +1,21 @@
 /*
-  WaveFile - library for writing wave files with metadata.
+  WaveHeader - library for setting up wave file header with metadata.
   Created by Jan Benda, June 5, 2021.
 */
 
-#ifndef WaveFile_h
-#define WaveFile_h
+#ifndef WaveHeader_h
+#define WaveHeader_h
 
 
 #include <Arduino.h>
 
 
-class WaveFile {
+class WaveHeader {
 
 public:
 
-  WaveFile();
-  ~WaveFile();
+  WaveHeader();
+  ~WaveHeader();
 
   size_t NBuffer;
   char *Buffer;

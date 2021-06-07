@@ -150,7 +150,6 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
     Wave.clearDateTime();
   Wave.assemble();
   File.write(Wave.Buffer, Wave.NBuffer);
-  //  File.write((const uint8_t *)&header, nheader);
 }
 
 
@@ -162,7 +161,6 @@ void SDWriter::closeWave(uint32_t samples) {
     Wave.setData(samples);
     Wave.assemble();
     File.write(Wave.Buffer, Wave.NBuffer);
-    //file.write((const uint8_t *)&header, nheader);
   }
   close();
 }

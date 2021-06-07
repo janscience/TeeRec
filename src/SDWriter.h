@@ -10,7 +10,7 @@
 
 
 #include <Arduino.h>
-#include <WaveFile.h>
+#include <WaveHeader.h>
 #include <SdFat.h>
 
 #define SD_FAT_TYPE 3
@@ -104,7 +104,7 @@ class SDWriter {
   bool SDAvailable;
   FsFile File;
 
-  WaveFile Wave;
+  WaveHeader Wave;
 
   elapsedMillis WriteTime;
   uint WriteInterval;

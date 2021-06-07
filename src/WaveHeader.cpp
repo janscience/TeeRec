@@ -1,7 +1,7 @@
-#include <WaveFile.h>
+#include <WaveHeader.h>
 
 
-WaveFile::WaveFile() :
+WaveHeader::WaveHeader() :
   Riff("RIFF", "WAVE"),
   Format(),
   Info("LIST", "INFO"),
@@ -15,13 +15,13 @@ WaveFile::WaveFile() :
 }
 
 
-WaveFile::~WaveFile() {
+WaveHeader::~WaveHeader() {
   if (Buffer != 0)
     delete [] Buffer;
 }
 
 
-WaveFile::Chunk::Chunk(const char *id, uint32_t size) {
+WaveHeader::Chunk::Chunk(const char *id, uint32_t size) {
   strncpy(Header.Id, id, 4);
   setSize(size);
   NBuffer = sizeof(Header) + Header.Size;
@@ -30,36 +30,36 @@ WaveFile::Chunk::Chunk(const char *id, uint32_t size) {
 }
 
 
-void WaveFile::Chunk::setSize(uint32_t size) {
+void WaveHeader::Chunk::setSize(uint32_t size) {
   Header.Size = ((size+1) >> 1) << 1; // even size
 }
 
 
-void WaveFile::Chunk::addSize(uint32_t size) {
+void WaveHeader::Chunk::addSize(uint32_t size) {
   Header.Size += size;
 }
 
 
-WaveFile::ListChunk::ListChunk(const char *id, const char *listid) :
+WaveHeader::ListChunk::ListChunk(const char *id, const char *listid) :
   Chunk(id, 4) {
   strncpy(ListId, listid, 4);
 }
 
 
-WaveFile::FormatChunk::FormatChunk() :
+WaveHeader::FormatChunk::FormatChunk() :
   Chunk("fmt ", sizeof(Format)) {
   memset(&Format, 0, sizeof(Format));
 }
 
 
-WaveFile::FormatChunk::FormatChunk(uint8_t nchannels, uint32_t samplerate,
+WaveHeader::FormatChunk::FormatChunk(uint8_t nchannels, uint32_t samplerate,
 				   uint16_t resolution) :
   Chunk("fmt ", sizeof(Format)) {
   set(nchannels, samplerate, resolution);
 }
 
 
-void WaveFile::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
+void WaveHeader::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
 			        uint16_t resolution) {
   size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
   Format.formatTag = 1;                   // 1 is PCM
@@ -71,13 +71,13 @@ void WaveFile::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
 }
 
 
-WaveFile::InfoChunk::InfoChunk(const char *infoid, const char *text) :
+WaveHeader::InfoChunk::InfoChunk(const char *infoid, const char *text) :
   Chunk(infoid, 0) {
   set(text);
 }
 
 
-void WaveFile::InfoChunk::set(const char *text) {
+void WaveHeader::InfoChunk::set(const char *text) {
   setSize(strlen(text));
   NBuffer = sizeof(Header) + Header.Size;
   strncpy(Text, text, MaxText);
@@ -85,30 +85,30 @@ void WaveFile::InfoChunk::set(const char *text) {
 }
 
 
-void WaveFile::InfoChunk::clear() {
+void WaveHeader::InfoChunk::clear() {
   setSize(0);
   Use = false;
 }
 
 
-WaveFile::DataChunk::DataChunk() :
+WaveHeader::DataChunk::DataChunk() :
   Chunk("data", 0) {
 }
 
 
-WaveFile::DataChunk::DataChunk(uint16_t resolution, int32_t samples) :
+WaveHeader::DataChunk::DataChunk(uint16_t resolution, int32_t samples) :
   Chunk("data", 0) {
   set(resolution, samples);
 }
 
 
-void WaveFile::DataChunk::set(uint16_t resolution, int32_t samples) {
+void WaveHeader::DataChunk::set(uint16_t resolution, int32_t samples) {
   size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
   Header.Size = samples * nbytes;         // in bytes, nchannels is already in samples
 }
 
 
-void WaveFile::setFormat(uint8_t nchannels, uint32_t samplerate,
+void WaveHeader::setFormat(uint8_t nchannels, uint32_t samplerate,
 		         uint16_t resolution, uint16_t dataresolution) {
   Format.set(nchannels, samplerate, dataresolution);
   DataResolution = dataresolution;
@@ -118,27 +118,27 @@ void WaveFile::setFormat(uint8_t nchannels, uint32_t samplerate,
 }
 
 
-void WaveFile::setData(int32_t samples) {
+void WaveHeader::setData(int32_t samples) {
   Data.set(DataResolution, samples);
 }
 
 
-void WaveFile::setDateTime(const char *datetime) {
+void WaveHeader::setDateTime(const char *datetime) {
   DateTime.set(datetime);
 }
 
 
-void WaveFile::clearDateTime() {
+void WaveHeader::clearDateTime() {
   DateTime.clear();
 }
 
 
-void WaveFile::setSoftware(const char *software) {
+void WaveHeader::setSoftware(const char *software) {
   Software.set(software);
 }
 
 
-void WaveFile::assemble() {
+void WaveHeader::assemble() {
   if (Buffer != 0)
     delete [] Buffer;
   // riff chunks:

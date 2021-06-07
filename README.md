@@ -25,12 +25,12 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 
 - ContinousADC: Sample from multiple pins into a cyclic buffer.
 - SDWrite: Write data on SD card.
-- WaveFile: Wave file format with metadata support.
+- WaveHeader: Setting up wave file header with metadata.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
+- PushButtons: Manage and query push buttons with calback functions.
 - TestSignals: Generate test signals on pulse-width modulation pins.
 - TeensyBoard: Find out which Teensy board we are running on.
-- PushButtons: Manage and query push buttons with calback functions.
 
 
 ## Examples
