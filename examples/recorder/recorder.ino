@@ -1,6 +1,5 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
-#include <WaveFile.h>
 #include <Display.h>
 #include <RTClock.h>
 #include <PushButtons.h>
@@ -33,9 +32,7 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
 ContinuousADC aidata;
 
 SDWriter file;
-WaveFile wave;
 size_t fileSamples = 0;
-char fileDateTime[20];
 
 
 Display screen(1);
@@ -65,8 +62,9 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
-  rtclock.dateTime(fileDateTime);
-  wave.open(file, name.c_str(), aidata, -1, fileDateTime);
+  char datetime[20];
+  rtclock.dateTime(datetime);
+  file.openWave(name.c_str(), aidata, -1, datetime);
   fileSamples = 0;
   if (file.isOpen()) {
     screen.clearText(0);
@@ -160,7 +158,7 @@ void storeData() {
     aidata.fileTimeStr(ts);
     screen.writeText(2, ts);
     if (aidata.endWrite()) {
-      wave.close(file, aidata, fileSamples, fileDateTime);
+      file.closeWave(fileSamples);
       screen.clearText(1);
       screen.clearText(2);
       if (logging)

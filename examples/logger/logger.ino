@@ -1,6 +1,5 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
-#include <WaveFile.h>
 #include <RTClock.h>
 #include <TestSignals.h>
 
@@ -44,7 +43,7 @@ void openNextFile() {
     return;
   char dts[20];
   rtclock.dateTime(dts);
-  wave.open(file, name.c_str(), aidata, -1, dts);
+  file.openWave(name.c_str(), aidata, -1, dts);
   Serial.println(name);
 }
 

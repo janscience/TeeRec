@@ -131,3 +131,38 @@ FsFile &SDWriter::file() {
   return File;
 }
 
+
+void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t samples,
+	 	        char *datetime) {
+  String name(fname);
+  if (name.indexOf('.') < 0 )
+    name += ".wav";
+  if (!open(name.c_str()))
+    return;
+  if (samples < 0)
+    samples = adc.maxFileSamples();
+  Wave.setFormat(adc.nchannels(), adc.rate(), adc.resolution(),
+		 adc.dataResolution());
+  Wave.setData(samples);
+  if (datetime != 0)
+    Wave.setDateTime(datetime);
+  else
+    Wave.clearDateTime();
+  Wave.assemble();
+  File.write(Wave.Buffer, Wave.NBuffer);
+  //  File.write((const uint8_t *)&header, nheader);
+}
+
+
+void SDWriter::closeWave(uint32_t samples) {
+  if (! File.isOpen())
+    return;
+  if (samples > 0) {
+    File.seek(0);
+    Wave.setData(samples);
+    Wave.assemble();
+    File.write(Wave.Buffer, Wave.NBuffer);
+    //file.write((const uint8_t *)&header, nheader);
+  }
+  close();
+}
