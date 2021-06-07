@@ -41,7 +41,7 @@ void WaveFile::Chunk::addSize(uint32_t size) {
 
 
 WaveFile::ListChunk::ListChunk(const char *id, const char *listid) :
-  Chunk(id, sizeof(ListId)) {
+  Chunk(id, 4) {
   strncpy(ListId, listid, 4);
 }
 
@@ -79,6 +79,7 @@ WaveFile::InfoChunk::InfoChunk(const char *infoid, const char *text) :
 
 void WaveFile::InfoChunk::set(const char *text) {
   setSize(strlen(text));
+  NBuffer = sizeof(Header) + Header.Size;
   strncpy(Text, text, MaxText);
   Use = (strlen(text) > 0);
 }
@@ -159,6 +160,7 @@ void WaveFile::assemble() {
   NBuffer = 8 + Riff.Header.Size;
   Riff.Header.Size += Data.Header.Size;
   // update info size:
+  Info.Header.Size = 4;
   for (int k=3; k<nchunks-1; k++)
     Info.addSize(chunks[k]->NBuffer);
   // make header:
