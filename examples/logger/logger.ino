@@ -42,7 +42,9 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0)
     return;
-  wave.open(file, name.c_str(), aidata);
+  char dts[20];
+  rtclock.dateTime(dts);
+  wave.open(file, name.c_str(), aidata, -1, dts);
   Serial.println(name);
 }
 

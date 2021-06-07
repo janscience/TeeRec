@@ -36,6 +36,13 @@ WaveFile::FormatChunk::FormatChunk(uint8_t nchannels, uint32_t samplerate,
 }
 
 
+WaveFile::InfoChunk::InfoChunk(const char *infoid, const char *text) :
+  Chunk(infoid, strlen(text)) {
+  memset(Text, 0, sizeof(Text));
+  strcpy(Text, text);
+}
+
+
 WaveFile::DataChunk::DataChunk(uint16_t resolution, int32_t samples) :
   Chunk("data", 0) {
   size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
@@ -44,21 +51,41 @@ WaveFile::DataChunk::DataChunk(uint16_t resolution, int32_t samples) :
 
 
 void WaveFile::writeHeader(FsFile &file, uint8_t nchannels, uint32_t samplerate,
-			   uint16_t resolution, int32_t samples) {
+			   uint16_t resolution, uint16_t dataresolution, int32_t samples,
+			   char *datetimes) {
+  // riff chunks:
+  int nchunks = 0;
+  Chunk *chunks[10];
   ListChunk riff("RIFF", "WAVE");
-  FormatChunk format(nchannels, samplerate, resolution);
-  DataChunk data(resolution, samples);
-  Chunk *chunks[3] = {&riff, &format, &data};
+  chunks[nchunks++] = &riff;
+  FormatChunk format(nchannels, samplerate, dataresolution);
+  chunks[nchunks++] = &format;
+  ListChunk info("LIST", "INFO");
+  chunks[nchunks++] = &info;
+  InfoChunk datetime("DTIM", datetimes==0?"":datetimes);
+  if (datetimes != 0)
+    chunks[nchunks++] = &datetime;
+  InfoChunk software("ISFT", "TeeRec");
+  chunks[nchunks++] = &software;
+  char bs[4];
+  sprintf(bs, "%d", resolution);
+  InfoChunk bits("BITS", bs);
+  chunks[nchunks++] = &bits;
+  DataChunk data(dataresolution, samples);
+  chunks[nchunks++] = &data;
   // update file size:
   riff.Header.Size = 4;
-  for (int k=1; k<3; k++)
+  for (int k=1; k<nchunks; k++)
     riff.Header.Size += chunks[k]->NBuffer;
   uint32_t nheader = 8 + riff.Header.Size;
   riff.Header.Size += data.Header.Size;
+  // update info size:
+  for (int k=3; k<nchunks-1; k++)
+    info.addSize(chunks[k]->NBuffer);
   // make header:
   char header[nheader];
   uint32_t idx = 0;
-  for (int k=0; k<3; k++) {
+  for (int k=0; k<nchunks; k++) {
     memcpy(&header[idx], chunks[k]->Buffer, chunks[k]->NBuffer);
     idx += chunks[k]->NBuffer;
   }
@@ -67,7 +94,7 @@ void WaveFile::writeHeader(FsFile &file, uint8_t nchannels, uint32_t samplerate,
 
 
 void WaveFile::open(SDWriter &file, const char *fname,
-		    const ContinuousADC &adc, int32_t samples) {
+		    const ContinuousADC &adc, int32_t samples, char *datetime) {
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
@@ -75,16 +102,19 @@ void WaveFile::open(SDWriter &file, const char *fname,
     return;
   if (samples < 0)
     samples = adc.maxFileSamples();
-  writeHeader(file.file(), adc.nchannels(), adc.rate(), adc.dataResolution(), samples);
+  writeHeader(file.file(), adc.nchannels(), adc.rate(), adc.resolution(),
+	      adc.dataResolution(), samples, datetime);
 }
 
 
-void WaveFile::close(SDWriter &file, const ContinuousADC &adc, uint32_t samples) {
+void WaveFile::close(SDWriter &file, const ContinuousADC &adc, uint32_t samples,
+                     char *datetime) {
   if (! file.isOpen())
     return;
   if (samples > 0) {
     file.file().seek(0);
-    writeHeader(file.file(), adc.nchannels(), adc.rate(), adc.dataResolution(), samples);
+    writeHeader(file.file(), adc.nchannels(), adc.rate(), adc.resolution(),
+		adc.dataResolution(), samples, datetime);
   }
   file.close();
 }

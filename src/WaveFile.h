@@ -24,13 +24,15 @@ class WaveFile {
   // For samples=1, initialize wave header with unsepcified size.
   // You then need to close the file with closeWave() and provide the number of samples there.
   // If no file extension is provided, ".wav" is added.
-  void open(SDWriter &file, const char *fname, const ContinuousADC &adc, int32_t samples=-1);
+void open(SDWriter &file, const char *fname, const ContinuousADC &adc, int32_t samples=-1,
+          char *datetime=0);
 
   // Update wave header with proper file size and close file.
   // If you supplied the right number of samples already to openWave(), 
   // then it is sufficient to simply close() the file.
   // Takes about 5ms.
-  void close(SDWriter &file, const ContinuousADC &adc, uint32_t samples);
+  void close(SDWriter &file, const ContinuousADC &adc, uint32_t samples,
+             char *datetime=0);
 
 
  protected:
@@ -72,6 +74,12 @@ class WaveFile {
     Format_t Format;
   };
 
+  class InfoChunk : public Chunk {
+  public:
+    InfoChunk(const char *infoid, const char *text);
+    char Text[50];
+  };
+
   class DataChunk : public Chunk {
   public:
     DataChunk(uint16_t resolution, int32_t samples);
@@ -80,7 +88,8 @@ class WaveFile {
   // Write wave file header to file.
   // If samples=0, you need to supply the number of samples to closeWave().
   void writeHeader(FsFile &file, uint8_t nchannels, uint32_t samplerate,
-	           uint16_t resolution, int32_t samples=0);
+		   uint16_t resolution, uint16_t dataresolution, int32_t samples=0,
+		   char *datetime=0);
 
 };
 

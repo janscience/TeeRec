@@ -35,6 +35,8 @@ ContinuousADC aidata;
 SDWriter file;
 WaveFile wave;
 size_t fileSamples = 0;
+char fileDateTime[20];
+
 
 Display screen(1);
 elapsedMillis screenTime;
@@ -63,7 +65,8 @@ void openNextFile() {
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
-  wave.open(file, name.c_str(), aidata);
+  rtclock.dateTime(fileDateTime);
+  wave.open(file, name.c_str(), aidata, -1, fileDateTime);
   fileSamples = 0;
   if (file.isOpen()) {
     screen.clearText(0);
@@ -157,7 +160,7 @@ void storeData() {
     aidata.fileTimeStr(ts);
     screen.writeText(2, ts);
     if (aidata.endWrite()) {
-      wave.close(file, aidata, fileSamples);
+      wave.close(file, aidata, fileSamples, fileDateTime);
       screen.clearText(1);
       screen.clearText(2);
       if (logging)
