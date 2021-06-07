@@ -69,14 +69,14 @@ class SDWriter {
   // Takes about 1-2ms.
   String incrementFileName(const String &fname);
 
-  // Open new file for writing.
+  // Open new file for writing (<=11ms).
   // fname is the name of the file inclusively extension.
   bool open(const char *fname);
 
   // True if file is open.
   bool isOpen() const;
 
-  // Close file.
+  // Close file (<=6ms).
   void close();
 
   // Return file object.
@@ -88,13 +88,14 @@ class SDWriter {
   // For samples=0, initialize wave header with unspecified size.
   // You then need to close the file with closeWave() and provide the number of samples there.
   // If no file extension is provided, ".wav" is added.
+  // Takes about <=25ms.
   void openWave(const char *fname, const ContinuousADC &adc, int32_t samples=-1,
                 char *datetime=0);
 
   // Update wave header with proper file size and close file.
   // If you supplied the right number of samples already to openWave(), 
   // then it is sufficient to simply close() the file.
-  // Takes about 5ms.
+  // Takes about <=8ms.
   void closeWave(uint32_t samples);
 
 

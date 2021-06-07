@@ -9,22 +9,22 @@
 // Settings: --------------------------------------------------------------------------------
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
-uint32_t samplingRate = 100000;      // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
-int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
+uint32_t samplingRate = 40000;      // samples per second and channel in Hertz
+int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
+int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A10, A11, -1};  // input pins for ADC1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool logging = false;                // keep saving to files
+bool logging = true;                // keep saving to files
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
 
-int stimulusFrequency = 500;         // Hertz
-int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
+int stimulusFrequency = 200;         // Hertz
+int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
 // ------------------------------------------------------------------------------------------
@@ -66,10 +66,12 @@ void openNextFile() {
   rtclock.dateTime(datetime);
   file.openWave(name.c_str(), aidata, -1, datetime);
   fileSamples = 0;
+  writeData();
   if (file.isOpen()) {
-    screen.clearText(0);
-    screen.writeText(1, name.c_str());
-    screen.writeText(2, "00:00");
+    screen.clearText(0);                // 35ms!
+    writeData();
+    screen.writeText(1, name.c_str());  // 25ms
+    writeData();
     Serial.println(name);
   }
 }
@@ -85,9 +87,9 @@ void setupStorage() {
 void startWrite(int id) {
   // on button press:
   if (file.available() && !file.isOpen()) {
-    openNextFile();
     aidata.setMaxFileSamples(0);
     aidata.startWrite();
+    openNextFile();
   }
 }
 
@@ -98,15 +100,22 @@ void stopWrite(int id) {
 }
 
 
+void writeData() {
+  fileSamples += aidata.writeData(file.file());
+}
+
+
 void splashScreen() {
-  screen.setTextArea(0, 0.0, 0.1, 0.4, 0.9, true);
-  screen.setTextArea(1, 0.4, 0.1, 1.0, 0.9, true);
-  screen.writeText(0, "rate:\nres.:\nADC0:\nADC1:");
+  screen.setTextArea(0, 0.1, 0.75, 0.9, 0.95);
+  screen.setTextArea(1, 0.0, 0.1, 0.4, 0.7, true);
+  screen.setTextArea(2, 0.4, 0.1, 1.0, 0.7, true);
+  screen.writeText(0, "TeeRec recorder");
+  screen.writeText(1, "rate:\nres.:\nADC0:\nADC1:");
   char msg[100];
   sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels",
           0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1));
-  screen.writeText(1, msg);
-  delay(2000);
+  screen.writeText(2, msg);
+  delay(1000);
   screen.clearText();
 }
 
@@ -128,9 +137,10 @@ void setupButtons() {
 }
 
 
-void plotData() {
+void plotData() {   // 85ms
   if (screenTime > updateScreen) {
     screenTime -= updateScreen;
+    // text: 36ms
     if (file.isOpen())
       screen.scrollText(1);
     else {
@@ -139,13 +149,14 @@ void plotData() {
       ts[strlen(ts)-3] = '\0';
       screen.writeText(0, ts);
     }
-    screen.clearPlots();
+    screen.clearPlots();   // 16ms
+    writeData();
     size_t n = aidata.frames(displayTime);
     float data[n];
     size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
       aidata.getData(k, start, data, n);
-      screen.plot(k%screen.numPlots(), data, n, k/screen.numPlots());
+      screen.plot(k%screen.numPlots(), data, n, k/screen.numPlots()); // 8ms for n=500
     }
   }
 }
@@ -153,16 +164,20 @@ void plotData() {
 
 void storeData() {
   if (file.needToWrite()) {
-    fileSamples += aidata.writeData(file.file());
-    char ts[6];
-    aidata.fileTimeStr(ts);
-    screen.writeText(2, ts);
+    writeData();
     if (aidata.endWrite()) {
       file.closeWave(fileSamples);
-      screen.clearText(1);
-      screen.clearText(2);
       if (logging)
         openNextFile();
+      else {
+        screen.clearText(1);
+        screen.clearText(2);
+      }
+    }
+    if (file.isOpen()) {
+      char ts[6];
+      aidata.fileTimeStr(ts);
+      screen.writeText(2, ts);
     }
   }
 }

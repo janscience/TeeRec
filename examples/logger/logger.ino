@@ -22,7 +22,7 @@ int stimulusFrequency = 500;          // Hertz
  
 ContinuousADC aidata;
 SDWriter file;
-WaveFile wave;
+WaveHeader wave;
 RTClock rtclock;
 
 
@@ -44,6 +44,7 @@ void openNextFile() {
   char dts[20];
   rtclock.dateTime(dts);
   file.openWave(name.c_str(), aidata, -1, dts);
+  aidata.writeData(file.file());
   Serial.println(name);
 }
 

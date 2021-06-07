@@ -137,7 +137,7 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
-  if (!open(name.c_str()))
+  if (!open(name.c_str()))                // 11ms
     return;
   if (samples < 0)
     samples = adc.maxFileSamples();
@@ -148,8 +148,8 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
     Wave.setDateTime(datetime);
   else
     Wave.clearDateTime();
-  Wave.assemble();
-  File.write(Wave.Buffer, Wave.NBuffer);
+  Wave.assemble();                        // 0ms
+  File.write(Wave.Buffer, Wave.NBuffer);  // 14ms
 }
 
 
@@ -157,10 +157,10 @@ void SDWriter::closeWave(uint32_t samples) {
   if (! File.isOpen())
     return;
   if (samples > 0) {
-    File.seek(0);
     Wave.setData(samples);
     Wave.assemble();
-    File.write(Wave.Buffer, Wave.NBuffer);
+    File.seek(0);
+    File.write(Wave.Buffer, Wave.NBuffer);   // 2ms
   }
-  close();
+  close();                                   // 6ms
 }

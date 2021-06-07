@@ -166,7 +166,7 @@ class ContinuousADC {
   // Increment sample index into data buffer by decr times number of channels.
   size_t incrementSample(size_t idx, size_t incr);
 
-  // Get the nbuffer most recent data from a channel scaled to (-1, 1).
+  // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
 
 
