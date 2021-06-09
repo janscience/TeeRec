@@ -6,7 +6,7 @@ from thunderfish.eventdetection import threshold_crossings
 
 
 def load_wave(filepath, verbose=0):
-    wf = wave.open(filepath, 'r')   # 'with' is not supported by wave
+    wf = wave.open(filepath, 'r')
     nchannels, sampwidth, rate, nframes, comptype, compname = wf.getparams()
     buffer = wf.readframes(nframes)
     if sampwidth == 1:
@@ -19,11 +19,11 @@ def load_wave(filepath, verbose=0):
     return data, float(rate)
 
 
-def load_n_plot(path):
+def analyze_periodicity(path):
     try:
         data, rate = load_wave(path, verbose=0)
     except EOFError:
-        return
+        break
     basename = path.split('/')[-1]
     thresh = 0
     fig, axs = plt.subplots(2, data.shape[1]//2)
@@ -41,7 +41,6 @@ def load_n_plot(path):
     ax.plot(up, np.zeros(len(up))+thresh, 'o')
     ax.plot(down, np.zeros(len(down))+thresh, 'o')
     ax.set_xlim(0, 1000)
-    #fig.savefig(basename.split('.')[0] + '-noise.png')
     print(np.diff(up[:-1][isi<maxipi]))
     for i in np.where(isi<maxipi)[0]:
         print(i, isi[i])
@@ -54,6 +53,8 @@ def load_n_plot(path):
         plt.show()
     """
 
-    
-for path in sys.argv[1:]:
-    load_n_plot(path)
+if __name__ == '__main__':
+    for path in sys.argv[1:]:
+    analyze_periodicity(path)
+
+
