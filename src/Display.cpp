@@ -150,6 +150,8 @@ void Display::clearText(uint8_t area) {
   TextCanvas[area]->fillScreen(0x0000);
   Screen->drawBitmap(TextX[area], TextY[area], TextCanvas[area]->getBuffer(),
 		     TextW[area], TextH[area], TextColor, TextBackground);
+  TextS[area] = 0;
+  TextI[area] = 0;
 }
 
 
@@ -179,6 +181,7 @@ void Display::writeText(uint8_t area, const char *text) {
   TextT[area] = new char[strlen(text)+1];
   strcpy(TextT[area], text);
   TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
+  TextI[area] = 0;
 }
 
 
@@ -187,10 +190,10 @@ void Display::scrollText(uint8_t area) {
     return;
   if (! TextS[area])
     return;
-  TextI[area]++;
-  if (TextI[area] >= strlen(TextT[area]) - TextC[area])
-    TextI[area] = 0;
   drawText(area, &TextT[area][TextI[area]]);
+  TextI[area]++;
+  if (TextI[area] >= strlen(TextT[area]) - 1)
+    TextI[area] = 0;
 }
 
 
@@ -220,6 +223,7 @@ void Display::popText(uint8_t area) {
   if (TextT[area] != 0) {
     drawText(area, TextT[area]);
     TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
+    TextI[area] = 0;
   }
   else
     clearText(area);
