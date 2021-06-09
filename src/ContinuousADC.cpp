@@ -168,9 +168,9 @@ void ContinuousADC::start() {
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       if ( (ADCUse & 3) != 3 ) {
-	ADConv.adc[adc]->startTimer(Rate*NChannels[0]);
+	ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
 	NVIC_DISABLE_IRQ(IRQ_PDB); // we don not need the PDB interrupt
-	Rate = ADConv.adc[adc]->getTimerFrequency()/NChannels[0];
+	Rate = ADConv.adc[adc]->getTimerFrequency()/NChannels[adc];
       }
       if ( NChannels[adc] > 1 )
         DMASwitch[adc].enable();

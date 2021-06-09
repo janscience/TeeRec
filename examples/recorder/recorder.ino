@@ -10,8 +10,8 @@
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
 uint32_t samplingRate = 40000;      // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
-int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
+int8_t channels0 [] =  {A2, A3, -1, A4, A5, A6, A7, A8, A9};      // input pins for ADC0
+int8_t channels1 [] =  {A16, A17, -1, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
