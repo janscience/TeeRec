@@ -7,15 +7,7 @@ from thunderfish.eventdetection import threshold_crossings
 
 def load_wave(filepath, verbose=0):
     wf = wave.open(filepath, 'r')   # 'with' is not supported by wave
-    (nchannels, sampwidth, rate, nframes, comptype, compname) = wf.getparams()
-    if verbose > 1:
-        # this should be a separate function with the sndheader module and for all audio formats
-        print('channels       : %d' % nchannels)
-        print('bytes          : %d' % sampwidth)
-        print('sampling rate  : %g' % rate)
-        print('frames         : %d' % nframes)
-        print('compression type: %s' % comptype)
-        print('compression name: %s' % compname)
+    nchannels, sampwidth, rate, nframes, comptype, compname = wf.getparams()
     buffer = wf.readframes(nframes)
     if sampwidth == 1:
         dtype = 'u1'
@@ -33,22 +25,23 @@ def load_n_plot(path):
     except EOFError:
         return
     basename = path.split('/')[-1]
-    c = 6
     thresh = 0
-    maxipi = 80
-    up, down = threshold_crossings(data[:,c], thresh)
-    isi = np.diff(up)
-    fig, ax = plt.subplots(figsize=(12,6))
+    fig, axs = plt.subplots(2, data.shape[1]//2)
+    axs = axs.ravel()
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
-    ax.hist(isi, -0.5 + np.arange(np.max(isi)+2))
+    for c in range(data.shape[1]):
+        up, down = threshold_crossings(data[:,c], thresh)
+        isi = np.diff(up)
+        if len(isi) > 10:
+            axs[c].hist(isi, -0.5 + np.arange(np.max(isi)+2))
+        axs[c].set_title('channel %d' % c)
+    plt.show()
     """
     ax.plot(data[:1000,c]);
     ax.plot(up, np.zeros(len(up))+thresh, 'o')
     ax.plot(down, np.zeros(len(down))+thresh, 'o')
     ax.set_xlim(0, 1000)
     #fig.savefig(basename.split('.')[0] + '-noise.png')
-    """
-    plt.show()
     print(np.diff(up[:-1][isi<maxipi]))
     for i in np.where(isi<maxipi)[0]:
         print(i, isi[i])
@@ -59,6 +52,7 @@ def load_n_plot(path):
         plt.plot(data[k-200:k+200,4])
         plt.plot(data[k-200:k+200,6])
         plt.show()
+    """
 
     
 for path in sys.argv[1:]:

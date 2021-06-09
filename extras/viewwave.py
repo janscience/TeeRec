@@ -62,7 +62,7 @@ def load_n_plot(path):
     sel = (time>tmin) & (time<tmin+trange)
     #ascale = 1000.0*0.5*3.3/100.0
     ascale = 1.0
-    for c in range(data.shape[1]):
+    for c in range(1, data.shape[1], 2):
         #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
         ax.plot(1000.0*time[:10000], ascale*data[:10000,c]+1000*c, '-', label='%d' % c)
     #ax.set_ylim(-1.1, 1.1)

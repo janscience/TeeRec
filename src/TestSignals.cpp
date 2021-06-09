@@ -21,12 +21,15 @@ void setupTestSignals(int *pins, int frequency) {
 #else
   #error "Board not supported for PWM signal generation."
 #endif
+  // setup frequencies and duty cycles:
   const int maxtimers = 9;
   int timerfreqs[maxtimers] = {-1, -1, -1, -1, -1, -1, -1, -1, -1};
   int pintimercount[maxtimers] = {0, 0, 0, 0, 0, 0, 0, 0, 0};
   const int maxdcs = 4;
   float pintimerdc[maxdcs] = {0.5, 0.2, 0.8, 0.33};  // duty cycle
   float maxfreqfac = 0.5;
+  int freqs[MaxSignalPins];
+  float dcs[MaxSignalPins];
   for (int k=0; k<MaxSignalPins && pins[k]>=0; k++) {
     int pin = pins[k];
     int timerid = pintimer[pin];
@@ -35,10 +38,24 @@ void setupTestSignals(int *pins, int frequency) {
 	maxfreqfac *= 2.0;
 	timerfreqs[timerid] = maxfreqfac*frequency;
       }
-      Serial.printf("  pin %2d: %5dHz, %3.0f%% duty cycle\n", pin, timerfreqs[timerid], 100.0*pintimerdc[pintimercount[timerid]%maxdcs]);
-      testSignal(pin, timerfreqs[timerid], pintimerdc[pintimercount[timerid]%maxdcs]);
+      freqs[k] = timerfreqs[timerid];
+      dcs[k] = pintimerdc[pintimercount[timerid]%maxdcs];
       pintimercount[timerid]++;
     }
+    else {
+      freqs[k] = -1;
+      dcs[k] = -1.0;
+    }
+  }
+  // activate pwm pins:
+  for (int k=0; k<MaxSignalPins && pins[k]>=0; k++) {
+    if (freqs[k] > 0)
+      testSignal(pins[k], freqs[k], dcs[k]);
+  }
+  // report:
+  for (int k=0; k<MaxSignalPins && pins[k]>=0; k++) {
+    if (freqs[k] > 0)
+      Serial.printf("  pin %2d: %5dHz, %3.0f%% duty cycle\n", pins[k], freqs[k], 100.0*dcs[k]);
   }
 }
 
