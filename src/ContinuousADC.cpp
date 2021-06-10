@@ -142,6 +142,17 @@ bool ContinuousADC::check() {
     ADCUse = 0;
     return false;
   }
+  // report:
+  Serial.println("ADC settings");
+  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  Serial.printf("  resolution: %dbits\n", Bits);
+  Serial.printf("  ADC0:       %dchannels\n", NChannels[0]);
+  Serial.printf("  ADC1:       %dchannels\n", NChannels[1]);
+  float bt = bufferTime();
+  if (bt < 1.0)
+    Serial.printf("  Buffer:     %.0fms\n", 1000.0*bt);
+  else
+    Serial.printf("  Buffer:     %.2fs\n", bt);
   return true;
 }
 

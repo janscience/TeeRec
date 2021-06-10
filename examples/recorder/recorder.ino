@@ -9,9 +9,9 @@
 // Settings: --------------------------------------------------------------------------------
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
-uint32_t samplingRate = 80000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
-int8_t channels1 [] =  {A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
+uint32_t samplingRate = 40000;       // samples per second and channel in Hertz
+int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels1 [] =  {A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
@@ -49,11 +49,6 @@ void setupADC() {
   aidata.setResolution(bits);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
-  float bt = aidata.bufferTime();
-  if (bt < 1.0)
-    Serial.printf("buffer time: %.0fms\n", 1000.0*bt);
-  else
-    Serial.printf("buffer time: %.2fs\n", bt);
 }
 
 
@@ -110,10 +105,15 @@ void splashScreen() {
   screen.setTextArea(1, 0.0, 0.1, 0.4, 0.7, true);
   screen.setTextArea(2, 0.4, 0.1, 1.0, 0.7, true);
   screen.writeText(0, "TeeRec recorder");
-  screen.writeText(1, "rate:\nres.:\nADC0:\nADC1:");
+  screen.writeText(1, "rate:\nres.:\nADC0:\nADC1\nbuffer:");
   char msg[100];
-  sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels",
-          0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1));
+  float bt = aidata.bufferTime();
+  if (bt < 1.0)
+    sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels\n%.0fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
+  else
+    sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels\n%.2fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1), bt);
   screen.writeText(2, msg);
   delay(1500);
   screen.clearText();

@@ -57,15 +57,17 @@ def test_continuity(pathes):
     intervals = isis1[:,:-1] + isis0[:,1:]
     for c in range(nchannels):
         if len(isis[c]) > 10:
-            n1, b1 = np.histogram(isis[c], -0.5 + np.arange(np.min(isis[c])-1, np.max(isis[c])+3))
-            n2, b2 = np.histogram(intervals[c], -0.5 + np.arange(np.min(intervals[c])-1, np.max(intervals[c])+3))
-            n2 *= np.max(n1)/np.max(n2)/2
             period = np.mean(isis[c])/samplerate
+            n1, b1 = np.histogram(isis[c], -0.5 + np.arange(np.min(isis[c])-1, np.max(isis[c])+3))
             axs[c].bar(b1[:-1], n1, width=1, color='b')
-            axs[c].bar(b2[:-1], n2, width=1, color='g')
+            dp = max(1, np.floor(np.log10(b1[-1] - b1[0])))
+            if len(intervals[c]) > 2:
+                n2, b2 = np.histogram(intervals[c], -0.5 + np.arange(np.min(intervals[c])-1, np.max(intervals[c])+3))
+                n2 *= np.max(n1)/np.max(n2)/2
+                axs[c].bar(b2[:-1], n2, width=1, color='g')
+                dp = max(1, np.floor(np.log10(max(b1[-1], b2[-1]) - min(b1[0], b2[0]))))
             axs[c].text(0.95, 0.9, 'period=%.2fms' % (1000.0*period), transform=axs[c].transAxes, ha='right')
             axs[c].text(0.95, 0.8, 'freq=%.1fHz' % (1/period), transform=axs[c].transAxes, ha='right')
-            dp = max(1, np.floor(np.log10(max(b1[-1], b2[-1]) - min(b1[0], b2[0]))))
             axs[c].xaxis.set_major_locator(ticker.MultipleLocator(10**dp))
             axs[c].set_xlabel('Inter-pulse samples')
         axs[c].set_title('channel %d' % c)
