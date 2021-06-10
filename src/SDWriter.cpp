@@ -5,7 +5,7 @@
 SDWriter::SDWriter() {
   NameCounter = 0;
   // start sdio interface to SD card:
-  if (!SD.begin(SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50)))) {
+  if (!SD.begin(SD_CONFIG)) {
     SDAvailable = false;
     return;
   }    

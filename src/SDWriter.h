@@ -24,14 +24,8 @@
   const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
 #endif
 
-// Try to select the best SD card configuration:
-#if HAS_SDIO_CLASS
-  #define SD_CONFIG SdioConfig(FIFO_SDIO)
-#elif ENABLE_DEDICATED_SPI
-  #define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI)
-#else
-  #define SD_CONFIG SdSpiConfig(SD_CS_PIN, SHARED_SPI)
-#endif
+#define SD_CONFIG SdioConfig(FIFO_SDIO)
+//#define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
 
 
 class ContinuousADC;
@@ -101,7 +95,7 @@ class SDWriter {
 
  protected:
 
-  SdFs SD;    // Lydia: SdFatSdio SD;
+  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX sd
   bool SDAvailable;
   FsFile File;
 
