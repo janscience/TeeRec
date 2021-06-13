@@ -63,8 +63,8 @@ def load_n_plot(path):
     ascale = 1.0
     for c in range(data.shape[1]):
         #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
-        ax.plot(1000.0*time[:10000], ascale*data[:10000,c]+1000*c, '-', label='%d' % c)
-    #ax.set_ylim(-1.1, 1.1)
+        ax.plot(1000.0*time[:100000], ascale*data[:100000,c]+1000*c, '-', label='%d' % c)
+    ax.set_ylim(-40000, 40000)
     ax.set_title(basename)
     ax.set_xlabel('Time [ms]')
     #ax.set_ylabel('Amplitude [mV]')
