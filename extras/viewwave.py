@@ -2,37 +2,28 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import wave
-#from audioio import load_audio
 
 
-def load_wave(filepath, verbose=0):
-    wf = wave.open(filepath, 'r')   # 'with' is not supported by wave
-    (nchannels, sampwidth, rate, nframes, comptype, compname) = wf.getparams()
-    if verbose > 1:
-        # this should be a separate function with the sndheader module and for all audio formats
-        print('channels       : %d' % nchannels)
-        print('bytes          : %d' % sampwidth)
-        print('sampling rate  : %g' % rate)
-        print('frames         : %d' % nframes)
-        print('compression type: %s' % comptype)
-        print('compression name: %s' % compname)
-    buffer = wf.readframes(nframes)
-    #factor = 2.0**(sampwidth*8-1)
-    if sampwidth == 1:
-        dtype = 'u1'
-        data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
-        #data = buffer.astype('d')/factor - 1.0
-    else:
-        dtype = 'i%d' % sampwidth
-        data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
-        #data = buffer.astype('d')/factor
-    wf.close()
-    return data, float(rate)
+def load_wave(filepath):
+    try:
+        wf = wave.open(filepath, 'r')
+        nchannels, sampwidth, rate, nframes, comptype, compname = wf.getparams()
+        buffer = wf.readframes(nframes)
+        if sampwidth == 1:
+            dtype = 'u1'
+            data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+        else:
+            dtype = 'i%d' % sampwidth
+            data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+        wf.close()
+        return data, float(rate)
+    except EOFError:
+        return None, None
 
-
-def load_bin(filepath, verbose=0):
+    
+def load_bin(filepath, offset=0):
     with open(filepath, 'rb') as wf:
-        wf.seek(108); # offset of data chunk
+        wf.seek(offset); # offset of data chunk
         buffer = wf.read()
         dtype = 'i2'
         nchannels = 4
@@ -41,16 +32,9 @@ def load_bin(filepath, verbose=0):
     return data, float(rate)
 
 
-def load_n_plot(path):
-    #data, rate = load_audio(path, verbose=2)
-    """
-    try:
-        data, rate = load_wave(path, verbose=0)
-    except EOFError:
-        return
-    """
-    data, rate = load_wave(path, verbose=0)
-    #data, rate = load_bin(path, verbose=0)
+def plot_traces(path):
+    data, rate = load_wave(path)
+    #data, rate = load_bin(path, 108)
     basename = path.split('/')[-1]
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
@@ -74,5 +58,6 @@ def load_n_plot(path):
     plt.show()
 
     
-for path in sys.argv[1:]:
-    load_n_plot(path)
+if __name__ == '__main__':
+    for path in sys.argv[1:]:
+        plot_traces(path)
