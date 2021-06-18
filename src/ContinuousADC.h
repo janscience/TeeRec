@@ -1,5 +1,5 @@
 /*
-  ContinuousADC - library for sampling from multiple pins into a cyclic buffer.
+  ContinuousADC - library for sampling from multiple pins into a single cyclic buffer.
   Created by Jan Benda, May 25th, 2021.
   Based on https://github.com/pedvide/ADC
   and on contributions from Stefan Mucha, Lydia Federman, and Sebastian Volkmer.
@@ -7,11 +7,9 @@
   Features
   --------
   
-  - Continuous DMA based data acquisition into a circular buffer.
-  - Single channel or multiplexed acquisition from multiple channels.
+  - Continuous DMA-based data acquisition into a single multiplexed circular buffer.
+  - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
   - Highspeed timed acquisition up to 500kHz.
-  - Acquisition from a single or both ADCs.
-  - A single multiplexed circular data buffer.
   - Conversion of data to signed 16bit for direct storage into WAV files.
 
 

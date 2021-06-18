@@ -10,25 +10,24 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 
 ## Features
 
-- Continuous DMA based data acquisition into a circular buffer.
-- Single channel or multiplexed acquisition from multiple channels.
+- Continuous DMA-based data acquisition into a single multiplexed circular buffer.
+- Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
 - Highspeed timed acquisition up to 500kHz.
-- Acquisition from a single or both ADCs.
-- Data are combined into a single multiplexed circular data buffer.
 - Conversion of data to signed 16bit for direct storage into WAV files.
 - Storing recorded data as wave files on SD cards.
 - Display recorded data on a monitor.
 - React to push buttons.
+- Generate test signals.
 
 
 ## Libraries
 
-- ContinousADC: Sample from multiple pins into a cyclic buffer.
+- ContinousADC: Sample from multiple pins into a single cyclic buffer.
 - SDWrite: Write data on SD card.
 - WaveHeader: Setting up wave file header with metadata.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
-- PushButtons: Manage and query push buttons with calback functions.
+- PushButtons: Manage and query push buttons with callback functions.
 - TestSignals: Generate test signals on pulse-width modulation pins.
 - TeensyBoard: Find out which Teensy board we are running on.
 
