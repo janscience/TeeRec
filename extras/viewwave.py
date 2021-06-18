@@ -1,3 +1,4 @@
+import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
@@ -32,10 +33,10 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path):
+def plot_traces(path, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
-    basename = path.split('/')[-1]
+    basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
     tmin = 0.0
@@ -49,15 +50,21 @@ def plot_traces(path):
         #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
         ax.plot(1000.0*time[:100000], ascale*data[:100000,c]+1000*c, '-', label='%d' % c)
     ax.set_ylim(-40000, 40000)
-    ax.set_title(basename)
     ax.set_xlabel('Time [ms]')
-    #ax.set_ylabel('Amplitude [mV]')
+    ax.set_ylabel('Amplitude [integer]')
     if data.shape[1] > 1:
         ax.legend(loc='lower right')
-    fig.savefig(basename.split('.')[0] + '.png')
-    plt.show()
+    ax.set_title(basename, fontsize=16)
+    if save:
+        fig.savefig(os.path.splitext(path)[0] + '-traces.png')
+    else:
+        plt.show()
 
     
 if __name__ == '__main__':
+    save = False
     for path in sys.argv[1:]:
-        plot_traces(path)
+        if path == '-s':
+            save = True
+            continue
+        plot_traces(path, save)
