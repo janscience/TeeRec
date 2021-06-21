@@ -17,7 +17,7 @@ uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool logging = true;                 // keep saving to files
+bool logging = false;                // keep saving to files
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 

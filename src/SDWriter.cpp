@@ -143,6 +143,9 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
     samples = adc.maxFileSamples();
   Wave.setFormat(adc.nchannels(), adc.rate(), adc.resolution(),
 		 adc.dataResolution());
+  char channels[100];
+  adc.channels(channels);
+  Wave.setChannels(channels);
   Wave.setData(samples);
   if (datetime != 0)
     Wave.setDateTime(datetime);

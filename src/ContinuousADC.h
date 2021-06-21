@@ -117,6 +117,13 @@ class ContinuousADC {
 
   // Return total number of channels on both ADCs.
   uint8_t nchannels() const;
+
+  // Return in chans a string with the channels/pins sampled on ADC adc.
+  void channels(uint8_t adc, char *chans) const;
+
+  // Return in chans a string with the channels/pins sampled from both ADCs
+  // in the order they are multiplexed into the buffer.
+  void channels(char *chans) const;
   
   // Set the sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
@@ -204,6 +211,10 @@ class ContinuousADC {
 
 
  protected:
+
+  // pins:
+  static const int NPins = 24;
+  static const int Pins[NPins];
 
   // ADC:
   static const int MaxChannels = 20;

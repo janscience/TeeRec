@@ -6,6 +6,7 @@ WaveHeader::WaveHeader() :
   Format(),
   Info("LIST", "INFO"),
   Bits("BITS", "16"),
+  Channels("PINS", ""),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
@@ -118,6 +119,11 @@ void WaveHeader::setFormat(uint8_t nchannels, uint32_t samplerate,
 }
 
 
+void WaveHeader::setChannels(const char *chans) {
+  Channels.set(chans);
+}
+
+
 void WaveHeader::setData(int32_t samples) {
   Data.set(DataResolution, samples);
 }
@@ -138,6 +144,11 @@ void WaveHeader::setSoftware(const char *software) {
 }
 
 
+void WaveHeader::clearSoftware() {
+  Software.clear();
+}
+
+
 void WaveHeader::assemble() {
   if (Buffer != 0)
     delete [] Buffer;
@@ -148,6 +159,8 @@ void WaveHeader::assemble() {
   chunks[nchunks++] = &Format;
   chunks[nchunks++] = &Info;
   chunks[nchunks++] = &Bits;
+  if (Channels.Use)
+    chunks[nchunks++] = &Channels;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)

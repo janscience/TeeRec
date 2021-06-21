@@ -2,6 +2,9 @@
 #include <ContinuousADC.h>
 
 
+const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
+					A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23};
+
 ContinuousADC *ContinuousADC::ADCC = 0;
 volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
 volatile ContinuousADC::sample_t ContinuousADC::Buffer[NBuffer];
@@ -61,6 +64,49 @@ uint8_t ContinuousADC::nchannels() const {
 }
 
 
+void ContinuousADC::channels(uint8_t adc, char *chans) const
+{
+  bool first = true;
+  for (uint8_t k=0; k<NChannels[adc]; k++) {
+    int8_t ch = Channels[adc][k];
+    for (int p=0; p<NPins; p++) {
+      if (Pins[p] == ch) {
+	if ( ! first )
+	  *chans++ = ',';
+	chans += sprintf(chans, "A%d", p);
+	first = false;
+	break;
+      }
+    }
+  }
+  *chans = '\0';
+}
+
+
+void ContinuousADC::channels(char *chans) const
+{
+  bool first = true;
+  int nchan = NChannels[0]>=NChannels[1]?NChannels[0]:NChannels[1];
+  for (uint8_t k=0; k<nchan; k++) {
+    for (uint8_t adc=0; adc<2; adc++) {
+      if (k<NChannels[adc]) {
+	int8_t ch = Channels[adc][k];
+	for (int p=0; p<NPins; p++) {
+	  if (Pins[p] == ch) {
+	    if ( ! first )
+	      *chans++ = ',';
+	    chans += sprintf(chans, "A%d", p);
+	    first = false;
+	    break;
+	  }
+	}
+      }
+    }
+  }
+  *chans = '\0';
+}
+
+
 void ContinuousADC::setRate(uint32_t rate) {
   Rate = rate;
 }
@@ -93,13 +139,10 @@ float ContinuousADC::bufferTime() const {
 
 
 void ContinuousADC::pinAssignment() {
-  const int npins = 23;
-  int pins[npins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
-		     A13, A14, A15, A16, A17, A18, A19, A20, A21, A22};
   Serial.println("pin ADC0 ADC1");
-  for (int k=0; k<npins; k++) {
-    Serial.printf("A%-2d    %d    %d\n", k, ADConv.adc[0]->checkPin(pins[k]),
-		  ADConv.adc[1]->checkPin(pins[k]));
+  for (int k=0; k<NPins; k++) {
+    Serial.printf("A%-2d    %d    %d\n", k, ADConv.adc[0]->checkPin(Pins[k]),
+		  ADConv.adc[1]->checkPin(Pins[k]));
   }
 }
 
@@ -360,13 +403,6 @@ bool ContinuousADC::endWrite() {
 
 
 void ContinuousADC::setupChannels(uint8_t adc) {
-  if ( NChannels[adc] > 1 ) {
-    // reorder:
-    uint8_t temp = Channels[adc][0];
-    for(uint8_t i=1; i<NChannels[adc]; i++)
-      Channels[adc][i-1] = Channels[adc][i];
-    Channels[adc][NChannels[adc]-1] = temp;
-  }
   // translate to SC1A code:
   for(uint8_t i=0; i<NChannels[adc]; i++) {
     uint8_t sc1a_pin = 0;
@@ -375,6 +411,13 @@ void ContinuousADC::setupChannels(uint8_t adc) {
     else if ( adc == 1 )
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
+  }
+  if ( NChannels[adc] > 1 ) {
+    // reorder:
+    uint8_t temp = SC1AChannels[adc][0];
+    for(uint8_t i=1; i<NChannels[adc]; i++)
+      SC1AChannels[adc][i-1] = SC1AChannels[adc][i];
+    SC1AChannels[adc][NChannels[adc]-1] = temp;
   }
   // configure for input:
   for(uint8_t i=0; i<NChannels[adc]; i++)

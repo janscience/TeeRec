@@ -23,6 +23,10 @@ public:
   // Set parameters of the format chunk.
   void setFormat(uint8_t nchannels, uint32_t samplerate,
 		 uint16_t resolution, uint16_t dataresolution);
+
+  // Set analog input pins.
+  void setChannels(const char *chans);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -35,6 +39,9 @@ public:
 
   // Set name of software.
   void setSoftware(const char *software);
+
+  // Clear name of software.
+  void clearSoftware();
 
   // Assemble wave header from previously set infos.
   // The header can then be retrieved from Buffer.
@@ -107,6 +114,7 @@ protected:
   FormatChunk Format;
   ListChunk Info;
   InfoChunk Bits;
+  InfoChunk Channels;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;
