@@ -146,6 +146,7 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
   char channels[100];
   adc.channels(channels);
   Wave.setChannels(channels);
+  Wave.setAveraging(adc.averaging());
   Wave.setData(samples);
   if (datetime != 0)
     Wave.setDateTime(datetime);

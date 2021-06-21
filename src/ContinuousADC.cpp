@@ -23,6 +23,7 @@ ContinuousADC::ContinuousADC() {
 
   Bits = DataBits;
   DataShift = 0;
+  Averaging = 1;
   Rate = 0;
   ADCUse = 0;
   ADCC = this;
@@ -133,6 +134,16 @@ uint8_t ContinuousADC::dataResolution() const {
 }
 
 
+void ContinuousADC::setAveraging(uint8_t num) {
+  Averaging = num;
+}
+
+
+uint8_t ContinuousADC::averaging(void) const {
+  return Averaging;
+}
+
+
 float ContinuousADC::bufferTime() const {
   return float(NBuffer/nchannels())/Rate;
 }
@@ -185,10 +196,15 @@ bool ContinuousADC::check() {
     ADCUse = 0;
     return false;
   }
+  if ((Averaging & (Averaging-1)) > 0 || Averaging == 2 || Averaging > 32) {
+    Serial.printf("ERROR: averaging must be one of 0, 1, 4, 8, 16, 32\n");
+    return false;
+  }
   // report:
   Serial.println("ADC settings");
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
+  Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  ADC0:       %dchannels\n", NChannels[0]);
   Serial.printf("  ADC1:       %dchannels\n", NChannels[1]);
   float bt = bufferTime();
@@ -426,7 +442,7 @@ void ContinuousADC::setupChannels(uint8_t adc) {
 
 
 void ContinuousADC::setupADC(uint8_t adc) {
-  ADConv.adc[adc]->setAveraging(1);
+  ADConv.adc[adc]->setAveraging(Averaging);
   ADConv.adc[adc]->setResolution(Bits);                                  // bit depth of ADC
   ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3);                 // reference voltage
   ADConv.adc[adc]->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);      

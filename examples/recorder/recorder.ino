@@ -9,16 +9,18 @@
 // Settings: --------------------------------------------------------------------------------
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
+int averaging = 4;                   // number of averages per sample: , 4, 8, 16, 32
 uint32_t samplingRate = 40000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
-int8_t channels1 [] =  {A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
+int8_t channels0 [] =  {A2, A3, -1, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels1 [] =  {A16, A17, -1, A18, A19, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
 bool logging = false;                // keep saving to files
-char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+//char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+char fileName[] = "AVG1-NUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
@@ -47,6 +49,7 @@ void setupADC() {
   aidata.setChannels(1, channels1);
   aidata.setRate(samplingRate);
   aidata.setResolution(bits);
+  aidata.setAveraging(averaging);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
 }
@@ -105,15 +108,17 @@ void splashScreen() {
   screen.setTextArea(1, 0.0, 0.1, 0.4, 0.7, true);
   screen.setTextArea(2, 0.4, 0.1, 1.0, 0.7, true);
   screen.writeText(0, "TeeRec recorder");
-  screen.writeText(1, "rate:\nres.:\nADC0:\nADC1\nbuffer:");
+  screen.writeText(1, "rate:\nres.:\navr:\nADC0:\nADC1\nbuffer:");
   char msg[100];
   float bt = aidata.bufferTime();
   if (bt < 1.0)
-    sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels\n%.0fms",
-            0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
+    sprintf(msg, "%.0fkHz\n%dbit\n%d\n%d channels\n%d channels\n%.0fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(),
+            aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
   else
-    sprintf(msg, "%.0fkHz\n%dbit\n%d channels\n%d channels\n%.2fms",
-            0.001*aidata.rate(), aidata.resolution(), aidata.nchannels(0), aidata.nchannels(1), bt);
+    sprintf(msg, "%.0fkHz\n%dbit\n%d\n%d channels\n%d channels\n%.2fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(),
+            aidata.nchannels(0), aidata.nchannels(1), bt);
   screen.writeText(2, msg);
   delay(1500);
   screen.clearText();

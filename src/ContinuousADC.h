@@ -140,6 +140,13 @@ class ContinuousADC {
   // Return resolution of data buffer in bits per sample (always 16 bits).
   uint8_t dataResolution() const;
 
+  // Set the number of averages taken by each sample.
+  // Can be 0, 4, 8, 16, or 32.
+  void setAveraging(uint8_t num);
+
+  // Return the number of averages taken by each sample.
+  uint8_t averaging(void) const;
+
   // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;
 
@@ -225,6 +232,7 @@ class ContinuousADC {
 
   uint8_t Bits;
   uint32_t Rate;
+  uint8_t Averaging;
   ADC ADConv;
   
   // DMA:

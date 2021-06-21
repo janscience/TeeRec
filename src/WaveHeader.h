@@ -27,6 +27,9 @@ public:
   // Set analog input pins.
   void setChannels(const char *chans);
 
+  // Set number of averages.
+  void setAveraging(uint8_t num);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -115,6 +118,7 @@ protected:
   ListChunk Info;
   InfoChunk Bits;
   InfoChunk Channels;
+  InfoChunk Averaging;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;
