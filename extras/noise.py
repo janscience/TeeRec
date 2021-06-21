@@ -37,12 +37,17 @@ def plot_hist(path, save, subtract_mean=True):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     nchannels = data.shape[1]
-    basename = path.split('/')[-1]
+    basename = os.path.basename(path)
     abins = np.arange(-2**15, 2**15, 2*16)
-    fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+    if nchannels > 1:
+        fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+        axs = axs.ravel()
+    else:
+        fig, ax = plt.subplots()
+        axs = [ax]
     fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
-    fig.suptitle(os.path.basename(path), fontsize=16)
-    for c in range(data.shape[1]):
+    fig.suptitle(basename, fontsize=16)
+    for c in range(nchannels):
         m = np.mean(data[:,c])
         s = np.std(data[:,c])
         print('%s\t%2d\t%5.0f\t%5.0f' % (basename, c, m, s))
@@ -60,7 +65,7 @@ def plot_hist(path, save, subtract_mean=True):
         axs[c].set_title('channel %d' % c)
         #axs[c].set_yscale('log')
         #axs[c].set_ylim(1, 1.1*nmax)
-        if c % 2 == 1:
+        if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel('Amplitude [integer]')
         axs[c].text(0.95, 0.87, '$\mu$=%.0f' % m, ha='right', transform=axs[c].transAxes)
         axs[c].text(0.95, 0.75, '$\sigma$=%.0f' % s, ha='right', transform=axs[c].transAxes)

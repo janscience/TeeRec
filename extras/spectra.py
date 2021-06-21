@@ -40,13 +40,17 @@ def plot_psds(path, save):
     #data, rate = load_bin(path, 108)
     data = np.array(data, dtype=np.double)
     nchannels = data.shape[1]
-    fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+    if nchannels > 1:
+        fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+        axs = axs.ravel()
+    else:
+        fig, ax = plt.subplots()
+        axs = [ax]
     fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
     fig.suptitle(os.path.basename(path), fontsize=16)
-    axs = axs.ravel()
     nfft = 1024*4
     thresh = 5 # dB
-    for c in range(data.shape[1]):
+    for c in range(nchannels):
         #data[:,c] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
         pxx, freqs = psd(data[:,c] - np.mean(data[:,c]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
         db = 10.0*np.log10(pxx/2**14/freqs[-1])
@@ -57,7 +61,7 @@ def plot_psds(path, save):
         for pi in p:
             axs[c].text(0.001*(freqs[pi]+10), db[pi]+0.3, '%.0fHz' % freqs[pi])
         axs[c].set_title('channel %d' % c)
-        if c % 2 == 1:
+        if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel('Frequency [kHz]')
         axs[c].set_ylabel('Power [dB rel max range]')
     if save:
