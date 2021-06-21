@@ -33,6 +33,9 @@ public:
   // Set string describing conversion speed.
   void setConversionSpeed(const char *conversion);
 
+  // Set string describing sampling speed.
+  void setSamplingSpeed(const char *sampling);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -123,6 +126,7 @@ protected:
   InfoChunk Channels;
   InfoChunk Averaging;
   InfoChunk Conversion;
+  InfoChunk Sampling;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;

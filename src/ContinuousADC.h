@@ -147,13 +147,22 @@ class ContinuousADC {
   // Return the number of averages taken by each sample.
   uint8_t averaging(void) const;
 
-  // Sets the conversion speed by chaning the ADC clock.
+  // Set the conversion speed by chaning the ADC clock.
   // One of VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED_16BITS,
   // HIGH_SPEED, VERY_HIGH_SPEED, ADACK_2_4, ADACK_4_0, ADACK_5_2 or ADACK_6_2.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // Return pointer to string describing conversion speed.
   const char *conversionSpeed() const;
+
+  // Set the sampling speed.
+  // Increase the sampling speed for low impedance sources, 
+  // decrease it for higher impedance ones.
+  // One of VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED, VERY_HIGH_SPEED.
+  void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
+
+  // Return pointer to string describing sampling speed.
+  const char *samplingSpeed() const;
 
   // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;
@@ -242,6 +251,7 @@ class ContinuousADC {
   uint32_t Rate;
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;
+  ADC_SAMPLING_SPEED SamplingSpeed;
 
   ADC ADConv;
   

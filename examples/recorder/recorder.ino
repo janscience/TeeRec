@@ -51,6 +51,7 @@ void setupADC() {
   aidata.setResolution(bits);
   aidata.setAveraging(averaging);
   aidata.setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);
+  aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
   aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
 }

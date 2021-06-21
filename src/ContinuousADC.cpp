@@ -26,6 +26,7 @@ ContinuousADC::ContinuousADC() {
   DataShift = 0;
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
+  SamplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
   Rate = 0;
   ADCUse = 0;
   ADCC = this;
@@ -156,6 +157,16 @@ const char *ContinuousADC::conversionSpeed() const {
 }
 
 
+void ContinuousADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
+  SamplingSpeed = speed;
+}
+
+
+const char *ContinuousADC::samplingSpeed() const {
+  return getSamplingEnumStr(SamplingSpeed);
+}
+
+
 float ContinuousADC::bufferTime() const {
   return float(NBuffer/nchannels())/Rate;
 }
@@ -220,6 +231,7 @@ bool ContinuousADC::check() {
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  conversion: %s\n", conversionSpeed());
+  Serial.printf("  sampling:   %s\n", samplingSpeed());
   Serial.printf("  ADC0:       %dchannels\n", NChannels[0]);
   Serial.printf("  ADC1:       %dchannels\n", NChannels[1]);
   Serial.printf("  Pins:       %s\n", chans);
@@ -463,7 +475,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setResolution(Bits);                                  // bit depth of ADC
   ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3);                 // reference voltage
   ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);      
-  ADConv.adc[adc]->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
+  ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
   ADConv.adc[adc]->enableDMA();                                          // connect DMA and ADC
   ADConv.adc[adc]->stopPDB();  
   ADConv.adc[adc]->startSingleRead(Channels[adc][0]);

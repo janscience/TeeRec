@@ -34,6 +34,7 @@ void setupADC() {
   aidata.setResolution(bits);
   aidata.setAveraging(averaging);
   aidata.setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
+  aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
   aidata.check();
 }
 
