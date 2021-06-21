@@ -11,7 +11,7 @@ void testSignal(int pin, int frequency, float dc) {
 
 
 void setupTestSignals(int *pins, int frequency) {
-  Serial.println("Test signals");
+  Serial.println("Test signals:");
   // pins 0-10 with same timer:
 #if defined(TEENSY35) || defined(TEENSY36)
   int pintimer[MaxSignalPins] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
@@ -57,6 +57,7 @@ void setupTestSignals(int *pins, int frequency) {
     if (freqs[k] > 0)
       Serial.printf("  pin %2d: %5dHz, %3.0f%% duty cycle\n", pins[k], freqs[k], 100.0*dcs[k]);
   }
+  Serial.println();
 }
 
 

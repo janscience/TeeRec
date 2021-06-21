@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ADC_util.h>
 #include <ContinuousADC.h>
 
 
@@ -24,6 +25,7 @@ ContinuousADC::ContinuousADC() {
   Bits = DataBits;
   DataShift = 0;
   Averaging = 1;
+  ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
   Rate = 0;
   ADCUse = 0;
   ADCC = this;
@@ -144,6 +146,16 @@ uint8_t ContinuousADC::averaging(void) const {
 }
 
 
+void ContinuousADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
+  ConversionSpeed = speed;
+}
+
+
+const char *ContinuousADC::conversionSpeed() const {
+  return getConversionEnumStr(ConversionSpeed);
+}
+
+
 float ContinuousADC::bufferTime() const {
   return float(NBuffer/nchannels())/Rate;
 }
@@ -201,17 +213,22 @@ bool ContinuousADC::check() {
     return false;
   }
   // report:
-  Serial.println("ADC settings");
+  char chans[100];
+  channels(chans);
+  Serial.println("ADC settings:");
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
+  Serial.printf("  conversion: %s\n", conversionSpeed());
   Serial.printf("  ADC0:       %dchannels\n", NChannels[0]);
   Serial.printf("  ADC1:       %dchannels\n", NChannels[1]);
+  Serial.printf("  Pins:       %s\n", chans);
   float bt = bufferTime();
   if (bt < 1.0)
     Serial.printf("  Buffer:     %.0fms\n", 1000.0*bt);
   else
     Serial.printf("  Buffer:     %.2fs\n", bt);
+  Serial.println();
   return true;
 }
 
@@ -445,7 +462,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setAveraging(Averaging);
   ADConv.adc[adc]->setResolution(Bits);                                  // bit depth of ADC
   ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3);                 // reference voltage
-  ADConv.adc[adc]->setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);      
+  ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);      
   ADConv.adc[adc]->setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
   ADConv.adc[adc]->enableDMA();                                          // connect DMA and ADC
   ADConv.adc[adc]->stopPDB();  
@@ -503,7 +520,6 @@ void ContinuousADC::isr(uint8_t adc) {
     uint16_t val = ADCBuffer[adc][dmai++];
     val <<= DataShift;  // make 16 bit
     val += 0x8000;      // convert to signed int
-    //    val = int16_t(0x4000*sin(6.2*BufferWrite[adc]/100));  // TEST
     Buffer[BufferWrite[adc]] = val;
     BufferWrite[adc] += step;
     if (BufferWrite[adc] >= NBuffer)

@@ -30,6 +30,9 @@ public:
   // Set number of averages.
   void setAveraging(uint8_t num);
 
+  // Set string describing conversion speed.
+  void setConversionSpeed(const char *conversion);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -119,6 +122,7 @@ protected:
   InfoChunk Bits;
   InfoChunk Channels;
   InfoChunk Averaging;
+  InfoChunk Conversion;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;

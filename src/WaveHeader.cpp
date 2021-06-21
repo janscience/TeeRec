@@ -6,8 +6,9 @@ WaveHeader::WaveHeader() :
   Format(),
   Info("LIST", "INFO"),
   Bits("BITS", "16"),
-  Averaging("AVRG", "1"),
   Channels("PINS", ""),
+  Averaging("AVRG", ""),
+  Conversion("CONV", ""),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
@@ -132,6 +133,11 @@ void WaveHeader::setAveraging(uint8_t num) {
 }
 
 
+void WaveHeader::setConversionSpeed(const char *conversion) {
+  Conversion.set(conversion);
+}
+
+
 void WaveHeader::setData(int32_t samples) {
   Data.set(DataResolution, samples);
 }
@@ -171,6 +177,8 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Channels;
   if (Averaging.Use)
     chunks[nchunks++] = &Averaging;
+  if (Conversion.Use)
+    chunks[nchunks++] = &Conversion;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)
