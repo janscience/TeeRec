@@ -112,14 +112,18 @@ void splashScreen() {
   screen.writeText(0, "TeeRec recorder");
   screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   char msg[100];
+  String convspeed = aidata.conversionSpeed();
+  convspeed.replace("_SPEED", "");
+  String samplspeed = aidata.samplingSpeed();
+  samplspeed.replace("_SPEED", "");
   float bt = aidata.bufferTime();
   if (bt < 1.0)
-    sprintf(msg, "%.0fkHz\n%dbit\n%s, %d\n%d channels\n%d channels\n%.0fms",
-            0.001*aidata.rate(), aidata.resolution(), aidata.conversionSpeed(), aidata.averaging(),
+    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.0fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
             aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
   else
-    sprintf(msg, "%.0fkHz\n%dbit\n%s, %d\n%d channels\n%d channels\n%.2fms",
-            0.001*aidata.rate(), aidata.resolution(), aidata.conversionSpeed(), aidata.averaging(),
+    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.2fms",
+            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
             aidata.nchannels(0), aidata.nchannels(1), bt);
   screen.writeText(2, msg);
   delay(1500);
