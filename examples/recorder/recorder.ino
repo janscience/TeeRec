@@ -4,7 +4,15 @@
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
 #include "fonts/FreeSans8pt7b.h"
-#include <Adafruit_ST7735.h>
+//#define ST7735
+#define ILI9341
+#if defined(ST7735)
+  #include <Adafruit_ST7735.h>       // 1.44""
+#elif defined(ILI9341)
+  #include "Adafruit_ILI9341.h"      // 2.8" with touch
+  #include <Wire.h>
+  #include <Adafruit_FT6206.h>
+#endif
 #include <RTClock.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
@@ -41,6 +49,7 @@ SDWriter file;
 size_t fileSamples = 0;
 
 Display screen;
+Adafruit_FT6206 touch = Adafruit_FT6206();
 elapsedMillis screenTime;
 
 RTClock rtclock;
@@ -115,10 +124,22 @@ void initScreen() {
   #define TFT_CS    10  
   #define TFT_RST   9
   #define TFT_DC    8 
-  Adafruit_ST7735 *stscreen = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-  stscreen->initR(INITR_144GREENTAB);
-  screen.init(stscreen, 1);
+#if defined(ST7735)
+  // Adafruit 1.44" TFT hardware specific initialization:
+  Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  tft->initR(INITR_144GREENTAB);
+  screen.init(tft, 1);
   screen.setDefaultFont(FreeSans7pt7b);
+#elif defined(ILI9341)
+  Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST, TFT_MISO);
+  tft->begin();
+  screen.init(tft, 1);
+  screen.setDefaultFont(FreeSans8pt7b);
+  if (! touch.begin(128)) {  // pass in 'sensitivity' coefficient
+    Serial.println("Couldn't start FT6206 touchscreen controller");
+    while (1);
+  }
+#endif
 }
 
 
@@ -169,7 +190,7 @@ void setupButtons() {
 
 
 void plotData() {   // 85ms
-  if (screenTime > updateScreen) {
+  if (screenTime > updateScreen && ! touch.touched()) {
     screenTime -= updateScreen;
     // text: 36ms
     if (file.isOpen())

@@ -41,16 +41,17 @@ void setupADC() {
 }
 
 
-void initScreen() {
+void initScreenST7735() {
+  // Adafruit 1.44" TFT hardware specific initialization:
   #define TFT_SCK   13
   #define TFT_MISO  12
   #define TFT_MOSI  11
   #define TFT_CS    10  
   #define TFT_RST   9
   #define TFT_DC    8 
-  Adafruit_ST7735 *stscreen = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-  stscreen->initR(INITR_144GREENTAB);
-  screen.init(stscreen, 1);
+  Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  tft->initR(INITR_144GREENTAB);
+  screen.init(tft, 1);
   screen.setDefaultFont(FreeSans7pt7b);
 }
 
@@ -91,7 +92,7 @@ void setup() {
   delay(100);
   setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
-  initScreen();
+  initScreenST7735();
   setupScreen();
   screenTime = 0;
   aidata.start();

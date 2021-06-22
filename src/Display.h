@@ -23,6 +23,31 @@
  * D/C      SPI data or command selector        white   (pin 8)
  * CCS      SD card SPI chip select             brown
  * Lite     PWM backlight control 
+ *
+ * Usage:
+ *
+ * #include <Display.h>
+ * #include <Adafruit_ST7735.h> 
+ *
+ * Display screen;
+ *
+ * void initScreenST7735() {
+ *   // Adafruit 1.44" TFT hardware specific initialization:
+ *   #define TFT_SCK   13
+ *   #define TFT_MISO  12
+ *   #define TFT_MOSI  11
+ *   #define TFT_CS    10  
+ *   #define TFT_RST   9
+ *   #define TFT_DC    8 
+ *   Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+ *   tft->initR(INITR_144GREENTAB);
+ *   screen.init(tft, 1);
+ * }
+ *
+ * void setup() {
+ *   initScreenST7735();
+ * }
+ *
  */
 
 
@@ -33,6 +58,9 @@
  * 
  * Wiring:
  * https://forums.adafruit.com/download/file.php?id=78488&sid=4a474d33f407a7a019f27e58661732e2
+ * from thread:
+ * https://forums.adafruit.com/viewtopic.php?f=31&t=170088
+ * WARNING: on this image, SDA and SCL are switched!
  *
  * Wiring monitor on Teensy 3.5:
  * 
@@ -41,14 +69,43 @@
  * Vin      power pin                           red     3.3V
  * Gnd      ground                              blue    GND
  * SCK      SPI clock input                     black   SCK0  (pin 13)
- * SO       MISO microcontroller in serial out          MISO0 (pin 12)
+ * SO       MISO microcontroller in serial out  green   MISO0 (pin 12)
  * SI       MOSI microcontroller out serial in  yellow  MOSI0 (pin 11)
  * TCS      TFT SPI chip select                 orange  (pin 10)  
  * D/C      SPI data or command selector        white   (pin 8)
  *
- * SDA      I2C data pin (touch)
- * SCL      I2C clock pin (touch)
+ * SDA      I2C data pin (touch)                        SDA0 (pin 18)
+ * SCL      I2C clock pin (touch)                       SCL0 (pin 19)
+ *
+ * Usage:
+ *
+ * Check out alternative library:
+ * https://github.com/PaulStoffregen/ILI9341_t3/blob/master/ILI9341_t3.h
+ *
+ * #include <Display.h>
+ * #include <Adafruit_ILI9341.h> 
+ *
+ * Display screen;
+ *
+ * void initScreen() {
+ *   // Adafruit 2.8" TFT Touch shield V2 hardware specific initialization:
+ *   #define TFT_SCK   13
+ *   #define TFT_MISO  12
+ *   #define TFT_MOSI  11
+ *   #define TFT_CS    10  
+ *   #define TFT_RST   9
+ *   #define TFT_DC    8 
+ *   Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCLK, TFT_RST, TFT_MISO);
+ *   tft->begin();
+ *   screen.init(tft, 0);
+ * }
+ *
+ * void setup() {
+ *   initScreen();
+ * }
+ *
  */
+
 
 #ifndef Display_h
 #define Display_h
