@@ -1,5 +1,7 @@
 #include <ContinuousADC.h>
 #include <Display.h>
+#include "fonts/FreeSans7pt7b.h"
+#include <Adafruit_ST7735.h>
 #include <TestSignals.h>
 
 
@@ -23,7 +25,7 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
  
 ContinuousADC aidata;
 
-Display screen(1);
+Display screen;
 elapsedMillis screenTime;
 
 
@@ -36,6 +38,20 @@ void setupADC() {
   aidata.setConversionSpeed(ADC_CONVERSION_SPEED::MED_SPEED);
   aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
   aidata.check();
+}
+
+
+void initScreen() {
+  #define TFT_SCK   13
+  #define TFT_MISO  12
+  #define TFT_MOSI  11
+  #define TFT_CS    10  
+  #define TFT_RST   9
+  #define TFT_DC    8 
+  Adafruit_ST7735 *stscreen = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  stscreen->initR(INITR_144GREENTAB);
+  screen.init(stscreen, 1);
+  screen.setDefaultFont(FreeSans7pt7b);
 }
 
 
@@ -75,6 +91,7 @@ void setup() {
   delay(100);
   setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
+  initScreen();
   setupScreen();
   screenTime = 0;
   aidata.start();

@@ -1,6 +1,10 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <Display.h>
+#include "fonts/FreeSans6pt7b.h"
+#include "fonts/FreeSans7pt7b.h"
+#include "fonts/FreeSans8pt7b.h"
+#include <Adafruit_ST7735.h>
 #include <RTClock.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
@@ -36,8 +40,7 @@ ContinuousADC aidata;
 SDWriter file;
 size_t fileSamples = 0;
 
-
-Display screen(1);
+Display screen;
 elapsedMillis screenTime;
 
 RTClock rtclock;
@@ -105,10 +108,27 @@ void writeData() {
 }
 
 
+void initScreen() {
+  #define TFT_SCK   13
+  #define TFT_MISO  12
+  #define TFT_MOSI  11
+  #define TFT_CS    10  
+  #define TFT_RST   9
+  #define TFT_DC    8 
+  Adafruit_ST7735 *stscreen = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  stscreen->initR(INITR_144GREENTAB);
+  screen.init(stscreen, 1);
+  screen.setDefaultFont(FreeSans7pt7b);
+}
+
+
 void splashScreen() {
-  screen.setTextArea(0, 0.1, 0.75, 0.9, 0.95);
-  screen.setTextArea(1, 0.0, 0.1, 0.4, 0.7, true);
-  screen.setTextArea(2, 0.4, 0.1, 1.0, 0.7, true);
+  screen.setTextArea(0, 0.0, 0.75, 1.0, 0.95);
+  screen.setFont(0, FreeSans8pt7b);
+  screen.setTextArea(1, 0.0, 0.0, 0.4, 0.7, true);
+  screen.setFont(1, FreeSans6pt7b);
+  screen.setTextArea(2, 0.4, 0.0, 1.0, 0.7, true);
+  screen.setFont(2, FreeSans6pt7b);
   screen.writeText(0, "TeeRec recorder");
   screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   char msg[100];
@@ -203,6 +223,7 @@ void setup() {
   setupTestSignals(signalPins, stimulusFrequency);
   setupButtons();
   setupADC();
+  initScreen();
   splashScreen();
   setupScreen();
   setupStorage();

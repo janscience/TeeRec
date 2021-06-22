@@ -1,14 +1,22 @@
 #include <Arduino.h>
 #include "Display.h"
 
+// 16 bit colors:
+#define BLACK    0x0000
+#define BLUE     0x001F
+#define RED      0xF800
+#define GREEN    0x07E0
+#define CYAN     0x07FF
+#define MAGENTA  0xF81F
+#define YELLOW   0xFFE0 
+#define ORANGE   0xFC00
+#define WHITE    0xFFFF
 
-const uint16_t Display::PlotLines[8] = {ST7735_GREEN, ST7735_YELLOW,
-					     ST7735_BLUE, ST7735_RED,
-					     ST7735_CYAN, ST7735_ORANGE,
-					     ST7735_MAGENTA, ST7735_WHITE};
+const uint16_t Display::PlotLines[8] = {GREEN, YELLOW, BLUE, RED, CYAN,
+					ORANGE, MAGENTA, WHITE};
 
 
-Display::Display(uint8_t rotation) {
+Display::Display() {
   NPlots = 0;
   for (int k=0; k<MaxAreas; k++) {
     PlotX[k] = 0;
@@ -30,8 +38,13 @@ Display::Display(uint8_t rotation) {
     TextHead[k] = 0;
   }
   memset(Text, 0, sizeof(Text));
-  Screen = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-  Screen->initR(INITR_144GREENTAB);
+  Font = 0;
+  Screen = 0;
+}
+
+
+void Display::init(Adafruit_SPITFT *screen, uint8_t rotation) {
+  Screen = screen;
   Screen->setRotation(rotation);
   Width = Screen->width();
   Height = Screen->height();
@@ -119,7 +132,8 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
   */
   TextCanvas[area] = new GFXcanvas1(TextW[area], TextH[area]);
   TextCanvas[area]->setRotation(0);
-  TextCanvas[area]->setFont(&Font);
+  if ( Font != 0 )
+    TextCanvas[area]->setFont(Font);
   TextCanvas[area]->setTextColor(0xffff);
   TextCanvas[area]->setTextSize(1);
   TextCanvas[area]->setTextWrap(false);
@@ -158,6 +172,17 @@ void Display::clearText(uint8_t area) {
 void Display::clearText() {
   for (int k=0; k<MaxAreas; k++)
     clearText(k);
+}
+
+
+void Display::setDefaultFont(const GFXfont &font) {
+  Font = &font;
+}
+
+
+void Display::setFont(uint8_t area, const GFXfont &font) {
+  if ( TextCanvas[area] != 0 )
+    TextCanvas[area]->setFont(&font);
 }
 
 

@@ -3,15 +3,12 @@
   Created by Jan Benda, May 25th, 2021.
 */
 
-/* Adafruit TFT monitor
+/* Adafruit1.44" TFT monitor
  * 
- * Overview and wiring:
+ * Overview:
  * https://learn.adafruit.com/adafruit-1-44-color-tft-with-micro-sd-socket
  * 
- * Adafruit GFX library tutorial:
- * https://learn.adafruit.com/adafruit-gfx-graphics-library/graphics-primitives
- * 
- * Wiring adafruit monitor on Teensy 3.5:
+ * Wiring monitor on Teensy 3.5:
  * 
  * Monitor  Description                         Cable   Teensy
  * ------------------------------------------------------------
@@ -29,30 +26,48 @@
  */
 
 
+/* Adafruit 2.8" TFT Touch Shield v2 - capacitive
+ * 
+ * Overview:
+ * https://learn.adafruit.com/adafruit-2-8-tft-touch-shield-v2
+ * 
+ * Wiring:
+ * https://forums.adafruit.com/download/file.php?id=78488&sid=4a474d33f407a7a019f27e58661732e2
+ *
+ * Wiring monitor on Teensy 3.5:
+ * 
+ * Monitor  Description                         Cable   Teensy
+ * ------------------------------------------------------------
+ * Vin      power pin                           red     3.3V
+ * Gnd      ground                              blue    GND
+ * SCK      SPI clock input                     black   SCK0  (pin 13)
+ * SO       MISO microcontroller in serial out          MISO0 (pin 12)
+ * SI       MOSI microcontroller out serial in  yellow  MOSI0 (pin 11)
+ * TCS      TFT SPI chip select                 orange  (pin 10)  
+ * D/C      SPI data or command selector        white   (pin 8)
+ *
+ * SDA      I2C data pin (touch)
+ * SCL      I2C clock pin (touch)
+ */
+
 #ifndef Display_h
 #define Display_h
 
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>        // Core graphics library
-#include <Adafruit_ST7735.h>     // Hardware-specific library
-#include "fonts/FreeSans7pt7b.h" // Nice font
+#include <Adafruit_SPITFT.h>
 #include <SPI.h> 
-
-
-#define TFT_SCK   13
-#define TFT_MISO  12
-#define TFT_MOSI  11
-#define TFT_CS    10  
-#define TFT_RST   9
-#define TFT_DC    8 
 
 
 class Display {
 
  public:
 
-  Display(uint8_t rotation=0);
+  Display();
+
+  // Initialize with a specific monitor.
+  void init(Adafruit_SPITFT *screen, uint8_t rotation=0);
 
   // Clear the entire screen with the background color.
   void clear();
@@ -87,6 +102,12 @@ class Display {
   // Clear all text areas.
   void clearText();
 
+  // Set default font for text areas.
+  void setDefaultFont(const GFXfont &font);
+
+  // Set font for specified text area.
+  void setFont(uint8_t area, const GFXfont &font);
+
   // Write into text area.
   void writeText(uint8_t area, const char *text);
 
@@ -99,21 +120,21 @@ class Display {
   // Write previous text into text area.
   void popText(uint8_t area);
 
-  Adafruit_ST7735 *Screen;
+  Adafruit_SPITFT *Screen;
 
 
  protected:
 
   // Colors:
-  static const uint16_t Background = ST7735_BLACK;
-  static const uint16_t PlotBackground = ST7735_BLACK;
-  static const uint16_t PlotGrid = 0x7BEF;
+  static const uint16_t Background = 0x0000;       // black
+  static const uint16_t PlotBackground = 0x0000;   // black
+  static const uint16_t PlotGrid = 0x7BEF;         // gray
   static const uint16_t PlotLines[8];
-  static const uint16_t TextBackground = ST7735_BLACK;
-  static const uint16_t TextColor = ST7735_WHITE;
+  static const uint16_t TextBackground = 0x0000;   // black
+  static const uint16_t TextColor = 0xffff;        // white
 
   // Fonts:
-  static constexpr GFXfont const &Font = FreeSans7pt7b;
+  const GFXfont *Font;
 
   // Monitor dimensions:
   uint16_t Width;
