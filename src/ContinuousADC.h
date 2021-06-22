@@ -179,8 +179,14 @@ class ContinuousADC {
   // Start the acquisition based on the channel, rate, and buffer settings.
   void start();
 
+  // Stop acquisition.
+  void stop();
+
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
+
+  // Number of DMA buffers filled so far.
+  size_t counter(int adc) const;
 
   // Number of frames (samples of a single channel) corresponding to time.
   size_t frames(float time) const;

@@ -232,8 +232,8 @@ bool ContinuousADC::check() {
   Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  conversion: %s\n", conversionSpeed());
   Serial.printf("  sampling:   %s\n", samplingSpeed());
-  Serial.printf("  ADC0:       %dchannels\n", NChannels[0]);
-  Serial.printf("  ADC1:       %dchannels\n", NChannels[1]);
+  Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
+  Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");
   Serial.printf("  Pins:       %s\n", chans);
   float bt = bufferTime();
   if (bt < 1.0)
@@ -261,6 +261,10 @@ void ContinuousADC::start() {
     BufferWrite[1] = 1;
 #if defined(ADC_USE_PDB)
     startPDB(Rate*NChannels[0]);
+#else
+    // TODO: make this a single function?!?
+    for (uint8_t adc=0; adc<2; adc++)
+      ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
 #endif
     Rate = ADConv.adc[0]->getTimerFrequency()/NChannels[0];
   }
@@ -268,12 +272,33 @@ void ContinuousADC::start() {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       if ( (ADCUse & 3) != 3 ) {
 	ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
+#if defined(ADC_USE_PDB)
 	NVIC_DISABLE_IRQ(IRQ_PDB); // we don not need the PDB interrupt
+#endif
 	Rate = ADConv.adc[adc]->getTimerFrequency()/NChannels[adc];
       }
-      if ( NChannels[adc] > 1 )
-        DMASwitch[adc].enable();
+    }
+  }
+  for (uint8_t adc=0; adc<2; adc++) {
+    if ( (ADCUse & (adc+1)) == adc+1 )
       DMABuffer[adc].enable();
+  }
+  for (uint8_t adc=0; adc<2; adc++) {
+    if ( (ADCUse & (adc+1)) == adc+1 && NChannels[adc] > 1 )
+      DMASwitch[adc].enable();
+  }
+}
+
+
+void ContinuousADC::stop() {
+  for (uint8_t adc=0; adc<2; adc++) {
+    if ( (ADCUse & (adc+1)) > 0 ) {
+      ADConv.adc[adc]->stopTimer();
+      ADConv.adc[adc]->disableDMA();
+      if ( NChannels[adc] > 1 )
+	DMASwitch[adc].disable();
+      DMABuffer[adc].disable();
+      DMABuffer[adc].detachInterrupt();
     }
   }
 }
@@ -286,6 +311,15 @@ size_t ContinuousADC::frames(float time) const {
 
 uint8_t ContinuousADC::adcs() const {
   return (ADCUse+1)/2;
+}
+
+
+size_t ContinuousADC::counter(int adc) const {
+  unsigned char sreg_backup = SREG;
+  cli();
+  size_t c = DMACounter[adc];
+  SREG = sreg_backup;
+  return c;
 }
 
 
@@ -472,12 +506,12 @@ void ContinuousADC::setupChannels(uint8_t adc) {
 
 void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setAveraging(Averaging);
-  ADConv.adc[adc]->setResolution(Bits);                                  // bit depth of ADC
-  ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3);                 // reference voltage
-  ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);      
+  ADConv.adc[adc]->setResolution(Bits);                  // bit depth of ADC
+  ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3); // reference voltage
+  ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
   ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
-  ADConv.adc[adc]->enableDMA();                                          // connect DMA and ADC
-  ADConv.adc[adc]->stopPDB();  
+  ADConv.adc[adc]->enableDMA();                          // connect DMA and ADC
+  ADConv.adc[adc]->stopTimer();
   ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
   Bits = ADConv.adc[adc]->getResolution();
   DataShift = DataBits - Bits;
@@ -496,7 +530,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
   DMAIndex[adc] = 0;
   DMACounter[adc] = 0;
 
-  DMABuffer[adc].begin(true);
+  DMABuffer[adc].begin();
   for (int mi=NMajors-1; mi>=0; mi--) {
     DMABuffer[adc].source(adc==0?ADC0_RA:ADC1_RA);
     DMABuffer[adc].destinationCircular(&ADCBuffer[adc][mi*MajorSize], sizeof(uint16_t)*MajorSize);
@@ -510,6 +544,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
 
   if ( NChannels[adc] > 1 ) {
+    DMASwitch[adc].begin();
     DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChannels[adc]);
     DMASwitch[adc].destination(adc==0?ADC0_SC1A:ADC1_SC1A); // this switches channels
     DMASwitch[adc].transferSize(1);
