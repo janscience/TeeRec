@@ -152,8 +152,48 @@ void ContinuousADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
 }
 
 
-const char *ContinuousADC::conversionSpeed() const {
+const char *ContinuousADC::conversionSpeedStr() const {
   return getConversionEnumStr(ConversionSpeed);
+}
+
+
+const char *ContinuousADC::conversionSpeedShortStr() const {
+  switch (ConversionSpeed) {
+#if defined(ADC_TEENSY_4) // Teensy 4
+#else
+    case ADC_CONVERSION_SPEED::VERY_LOW_SPEED:
+      return (const char *)"verylow";
+#endif
+    case ADC_CONVERSION_SPEED::LOW_SPEED:
+      return (const char *)"low";
+    case ADC_CONVERSION_SPEED::MED_SPEED:
+      return (const char *)"med";
+    case ADC_CONVERSION_SPEED::HIGH_SPEED:
+      return (const char *)"high";
+#if defined(ADC_TEENSY_4) // Teensy 4
+#else
+    case ADC_CONVERSION_SPEED::VERY_HIGH_SPEED:
+      return (const char *)"veryhigh";
+#endif
+#if defined(ADC_TEENSY_4) // Teensy 4
+    case ADC_CONVERSION_SPEED::ADACK_10:
+      return (const char *)"adack10";
+    case ADC_CONVERSION_SPEED::ADACK_20:
+      return (const char *)"adack20";
+#else
+    case ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS:
+      return (const char *)"high16";
+    case ADC_CONVERSION_SPEED::ADACK_2_4:
+      return (const char *)"adack24";
+    case ADC_CONVERSION_SPEED::ADACK_4_0:
+      return (const char *)"adack40";
+    case ADC_CONVERSION_SPEED::ADACK_5_2:
+      return (const char *)"adack52";
+    case ADC_CONVERSION_SPEED::ADACK_6_2:
+      return (const char *)"adack62";
+#endif
+  }
+  return (const char *)"none";
 }
 
 
@@ -230,7 +270,7 @@ bool ContinuousADC::check() {
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
-  Serial.printf("  conversion: %s\n", conversionSpeed());
+  Serial.printf("  conversion: %s\n", conversionSpeedStr());
   Serial.printf("  sampling:   %s\n", samplingSpeed());
   Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
   Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");

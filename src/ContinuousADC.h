@@ -152,8 +152,11 @@ class ContinuousADC {
   // HIGH_SPEED, VERY_HIGH_SPEED, ADACK_2_4, ADACK_4_0, ADACK_5_2 or ADACK_6_2.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
-  // Return pointer to string describing conversion speed.
-  const char *conversionSpeed() const;
+  // Return string describing the selected conversion speed.
+  const char *conversionSpeedStr() const;
+
+  // Return a short string describing the selected conversion speed.
+  const char *conversionSpeedShortStr() const;
 
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
