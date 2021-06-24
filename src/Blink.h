@@ -17,9 +17,21 @@ class Blink {
   Blink(int pin=LED_BUILTIN);
   ~Blink();
 
-  void setTiming(uint32_t intervalms, uint32_t onms);
+  // Set simple blink interval. Every intervalms the LED is on for onms.
+  void set(uint32_t intervalms, uint32_t onms);
 
-  void set(bool on);
+  // Set arbitrary blink intervals that repeat periodically.
+  // First interval is LED on. Null terminated.
+  void set(const uint32_t *times);
+
+  // One shot sequence of blink intervals.
+  // First interval is LED on. Null terminated.
+  // After finishing fall back to the default blinking defined by set().
+  void blink(const uint32_t *times);
+  
+  void switchOn(bool on=true);
+  
+  void switchOff();
 
   void update();
 
@@ -27,9 +39,10 @@ class Blink {
  protected:
   
   int Pin;
-  bool Status;
-  uint32_t OnTime;
-  uint32_t OffTime;
+  bool On;
+  uint32_t *Times[2];
+  int Index;
+  int State;
   elapsedMillis Time;
 
 };

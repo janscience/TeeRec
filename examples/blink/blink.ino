@@ -1,13 +1,19 @@
 #include <Blink.h>
 
 Blink blink;
+elapsedMillis Time;
 
 
 void setup() {
-  blink.setTiming(1000, 200);
+  blink.set(1000, 200);
 }
 
 
 void loop() {
   blink.update();
+  if (Time > 10000) {
+    Time = 0;
+    uint32_t times[] = {100, 100, 100, 100, 100, 100, 0};
+    blink.blink(times);
+  }
 }
