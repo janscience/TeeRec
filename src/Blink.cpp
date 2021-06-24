@@ -50,6 +50,20 @@ void Blink::set(const uint32_t *times) {
 }
 
 
+void Blink::blink(uint32_t intervalms, uint32_t onms) {
+  if (Times[1] != 0 )
+    delete [] Times[1];
+  Times[1] = new uint32_t[3];
+  Times[1][0] = onms;
+  Times[1][1] = intervalms - onms;
+  Times[1][2] = 0;
+  State = 1;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
 void Blink::blink(const uint32_t *times) {
   if (Times[1] != 0 )
     delete [] Times[1];
@@ -82,7 +96,7 @@ void Blink::switchOff() {
 void Blink::update() {
   if (Times[State] != 0 && Time > Times[State][Index]) {
     Time -= Times[State][Index];
-    switchOn(Index%2 == 0);
+    switchOn(Index%2 == 1);
     Index++;
     if (Times[State][Index] == 0) {
       if (State > 0) {

@@ -5,7 +5,7 @@ elapsedMillis Time;
 
 
 void setup() {
-  blink.set(1000, 200);
+  blink.set(1000, 20);
 }
 
 

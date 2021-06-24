@@ -52,6 +52,7 @@ void openNextFile() {
   file.openWave(name.c_str(), aidata, -1, dts);
   aidata.writeData(file.file());
   Serial.println(name);
+  blink.blink(2000, 1000);
 }
 
 
@@ -80,7 +81,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  blink.setTiming(1000, 100);
+  blink.set(1000, 20);
   setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
   setupStorage();

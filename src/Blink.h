@@ -24,15 +24,22 @@ class Blink {
   // First interval is LED on. Null terminated.
   void set(const uint32_t *times);
 
+  // One shot simple blink interval. Within intervalms the LED is on for onms.
+  // After finishing fall back to the default blinking defined by set().
+  void blink(uint32_t intervalms, uint32_t onms);
+
   // One shot sequence of blink intervals.
   // First interval is LED on. Null terminated.
   // After finishing fall back to the default blinking defined by set().
   void blink(const uint32_t *times);
-  
+
+  // Manually switch LED on or off.
   void switchOn(bool on=true);
   
+  // Manually switch LED off.
   void switchOff();
 
+  // Call this function as often as possible in your loop().
   void update();
 
 
