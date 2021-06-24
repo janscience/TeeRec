@@ -13,11 +13,11 @@
 // From https://github.com/pedvide/ADC/blob/master/settings_defines.h
 
 #if defined(TEENSYDUINO) 
-  #if defined(__MK20DX256__) // Teensy 3.1/3.2
+  #if defined(__MK20DX256__)   // Teensy 3.1/3.2
     #define TEENSY31
   #elif defined(__MK20DX128__) // Teensy 3.0
     #define TEENSY30
-  #elif defined(__MKL26Z64__) // Teensy LC
+  #elif defined(__MKL26Z64__)  // Teensy LC
     #define TEENSYLC
   #elif defined(__MK64FX512__) // Teensy 3.5
     #define TEENSY35
@@ -38,5 +38,8 @@
   #error "Non Teensy boards not supported"
 #endif
 
+
+// Return string with name of Teensy board.
+const char *teensyStr();
 
 #endif

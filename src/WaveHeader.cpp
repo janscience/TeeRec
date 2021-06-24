@@ -1,3 +1,4 @@
+#include <TeensyBoard.h>
 #include <WaveHeader.h>
 
 
@@ -10,6 +11,7 @@ WaveHeader::WaveHeader() :
   Averaging("AVRG", ""),
   Conversion("CNVS", ""),
   Sampling("SMPS", ""),
+  Teensy("TNSY", teensyStr()),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
@@ -187,6 +189,8 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Conversion;
   if (Sampling.Use)
     chunks[nchunks++] = &Sampling;
+  if (Teensy.Use)
+    chunks[nchunks++] = &Teensy;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)

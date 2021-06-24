@@ -127,6 +127,7 @@ protected:
   InfoChunk Averaging;
   InfoChunk Conversion;
   InfoChunk Sampling;
+  InfoChunk Teensy;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;
