@@ -1,5 +1,5 @@
 /*
-  EFishMonitor - library for displaying electric fish recordings on a monitor.
+  Display - library for displaying electric fish recordings on a monitor.
   Created by Jan Benda, May 25th, 2021.
 */
 

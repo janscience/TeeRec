@@ -1,6 +1,7 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <Blink.h>
 #include <TestSignals.h>
 
 
@@ -25,6 +26,7 @@ ContinuousADC aidata;
 SDWriter file;
 WaveHeader wave;
 RTClock rtclock;
+Blink blink;
 
 
 void setupADC() {
@@ -76,8 +78,9 @@ void storeData() {
 
 void setup() {
   Serial.begin(9600);
-  delay(100);
+  while (!Serial && millis() < 2000) {};
   rtclock.check();
+  blink.setTiming(1000, 100);
   setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
   setupStorage();
@@ -87,4 +90,5 @@ void setup() {
 
 void loop() {
   storeData();
+  blink.update();
 } 
