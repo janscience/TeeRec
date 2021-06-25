@@ -550,6 +550,21 @@ bool ContinuousADC::endWrite() {
 }
 
 
+void ContinuousADC::checkData(int32_t min, int32_t max) {
+  size_t last = currentSample();
+  while (BufferRead != last) {
+    size_t idx = BufferRead;
+    sample_t data = Buffer[BufferRead++];
+    if (BufferRead >= NBuffer)
+      BufferRead -= NBuffer;
+    if (data < min)
+      Serial.printf("%d: %d < %d\n", idx, data, min);
+    else if (data > max)
+      Serial.printf("%d: %d > %d\n", idx, data, max);
+  }
+}
+
+
 void ContinuousADC::setupChannels(uint8_t adc) {
   // translate to SC1A code:
   for(uint8_t i=0; i<NChannels[adc]; i++) {

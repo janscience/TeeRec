@@ -261,5 +261,6 @@ void setup() {
 void loop() {
   buttons.update();
   storeData();
+  //aidata.checkData(30000,40000);
   plotData();
 } 

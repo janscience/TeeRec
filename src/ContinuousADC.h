@@ -222,8 +222,7 @@ class ContinuousADC {
 
   // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
-
-
+  
   // Write available data to file (if the file is open).
   // If maxFileSamples() is set (>0), then stop writing after that many samples. 
   // Returns number of written samples.
@@ -254,6 +253,9 @@ class ContinuousADC {
   // Return true if maximum number of samples have been written
   // and a new file needs to be opened.
   bool endWrite();
+
+  // Check whether data in the buffer are within the specified range (for debugging).
+  void checkData(int32_t min, int32_t max);
 
   // Interrupt service routine. For internal usage.
   void isr(uint8_t adc);
