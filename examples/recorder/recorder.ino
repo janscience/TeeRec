@@ -27,8 +27,8 @@ int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins 
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
-float displayTime = 0.005;
-//float displayTime = 0.001*updateScreen;
+//float displayTime = 0.005;
+float displayTime = 0.0015*updateScreen;
 
 bool logging = false;                // keep saving to files
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
@@ -165,7 +165,7 @@ void splashScreen() {
             0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
             aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
   else
-    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.2fms",
+    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.2fs",
             0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
             aidata.nchannels(0), aidata.nchannels(1), bt);
   screen.writeText(2, msg);
@@ -244,7 +244,7 @@ void storeData() {
 
 void setup() {
   Serial.begin(9600);
-  delay(100);
+  while (!Serial && millis() < 2000) {};
   rtclock.check();
   setupTestSignals(signalPins, stimulusFrequency);
   setupButtons();

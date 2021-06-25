@@ -11,19 +11,16 @@ WaveHeader::WaveHeader() :
   Averaging("AVRG", ""),
   Conversion("CNVS", ""),
   Sampling("SMPS", ""),
-  Teensy("TNSY", teensyStr()),
+  Board("IBRD", teensyStr()),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
   DataResolution = 16;
   NBuffer = 0;
-  Buffer = 0;
 }
 
 
 WaveHeader::~WaveHeader() {
-  if (Buffer != 0)
-    delete [] Buffer;
 }
 
 
@@ -66,7 +63,7 @@ WaveHeader::FormatChunk::FormatChunk(uint8_t nchannels, uint32_t samplerate,
 
 
 void WaveHeader::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
-			        uint16_t resolution) {
+			          uint16_t resolution) {
   size_t nbytes = (resolution-1)/8  + 1;  // bytes per sample
   Format.formatTag = 1;                   // 1 is PCM
   Format.numChannels = nchannels;
@@ -172,11 +169,10 @@ void WaveHeader::clearSoftware() {
 
 
 void WaveHeader::assemble() {
-  if (Buffer != 0)
-    delete [] Buffer;
   // riff chunks:
+  const int maxchunks = 12;
   int nchunks = 0;
-  Chunk *chunks[10];
+  Chunk *chunks[maxchunks];
   chunks[nchunks++] = &Riff;
   chunks[nchunks++] = &Format;
   chunks[nchunks++] = &Info;
@@ -189,13 +185,15 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Conversion;
   if (Sampling.Use)
     chunks[nchunks++] = &Sampling;
-  if (Teensy.Use)
-    chunks[nchunks++] = &Teensy;
+  if (Board.Use)
+    chunks[nchunks++] = &Board;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)
     chunks[nchunks++] = &Software;
   chunks[nchunks++] = &Data;
+  if (nchunks > maxchunks)
+    Serial.println("WaveHeader::assemble(): maxchunks too small!\n");
   // update file size:
   Riff.Header.Size = 4;
   for (int k=1; k<nchunks; k++)
@@ -207,7 +205,10 @@ void WaveHeader::assemble() {
   for (int k=3; k<nchunks-1; k++)
     Info.addSize(chunks[k]->NBuffer);
   // make header:
-  Buffer = new char[NBuffer];
+  if (NBuffer > MaxBuffer) {
+    NBuffer = 0;
+    Serial.println("WaveHeader::assemble(): Header too large!\n");
+  }
   uint32_t idx = 0;
   for (int k=0; k<nchunks; k++) {
     memcpy(&Buffer[idx], chunks[k]->Buffer, chunks[k]->NBuffer);

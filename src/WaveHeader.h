@@ -17,8 +17,9 @@ public:
   WaveHeader();
   ~WaveHeader();
 
+  static const size_t MaxBuffer = 500;
   size_t NBuffer;
-  char *Buffer;
+  char Buffer[MaxBuffer];
 
   // Set parameters of the format chunk.
   void setFormat(uint8_t nchannels, uint32_t samplerate,
@@ -127,7 +128,7 @@ protected:
   InfoChunk Averaging;
   InfoChunk Conversion;
   InfoChunk Sampling;
-  InfoChunk Teensy;
+  InfoChunk Board;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;
