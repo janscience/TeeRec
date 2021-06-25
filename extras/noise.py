@@ -38,7 +38,7 @@ def plot_hist(path, save, subtract_mean=True):
     #data, rate = load_bin(path, 108)
     nchannels = data.shape[1]
     basename = os.path.basename(path)
-    abins = np.arange(-2**15, 2**15, 2*16)
+    abins = np.arange(-2**15, 2**15+1, 1)
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True)
         axs = axs.ravel()

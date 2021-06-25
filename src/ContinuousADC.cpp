@@ -551,16 +551,12 @@ bool ContinuousADC::endWrite() {
 
 
 void ContinuousADC::checkData(int32_t min, int32_t max) {
-  size_t last = currentSample();
-  while (BufferRead != last) {
-    size_t idx = BufferRead;
-    sample_t data = Buffer[BufferRead++];
-    if (BufferRead >= NBuffer)
-      BufferRead -= NBuffer;
+  for (unsigned int k=0; k<NBuffer; k++) {
+    sample_t data = Buffer[k];
     if (data < min)
-      Serial.printf("%d: %d < %d\n", idx, data, min);
+      Serial.printf("%d: %d < %d\n", k, data, min);
     else if (data > max)
-      Serial.printf("%d: %d > %d\n", idx, data, max);
+      Serial.printf("%d: %d > %d\n", k, data, max);
   }
 }
 

@@ -155,7 +155,9 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
   else
     Wave.clearDateTime();
   Wave.assemble();                        // 0ms
-  File.write(Wave.Buffer, Wave.NBuffer);  // 14ms
+  if (File.write(Wave.Buffer, Wave.NBuffer) < 0) {  // 14ms
+    Serial.println("ERROR writing wave header");
+  }
 }
 
 

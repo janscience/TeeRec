@@ -34,7 +34,8 @@ WaveHeader::Chunk::Chunk(const char *id, uint32_t size) {
 
 
 void WaveHeader::Chunk::setSize(uint32_t size) {
-  Header.Size = ((size+1) >> 1) << 1; // even size
+  //Header.Size = ((size+1) >> 1) << 1; // even size needed for wave
+  Header.Size = ((size+3) >> 2) << 2; // but 4 bytes aligned needed for SdFat for some unknown reason...
 }
 
 

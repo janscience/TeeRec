@@ -254,7 +254,7 @@ class ContinuousADC {
   // and a new file needs to be opened.
   bool endWrite();
 
-  // Check whether data in the buffer are within the specified range (for debugging).
+  // Check whether data in the whole buffer are within the specified range (for debugging).
   void checkData(int32_t min, int32_t max);
 
   // Interrupt service routine. For internal usage.

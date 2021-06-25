@@ -27,15 +27,15 @@ def load_bin(filepath, offset=0):
         wf.seek(offset); # offset of data chunk
         buffer = wf.read()
         dtype = 'i2'
-        nchannels = 4
+        nchannels = 1
         data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
-    rate = 100000
+    rate = 80000
     return data, float(rate)
 
 
 def plot_traces(path, save):
     data, rate = load_wave(path)
-    #data, rate = load_bin(path, 108)
+    #data, rate = load_bin(path, 0)
     basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
@@ -48,7 +48,8 @@ def plot_traces(path, save):
     ascale = 1.0
     for c in range(data.shape[1]):
         #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
-        ax.plot(1000.0*time[:], ascale*data[:,c]+1000*c, '-', label='%d' % c)
+        #ax.plot(1000.0*time[:], ascale*data[:,c]+1000*c, '-', label='%d' % c)
+        ax.plot(ascale*data[:,c]+1000*c, '-', label='%d' % c)
     ax.set_ylim(-40000, 40000)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Amplitude [integer]')
