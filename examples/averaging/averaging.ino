@@ -10,7 +10,7 @@ uint32_t samplingRate = 40000;       // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
 
-ADC_CONVERSION_SPEED conversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
+ADC_CONVERSION_SPEED conversionSpeed = ADC_CONVERSION_SPEED::LOW_SPEED;
 // Choose one of:                                        
 //   VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED_16BITS, HIGH_SPEED, VERY_HIGH_SPEED,
 //   ADACK_2_4, ADACK_4_0, ADACK_5_2, ADACK_6_2
@@ -50,7 +50,7 @@ void setup() {
   file.dataDir("tests");
   file.setWriteInterval(aidata);
   blink.set(1000, 20);
-  delay(2000);
+  delay(4000);
 }
 
 
@@ -60,8 +60,9 @@ void loop() {
   for (unsigned int k=0; k<sizeof(averages_list); k++) {
     aidata.setAveraging(averages_list[k]);
     const char *convs = aidata.conversionSpeedShortStr();
-    sprintf(fname, "averaging-%03.0fkHz-%02dbit-%s-a%02d.wav", 0.001*aidata.rate(),
-            aidata.resolution(), convs, aidata.averaging());
+    const char *sampls = aidata.samplingSpeedShortStr();
+    sprintf(fname, "averaging-%03.0fkHz-%02dbit-conv%s-sampl%s-avrg%02d.wav", 0.001*aidata.rate(),
+            aidata.resolution(), convs, sampls, aidata.averaging());
     Serial.println(fname);
     file.openWave(fname, aidata);
     aidata.start();
