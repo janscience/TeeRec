@@ -47,7 +47,8 @@ class Blink {
   
   int Pin;
   bool On;
-  uint32_t *Times[2];
+  static const int MaxTimes = 11;
+  uint32_t Times[2][MaxTimes];
   int Index;
   int State;
   elapsedMillis Time;
