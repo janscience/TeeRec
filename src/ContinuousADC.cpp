@@ -202,8 +202,33 @@ void ContinuousADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
 }
 
 
-const char *ContinuousADC::samplingSpeed() const {
+const char *ContinuousADC::samplingSpeedStr() const {
   return getSamplingEnumStr(SamplingSpeed);
+}
+
+
+const char *ContinuousADC::samplingSpeedShortStr() const {
+  switch (SamplingSpeed) {
+  case ADC_SAMPLING_SPEED::VERY_LOW_SPEED:
+    return (const char *)"verylow";
+  case ADC_SAMPLING_SPEED::LOW_SPEED:
+    return (const char *)"low";
+  case ADC_SAMPLING_SPEED::MED_SPEED:
+    return (const char *)"med";
+  case ADC_SAMPLING_SPEED::HIGH_SPEED:
+    return (const char *)"high";
+  case ADC_SAMPLING_SPEED::VERY_HIGH_SPEED:
+    return (const char *)"veryhigh";
+#if defined(ADC_TEENSY_4) // Teensy 4
+  case ADC_SAMPLING_SPEED::LOW_MED_SPEED:
+    return (const char *)"lowmed";
+  case ADC_SAMPLING_SPEED::MED_HIGH_SPEED:
+    return (const char *)"medhigh";
+  case ADC_SAMPLING_SPEED::HIGH_VERY_HIGH_SPEED:
+    return (const char *)"highveryhigh";
+#endif
+  }
+  return (const char *)"NONE";
 }
 
 
@@ -271,7 +296,7 @@ bool ContinuousADC::check() {
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  conversion: %s\n", conversionSpeedStr());
-  Serial.printf("  sampling:   %s\n", samplingSpeed());
+  Serial.printf("  sampling:   %s\n", samplingSpeedStr());
   Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
   Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");
   Serial.printf("  Pins:       %s\n", chans);
@@ -554,6 +579,14 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->stopTimer();
   ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
   Bits = ADConv.adc[adc]->getResolution();
+
+  /*
+  analogReadResolution(Bits);
+  //analogReference(DEFAULT);
+  analogReadAveraging(Averaging);
+  analogRead(Channels[adc][0]);
+  */
+
   DataShift = DataBits - Bits;
 }
 

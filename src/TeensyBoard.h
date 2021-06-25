@@ -26,13 +26,13 @@
   #elif defined(__IMXRT1062__) // Teensy 4.0/4.1
     // They only differ in the number of exposed pins
     #define TEENSY4
+    #ifdef ARDUINO_TEENSY41
+      #define TEENSY41
+    #else
+      #define TEENSY40
+    #endif
   #else
     #error "Unknown Teensy board!"
-  #endif
-  #ifdef ARDUINO_TEENSY41
-    #define TEENSY41
-  #else
-    #define TEENSY40
   #endif
 #else
   #error "Non Teensy boards not supported"

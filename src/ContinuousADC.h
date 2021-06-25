@@ -150,6 +150,12 @@ class ContinuousADC {
   // Set the conversion speed by chaning the ADC clock.
   // One of VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED_16BITS,
   // HIGH_SPEED, VERY_HIGH_SPEED, ADACK_2_4, ADACK_4_0, ADACK_5_2 or ADACK_6_2.
+  // From https://forum.pjrc.com/threads/25532-ADC-library-update-now-with-support-for-Teensy-3-1:
+  // The measurement of a voltage takes place in two steps:
+  //   Sampling: Load an internal capacitor with the voltage you want to measure.
+  //   The longer you let this capacitor be charged, the closest it will resemble the voltage.
+  //   Conversion: Convert that voltage into a digital representation that is as close
+  //   as possible to the selected resolution.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // Return string describing the selected conversion speed.
@@ -161,11 +167,21 @@ class ContinuousADC {
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
   // decrease it for higher impedance ones.
-  // One of VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED, VERY_HIGH_SPEED.
+  // One of VERY_LOW_SPEED, LOW_SPEED, LOW_MED_SPEED, MED_SPEED, MED_HIGH_SPEED,
+  // HIGH_SPEED, HIGH_VERY_HIGH_SPEED, VERY_HIGH_SPEED.
+  // From https://forum.pjrc.com/threads/25532-ADC-library-update-now-with-support-for-Teensy-3-1:
+  // The measurement of a voltage takes place in two steps:
+  //   Sampling: Load an internal capacitor with the voltage you want to measure.
+  //   The longer you let this capacitor be charged, the closest it will resemble the voltage.
+  //   Conversion: Convert that voltage into a digital representation that is as close
+  //   as possible to the selected resolution.
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
-  // Return pointer to string describing sampling speed.
-  const char *samplingSpeed() const;
+  // Return string describing the selected sampling speed.
+  const char *samplingSpeedStr() const;
+
+  // Return a short string describing the selected sampling speed.
+  const char *samplingSpeedShortStr() const;
 
   // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;

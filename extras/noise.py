@@ -53,18 +53,18 @@ def plot_hist(path, save, subtract_mean=True):
         print('%s\t%2d\t%5.0f\t%5.0f' % (basename, c, m, s))
         n, b = np.histogram(data[:,c], abins);
         nmax = np.max(n)
+        i0 = np.argmax(n>0)
+        i1 = len(n) - np.argmax(n[::-1]>0)
         if subtract_mean:
             b -= m
-            axs[c].fill_between(b[:-1][n>1], n[n>1], 1);
+            axs[c].fill_between(b[i0:i1], n[i0:i1]);
             axs[c].axvline(0, color='k')
             axs[c].plot([-s, +s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         else:
-            axs[c].fill_between(b[:-1][n>1], n[n>1], 1);
+            axs[c].fill_between(b[i0:i1], n[i0:i1]);
             axs[c].axvline(m, color='k')
             axs[c].plot([m-s, m+s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         axs[c].set_title('channel %d' % c)
-        #axs[c].set_yscale('log')
-        #axs[c].set_ylim(1, 1.1*nmax)
         if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel('Amplitude [integer]')
         axs[c].text(0.95, 0.87, '$\mu$=%.0f' % m, ha='right', transform=axs[c].transAxes)
@@ -82,4 +82,4 @@ if __name__ == '__main__':
         if path == '-s':
             save = True
             continue
-        plot_hist(path, save)
+        plot_hist(path, save, True)

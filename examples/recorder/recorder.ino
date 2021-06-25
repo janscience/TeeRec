@@ -4,8 +4,8 @@
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
 #include "fonts/FreeSans8pt7b.h"
-//#define ST7735
-#define ILI9341
+#define ST7735
+//#define ILI9341
 #if defined(ST7735)
   #include <Adafruit_ST7735.h>       // 1.44""
 #elif defined(ILI9341)
@@ -21,18 +21,17 @@
 // Settings: --------------------------------------------------------------------------------
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
-int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
+int averaging = 1;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
 uint32_t samplingRate = 20000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, -1, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
-int8_t channels1 [] =  {A16, A17, -1, A18, A19, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
+int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
 bool logging = false;                // keep saving to files
-//char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-char fileName[] = "AVG1-NUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
@@ -49,7 +48,10 @@ SDWriter file;
 size_t fileSamples = 0;
 
 Display screen;
+#if defined(ILI9341)
 Adafruit_FT6206 touch = Adafruit_FT6206();
+#endif
+bool freezePlots = false;
 elapsedMillis screenTime;
 
 RTClock rtclock;
@@ -153,9 +155,9 @@ void splashScreen() {
   screen.writeText(0, "TeeRec recorder");
   screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   char msg[100];
-  String convspeed = aidata.conversionSpeed();
+  String convspeed = aidata.conversionSpeedShortStr();
   convspeed.replace("_SPEED", "");
-  String samplspeed = aidata.samplingSpeed();
+  String samplspeed = aidata.samplingSpeedShortStr();
   samplspeed.replace("_SPEED", "");
   float bt = aidata.bufferTime();
   if (bt < 1.0)
@@ -190,7 +192,10 @@ void setupButtons() {
 
 
 void plotData() {   // 85ms
-  if (screenTime > updateScreen && ! touch.touched()) {
+#if defined(ILI9341)
+  freezePlots = touch.touched();
+#endif
+  if (screenTime > updateScreen && ! freezePlots) {
     screenTime -= updateScreen;
     // text: 36ms
     if (file.isOpen())
