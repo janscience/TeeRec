@@ -32,10 +32,9 @@ Display::Display() {
     TextB[k] = 0;
     TextC[k] = 0;
     TextI[k] = 0;
-    TextT[k] = 0;
     TextS[k] = false;
-    TextCanvas[k] = 0;
     TextHead[k] = 0;
+    TextCanvas[k] = 0;
   }
   memset(Text, 0, sizeof(Text));
   Font = 0;
@@ -149,7 +148,8 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
   }
   TextC[area] = TextW[area]*3/w;
   TextI[area] = 0;
-  TextT[area] = 0;
+  TextHead[area] = 0;
+  Text[area][0][0] = '\0';
   return float(h)/float(Height);
 }
   
@@ -157,10 +157,7 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
 void Display::clearText(uint8_t area) {
   if (TextW[area] == 0 )
     return;
-  if (TextT != 0) {
-    delete [] TextT[area];
-    TextT[area] = 0;
-  }
+  Text[area][TextHead[area]][0] = '\0';
   TextCanvas[area]->fillScreen(0x0000);
   Screen->drawBitmap(TextX[area], TextY[area], TextCanvas[area]->getBuffer(),
 		     TextW[area], TextH[area], TextColor, TextBackground);
@@ -201,23 +198,20 @@ void Display::writeText(uint8_t area, const char *text) {
   if (TextW[area] == 0 )
     return;
   drawText(area, text);
-  if (TextT != 0)
-    delete [] TextT[area];
-  TextT[area] = new char[strlen(text)+1];
-  strcpy(TextT[area], text);
+  strncpy(Text[area][TextHead[area]], text, MaxChars);
   TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
   TextI[area] = 0;
 }
 
 
 void Display::scrollText(uint8_t area) {
-  if (TextT[area] == 0)
+  if (Text[area][TextHead[area]][0] == '\0')
     return;
   if (! TextS[area])
     return;
-  drawText(area, &TextT[area][TextI[area]]);
+  drawText(area, &Text[area][TextHead[area]][TextI[area]]);
   TextI[area]++;
-  if (TextI[area] >= strlen(TextT[area]) - 1)
+  if (TextI[area] >= strlen(Text[area][TextHead[area]]) - 1)
     TextI[area] = 0;
 }
 
@@ -225,11 +219,8 @@ void Display::scrollText(uint8_t area) {
 void Display::pushText(uint8_t area, const char *text) {
   if (TextW[area] == 0 )
     return;
-  if (TextHead[area] < MaxTexts && TextT != 0) {
-    Text[area][TextHead[area]] = TextT[area];
-    TextT[area] = 0;
+  if (TextHead[area] < MaxTexts)
     TextHead[area]++;
-  }
   writeText(area, text);
 }
 
@@ -237,16 +228,10 @@ void Display::pushText(uint8_t area, const char *text) {
 void Display::popText(uint8_t area) {
   if (TextW[area] == 0 )
     return;
-  if (TextT != 0) {
-    delete [] TextT[area];
-    TextT[area] = 0;
-  }
-  if (TextHead[area] > 0) {
+  if (TextHead[area] > 0)
     TextHead[area]--;
-    TextT[area] = Text[area][TextHead[area]];
-  }
-  if (TextT[area] != 0) {
-    drawText(area, TextT[area]);
+  if (Text[area][TextHead[area]][0] != '\0') {
+    drawText(area, Text[area][TextHead[area]]);
     TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
     TextI[area] = 0;
   }

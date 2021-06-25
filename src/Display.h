@@ -218,15 +218,15 @@ class Display {
   int16_t TextW[MaxAreas];
   int16_t TextH[MaxAreas];
   int16_t TextB[MaxAreas];
-  uint16_t TextC[MaxAreas];   // max number of characters
-  uint16_t TextI[MaxAreas];   // character offset
-  bool TextS[MaxAreas];       // scroll it
-  char *TextT[MaxAreas];      // text
-  PROGMEM GFXcanvas1 *TextCanvas[MaxAreas];
+  uint16_t TextC[MaxAreas];          // max number of characters
+  uint16_t TextI[MaxAreas];          // character offset
+  bool TextS[MaxAreas];              // scroll it
   // Text stack:
   static const uint8_t MaxTexts = 8;
-  char *Text[MaxAreas][MaxTexts];
+  static const size_t MaxChars = 100;
+  char Text[MaxAreas][MaxTexts][MaxChars];
   int TextHead[MaxAreas];
+  PROGMEM GFXcanvas1 *TextCanvas[MaxAreas];
 
   void drawText(uint8_t area, const char *text);
 
