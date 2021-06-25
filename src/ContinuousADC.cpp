@@ -471,28 +471,32 @@ size_t ContinuousADC::writeData(FsFile &file) {
     return 0;
   size_t last = currentSample();
   size_t nwrite = 0;
-  if (BufferRead >= last) {
+  if (BufferRead >= last && last != 0) {
     nwrite = NBuffer - BufferRead;
-    if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
-      nwrite = FileMaxSamples - FileSamples;
-    nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
-    samples0 = nbytes / sizeof(sample_t);
-    BufferRead += samples0;
-    if (BufferRead >= NBuffer)
-      BufferRead -= NBuffer;
-    FileSamples += samples0;
+    if (nwrite > 0) {
+      if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
+	nwrite = FileMaxSamples - FileSamples;
+      nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
+      samples0 = nbytes / sizeof(sample_t);
+      BufferRead += samples0;
+      if (BufferRead >= NBuffer)
+	BufferRead -= NBuffer;
+      FileSamples += samples0;
+    }
   }
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
     return samples0;
   nwrite = last - BufferRead;
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;
-  nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
-  samples1 = nbytes / sizeof(sample_t);
-  BufferRead += samples1;
-  if (BufferRead >= NBuffer)
-    BufferRead -= NBuffer;
-  FileSamples += samples1;
+  if (nwrite > 0) {
+    nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
+    samples1 = nbytes / sizeof(sample_t);
+    BufferRead += samples1;
+    if (BufferRead >= NBuffer)
+      BufferRead -= NBuffer;
+    FileSamples += samples1;
+  }
   return samples0 + samples1;
 }
 
