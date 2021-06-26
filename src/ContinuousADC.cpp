@@ -473,9 +473,9 @@ size_t ContinuousADC::writeData(FsFile &file) {
   size_t nwrite = 0;
   if (BufferRead >= last && ! (last == 0 && BufferRead ==0)) {
     nwrite = NBuffer - BufferRead;
+    if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
+      nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
-      if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
-	nwrite = FileMaxSamples - FileSamples;
       nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
       samples0 = nbytes / sizeof(sample_t);
       BufferRead += samples0;
