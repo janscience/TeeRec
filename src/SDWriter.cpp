@@ -45,6 +45,32 @@ void SDWriter::dataDir(const char *path) {
 }
 
 
+void SDWriter::removeFiles(const char *path) {
+  FsFile dir;
+  FsFile file;
+  if (! SDAvailable)
+    return;
+  if (!dir.open(path))
+    return;
+  Serial.printf("Removing all files in %s:\n", path);
+  while (file.openNext(&dir, O_WRITE)) {
+    if (!file.isDir()) {
+      char fname[200];
+      file.getName(fname, 200);
+      if (file.remove()) {
+	Serial.print("  ");
+	Serial.println(fname);
+      }
+      else {
+	Serial.print("  Failed to remove file ");
+	Serial.println(fname);
+      }
+    }
+  }
+  Serial.println("done");
+}
+
+
 void SDWriter::setWriteInterval(const ContinuousADC &adc) {
   WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
 }

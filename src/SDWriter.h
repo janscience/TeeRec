@@ -24,7 +24,8 @@
   const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
 #endif
 
-#define SD_CONFIG SdioConfig(FIFO_SDIO)
+//#define SD_CONFIG SdioConfig(FIFO_SDIO)
+#define SD_CONFIG BUILTIN_SDCARD
 //#define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
 
 
@@ -48,6 +49,9 @@ class SDWriter {
 
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
+
+  // Remove all files in path (non-recursively).
+  void removeFiles(const char *path);
 
   // Set write interval depending on adc settings.
   // Call this *after* setting up ContinusADC in setup().
