@@ -34,8 +34,7 @@ WaveHeader::Chunk::Chunk(const char *id, uint32_t size) {
 
 
 void WaveHeader::Chunk::setSize(uint32_t size) {
-  //Header.Size = ((size+1) >> 1) << 1; // even size needed for wave
-  Header.Size = ((size+3) >> 2) << 2; // but 4 bytes aligned needed for SdFat for some unknown reason...
+  Header.Size = ((size+1) >> 1) << 1; // even size needed for wave
 }
 
 
@@ -205,15 +204,24 @@ void WaveHeader::assemble() {
   Info.Header.Size = 4;
   for (int k=3; k<nchunks-1; k++)
     Info.addSize(chunks[k]->NBuffer);
-  // make header:
+  // expand to next multiple of 4:
+  uint32_t infosize = ((Info.Header.Size+3) >> 2) << 2;
+  infosize -= Info.Header.Size;
+  Info.Header.Size += infosize;
+  Riff.Header.Size += infosize;
+  NBuffer += infosize;
+  // assemble header buffer:
   if (NBuffer > MaxBuffer) {
     NBuffer = 0;
     Serial.println("WaveHeader::assemble(): Header too large!\n");
   }
+  memset(Buffer, 0, sizeof(Buffer));
   uint32_t idx = 0;
-  for (int k=0; k<nchunks; k++) {
+  for (int k=0; k<nchunks-1; k++) {
     memcpy(&Buffer[idx], chunks[k]->Buffer, chunks[k]->NBuffer);
     idx += chunks[k]->NBuffer;
   }
+  idx += infosize;
+  memcpy(&Buffer[idx], Data.Buffer, Data.NBuffer);
 }
 
