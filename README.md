@@ -27,6 +27,7 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - WaveHeader: Setting up wave file header with metadata.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
+- Blink: Blinking LEDs.
 - PushButtons: Manage and query push buttons with callback functions.
 - TestSignals: Generate test signals on pulse-width modulation pins.
 - TeensyBoard: Find out which Teensy board we are running on.
@@ -37,4 +38,7 @@ Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/
 - scope: Show acquired data on a display.
 - logger: Continuously store data on SD card.
 - recorder: Show acquired data on a display and store data on SD card upon user request.
+- averaging: Test various averaging settings for acquisition.
+- removefiles: Remove all files from a directory on SD card.
+- blink: Demonstrate usage of Blink class.
 - pushbuttons: Demonstrate usage of PushButtons class.
