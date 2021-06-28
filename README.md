@@ -70,15 +70,15 @@ in [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html).
 
 For installing [SdFat version2](https://github.com/greiman/SdFat),
 [Bounce2](https://github.com/thomasfredericks/Bounce2), and the
-libraries for the TFT monior, open in the Arduino IDE: Tools - Manage
+libraries for the TFT monitor, open in the Arduino IDE: Tools - Manage
 libraries. Search for "SdFat", "Bounce2" and the TFT libraries and
 install them.
 
 
 ## Installation
 
-Clone the [TeeRec](https://github.com/janscience/TeeRec) directly into
-'Arduino/libraries':
+Clone the [TeeRec](https://github.com/janscience/TeeRec) repository
+directly into 'Arduino/libraries':
 ```sh
 cd Arduino/libraries
 git clone https://github.com/janscience/TeeRec.git
