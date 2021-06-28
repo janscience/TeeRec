@@ -86,6 +86,7 @@ void setup() {
   setupADC();
   setupStorage();
   aidata.start();
+  aidata.report();
 }
 
 

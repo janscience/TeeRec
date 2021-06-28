@@ -96,6 +96,7 @@ void setup() {
   setupScreen();
   screenTime = 0;
   aidata.start();
+  aidata.report();
 }
 
 

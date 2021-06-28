@@ -255,6 +255,7 @@ void setup() {
   setupStorage();
   screenTime = 0;
   aidata.start();
+  aidata.report();
 }
 
 

@@ -192,8 +192,11 @@ class ContinuousADC {
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
-  // If successfull, you can remove this check from your code.
+  // If successfull, you may remove this check from your code.
   bool check();
+
+  // Print current settings on Serial.
+  void report();
  
   // Start the acquisition based on the channel, rate, and buffer settings.
   void start();

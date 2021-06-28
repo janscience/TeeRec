@@ -288,7 +288,13 @@ bool ContinuousADC::check() {
     Serial.printf("ERROR: averaging must be one of 0, 1, 4, 8, 16, 32\n");
     return false;
   }
-  // report:
+  return true;
+}
+
+  
+void ContinuousADC::report() {
+  if (!Serial)
+    return;
   char chans[100];
   channels(chans);
   Serial.println("ADC settings:");
@@ -306,7 +312,6 @@ bool ContinuousADC::check() {
   else
     Serial.printf("  Buffer:     %.2fs\n", bt);
   Serial.println();
-  return true;
 }
 
   
