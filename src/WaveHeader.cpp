@@ -12,6 +12,7 @@ WaveHeader::WaveHeader() :
   Conversion("CNVS", ""),
   Sampling("SMPS", ""),
   Board("IBRD", teensyStr()),
+  MAC("IMAC", teensyMAC()),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
@@ -170,7 +171,7 @@ void WaveHeader::clearSoftware() {
 
 void WaveHeader::assemble() {
   // riff chunks:
-  const int maxchunks = 12;
+  const int maxchunks = 14;
   int nchunks = 0;
   Chunk *chunks[maxchunks];
   chunks[nchunks++] = &Riff;
@@ -187,6 +188,8 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Sampling;
   if (Board.Use)
     chunks[nchunks++] = &Board;
+  if (MAC.Use)
+    chunks[nchunks++] = &MAC;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)

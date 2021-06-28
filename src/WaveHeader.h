@@ -129,6 +129,7 @@ protected:
   InfoChunk Conversion;
   InfoChunk Sampling;
   InfoChunk Board;
+  InfoChunk MAC;
   InfoChunk DateTime;
   InfoChunk Software;
   DataChunk Data;

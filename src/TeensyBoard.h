@@ -38,8 +38,23 @@
   #error "Non Teensy boards not supported"
 #endif
 
-
 // Return string with name of Teensy board.
 const char *teensyStr();
+
+
+// From https://github.com/sstaub/TeensyID :
+
+// Pointer to an  array with size of 4 uint8_t containing the serial number
+void teensySN(uint8_t *sn);
+
+// Serial number as a formated string in hex xx-xx-xx-xx
+const char *teensySN(void);
+
+
+// Pointer to an array with size of 6 uint8_t containing the MAC address
+void teensyMAC(uint8_t *mac);
+
+// MAC address as formated string in hex xx:xx:xx:xx:xx:xx
+const char *teensyMAC(void);
 
 #endif
