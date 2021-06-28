@@ -33,6 +33,7 @@ def test_continuity(pathes):
     isis = [[] for k in range(nchannels)]
     isis0 = np.zeros((nchannels, len(pathes)))
     isis1 = np.zeros((nchannels, len(pathes)))
+    n = 0;
     for k, path in enumerate(pathes):
         if not first:
             data, rate = load_wave(path)
@@ -42,6 +43,7 @@ def test_continuity(pathes):
             break
         first = False
         print(path)
+        n += 1
         for c in range(nchannels):
             nup = np.sum(data[:,c] > 1024*16)
             ndown = np.sum(data[:,c] < -1024*16)
@@ -54,7 +56,7 @@ def test_continuity(pathes):
     fig, axs = plt.subplots(2, nchannels//2)
     axs = axs.ravel()
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
-    intervals = isis1[:,:-1] + isis0[:,1:]
+    intervals = isis1[:,:n-1] + isis0[:,1:n]
     for c in range(nchannels):
         if len(isis[c]) > 10:
             period = np.mean(isis[c])/samplerate
