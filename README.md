@@ -2,10 +2,17 @@
 
 Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.5 microcontroller.
 
-Based on Pedro Villanueva's [ADC](https://github.com/pedvide/ADC) library, 
-Paul Stoffregen's [DMAChannel](https://github.com/PaulStoffregen/cores/tree/master/teensy3),
-Bill Greiman's [SdFat](https://github.com/greiman/SdFat) library, and on
-Stefan Mucha's first [EOD logger sketch](https://github.com/muchaste/EOD-Logger/tree/master/eodlogger_v1) with contributions by [Lydia Federman](https://github.com/LydiaFe/EOD-Logger) and [Sebastian Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2channel_barebone/eodlogger_8channel.ino) (multiplexing support).
+Based on Pedro Villanueva's [ADC](https://github.com/pedvide/ADC)
+library, Paul Stoffregen's
+[DMAChannel](https://github.com/PaulStoffregen/cores/tree/master/teensy3),
+Bill Greiman's [SdFat](https://github.com/greiman/SdFat) library, and
+on Stefan Mucha's first
+[EOD logger sketch](https://github.com/muchaste/EOD-Logger/tree/master/eodlogger_v1)
+with contributions by
+[Lydia Federman](https://github.com/LydiaFe/EOD-Logger)
+(simultaneous recordings from both ADCs) and
+[Sebastian Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2channel_barebone/eodlogger_8channel.ino)
+(multiplexing).
 
 
 ## Features
