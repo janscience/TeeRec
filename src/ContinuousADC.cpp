@@ -27,6 +27,7 @@ ContinuousADC::ContinuousADC() {
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
   SamplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
+  Reference = ADC_REFERENCE::REF_3V3;
   Rate = 0;
   ADCUse = 0;
   ADCC = this;
@@ -232,6 +233,23 @@ const char *ContinuousADC::samplingSpeedShortStr() const {
 }
 
 
+void ContinuousADC::setReference(ADC_REFERENCE ref) {
+  Reference = ref;
+}
+
+
+const char *ContinuousADC::referenceStr() const {
+  if (Reference == ADC_REFERENCE::REF_3V3)
+    return (const char *)"3V3";
+  else if (Reference == ADC_REFERENCE::REF_1V2)
+    return (const char *)"1V2";
+  else if (Reference == ADC_REFERENCE::REF_EXT)
+    return (const char *)"EXT";
+  else
+    return (const char *)"NONE";
+}
+
+
 float ContinuousADC::bufferTime() const {
   return float(NBuffer/nchannels())/Rate;
 }
@@ -298,7 +316,10 @@ void ContinuousADC::report() {
   char chans[100];
   channels(chans);
   Serial.println("ADC settings:");
-  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  //Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  Serial.print("  rate:       ");
+  Serial.print(0.001*Rate);
+  Serial.println("kHz");
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  conversion: %s\n", conversionSpeedStr());
@@ -306,11 +327,13 @@ void ContinuousADC::report() {
   Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
   Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");
   Serial.printf("  Pins:       %s\n", chans);
+  /*
   float bt = bufferTime();
   if (bt < 1.0)
     Serial.printf("  Buffer:     %.0fms\n", 1000.0*bt);
   else
     Serial.printf("  Buffer:     %.2fs\n", bt);
+  */
   Serial.println();
 }
 
@@ -591,22 +614,14 @@ void ContinuousADC::setupChannels(uint8_t adc) {
 
 void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setAveraging(Averaging);
-  ADConv.adc[adc]->setResolution(Bits);                  // bit depth of ADC
-  ADConv.adc[adc]->setReference(ADC_REFERENCE::REF_3V3); // reference voltage
+  ADConv.adc[adc]->setResolution(Bits);
+  ADConv.adc[adc]->setReference(Reference);
   ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
   ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
-  ADConv.adc[adc]->enableDMA();                          // connect DMA and ADC
+  ADConv.adc[adc]->enableDMA();
   ADConv.adc[adc]->stopTimer();
   ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
   Bits = ADConv.adc[adc]->getResolution();
-
-  /*
-  analogReadResolution(Bits);
-  //analogReference(DEFAULT);
-  analogReadAveraging(Averaging);
-  analogRead(Channels[adc][0]);
-  */
-
   DataShift = DataBits - Bits;
 }
 

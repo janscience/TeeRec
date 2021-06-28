@@ -28,10 +28,11 @@
     aidata.setChannels(0, channels0);
     aidata.setChannels(1, channels1);
     aidata.setRate(samplingRate);
-    aidata.setResolution(12);   // 10bit 12bit, 16bit 
+    aidata.setResolution(12);   // 10bit, 12bit, 16bit 
     aidata.setMaxFileTime(60);  // seconds
     aidata.check();
     aidata.start();
+    aidata.report();
   }
   ```
 
@@ -183,6 +184,14 @@ class ContinuousADC {
   // Return a short string describing the selected sampling speed.
   const char *samplingSpeedShortStr() const;
 
+  // Set the voltage preference.
+  // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
+  // Teensy 4.x has only 3V3, on Teensy 3.x EXT equals 3V3.
+  void setReference(ADC_REFERENCE ref);
+
+  // Return string describing the selected voltage reference.
+  const char *referenceStr() const;
+
   // Time the cyclic buffer can hold in seconds.
   float bufferTime() const;
 
@@ -282,6 +291,7 @@ class ContinuousADC {
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;
   ADC_SAMPLING_SPEED SamplingSpeed;
+  ADC_REFERENCE Reference;
 
   ADC ADConv;
   

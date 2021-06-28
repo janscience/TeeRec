@@ -37,6 +37,9 @@ public:
   // Set string describing sampling speed.
   void setSamplingSpeed(const char *sampling);
 
+  // Set string describing voltage reference.
+  void setReference(const char *ref);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -128,6 +131,7 @@ protected:
   InfoChunk Averaging;
   InfoChunk Conversion;
   InfoChunk Sampling;
+  InfoChunk Reference;
   InfoChunk Board;
   InfoChunk MAC;
   InfoChunk DateTime;

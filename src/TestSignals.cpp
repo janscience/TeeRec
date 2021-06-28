@@ -55,7 +55,7 @@ void setupTestSignals(int *pins, int frequency) {
   // report:
   for (int k=0; k<MaxSignalPins && pins[k]>=0; k++) {
     if (freqs[k] > 0)
-      Serial.printf("  pin %2d: %5dHz, %3.0f%% duty cycle\n", pins[k], freqs[k], 100.0*dcs[k]);
+      Serial.printf("  pin %2d: %5dHz, %3d%% duty cycle\n", pins[k], freqs[k], int(100.0*dcs[k]));
   }
   Serial.println();
 }
