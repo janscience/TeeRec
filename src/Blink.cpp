@@ -10,6 +10,7 @@ Blink::Blink(int pin) {
   memset(Times, 0, sizeof(Times));
   Index = 0;
   State = 0;
+  Delay = 0;
 }
 
 
@@ -36,6 +37,30 @@ void Blink::set(const uint32_t *times) {
   Index = 0;
   Time = 0;
   switchOn();
+}
+
+
+void Blink::setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms) {
+  set(intervalms, onms);
+  Delay = delayms;
+  if (Delay > 0)
+    switchOff();
+}
+
+
+void Blink::setDelayed(uint32_t delayms, const uint32_t *times) {
+  set(times);
+  Delay = delayms;
+  if (Delay > 0)
+    switchOff();
+}
+
+
+void Blink::clear() {
+  Times[0][0] = 0;
+  Index = 0;
+  Time = 0;
+  switchOff();
 }
 
 
@@ -76,6 +101,16 @@ void Blink::switchOff() {
 
 
 void Blink::update() {
+  if (Delay > 0) {
+    if (Time > Delay) {
+      Time = 0;
+      switchOn();
+      Delay = 0;
+    }
+    return;
+  }
+  if (State == 0 && Index == 0 && Times[State][Index] == 0)
+    return;
   if (Time > Times[State][Index]) {
     Time -= Times[State][Index];
     switchOn(Index%2 == 1);
@@ -89,6 +124,3 @@ void Blink::update() {
     }
   }
 }
-
-
-

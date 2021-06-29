@@ -24,6 +24,18 @@ class Blink {
   // First interval is LED on. Null terminated.
   void set(const uint32_t *times);
 
+  // Set simple blink interval. Every intervalms the LED is on for onms,
+  // starting after a delay of delayms milliseconds.
+  void setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms);
+
+  // Set arbitrary blink intervals that repeat periodically,
+  // starting after a delay of delayms milliseconds.
+  // First interval is LED on. Null terminated.
+  void setDelayed(uint32_t delayms, const uint32_t *times);
+
+  // Switch off all blinking.
+  void clear();
+  
   // One shot simple blink interval. Within intervalms the LED is on for onms.
   // After finishing fall back to the default blinking defined by set().
   void blink(uint32_t intervalms, uint32_t onms);
@@ -49,6 +61,7 @@ class Blink {
   bool On;
   static const int MaxTimes = 11;
   uint32_t Times[2][MaxTimes];
+  uint32_t  Delay;
   int Index;
   int State;
   elapsedMillis Time;
