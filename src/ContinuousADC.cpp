@@ -240,9 +240,9 @@ void ContinuousADC::setReference(ADC_REFERENCE ref) {
 
 const char *ContinuousADC::referenceStr() const {
   if (Reference == ADC_REFERENCE::REF_3V3)
-    return (const char *)"3V3";
+    return (const char *)"3.3V";
   else if (Reference == ADC_REFERENCE::REF_1V2)
-    return (const char *)"1V2";
+    return (const char *)"1.2V";
   else if (Reference == ADC_REFERENCE::REF_EXT)
     return (const char *)"EXT";
   else
@@ -316,24 +316,20 @@ void ContinuousADC::report() {
   char chans[100];
   channels(chans);
   Serial.println("ADC settings:");
-  //Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
-  Serial.print("  rate:       ");
-  Serial.print(0.001*Rate);
-  Serial.println("kHz");
+  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
   Serial.printf("  conversion: %s\n", conversionSpeedStr());
   Serial.printf("  sampling:   %s\n", samplingSpeedStr());
+  Serial.printf("  reference:  %s\n", referenceStr());
   Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
   Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");
   Serial.printf("  Pins:       %s\n", chans);
-  /*
   float bt = bufferTime();
   if (bt < 1.0)
     Serial.printf("  Buffer:     %.0fms\n", 1000.0*bt);
   else
     Serial.printf("  Buffer:     %.2fs\n", bt);
-  */
   Serial.println();
 }
 
