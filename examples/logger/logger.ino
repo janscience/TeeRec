@@ -45,14 +45,26 @@ void setupADC() {
 void openNextFile() {
   String name = rtclock.makeStr(fileName, true);
   name = file.incrementFileName(name);
-  if (name.length() == 0)
+  if (name.length() == 0) {
+    Serial.println("WARNING: failed to open file on SD card.");
+    Serial.println("SD card probably not inserted.");
+    Serial.println();
     return;
+  }
   char dts[20];
   rtclock.dateTime(dts);
   file.openWave(name.c_str(), aidata, -1, dts);
   aidata.writeData(file.file());
   Serial.println(name);
-  blink.blink(2000, 1000);
+  if (file.isOpen()) {
+    blink.set(2000, 20);
+    blink.blink(2000, 1000);
+  }
+  else {
+    Serial.println();
+    Serial.println("WARNING: failed to open file on SD card.");
+    Serial.println("SD card probably not inserted.");
+  }
 }
 
 
@@ -66,9 +78,18 @@ void setupStorage() {
 
 void storeData() {
   if (file.needToWrite()) {
-    aidata.writeData(file.file());
+    size_t samples = aidata.writeData(file.file());
+    if (samples == 0) {
+      blink.clear();
+      Serial.println();
+      Serial.println("ERROR: data acquisition not running.");
+      Serial.println("sampling rate probably too high,");
+      Serial.println("given the number of channels, averaging, sampling and conversion speed.");
+      while(1) {};
+    }
     if (aidata.endWrite()) {
       file.close();  // file size was set by openWave()
+      blink.clear();
       openNextFile();
     }
   }
@@ -78,12 +99,13 @@ void storeData() {
 // ------------------------------------------------------------------------------------------
 
 void setup() {
+  blink.switchOn();
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  blink.set(2000, 20);
   setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
+  blink.switchOff();
   setupStorage();
   aidata.start();
   aidata.report();
