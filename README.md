@@ -1,6 +1,6 @@
 # TeeRec - Teensy recorder
 
-Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.5 microcontroller.
+Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.5/3.6 microcontrollers.
 
 Based on Pedro Villanueva's [ADC](https://github.com/pedvide/ADC)
 library, Paul Stoffregen's
@@ -73,7 +73,8 @@ The Display library currently uses:
 
 The [Arduino Time Library](https://github.com/PaulStoffregen/Time) and
 [ADC](https://github.com/pedvide/ADC) libraries are already included
-in [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html).
+in [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
+installing Teensyduino make sure you selected them.
 
 For installing [SdFat version2](https://github.com/greiman/SdFat),
 [Bounce2](https://github.com/thomasfredericks/Bounce2), and the
