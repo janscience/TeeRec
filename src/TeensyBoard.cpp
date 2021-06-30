@@ -1,7 +1,7 @@
 #include "TeensyBoard.h"
 
 
-const char *teensyStr() {
+const char *teensyBoard() {
 #if defined(TEENSY41)
   return (const char *)"Teensy 4.1";
 #elif defined(TEENSY40)

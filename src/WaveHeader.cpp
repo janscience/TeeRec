@@ -12,7 +12,7 @@ WaveHeader::WaveHeader() :
   Conversion("CNVS", ""),
   Sampling("SMPS", ""),
   Reference("VREF", ""),
-  Board("IBRD", teensyStr()),
+  Board("IBRD", teensyBoard()),
   MAC("IMAC", teensyMAC()),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),

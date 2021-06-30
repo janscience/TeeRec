@@ -39,7 +39,7 @@
 #endif
 
 // Return string with name of Teensy board.
-const char *teensyStr();
+const char *teensyBoard();
 
 
 // From https://github.com/sstaub/TeensyID :
