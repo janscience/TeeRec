@@ -51,6 +51,7 @@ with contributions by
 - recorder: Show acquired data on a display and store data on SD card upon user request.
 - averaging: Test various averaging settings for acquisition.
 - removefiles: Remove all files from a directory on SD card.
+- teensyboard: Print Teensy board version, serial number and MAC adress.
 - blink: Demonstrate usage of Blink class.
 - pushbuttons: Demonstrate usage of PushButtons class.
 
