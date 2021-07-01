@@ -3,8 +3,18 @@
 #include <ContinuousADC.h>
 
 
+#if !defined(PIN_A13)
+const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12};
+#elif !defined(PIN_A14)
+const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13};
+#elif !defined(PIN_A21)
 const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
-					A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23};
+					A13, A14, A15, A16, A17, A18, A19, A20};
+#else
+const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
+					A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23, A24, A25, A26};
+#endif
+
 
 ContinuousADC *ContinuousADC::ADCC = 0;
 volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];

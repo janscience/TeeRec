@@ -12,12 +12,13 @@ void testSignal(int pin, int frequency, float dc) {
 
 void setupTestSignals(int *pins, int frequency) {
   Serial.println("Test signals:");
-  // pins 0-10 with same timer:
-#if defined(TEENSY35) || defined(TEENSY36)
-  int pintimer[MaxSignalPins] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
-#elif defined(TEENSY40) || defined(TEENSY41)
-  // Teensy 3.5 & 3.6, pins 0-10 with same frequency:
+  // pins 0-10:
+#if defined(TEENSY40) || defined(TEENSY41)
   int pintimer[MaxSignalPins] = {1, 2, 3, 3, 4, 5, 6, 7, 7, 6, 8};
+#elif defined(TEENSY35) || defined(TEENSY36)
+  int pintimer[MaxSignalPins] = {0, 0, 1, 2, 2, 3, 3, 1, 1, 3, 3};
+#elif defined(TEENSY32)
+  int pintimer[MaxSignalPins] = {0, 0, 0, 1, 1, 2, 2, 0, 0, 2, 2};
 #else
   #error "Board not supported for PWM signal generation."
 #endif

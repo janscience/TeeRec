@@ -14,7 +14,7 @@
 
 #if defined(TEENSYDUINO) 
   #if defined(__MK20DX256__)   // Teensy 3.1/3.2
-    #define TEENSY31
+    #define TEENSY32
   #elif defined(__MK20DX128__) // Teensy 3.0
     #define TEENSY30
   #elif defined(__MKL26Z64__)  // Teensy LC

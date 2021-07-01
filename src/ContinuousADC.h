@@ -92,6 +92,7 @@
 #include <ADC.h>
 #include <DMAChannel.h>
 #include <SdFat.h>
+#include <TeensyBoard.h>
 
 
 class ContinuousADC {
@@ -276,9 +277,17 @@ class ContinuousADC {
  protected:
 
   // pins:
-  static const int NPins = 24;
+#if !defined(PIN_A13)
+  static const int NPins = 13;
+#elif !defined(PIN_A14)
+  static const int NPins = 14;
+#elif !defined(PIN_A21)
+  static const int NPins = 21;
+#else
+  static const int NPins = 27;
+#endif
   static const int Pins[NPins];
-
+  
   // ADC:
   static const int MaxChannels = 20;
   uint8_t Channels[2][MaxChannels];

@@ -10,8 +10,8 @@ const char *teensyBoard() {
   return (const char *)"Teensy 3.6";
 #elif defined(TEENSY35)
   return (const char *)"Teensy 3.5";
-#elif defined(TEENSY31)
-  return (const char *)"Teensy 3.1";
+#elif defined(TEENSY32)
+  return (const char *)"Teensy 3.2";
 #elif defined(TEENSY30)
   return (const char *)"Teensy 3.0";
 #elif defined(TEENSYLC)

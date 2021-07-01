@@ -24,8 +24,11 @@
   const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
 #endif
 
-//#define SD_CONFIG SdioConfig(FIFO_SDIO)
-#define SD_CONFIG BUILTIN_SDCARD
+#ifdef BUILTIN_SDCARD
+  #define SD_CONFIG BUILTIN_SDCARD
+#else
+  #define SD_CONFIG SdioConfig(FIFO_SDIO)
+#endif
 //#define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
 
 
