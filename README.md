@@ -109,3 +109,13 @@ touch .development
 
 Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
+
+
+## Links
+
+- [EOD-Logger](https://github.com/muchaste/EOD-Logger)
+- [Audio](https://github.com/PaulStoffregen/Audio) library
+- microSoundRecorder - Environmental Sound Recorder for Teensy 3.6:
+  [github](https://github.com/WMXZ-EU/microSoundRecorder)
+  [wiki](https://github.com/WMXZ-EU/microSoundRecorder/wiki/Hardware-setup)
+  [forum](https://forum.pjrc.com/threads/52175?p=185386&viewfull=1#post185386)
