@@ -120,12 +120,12 @@ public:
   
   static const size_t NBuffer = 64*1024;    // size of this buffer: 64kB
   volatile static sample_t Buffer[NBuffer]; // the one and only buffer
+  volatile size_t Head;                     // current index of latest data
 
   
 protected:
   
   const uint8_t Bits = 16;
-  volatile size_t Head;                     // current index of latest data
   static const size_t MaxConsumers = 10;
   size_t NConsumers;
   DataConsumer *Consumers[MaxConsumers];

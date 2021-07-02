@@ -8,21 +8,23 @@
 
 
 #include <Arduino.h>
-#include <AudioStream.h>
+#include <Audio.h>
+#include <ContinuousADC.h>
 
 
-class AudioPlayBuffer : public AudioStream {
+class AudioPlayBuffer : public DataConsumer, public AudioStream {
   
  public:
   
   AudioPlayBuffer();
-  void begin();
   virtual void update();
+  virtual void reset();
 
-	
- private:
-  
-  // volatile bool Playing;
+
+private:
+
+  volatile uint8_t NChannels;
+  volatile uint32_t Rate;
   
 };
 
@@ -32,7 +34,18 @@ class AudioShield {
  public:
 
   AudioShield();
+  ~AudioShield();
 
+  void setup();
+
+
+ protected:
+
+  AudioPlayBuffer AudioInput;
+  AudioOutputI2S AudioOutput;
+  AudioConnection *PatchCord1;
+  AudioConnection *PatchCord2;
+  AudioControlSGTL5000 Shield;
 
 };
 

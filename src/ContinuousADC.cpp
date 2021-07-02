@@ -372,7 +372,6 @@ void ContinuousADC::report() {
 
   
 void ContinuousADC::start() {
-  Data.clear();
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       DataHead[adc] = 0;
@@ -403,6 +402,7 @@ void ContinuousADC::start() {
       }
     }
   }
+  Data.clear();   // resets the consumers and they might want to know about Rate
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 )
       DMABuffer[adc].enable();
