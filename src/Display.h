@@ -1,5 +1,5 @@
 /*
-  Display - library for displaying acquired data on a monitor.
+  Display - displaying acquired data on a monitor.
   Created by Jan Benda, May 25th, 2021.
 */
 

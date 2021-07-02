@@ -3,6 +3,21 @@
   Created by Jan Benda, May 26th, 2021.
 
   Install SdFat library from Tools->Manage Libraries (search for SdFat).
+
+  By default, the builtin SD card slot is used.
+
+  By definig SD_CONFIG, you can select and configure another slot.
+  Something along these lines *before* you include SDWriter.h:
+  ```
+  // Definition of the chip select pin used for the SD-card.
+  #ifndef SDCARD_SS_PIN
+    const uint8_t SD_CS_PIN = SS;
+  #else 
+    // assume built-in SD is used:
+    const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
+  #endif
+  #define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
+  ```
 */
 
 #ifndef SDWriter_h
@@ -15,21 +30,13 @@
 
 #define SD_FAT_TYPE 3
 
-// Definition of the pin used for the SD-card.
-// SDCARD_SS_PIN is defined for the built-in SD on some boards.
-#ifndef SDCARD_SS_PIN
-  const uint8_t SD_CS_PIN = SS;
-#else 
-  // assume built-in SD is used:
-  const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
+#ifndef SD_CONFIG
+  #ifdef BUILTIN_SDCARD
+    #define SD_CONFIG BUILTIN_SDCARD
+  #else
+    #define SD_CONFIG SdioConfig(FIFO_SDIO)
+  #endif
 #endif
-
-#ifdef BUILTIN_SDCARD
-  #define SD_CONFIG BUILTIN_SDCARD
-#else
-  #define SD_CONFIG SdioConfig(FIFO_SDIO)
-#endif
-//#define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
 
 
 class ContinuousADC;

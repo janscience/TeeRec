@@ -49,7 +49,7 @@ def plot_psds(path, save):
     fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
     fig.suptitle(os.path.basename(path), fontsize=16)
     nfft = 1024*4
-    thresh = 5 # dB
+    thresh = 15 # dB
     for c in range(nchannels):
         #data[:,c] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
         pxx, freqs = psd(data[:,c] - np.mean(data[:,c]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
