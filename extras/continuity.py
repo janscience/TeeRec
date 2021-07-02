@@ -65,6 +65,7 @@ def test_continuity(pathes):
             dp = max(1, np.floor(np.log10(b1[-1] - b1[0])))
             if len(intervals[c]) > 2:
                 n2, b2 = np.histogram(intervals[c], -0.5 + np.arange(np.min(intervals[c])-1, np.max(intervals[c])+3))
+                n2 = n2.astype(np.float64)
                 n2 *= np.max(n1)/np.max(n2)/2
                 axs[c].bar(b2[:-1], n2, width=1, color='g')
                 dp = max(1, np.floor(np.log10(max(b1[-1], b2[-1]) - min(b1[0], b2[0]))))

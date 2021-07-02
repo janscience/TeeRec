@@ -37,7 +37,6 @@ void setupADC() {
   aidata.setAveraging(averaging);
   aidata.setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);
   aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
-  aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
 }
 
@@ -54,7 +53,7 @@ void openNextFile() {
   char dts[20];
   rtclock.dateTime(dts);
   file.openWave(name.c_str(), aidata, -1, dts);
-  aidata.writeData(file.file());
+  file.writeData();
   Serial.println(name);
   if (file.isOpen()) {
     blink.set(2000, 20);
@@ -71,14 +70,15 @@ void openNextFile() {
 void setupStorage() {
   file.dataDir("recordings");
   file.setWriteInterval(aidata);
-  aidata.startWrite();
+  file.setMaxFileTime(fileSaveTime);
+  file.startWrite();
   openNextFile();
 }
 
 
 void storeData() {
   if (file.needToWrite()) {
-    size_t samples = aidata.writeData(file.file());
+    size_t samples = file.writeData();
     if (samples == 0) {
       blink.clear();
       Serial.println();
@@ -87,7 +87,7 @@ void storeData() {
       Serial.println("given the number of channels, averaging, sampling and conversion speed.");
       while(1) {};
     }
-    if (aidata.endWrite()) {
+    if (file.endWrite()) {
       file.close();  // file size was set by openWave()
       blink.clear();
       openNextFile();

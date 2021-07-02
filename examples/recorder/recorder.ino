@@ -45,7 +45,6 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 ContinuousADC aidata;
 
 SDWriter file;
-size_t fileSamples = 0;
 
 Display screen;
 #if defined(ILI9341)
@@ -67,7 +66,6 @@ void setupADC() {
   aidata.setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);
   aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
   aidata.setReference(ADC_REFERENCE::REF_3V3);
-  aidata.setMaxFileTime(fileSaveTime);
   aidata.check();
 }
 
@@ -80,13 +78,12 @@ void openNextFile() {
   char datetime[20];
   rtclock.dateTime(datetime);
   file.openWave(name.c_str(), aidata, -1, datetime);
-  fileSamples = 0;
-  writeData();
+  file.writeData();
   if (file.isOpen()) {
     screen.clearText(0);                // 35ms!
-    writeData();
+    file.writeData();
     screen.writeText(1, name.c_str());  // 25ms
-    writeData();
+    file.writeData();
     Serial.println(name);
   }
 }
@@ -96,14 +93,15 @@ void setupStorage() {
   if (file.available())
     file.dataDir("recordings");
   file.setWriteInterval(aidata);
+  file.setMaxFileTime(fileSaveTime);
 }
 
 
 void startWrite(int id) {
   // on button press:
   if (file.available() && !file.isOpen()) {
-    aidata.setMaxFileSamples(0);
-    aidata.startWrite();
+    file.setMaxFileSamples(0);
+    file.startWrite();
     openNextFile();
   }
 }
@@ -111,12 +109,7 @@ void startWrite(int id) {
 
 void stopWrite(int id) {
   // on button release:
-  aidata.setMaxFileTime(fileSaveTime);
-}
-
-
-void writeData() {
-  fileSamples += aidata.writeData(file.file());
+  file.setMaxFileTime(fileSaveTime);
 }
 
 
@@ -208,7 +201,7 @@ void plotData() {   // 85ms
       screen.writeText(0, ts);
     }
     screen.clearPlots();   // 16ms
-    writeData();
+    file.writeData();
     size_t n = aidata.frames(displayTime);
     float data[n];
     size_t start = aidata.currentSample(n);
@@ -222,9 +215,9 @@ void plotData() {   // 85ms
 
 void storeData() {
   if (file.needToWrite()) {
-    writeData();
-    if (aidata.endWrite()) {
-      file.closeWave(fileSamples);
+    file.writeData();
+    if (file.endWrite()) {
+      file.closeWave();
       if (logging)
         openNextFile();
       else {
@@ -234,7 +227,7 @@ void storeData() {
     }
     if (file.isOpen()) {
       char ts[6];
-      aidata.fileTimeStr(ts);
+      file.fileTimeStr(ts);
       screen.writeText(2, ts);
     }
   }

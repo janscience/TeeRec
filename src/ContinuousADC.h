@@ -95,11 +95,52 @@
 #include <TeensyBoard.h>
 
 
+typedef int16_t sample_t;
+
+
+class DataConsumer;
+
+
+class DataBuffer {
+
+  friend class ContinuousADC;
+  
+public:
+
+  DataBuffer();
+
+  // add consumer to data.
+  void addConsumer(DataConsumer *consumer);
+
+  // clear the buffer and reset consumers.
+  void clear();
+
+  // Return current value of head.
+  size_t head() const;
+  
+  static const size_t NBuffer = 64*1024;    // size of this buffer: 64kB
+  volatile static sample_t Buffer[NBuffer]; // the one and only buffer
+
+  
+protected:
+  
+  const uint8_t Bits = 16;
+  volatile size_t Head;                     // current index of latest data
+  static const size_t MaxConsumers = 10;
+  size_t NConsumers;
+  DataConsumer *Consumers[MaxConsumers];
+};
+
+
 class ContinuousADC {
+
+  friend class DataConsumer;
 
  public:
 
   static ContinuousADC *ADCC;
+  
+  static const size_t MajorSize = 256;
 
   // Initialize.
   ContinuousADC();
@@ -220,9 +261,18 @@ class ContinuousADC {
   // Number of DMA buffers filled so far.
   size_t counter(int adc) const;
 
-  // Number of frames (samples of a single channel) corresponding to time.
+  // Number of frames (samples of a single channel) corresponding to time (in seconds).
   size_t frames(float time) const;
 
+  // Number of samples (samples of all channel) corresponding to time (in seconds).
+  size_t samples(float time) const;
+
+  // Time in seconds corresponding to a given number of samples (not frames).
+  float time(size_t samples) const;
+
+  // Return time corresponding to samples as a string displaying minutes and seconds.
+  // str must hold at least 6 characters.
+  void timeStr(size_t sample, char *str) const;
 
   // Return sample right after most current data value in data buffer.
   size_t currentSample(size_t decr=0);
@@ -235,37 +285,6 @@ class ContinuousADC {
 
   // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
-  
-  // Write available data to file (if the file is open).
-  // If maxFileSamples() is set (>0), then stop writing after that many samples. 
-  // Returns number of written samples.
-  size_t writeData(FsFile &file);
-
-  // Start writing to a file from the current data position on.
-  void startWrite();
-
-  // Return current file size in samples.
-  size_t fileSamples() const;
-
-  // Return current file size in seconds.
-  float fileTime() const;
-
-  // Return current file size as a string displaying minutes and seconds.
-  // str must hold at least 6 characters.
-  void fileTimeStr(char *str) const;
-
-  // Set maximum file size to a fixed number of samples modulo 256.
-  void setMaxFileSamples(size_t samples);
-
-  // Set maximum file size to approximately that many seconds.
-  void setMaxFileTime(float secs);
-
-  // Return actually used maximum file size in samples.
-  size_t maxFileSamples() const;
-
-  // Return true if maximum number of samples have been written
-  // and a new file needs to be opened.
-  bool endWrite();
 
   // Check whether data in the whole buffer are within the specified range (for debugging).
   void checkData(int32_t min, int32_t max);
@@ -305,7 +324,6 @@ class ContinuousADC {
   ADC ADConv;
   
   // DMA:
-  static const size_t MajorSize = 256;
   static const size_t NMajors = 2;
   DMAChannel DMABuffer[2];        // transfer data from ADCs to ADCBuffer
   DMAChannel DMASwitch[2];        // tell ADC from which pin to sample
@@ -315,16 +333,9 @@ class ContinuousADC {
   DMAChannel::TCD_t TCDs[2][NMajors] __attribute__ ((aligned (32))) ;
 
   // Data (large buffer holding converted and multiplexed data from both ADCs):
-  const uint8_t DataBits = 16;
-  typedef int16_t sample_t;
-  static const size_t NBuffer = 64*1024;    // size of this buffer: 64kB
-  volatile static sample_t Buffer[NBuffer]; // the one and only buffer
-  volatile size_t BufferWrite[2];           // current index for each ADC for writing.
-  size_t BufferRead;                        // index for reading the buffer and writing to file.
-  volatile uint16_t DataShift;              // number of bits ADC data need to be shifted to make them 16 bit.
-
-  size_t FileSamples;             // current number of samples stored in a file.
-  size_t FileMaxSamples;          // maximum number of samples to be stored in a file.
+  DataBuffer Data;
+  volatile size_t DataHead[2];    // current index for each ADC for writing.
+  volatile uint16_t DataShift;    // number of bits ADC data need to be shifted to make them 16 bit.
   
   void setupChannels(uint8_t adc);
   void setupADC(uint8_t adc);
@@ -339,6 +350,25 @@ class ContinuousADC {
 
 void DMAISR0();
 void DMAISR1();
+
+
+// Base class for all objects operating on the data buffer.
+// Instantiate them *after* ContinuousADC has been instantiated.
+class DataConsumer {
+  
+public:
+  DataConsumer(void);
+
+  // Data buffer has been initialized.
+  virtual void reset();
+
+
+protected:
+
+  DataBuffer *Data;
+  size_t Tail;       // index for reading the buffer.
+  
+};
 
 
 #endif

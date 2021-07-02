@@ -2,7 +2,8 @@
 #include <SDWriter.h>
 
 
-SDWriter::SDWriter() {
+SDWriter::SDWriter() :
+  DataConsumer() {
   NameCounter = 0;
   // start sdio interface to SD card:
   if (!SD.begin(SD_CONFIG)) {
@@ -13,6 +14,8 @@ SDWriter::SDWriter() {
   SDAvailable = true;
   File.close();
   WriteInterval = 100;
+  FileSamples = 0;
+  FileMaxSamples = 0;
 }
 
 
@@ -135,6 +138,7 @@ bool SDWriter::open(const char *fname) {
   }
   if (!File.open(fname, O_WRITE | O_CREAT))
     Serial.printf("failed to open file %s\n", fname);
+  FileSamples = 0;
   WriteTime = 0;
   return File.isOpen();
 }
@@ -166,7 +170,7 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
   if (!open(name.c_str()))                // 11ms
     return;
   if (samples < 0)
-    samples = adc.maxFileSamples();
+    samples = FileMaxSamples;
   Wave.setFormat(adc.nchannels(), adc.rate(), adc.resolution(),
 		 adc.dataResolution());
   char channels[100];
@@ -188,14 +192,100 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
 }
 
 
-void SDWriter::closeWave(uint32_t samples) {
+void SDWriter::closeWave() {
   if (! File.isOpen())
     return;
-  if (samples > 0) {
-    Wave.setData(samples);
+  if (FileSamples > 0) {
+    Wave.setData(FileSamples);
     Wave.assemble();
     File.seek(0);
     File.write(Wave.Buffer, Wave.NBuffer);   // 2ms
   }
   close();                                   // 6ms
+}
+
+
+size_t SDWriter::writeData() {
+  size_t nbytes = 0;
+  size_t samples0 = 0;
+  size_t samples1 = 0;
+  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+    return 0;
+  if (! File.isOpen())
+    return 0;
+  size_t head = Data->head();
+  size_t nwrite = 0;
+  if (Tail >= head && ! (head == 0 && Tail ==0)) {
+    nwrite = Data->NBuffer - Tail;
+    if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
+      nwrite = FileMaxSamples - FileSamples;
+    if (nwrite > 0) {
+      nbytes = File.write((void *)&Data->Buffer[Tail], sizeof(sample_t)*nwrite);
+      samples0 = nbytes / sizeof(sample_t);
+      Tail += samples0;
+      if (Tail >= Data->NBuffer)
+	Tail -= Data->NBuffer;
+      FileSamples += samples0;
+    }
+  }
+  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+    return samples0;
+  nwrite = head - Tail;
+  if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
+    nwrite = FileMaxSamples - FileSamples;
+  if (nwrite > 0) {
+    nbytes = File.write((void *)&Data->Buffer[Tail], sizeof(sample_t)*nwrite);
+    samples1 = nbytes / sizeof(sample_t);
+    Tail += samples1;
+    if (Tail >= Data->NBuffer)
+      Tail -= Data->NBuffer;
+    FileSamples += samples1;
+  }
+  return samples0 + samples1;
+}
+
+
+void SDWriter::startWrite() {
+  Tail = Data->head();
+}
+
+
+size_t SDWriter::fileSamples() const {
+  return FileSamples;
+}
+
+
+float SDWriter::fileTime() const {
+  return ContinuousADC::ADCC->time(FileSamples);
+}
+
+
+void SDWriter::fileTimeStr(char *str) const {
+  ContinuousADC::ADCC->timeStr(FileSamples, str);
+}
+
+
+void SDWriter::setMaxFileSamples(size_t samples) {
+  FileMaxSamples = (samples/ContinuousADC::MajorSize)*ContinuousADC::MajorSize;
+}
+
+
+void SDWriter::setMaxFileTime(float secs) {
+  setMaxFileSamples(ContinuousADC::ADCC->samples(secs));
+}
+
+
+size_t SDWriter::maxFileSamples() const {
+  return FileMaxSamples;
+}
+
+
+bool SDWriter::endWrite() {
+  return ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples );
+}
+
+
+void SDWriter::reset() {
+  DataConsumer::reset();
+  FileSamples = 0;
 }

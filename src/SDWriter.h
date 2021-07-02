@@ -25,6 +25,7 @@
 
 
 #include <Arduino.h>
+#include <ContinuousADC.h>
 #include <WaveHeader.h>
 #include <SdFat.h>
 
@@ -39,10 +40,7 @@
 #endif
 
 
-class ContinuousADC;
-
-
-class SDWriter {
+class SDWriter : public DataConsumer {
 
  public:
 
@@ -101,11 +99,44 @@ class SDWriter {
                 char *datetime=0);
 
   // Update wave header with proper file size and close file.
-  // If you supplied the right number of samples already to openWave(), 
-  // then it is sufficient to simply close() the file.
   // Takes about <=8ms.
-  void closeWave(uint32_t samples);
+  void closeWave();
 
+  
+  // Write available data to file (if the file is open).
+  // If maxFileSamples() is set (>0), then stop writing after that many samples. 
+  // Returns number of written samples.
+  size_t writeData();
+
+  // Start writing to a file from the current data head on.
+  void startWrite();
+
+  // Return current file size in samples.
+  size_t fileSamples() const;
+
+  // Return current file size in seconds.
+  float fileTime() const;
+
+  // Return current file size as a string displaying minutes and seconds.
+  // str must hold at least 6 characters.
+  void fileTimeStr(char *str) const;
+
+  // Set maximum file size to a fixed number of samples modulo 256.
+  void setMaxFileSamples(size_t samples);
+
+  // Set maximum file size to approximately that many seconds.
+  void setMaxFileTime(float secs);
+
+  // Return actually used maximum file size in samples.
+  size_t maxFileSamples() const;
+
+  // Return true if maximum number of samples have been written
+  // and a new file needs to be opened.
+  bool endWrite();
+  
+  // Data buffer has been initialized.
+  virtual void reset();
+  
 
  protected:
 
@@ -120,6 +151,9 @@ class SDWriter {
 
   uint16_t NameCounter;
 
+  size_t FileSamples;    // current number of samples stored in the file.
+  size_t FileMaxSamples; // maximum number of samples to be stored in a file.
+  
 };
 
 

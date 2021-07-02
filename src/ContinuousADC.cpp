@@ -3,6 +3,36 @@
 #include <ContinuousADC.h>
 
 
+DataBuffer::DataBuffer() {
+  Head = 0;
+  NConsumers = 0;
+}
+
+
+void DataBuffer::addConsumer(DataConsumer *consumer) {
+  Consumers[NConsumers++] = consumer;
+}
+
+
+void DataBuffer::clear() {
+  Head = 0;
+  memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
+  for (size_t k=0; k<NConsumers; k++)
+    Consumers[k]->reset();
+}
+
+
+size_t DataBuffer::head() const {
+  unsigned char sreg_backup;
+  size_t idx = 0;
+  sreg_backup = SREG;
+  cli();
+  idx = Head;
+  SREG = sreg_backup;
+  return idx;
+}
+
+
 #if !defined(PIN_A13)
 const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12};
 #elif !defined(PIN_A14)
@@ -18,7 +48,8 @@ const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, 
 
 ContinuousADC *ContinuousADC::ADCC = 0;
 volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
-volatile ContinuousADC::sample_t ContinuousADC::Buffer[NBuffer];
+
+volatile sample_t DataBuffer::Buffer[NBuffer];
 
 
 ContinuousADC::ContinuousADC() {
@@ -26,13 +57,13 @@ ContinuousADC::ContinuousADC() {
     NChannels[adc] = 0;
     DMAIndex[adc] = 0;
     DMACounter[adc] = 0;
-    BufferWrite[adc] = 0;
+    DataHead[adc] = 0;
   }
   memset(Channels, 0, sizeof(Channels));
   memset(SC1AChannels, 0, sizeof(SC1AChannels));
   memset(TCDs, 0, sizeof(TCDs));
 
-  Bits = DataBits;
+  Bits = Data.Bits;
   DataShift = 0;
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
@@ -41,10 +72,6 @@ ContinuousADC::ContinuousADC() {
   Rate = 0;
   ADCUse = 0;
   ADCC = this;
-
-  BufferRead = 0;
-  FileSamples = 0;
-  FileMaxSamples = 0;
 }
 
 
@@ -134,7 +161,7 @@ uint32_t ContinuousADC::rate() const {
 
 void ContinuousADC::setResolution(uint8_t bits) {
   Bits = bits;
-  DataShift = DataBits - Bits;
+  DataShift = Data.Bits - Bits;
 }
 
 
@@ -144,7 +171,7 @@ uint8_t ContinuousADC::resolution() const {
 
 
 uint8_t ContinuousADC::dataResolution() const {
-  return DataBits;
+  return Data.Bits;
 }
 
 
@@ -261,7 +288,7 @@ const char *ContinuousADC::referenceStr() const {
 
 
 float ContinuousADC::bufferTime() const {
-  return float(NBuffer/nchannels())/Rate;
+  return float(Data.NBuffer/nchannels())/Rate;
 }
 
 
@@ -280,8 +307,8 @@ bool ContinuousADC::check() {
     ADCUse = 0;
     return false;
   }
-  if ( NBuffer < NMajors*MajorSize ) {
-    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
+  if ( Data.NBuffer < NMajors*MajorSize ) {
+    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", Data.NBuffer);
     ADCUse = 0;
     return false;
   }
@@ -345,19 +372,17 @@ void ContinuousADC::report() {
 
   
 void ContinuousADC::start() {
-  BufferRead = 0;
-  FileSamples = 0;
-  memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
+  Data.clear();
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
-      BufferWrite[adc] = 0;
+      DataHead[adc] = 0;
       setupChannels(adc);
       setupADC(adc);
       setupDMA(adc);
     }
   }
   if ( (ADCUse & 3) == 3 ) {
-    BufferWrite[1] = 1;
+    DataHead[1] = 1;
 #if defined(ADC_USE_PDB)
     startPDB(Rate*NChannels[0]);
 #else
@@ -408,6 +433,24 @@ size_t ContinuousADC::frames(float time) const {
 }
 
 
+size_t ContinuousADC::samples(float time) const {
+  return floor(time*Rate*nchannels());
+}
+
+
+float ContinuousADC::time(size_t samples) const {
+  return samples/float(NChannels[0]+NChannels[1])/float(Rate);
+}
+
+
+void ContinuousADC::timeStr(size_t samples, char *str) const {
+  float seconds = time(samples);
+  float minutes = floor(seconds/60.0);
+  seconds -= minutes*60;
+  sprintf(str, "%02.0f:%02.0f", minutes, seconds);
+}
+
+
 uint8_t ContinuousADC::adcs() const {
   return (ADCUse+1)/2;
 }
@@ -423,49 +466,28 @@ size_t ContinuousADC::counter(int adc) const {
 
 
 size_t ContinuousADC::currentSample(size_t decr) {
-  unsigned char sreg_backup;
-  size_t counter0;
-  size_t counter1;
-  size_t idx = 0;
-  if ((ADCUse & 3) == 3) {
-    while (true) {
-      sreg_backup = SREG;
-      cli();
-      counter0 = DMACounter[0];
-      counter1 = DMACounter[1];
-      SREG = sreg_backup;
-      if (counter0 == counter1)
-	break;
-    }
-  }
-  sreg_backup = SREG;
-  cli();
-  if ((ADCUse & 1) == 1)
-    idx = BufferWrite[0];
-  else if ((ADCUse & 2) == 2)
-    idx = BufferWrite[1];
-  SREG = sreg_backup;
+  size_t idx = Data.head();
   if (decr > 0) {
-    idx += NBuffer - decr*(NChannels[0] + NChannels[1]);
-    while (idx >= NBuffer)
-      idx -= NBuffer;
+    idx += Data.NBuffer - decr*(NChannels[0] + NChannels[1]);
+    while (idx >= Data.NBuffer)
+      idx -= Data.NBuffer;
   }
   return idx;
 }
 
 
 size_t ContinuousADC::decrementSample(size_t idx, size_t decr) {
-  idx += NBuffer - decr*(NChannels[0] + NChannels[1]);
-  while (idx >= NBuffer)
-    idx -= NBuffer;
+  idx += Data.NBuffer - decr*(NChannels[0] + NChannels[1]);
+  while (idx >= Data.NBuffer)
+    idx -= Data.NBuffer;
   return idx;
 }
 
 
 size_t ContinuousADC::incrementSample(size_t idx, size_t incr) {
   idx += incr*(NChannels[0] + NChannels[1]);
-  while (idx >= NBuffer)
-    idx -= NBuffer;
+  while (idx >= Data.NBuffer)
+    idx -= Data.NBuffer;
   return idx;
 }
 
@@ -476,117 +498,26 @@ void ContinuousADC::getData(uint8_t channel, size_t start, float *buffer, size_t
     return;
   }
   size_t step = NChannels[0] + NChannels[1];
-  if (nbuffer*step > NBuffer) {
+  if (nbuffer*step > Data.NBuffer) {
     Serial.println("ERROR: requested too many samples.");
     memset(buffer, 0, sizeof(sample_t)*nbuffer);
     return;
   }
   // copy:
   start += channel;
-  float scale = 1.0/(1 << (DataBits-1));
+  float scale = 1.0/(1 << (Data.Bits-1));
   for (size_t k=0; k<nbuffer; k++ ) {
-    if (start >= NBuffer)
-      start -= NBuffer;
-    buffer[k] = scale*Buffer[start];
+    if (start >= Data.NBuffer)
+      start -= Data.NBuffer;
+    buffer[k] = scale*Data.Buffer[start];
     start += step;
   }
 }
 
 
-size_t ContinuousADC::writeData(FsFile &file) {
-  size_t nbytes = 0;
-  size_t samples0 = 0;
-  size_t samples1 = 0;
-  if ( ADCUse == 0 )
-    return 0;
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
-    return 0;
-  if (! file.isOpen())
-    return 0;
-  size_t last = currentSample();
-  size_t nwrite = 0;
-  if (BufferRead >= last && ! (last == 0 && BufferRead ==0)) {
-    nwrite = NBuffer - BufferRead;
-    if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
-      nwrite = FileMaxSamples - FileSamples;
-    if (nwrite > 0) {
-      nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
-      samples0 = nbytes / sizeof(sample_t);
-      BufferRead += samples0;
-      if (BufferRead >= NBuffer)
-	BufferRead -= NBuffer;
-      FileSamples += samples0;
-    }
-  }
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
-    return samples0;
-  nwrite = last - BufferRead;
-  if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
-    nwrite = FileMaxSamples - FileSamples;
-  if (nwrite > 0) {
-    nbytes = file.write((void *)&Buffer[BufferRead], sizeof(sample_t)*nwrite);
-    samples1 = nbytes / sizeof(sample_t);
-    BufferRead += samples1;
-    if (BufferRead >= NBuffer)
-      BufferRead -= NBuffer;
-    FileSamples += samples1;
-  }
-  return samples0 + samples1;
-}
-
-
-void ContinuousADC::startWrite() {
-  BufferRead = currentSample();
-  FileSamples = 0;
-}
-
-
-size_t ContinuousADC::fileSamples() const {
-  return FileSamples;
-}
-
-
-float ContinuousADC::fileTime() const {
-  return FileSamples/float(NChannels[0]+NChannels[1])/float(Rate);
-}
-
-
-void ContinuousADC::fileTimeStr(char *str) const {
-  float seconds = fileTime();
-  float minutes = floor(seconds/60.0);
-  seconds -= minutes*60;
-  sprintf(str, "%02.0f:%02.0f", minutes, seconds);
-}
-
-
-void ContinuousADC::setMaxFileSamples(size_t samples) {
-  FileMaxSamples = (samples/MajorSize)*MajorSize;
-}
-
-
-void ContinuousADC::setMaxFileTime(float secs) {
-  setMaxFileSamples(secs*Rate*nchannels());
-}
-
-
-size_t ContinuousADC::maxFileSamples() const {
-  return FileMaxSamples;
-}
-
-
-bool ContinuousADC::endWrite() {
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples ) {
-    FileSamples = 0;
-    return true;
-  }
-  else
-    return false;
-}
-
-
 void ContinuousADC::checkData(int32_t min, int32_t max) {
-  for (unsigned int k=0; k<NBuffer; k++) {
-    sample_t data = Buffer[k];
+  for (unsigned int k=0; k<Data.NBuffer; k++) {
+    sample_t data = Data.Buffer[k];
     if (data < min)
       Serial.printf("%d: %d < %d\n", k, data, min);
     else if (data > max)
@@ -628,7 +559,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->stopTimer();
   ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
   Bits = ADConv.adc[adc]->getResolution();
-  DataShift = DataBits - Bits;
+  DataShift = Data.Bits - Bits;
 }
 
     
@@ -681,12 +612,17 @@ void ContinuousADC::isr(uint8_t adc) {
     uint16_t val = ADCBuffer[adc][dmai++];
     val <<= DataShift;  // make 16 bit
     val += 0x8000;      // convert to signed int
-    Buffer[BufferWrite[adc]] = val;
-    BufferWrite[adc] += step;
-    if (BufferWrite[adc] >= NBuffer)
-      BufferWrite[adc] -= NBuffer;
+    Data.Buffer[DataHead[adc]] = val;
+    DataHead[adc] += step;
+    if (DataHead[adc] >= Data.NBuffer)
+      DataHead[adc] -= Data.NBuffer;
   }
   DMACounter[adc]++;
+  if (ADCUse == 3) {
+    if (DMACounter[0] == DMACounter[1])
+      Data.Head = DataHead[0];
+  } else
+    Data.Head = DataHead[adc];
   DMABuffer[adc].clearInterrupt();
   // TODO: check for buffer overrun! Only if we actually call writeData!
 }
@@ -799,4 +735,15 @@ void DMAISR0() {
 
 void DMAISR1() {
   ContinuousADC::ADCC->isr(1);
+}
+
+
+DataConsumer::DataConsumer(void) {
+  Data = &ContinuousADC::ADCC->Data;
+  Tail = 0;
+}
+
+
+void DataConsumer::reset() {
+  Tail = 0;
 }
