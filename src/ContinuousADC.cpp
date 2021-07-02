@@ -6,6 +6,7 @@
 DataBuffer::DataBuffer() {
   Head = 0;
   NConsumers = 0;
+  //memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
 }
 
 
@@ -14,9 +15,8 @@ void DataBuffer::addConsumer(DataConsumer *consumer) {
 }
 
 
-void DataBuffer::clear() {
+void DataBuffer::reset() {
   Head = 0;
-  memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
   for (size_t k=0; k<NConsumers; k++)
     Consumers[k]->reset();
 }
@@ -402,7 +402,7 @@ void ContinuousADC::start() {
       }
     }
   }
-  Data.clear();   // resets the consumers and they might want to know about Rate
+  Data.reset();   // resets the consumers and they might want to know about Rate
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 )
       DMABuffer[adc].enable();
@@ -536,6 +536,7 @@ void ContinuousADC::setupChannels(uint8_t adc) {
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
   }
+  /* ????????
   if ( NChannels[adc] > 1 ) {
     // reorder:
     uint8_t temp = SC1AChannels[adc][0];
@@ -543,6 +544,7 @@ void ContinuousADC::setupChannels(uint8_t adc) {
       SC1AChannels[adc][i-1] = SC1AChannels[adc][i];
     SC1AChannels[adc][NChannels[adc]-1] = temp;
   }
+  */
   // configure for input:
   for(uint8_t i=0; i<NChannels[adc]; i++)
     pinMode(Channels[adc][i], INPUT);
@@ -600,6 +602,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
 
 void ContinuousADC::isr(uint8_t adc) {
   // takes 38us! (=26kHz) for 256 samples
+  //elapsedMicros time;
   size_t dmai = DMAIndex[adc]*MajorSize;
   DMAIndex[adc]++;
   if ( DMAIndex[adc] >= NMajors)
@@ -625,6 +628,7 @@ void ContinuousADC::isr(uint8_t adc) {
     Data.Head = DataHead[adc];
   DMABuffer[adc].clearInterrupt();
   // TODO: check for buffer overrun! Only if we actually call writeData!
+  //Serial.println(time);
 }
 
 
@@ -741,6 +745,7 @@ void DMAISR1() {
 DataConsumer::DataConsumer(void) {
   Data = &ContinuousADC::ADCC->Data;
   Tail = 0;
+  Data->addConsumer(this);
 }
 
 

@@ -112,8 +112,8 @@ public:
   // add consumer to data.
   void addConsumer(DataConsumer *consumer);
 
-  // clear the buffer and reset consumers.
-  void clear();
+  // reset the buffer and consumers.
+  void reset();
 
   // Return current value of head.
   size_t head() const;
