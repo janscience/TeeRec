@@ -117,8 +117,12 @@ public:
 
   // Return current value of head.
   size_t head() const;
-  
-  static const size_t NBuffer = 64*1024;    // size of this buffer: 64kB
+
+ #ifdef TEENSY32
+  static const size_t NBuffer = 16*1024;    // buffer size: 32kB
+#else
+  static const size_t NBuffer = 64*1024;    // buffer size: 128kB
+#endif
   volatile static sample_t Buffer[NBuffer]; // the one and only buffer
   volatile size_t Head;                     // current index of latest data
 
