@@ -374,6 +374,7 @@ void ContinuousADC::report() {
 
   
 void ContinuousADC::start() {
+  // setup acquisition:
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       DataHead[adc] = 0;
@@ -382,6 +383,7 @@ void ContinuousADC::start() {
       setupDMA(adc);
     }
   }
+  // start timer:
   if ( (ADCUse & 3) == 3 ) {
     DataHead[1] = 1;
 #if defined(ADC_USE_PDB)
@@ -393,9 +395,9 @@ void ContinuousADC::start() {
 #endif
     Rate = ADConv.adc[0]->getTimerFrequency()/NChannels[0];
   }
-  for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) == adc+1 ) {
-      if ( (ADCUse & 3) != 3 ) {
+  else {
+    for (uint8_t adc=0; adc<2; adc++) {
+      if ( (ADCUse & (adc+1)) == adc+1 ) {
 	ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
 #if defined(ADC_USE_PDB)
 	NVIC_DISABLE_IRQ(IRQ_PDB); // we don not need the PDB interrupt
@@ -405,14 +407,6 @@ void ContinuousADC::start() {
     }
   }
   Data.reset();   // resets the consumers and they might want to know about Rate
-  for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) == adc+1 )
-      DMABuffer[adc].enable();
-  }
-  for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) == adc+1 && NChannels[adc] > 1 )
-      DMASwitch[adc].enable();
-  }
 }
 
 
@@ -529,7 +523,6 @@ void ContinuousADC::setupChannels(uint8_t adc) {
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
   }
-  /* ????????
   if ( NChannels[adc] > 1 ) {
     // reorder:
     uint8_t temp = SC1AChannels[adc][0];
@@ -537,7 +530,6 @@ void ContinuousADC::setupChannels(uint8_t adc) {
       SC1AChannels[adc][i-1] = SC1AChannels[adc][i];
     SC1AChannels[adc][NChannels[adc]-1] = temp;
   }
-  */
   // configure for input:
   for(uint8_t i=0; i<NChannels[adc]; i++)
     pinMode(Channels[adc][i], INPUT);
@@ -545,16 +537,17 @@ void ContinuousADC::setupChannels(uint8_t adc) {
 
 
 void ContinuousADC::setupADC(uint8_t adc) {
-  ADConv.adc[adc]->setAveraging(Averaging);
-  ADConv.adc[adc]->setResolution(Bits);
   ADConv.adc[adc]->setReference(Reference);
-  ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
-  ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
-  ADConv.adc[adc]->enableDMA();
-  ADConv.adc[adc]->stopTimer();
-  ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
+  ADConv.adc[adc]->setResolution(Bits);
   Bits = ADConv.adc[adc]->getResolution();
   DataShift = Data.Bits - Bits;
+  ADConv.adc[adc]->setAveraging(Averaging);
+  ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
+  ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
+  ADConv.adc[adc]->disableDMA();
+  ADConv.adc[adc]->stopTimer();
+  ADConv.adc[adc]->startSingleRead(Channels[adc][0]);
+  ADConv.adc[adc]->enableDMA();
 }
 
     
@@ -582,6 +575,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
   }
   DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
+  DMABuffer[adc].enable();
 
   if ( NChannels[adc] > 1 ) {
     DMASwitch[adc].begin();
@@ -589,6 +583,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
     DMASwitch[adc].destination(adc==0?ADC0_SC1A:ADC1_SC1A); // this switches channels
     DMASwitch[adc].transferSize(1);
     DMASwitch[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
+    DMASwitch[adc].enable();
   }
 }
 
