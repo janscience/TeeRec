@@ -118,13 +118,15 @@ public:
   // Return current value of head.
   size_t head() const;
 
+  // DANGER: Buffer size must be a multiple of ContinuousADC::MajorSize and the maximum number of channels per ADC (16)!
  #ifdef TEENSY32
-  static const size_t NBuffer = 16*1024;    // buffer size: 32kB
+  static const size_t NBuffer = 256*64;     // buffer size: 32kB
 #else
-  static const size_t NBuffer = 64*1024;    // buffer size: 128kB
+  static const size_t NBuffer = 256*256;    // buffer size: 128kB
 #endif
   volatile static sample_t Buffer[NBuffer]; // the one and only buffer
   volatile size_t Head;                     // current index of latest data
+  volatile size_t Cycle;                    // count buffer cycles
 
   
 protected:
@@ -262,9 +264,6 @@ class ContinuousADC {
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
 
-  // Number of DMA buffers filled so far.
-  size_t counter(int adc) const;
-
   // Number of frames (samples of a single channel) corresponding to time (in seconds).
   size_t frames(float time) const;
 
@@ -329,17 +328,17 @@ class ContinuousADC {
   
   // DMA:
   static const size_t NMajors = 2;
-  DMAChannel DMABuffer[2];        // transfer data from ADCs to ADCBuffer
-  DMAChannel DMASwitch[2];        // tell ADC from which pin to sample
-  volatile size_t DMAIndex[2];    // currently active ADCBuffer segment
-  volatile size_t DMACounter[2];  // total count of ADCBuffer segments
+  DMAChannel DMABuffer[2];         // Buffer holding conversion results
+  DMAChannel DMASwitch[2];         // tell ADC from which pin to sample
+  volatile size_t DMAIndex[2];     // currently active DMABuffer segment
+  volatile size_t DMACounter[2];   // total count of DMABuffer segments
   volatile DMAMEM static uint16_t __attribute__((aligned(32))) ADCBuffer[2][NMajors*MajorSize];
-  DMAChannel::TCD_t TCDs[2][NMajors] __attribute__ ((aligned (32))) ;
+  DMAChannel::TCD_t __attribute__ ((aligned (32))) TCDs[2][NMajors];
 
   // Data (large buffer holding converted and multiplexed data from both ADCs):
   DataBuffer Data;
-  volatile size_t DataHead[2];    // current index for each ADC for writing.
-  volatile uint16_t DataShift;    // number of bits ADC data need to be shifted to make them 16 bit.
+  size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
+  uint8_t DataShift;  // number of bits ADC data need to be shifted to make them 16 bit.
   
   void setupChannels(uint8_t adc);
   void setupADC(uint8_t adc);
@@ -369,6 +368,7 @@ public:
 
 protected:
 
+  size_t available() const;
   DataBuffer *Data;
   size_t Tail;       // index for reading the buffer.
   

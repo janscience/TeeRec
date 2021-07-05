@@ -17,35 +17,52 @@ void AudioPlayBuffer::reset() {
 
 
 void AudioPlayBuffer::update() {
-  audio_block_t *block;
+  audio_block_t *block1 = NULL;
+  audio_block_t *block2 = NULL;
 
   if (NChannels == 0 || Rate == 0)
     return;
-  
-  // allocate the audio blocks to transmit
-  block = allocate();
-  if (block == NULL)
-    return;
 
-  // transfer data from buffer to block:
-  unsigned int i = 0;
-  if (Tail > Data->Head) {
-    for (i=0; i<AUDIO_BLOCK_SAMPLES && Tail < Data->NBuffer; i++) {
-      block->data[i] = Data->Buffer[Tail++];
-    }
-    if (Tail >= Data->NBuffer)
-      Tail = 0;
-  }
-  if (Tail < Data->Head) {
-    for ( ; i<AUDIO_BLOCK_SAMPLES && Tail < Data->Head; i++) {
-      block->data[i] = Data->Buffer[Tail++];
-    }
-  }
-  for ( ; i<AUDIO_BLOCK_SAMPLES; i++)
-    block->data[i] = 0;
+  if (available()/NChannels*(1.0/Rate) < AUDIO_BLOCK_SAMPLES/AUDIO_SAMPLE_RATE_EXACT)
+    return;
   
-  transmit(block);
-  release(block);
+  // allocate audio blocks to transmit:
+  block1 = allocate();
+  if (block1 == NULL)
+    return;
+  if (NChannels > 1) {
+    block2 = allocate();
+    if (block2 == NULL)
+      return;
+  }
+
+  // transfer data from buffer to blocks:
+  for (uint8_t c=0; c<NChannels; c++) {
+    unsigned int i = 0;
+    if (Tail > Data->Head) {
+      for (i=0; i<AUDIO_BLOCK_SAMPLES && Tail < Data->NBuffer; i++) {
+	block1->data[i] = Data->Buffer[Tail++];
+      }
+      if (Tail >= Data->NBuffer)
+	Tail = 0;
+    }
+    if (Tail < Data->Head) {
+      for ( ; i<AUDIO_BLOCK_SAMPLES && Tail < Data->Head; i++) {
+	block1->data[i] = Data->Buffer[Tail++];
+      }
+    }
+    // fill up with zeros: that should actually not be needed!
+    for ( ; i<AUDIO_BLOCK_SAMPLES; i++)
+      block1->data[i] = 0;
+  }
+
+  if (NChannels == 1)
+    memcpy(block2, block1, 2*AUDIO_BLOCK_SAMPLES);
+
+  transmit(block1, 0);
+  transmit(block2, 1);
+  release(block1);
+  release(block2);
 }
 
 

@@ -5,6 +5,7 @@
 
 DataBuffer::DataBuffer() {
   Head = 0;
+  Cycle = 0;
   NConsumers = 0;
   //memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
 }
@@ -17,6 +18,7 @@ void DataBuffer::addConsumer(DataConsumer *consumer) {
 
 void DataBuffer::reset() {
   Head = 0;
+  Cycle = 0;
   for (size_t k=0; k<NConsumers; k++)
     Consumers[k]->reset();
 }
@@ -456,15 +458,6 @@ uint8_t ContinuousADC::adcs() const {
 }
 
 
-size_t ContinuousADC::counter(int adc) const {
-  unsigned char sreg_backup = SREG;
-  cli();
-  size_t c = DMACounter[adc];
-  SREG = sreg_backup;
-  return c;
-}
-
-
 size_t ContinuousADC::currentSample(size_t decr) {
   size_t idx = Data.head();
   if (decr > 0) {
@@ -601,8 +594,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
 
 
 void ContinuousADC::isr(uint8_t adc) {
-  // takes 38us! (=26kHz) for 256 samples
-  //elapsedMicros time;
+  // takes 31us! (=26kHz) for 256 samples
   size_t dmai = DMAIndex[adc]*MajorSize;
   DMAIndex[adc]++;
   if ( DMAIndex[adc] >= NMajors)
@@ -622,13 +614,18 @@ void ContinuousADC::isr(uint8_t adc) {
   }
   DMACounter[adc]++;
   if (ADCUse == 3) {
-    if (DMACounter[0] == DMACounter[1])
+    if (DMACounter[0] == DMACounter[1]) {
+      if (DataHead[0] < Data.Head)
+	Data.Cycle++;
       Data.Head = DataHead[0];
-  } else
+    }
+  } else {
+    if (DataHead[adc] < Data.Head)
+      Data.Cycle++;
     Data.Head = DataHead[adc];
+  }
   DMABuffer[adc].clearInterrupt();
   // TODO: check for buffer overrun! Only if we actually call writeData!
-  //Serial.println(time);
 }
 
 
@@ -751,4 +748,19 @@ DataConsumer::DataConsumer(void) {
 
 void DataConsumer::reset() {
   Tail = 0;
+}
+
+
+size_t DataConsumer::available() const {
+  size_t tail = 0;
+  size_t head = 0;
+  unsigned char sreg_backup = SREG;
+  cli();
+  tail = Tail;
+  head = Data->Head;
+  SREG = sreg_backup;
+  if (tail <= head)
+    return head - tail;
+  else
+    return Data->NBuffer - tail + head;
 }
