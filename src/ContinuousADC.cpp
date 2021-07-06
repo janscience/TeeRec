@@ -3,38 +3,6 @@
 #include <ContinuousADC.h>
 
 
-DataBuffer::DataBuffer() {
-  Head = 0;
-  Cycle = 0;
-  NConsumers = 0;
-  //memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
-}
-
-
-void DataBuffer::addConsumer(DataConsumer *consumer) {
-  Consumers[NConsumers++] = consumer;
-}
-
-
-void DataBuffer::reset() {
-  Head = 0;
-  Cycle = 0;
-  for (size_t k=0; k<NConsumers; k++)
-    Consumers[k]->reset();
-}
-
-
-size_t DataBuffer::head() const {
-  unsigned char sreg_backup;
-  size_t idx = 0;
-  sreg_backup = SREG;
-  cli();
-  idx = Head;
-  SREG = sreg_backup;
-  return idx;
-}
-
-
 #if !defined(PIN_A13)
 const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12};
 #elif !defined(PIN_A14)
@@ -51,12 +19,10 @@ const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, 
 ContinuousADC *ContinuousADC::ADCC = 0;
 volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
 
-volatile sample_t DataBuffer::Buffer[NBuffer];
-
 
 ContinuousADC::ContinuousADC() {
   for (uint8_t adc=0; adc<2; adc++) {
-    NChannels[adc] = 0;
+    NChans[adc] = 0;
     DMAIndex[adc] = 0;
     DMACounter[adc] = 0;
     DataHead[adc] = 0;
@@ -65,13 +31,14 @@ ContinuousADC::ContinuousADC() {
   memset(SC1AChannels, 0, sizeof(SC1AChannels));
   memset(TCDs, 0, sizeof(TCDs));
 
-  Bits = Data.Bits;
+  Bits = DataBits;
   DataShift = 0;
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
   SamplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
   Reference = ADC_REFERENCE::REF_3V3;
   Rate = 0;
+  NChannels = 0;
   ADCUse = 0;
   ADCC = this;
 }
@@ -79,39 +46,42 @@ ContinuousADC::ContinuousADC() {
 
 void ContinuousADC::setChannel(uint8_t adc, uint8_t channel) {
   Channels[adc][0] = channel;
-  NChannels[adc] = 1;
+  NChans[adc] = 1;
+  NChannels = 0;
+  for (uint8_t adc=0; adc<2; adc++)
+    NChannels += NChans[adc];
   ADCUse |= (1 << adc);
 }
 
 
 void ContinuousADC::setChannels(uint8_t adc, const int8_t *channels) {
-  NChannels[adc] = 0;
+  NChans[adc] = 0;
   for (uint8_t k=0; k<MaxChannels && channels[k]>0; k++)
-    Channels[adc][NChannels[adc]++] = channels[k];
-  if (NChannels[adc] > 0)
+    Channels[adc][NChans[adc]++] = channels[k];
+  NChannels = 0;
+  for (uint8_t adc=0; adc<2; adc++)
+    NChannels += NChans[adc];
+  if (NChans[adc] > 0)
     ADCUse |= (1 << adc);
 }
 
 
 uint8_t ContinuousADC::nchannels(uint8_t adc) const {
   if ( (ADCUse & (adc+1)) == adc+1 )
-    return NChannels[adc];
+    return NChans[adc];
   return 0;
 }
 
 
 uint8_t ContinuousADC::nchannels() const {
-  uint8_t nchans = 0;
-  for (uint8_t adc=0; adc<2; adc++)
-    nchans += nchannels(adc);
-  return nchans;
+  return NChannels;
 }
 
 
 void ContinuousADC::channels(uint8_t adc, char *chans) const
 {
   bool first = true;
-  for (uint8_t k=0; k<NChannels[adc]; k++) {
+  for (uint8_t k=0; k<NChans[adc]; k++) {
     int8_t ch = Channels[adc][k];
     for (int p=0; p<NPins; p++) {
       if (Pins[p] == ch) {
@@ -130,10 +100,10 @@ void ContinuousADC::channels(uint8_t adc, char *chans) const
 void ContinuousADC::channels(char *chans) const
 {
   bool first = true;
-  int nchan = NChannels[0]>=NChannels[1]?NChannels[0]:NChannels[1];
+  int nchan = NChans[0]>=NChans[1]?NChans[0]:NChans[1];
   for (uint8_t k=0; k<nchan; k++) {
     for (uint8_t adc=0; adc<2; adc++) {
-      if (k<NChannels[adc]) {
+      if (k<NChans[adc]) {
 	int8_t ch = Channels[adc][k];
 	for (int p=0; p<NPins; p++) {
 	  if (Pins[p] == ch) {
@@ -151,29 +121,14 @@ void ContinuousADC::channels(char *chans) const
 }
 
 
-void ContinuousADC::setRate(uint32_t rate) {
-  Rate = rate;
-}
-
-
-uint32_t ContinuousADC::rate() const {
-  return ADCUse>0?Rate:0;
-}
-
-
 void ContinuousADC::setResolution(uint8_t bits) {
   Bits = bits;
-  DataShift = Data.Bits - Bits;
+  DataShift = DataBits - Bits;
 }
 
 
 uint8_t ContinuousADC::resolution() const {
   return ADCUse>0?Bits:0;
-}
-
-
-uint8_t ContinuousADC::dataResolution() const {
-  return Data.Bits;
 }
 
 
@@ -289,11 +244,6 @@ const char *ContinuousADC::referenceStr() const {
 }
 
 
-float ContinuousADC::bufferTime() const {
-  return float(Data.NBuffer/nchannels())/Rate;
-}
-
-
 void ContinuousADC::pinAssignment() {
   Serial.println("pin ADC0 ADC1");
   for (int k=0; k<NPins; k++) {
@@ -309,25 +259,25 @@ bool ContinuousADC::check() {
     ADCUse = 0;
     return false;
   }
-  if ( Data.NBuffer < NMajors*MajorSize ) {
-    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", Data.NBuffer);
+  if ( NBuffer < NMajors*MajorSize ) {
+    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
     ADCUse = 0;
     return false;
   }
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
-      if (NChannels[adc] == 0) {
+      if (NChans[adc] == 0) {
 	Serial.println("ERROR: no channels supplied.");
 	ADCUse = 0;
 	return false;
       }
-      if ((NChannels[adc] & (NChannels[adc]-1)) > 0) {
+      if ((NChans[adc] & (NChans[adc]-1)) > 0) {
 	Serial.printf("ERROR: number of channels (%d) on ADC%d must be a power of two.\n",
-		      NChannels[adc], adc);
+		      NChans[adc], adc);
 	ADCUse = 0;
 	return false;
       }
-      for(uint8_t i=0; i<NChannels[adc]; i++) {
+      for(uint8_t i=0; i<NChans[adc]; i++) {
 	if ( ! ADConv.adc[adc]->checkPin(Channels[adc][i]) ) {
 	  Serial.printf("ERROR: invalid channel at index %d at ADC%d\n", i, adc);
 	  ADCUse = 0;
@@ -336,8 +286,8 @@ bool ContinuousADC::check() {
       }
     }
   }
-  if ( (ADCUse & 3) == 3 && NChannels[0] != NChannels[1] ) {
-    Serial.printf("ERROR: number of channels on both ADCs must be the same. ADC0: %d, ADC1: %d\n", NChannels[0], NChannels[1]);
+  if ( (ADCUse & 3) == 3 && NChans[0] != NChans[1] ) {
+    Serial.printf("ERROR: number of channels on both ADCs must be the same. ADC0: %d, ADC1: %d\n", NChans[0], NChans[1]);
     ADCUse = 0;
     return false;
   }
@@ -361,8 +311,8 @@ void ContinuousADC::report() {
   Serial.printf("  conversion: %s\n", conversionSpeedStr());
   Serial.printf("  sampling:   %s\n", samplingSpeedStr());
   Serial.printf("  reference:  %s\n", referenceStr());
-  Serial.printf("  ADC0:       %dchannel%s\n", NChannels[0], NChannels[0]>1?"s":"");
-  Serial.printf("  ADC1:       %dchannel%s\n", NChannels[1], NChannels[1]>1?"s":"");
+  Serial.printf("  ADC0:       %dchannel%s\n", NChans[0], NChans[0]>1?"s":"");
+  Serial.printf("  ADC1:       %dchannel%s\n", NChans[1], NChans[1]>1?"s":"");
   Serial.printf("  Pins:       %s\n", chans);
   float bt = bufferTime();
   if (bt < 1.0)
@@ -387,26 +337,26 @@ void ContinuousADC::start() {
   if ( (ADCUse & 3) == 3 ) {
     DataHead[1] = 1;
 #if defined(ADC_USE_PDB)
-    startPDB(Rate*NChannels[0]);
+    startPDB(Rate*NChans[0]);
 #else
     // TODO: make this a single function?!?
     for (uint8_t adc=0; adc<2; adc++)
-      ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
+      ADConv.adc[adc]->startTimer(Rate*NChans[adc]);
 #endif
-    Rate = ADConv.adc[0]->getTimerFrequency()/NChannels[0];
+    Rate = ADConv.adc[0]->getTimerFrequency()/NChans[0];
   }
   else {
     for (uint8_t adc=0; adc<2; adc++) {
       if ( (ADCUse & (adc+1)) == adc+1 ) {
-	ADConv.adc[adc]->startTimer(Rate*NChannels[adc]);
+	ADConv.adc[adc]->startTimer(Rate*NChans[adc]);
 #if defined(ADC_USE_PDB)
 	NVIC_DISABLE_IRQ(IRQ_PDB); // we don not need the PDB interrupt
 #endif
-	Rate = ADConv.adc[adc]->getTimerFrequency()/NChannels[adc];
+	Rate = ADConv.adc[adc]->getTimerFrequency()/NChans[adc];
       }
     }
   }
-  Data.reset();   // resets the consumers and they might want to know about Rate
+  reset();   // resets the consumers and they might want to know about Rate
 }
 
 
@@ -415,7 +365,7 @@ void ContinuousADC::stop() {
     if ( (ADCUse & (adc+1)) > 0 ) {
       ADConv.adc[adc]->stopTimer();
       ADConv.adc[adc]->disableDMA();
-      if ( NChannels[adc] > 1 )
+      if ( NChans[adc] > 1 )
 	DMASwitch[adc].disable();
       DMABuffer[adc].disable();
       DMABuffer[adc].detachInterrupt();
@@ -424,98 +374,14 @@ void ContinuousADC::stop() {
 }
 
 
-size_t ContinuousADC::frames(float time) const {
-  return floor(time*Rate);
-}
-
-
-size_t ContinuousADC::samples(float time) const {
-  return floor(time*Rate*nchannels());
-}
-
-
-float ContinuousADC::time(size_t samples) const {
-  return samples/float(NChannels[0]+NChannels[1])/float(Rate);
-}
-
-
-void ContinuousADC::timeStr(size_t samples, char *str) const {
-  float seconds = time(samples);
-  float minutes = floor(seconds/60.0);
-  seconds -= minutes*60;
-  sprintf(str, "%02.0f:%02.0f", minutes, seconds);
-}
-
-
 uint8_t ContinuousADC::adcs() const {
   return (ADCUse+1)/2;
 }
 
 
-size_t ContinuousADC::currentSample(size_t decr) {
-  size_t idx = Data.head();
-  if (decr > 0) {
-    idx += Data.NBuffer - decr*(NChannels[0] + NChannels[1]);
-    while (idx >= Data.NBuffer)
-      idx -= Data.NBuffer;
-  }
-  return idx;
-}
-
-
-size_t ContinuousADC::decrementSample(size_t idx, size_t decr) {
-  idx += Data.NBuffer - decr*(NChannels[0] + NChannels[1]);
-  while (idx >= Data.NBuffer)
-    idx -= Data.NBuffer;
-  return idx;
-}
-
-
-size_t ContinuousADC::incrementSample(size_t idx, size_t incr) {
-  idx += incr*(NChannels[0] + NChannels[1]);
-  while (idx >= Data.NBuffer)
-    idx -= Data.NBuffer;
-  return idx;
-}
-
-
-void ContinuousADC::getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) {
-  if ( ADCUse == 0 ) {
-    memset(buffer, 0, sizeof(sample_t)*nbuffer);
-    return;
-  }
-  size_t step = NChannels[0] + NChannels[1];
-  if (nbuffer*step > Data.NBuffer) {
-    Serial.println("ERROR: requested too many samples.");
-    memset(buffer, 0, sizeof(sample_t)*nbuffer);
-    return;
-  }
-  // copy:
-  start += channel;
-  float scale = 1.0/(1 << (Data.Bits-1));
-  for (size_t k=0; k<nbuffer; k++ ) {
-    if (start >= Data.NBuffer)
-      start -= Data.NBuffer;
-    buffer[k] = scale*Data.Buffer[start];
-    start += step;
-  }
-}
-
-
-void ContinuousADC::checkData(int32_t min, int32_t max) {
-  for (unsigned int k=0; k<Data.NBuffer; k++) {
-    sample_t data = Data.Buffer[k];
-    if (data < min)
-      Serial.printf("%d: %d < %d\n", k, data, min);
-    else if (data > max)
-      Serial.printf("%d: %d > %d\n", k, data, max);
-  }
-}
-
-
 void ContinuousADC::setupChannels(uint8_t adc) {
   // translate to SC1A code:
-  for(uint8_t i=0; i<NChannels[adc]; i++) {
+  for(uint8_t i=0; i<NChans[adc]; i++) {
     uint8_t sc1a_pin = 0;
     if ( adc == 0 )
       sc1a_pin = ADConv.channel2sc1aADC0[Channels[adc][i]];
@@ -523,15 +389,15 @@ void ContinuousADC::setupChannels(uint8_t adc) {
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
   }
-  if ( NChannels[adc] > 1 ) {
+  if ( NChans[adc] > 1 ) {
     // reorder:
     uint8_t temp = SC1AChannels[adc][0];
-    for(uint8_t i=1; i<NChannels[adc]; i++)
+    for(uint8_t i=1; i<NChans[adc]; i++)
       SC1AChannels[adc][i-1] = SC1AChannels[adc][i];
-    SC1AChannels[adc][NChannels[adc]-1] = temp;
+    SC1AChannels[adc][NChans[adc]-1] = temp;
   }
   // configure for input:
-  for(uint8_t i=0; i<NChannels[adc]; i++)
+  for(uint8_t i=0; i<NChans[adc]; i++)
     pinMode(Channels[adc][i], INPUT);
 }
 
@@ -540,7 +406,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setReference(Reference);
   ADConv.adc[adc]->setResolution(Bits);
   Bits = ADConv.adc[adc]->getResolution();
-  DataShift = Data.Bits - Bits;
+  DataShift = DataBits - Bits;
   ADConv.adc[adc]->setAveraging(Averaging);
   ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
   ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
@@ -577,9 +443,9 @@ void ContinuousADC::setupDMA(uint8_t adc) {
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
   DMABuffer[adc].enable();
 
-  if ( NChannels[adc] > 1 ) {
+  if ( NChans[adc] > 1 ) {
     DMASwitch[adc].begin();
-    DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChannels[adc]);
+    DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChans[adc]);
     DMASwitch[adc].destination(adc==0?ADC0_SC1A:ADC1_SC1A); // this switches channels
     DMASwitch[adc].transferSize(1);
     DMASwitch[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
@@ -589,7 +455,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
 
 
 void ContinuousADC::isr(uint8_t adc) {
-  // takes 31us! (=26kHz) for 256 samples
+  // takes 31us! (=32kHz) for 256 samples
   size_t dmai = DMAIndex[adc]*MajorSize;
   DMAIndex[adc]++;
   if ( DMAIndex[adc] >= NMajors)
@@ -602,22 +468,22 @@ void ContinuousADC::isr(uint8_t adc) {
     uint16_t val = ADCBuffer[adc][dmai++];
     val <<= DataShift;  // make 16 bit
     val += 0x8000;      // convert to signed int
-    Data.Buffer[DataHead[adc]] = val;
+    Buffer[DataHead[adc]] = val;
     DataHead[adc] += step;
-    if (DataHead[adc] >= Data.NBuffer)
-      DataHead[adc] -= Data.NBuffer;
+    if (DataHead[adc] >= NBuffer)
+      DataHead[adc] -= NBuffer;
   }
   DMACounter[adc]++;
   if (ADCUse == 3) {
     if (DMACounter[0] == DMACounter[1]) {
-      if (DataHead[0] < Data.Head)
-	Data.Cycle++;
-      Data.Head = DataHead[0];
+      if (DataHead[0] < Head)
+	Cycle++;
+      Head = DataHead[0];
     }
   } else {
-    if (DataHead[adc] < Data.Head)
-      Data.Cycle++;
-    Data.Head = DataHead[adc];
+    if (DataHead[adc] < Head)
+      Cycle++;
+    Head = DataHead[adc];
   }
   DMABuffer[adc].clearInterrupt();
   // TODO: check for buffer overrun! Only if we actually call writeData!
@@ -733,29 +599,3 @@ void DMAISR1() {
   ContinuousADC::ADCC->isr(1);
 }
 
-
-DataConsumer::DataConsumer(void) {
-  Data = &ContinuousADC::ADCC->Data;
-  Tail = 0;
-  Data->addConsumer(this);
-}
-
-
-void DataConsumer::reset() {
-  Tail = 0;
-}
-
-
-size_t DataConsumer::available() const {
-  size_t tail = 0;
-  size_t head = 0;
-  unsigned char sreg_backup = SREG;
-  cli();
-  tail = Tail;
-  head = Data->Head;
-  SREG = sreg_backup;
-  if (tail <= head)
-    return head - tail;
-  else
-    return Data->NBuffer - tail + head;
-}

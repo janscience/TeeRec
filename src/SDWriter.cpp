@@ -216,15 +216,15 @@ size_t SDWriter::writeData() {
   size_t head = Data->head();
   size_t nwrite = 0;
   if (Tail >= head && ! (head == 0 && Tail ==0)) {
-    nwrite = Data->NBuffer - Tail;
+    nwrite = Data->nbuffer() - Tail;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
-      nbytes = File.write((void *)&Data->Buffer[Tail], sizeof(sample_t)*nwrite);
+      nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
       samples0 = nbytes / sizeof(sample_t);
       Tail += samples0;
-      if (Tail >= Data->NBuffer)
-	Tail -= Data->NBuffer;
+      if (Tail >= Data->nbuffer())
+	Tail -= Data->nbuffer();
       FileSamples += samples0;
     }
   }
@@ -234,11 +234,11 @@ size_t SDWriter::writeData() {
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;
   if (nwrite > 0) {
-    nbytes = File.write((void *)&Data->Buffer[Tail], sizeof(sample_t)*nwrite);
+    nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
     Tail += samples1;
-    if (Tail >= Data->NBuffer)
-      Tail -= Data->NBuffer;
+    if (Tail >= Data->nbuffer())
+      Tail -= Data->nbuffer();
     FileSamples += samples1;
   }
   return samples0 + samples1;
@@ -285,7 +285,7 @@ bool SDWriter::endWrite() {
 }
 
 
-void SDWriter::reset() {
-  DataConsumer::reset();
+void SDWriter::reset(const DataBuffer *data) {
+  DataConsumer::reset(data);
   FileSamples = 0;
 }

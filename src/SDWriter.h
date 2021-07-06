@@ -135,12 +135,12 @@ class SDWriter : public DataConsumer {
   bool endWrite();
   
   // Data buffer has been initialized.
-  virtual void reset();
+  virtual void reset(const DataBuffer *data);
   
 
  protected:
 
-  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX sd
+  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
   bool SDAvailable;
   FsFile File;
 

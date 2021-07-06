@@ -18,13 +18,6 @@ class AudioPlayBuffer : public DataConsumer, public AudioStream {
   
   AudioPlayBuffer();
   virtual void update();
-  virtual void reset();
-
-
-private:
-
-  volatile uint8_t NChannels;
-  volatile uint32_t Rate;
   
 };
 

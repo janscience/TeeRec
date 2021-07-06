@@ -33,7 +33,8 @@ with contributions by
 
 ## Libraries
 
-- ContinousADC: Sample from multiple pins into a single cyclic buffer.
+- DataBuffer: A single cyclic, multiplexed buffer holding acquired data.
+- ContinousADC: Sample from multiple pins into a DataBuffer.
 - SDWrite: Write data on SD card.
 - WaveHeader: Setting up wave file header with metadata.
 - Display: Display data on a monitor.

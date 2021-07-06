@@ -29,15 +29,15 @@
     aidata.setChannels(1, channels1);
     aidata.setRate(samplingRate);
     aidata.setResolution(12);   // 10bit, 12bit, 16bit 
-    aidata.setMaxFileTime(60);  // seconds
     aidata.check();
     aidata.start();
     aidata.report();
   }
   ```
 
-  Now, acquisition is continuously running and the cyclic buffer is filled.
-  Use aidata.getData() and aidata.writeData() functions to work with the acquired data.
+  Now, acquisition is continuously running and the cyclic buffer is
+  filled.  Use, for example, `aidata.getData()` or
+  `SDWriter::writeData()` to work with the acquired data.
 
 
   Teensy 3.5
@@ -56,7 +56,7 @@
   8         8            40    45
 
 
-  Output of pinAssignment():
+  Output of `pinAssignment()`:
 
   pin ADC0 ADC1
   A0     1    0
@@ -91,56 +91,10 @@
 #include <Arduino.h>
 #include <ADC.h>
 #include <DMAChannel.h>
-#include <SdFat.h>
-#include <TeensyBoard.h>
+#include <DataBuffer.h>
 
 
-typedef int16_t sample_t;
-
-
-class DataConsumer;
-
-
-class DataBuffer {
-
-  friend class ContinuousADC;
-  
-public:
-
-  DataBuffer();
-
-  // add consumer to data.
-  void addConsumer(DataConsumer *consumer);
-
-  // reset the buffer and consumers.
-  void reset();
-
-  // Return current value of head.
-  size_t head() const;
-
-  // DANGER: Buffer size must be a multiple of ContinuousADC::MajorSize and the maximum number of channels per ADC (16)!
- #ifdef TEENSY32
-  static const size_t NBuffer = 256*64;     // buffer size: 32kB
-#else
-  static const size_t NBuffer = 256*256;    // buffer size: 128kB
-#endif
-  volatile static sample_t Buffer[NBuffer]; // the one and only buffer
-  volatile size_t Head;                     // current index of latest data
-  volatile size_t Cycle;                    // count buffer cycles
-
-  
-protected:
-  
-  const uint8_t Bits = 16;
-  static const size_t MaxConsumers = 10;
-  size_t NConsumers;
-  DataConsumer *Consumers[MaxConsumers];
-};
-
-
-class ContinuousADC {
-
-  friend class DataConsumer;
+class ContinuousADC : public DataBuffer {
 
  public:
 
@@ -156,15 +110,16 @@ class ContinuousADC {
   void setChannel(uint8_t adc, uint8_t channel);
 
   // Configure for acquisition from several channels on a single ADC.
-  // channels is an array with pin specifications like A6, A19.
-  // nchannels must be a power of two,
+  // channels is an array with pin specifications like A6, A19,
+  // terminated by -1.
+  // The number of channels must be a power of two,
   // because the channels have to fit into the 256 samples DMA buffer.
   void setChannels(uint8_t adc, const int8_t *channels);
 
   // Return number of channels on specified ADC.
   uint8_t nchannels(uint8_t adc) const;
 
-  // Return total number of channels on both ADCs.
+  // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const;
 
   // Return in chans a string with the channels/pins sampled on ADC adc.
@@ -174,20 +129,11 @@ class ContinuousADC {
   // in the order they are multiplexed into the buffer.
   void channels(char *chans) const;
   
-  // Set the sampling rate per channel in Hertz.
-  void setRate(uint32_t rate);
-
-  // Return sampling rate per channel in Hertz.
-  uint32_t rate() const;
-  
   // Set the resolution in bits per sample (valid values are 10, 12, 16 bit).
   void setResolution(uint8_t bits);
 
   // Return ADC resolution in bits per sample.
   uint8_t resolution() const;
-
-  // Return resolution of data buffer in bits per sample (always 16 bits).
-  uint8_t dataResolution() const;
 
   // Set the number of averages taken by each sample.
   // Can be 0, 4, 8, 16, or 32.
@@ -240,9 +186,6 @@ class ContinuousADC {
   // Return string describing the selected voltage reference.
   const char *referenceStr() const;
 
-  // Time the cyclic buffer can hold in seconds.
-  float bufferTime() const;
-
   // Print the assignment of AI pins to ADC0 and ADC1 to Serial.
   void pinAssignment();
 
@@ -263,34 +206,6 @@ class ContinuousADC {
 
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
-
-  // Number of frames (samples of a single channel) corresponding to time (in seconds).
-  size_t frames(float time) const;
-
-  // Number of samples (samples of all channel) corresponding to time (in seconds).
-  size_t samples(float time) const;
-
-  // Time in seconds corresponding to a given number of samples (not frames).
-  float time(size_t samples) const;
-
-  // Return time corresponding to samples as a string displaying minutes and seconds.
-  // str must hold at least 6 characters.
-  void timeStr(size_t sample, char *str) const;
-
-  // Return sample right after most current data value in data buffer.
-  size_t currentSample(size_t decr=0);
-
-  // Decrement sample index into data buffer by decr times number of channels.
-  size_t decrementSample(size_t idx, size_t decr);
-
-  // Increment sample index into data buffer by decr times number of channels.
-  size_t incrementSample(size_t idx, size_t incr);
-
-  // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
-  void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
-
-  // Check whether data in the whole buffer are within the specified range (for debugging).
-  void checkData(int32_t min, int32_t max);
 
   // Interrupt service routine. For internal usage.
   void isr(uint8_t adc);
@@ -314,11 +229,10 @@ class ContinuousADC {
   static const int MaxChannels = 20;
   uint8_t Channels[2][MaxChannels];
   uint8_t SC1AChannels[2][MaxChannels];
-  uint8_t NChannels[2];
+  uint8_t NChans[2];
   uint8_t ADCUse;
 
   uint8_t Bits;
-  uint32_t Rate;
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;
   ADC_SAMPLING_SPEED SamplingSpeed;
@@ -353,26 +267,6 @@ class ContinuousADC {
 
 void DMAISR0();
 void DMAISR1();
-
-
-// Base class for all objects operating on the data buffer.
-// Instantiate them *after* ContinuousADC has been instantiated.
-class DataConsumer {
-  
-public:
-  DataConsumer(void);
-
-  // Data buffer has been initialized.
-  virtual void reset();
-
-
-protected:
-
-  size_t available() const;
-  DataBuffer *Data;
-  size_t Tail;       // index for reading the buffer.
-  
-};
 
 
 #endif
