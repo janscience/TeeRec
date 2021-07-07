@@ -48,7 +48,7 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
  
 ContinuousADC aidata;
 
-SDWriter file;
+SDWriter file(aidata);
 
 //AudioShield audio;
 

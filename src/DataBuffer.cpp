@@ -16,10 +16,6 @@ DataBuffer::DataBuffer() {
 
 
 void DataBuffer::addConsumer(DataConsumer *consumer) const {
-  for (size_t k=0; k<NConsumers; k++) {
-    if (Consumers[NConsumers++] == consumer)
-      return;
-  }
   Consumers[NConsumers++] = consumer;
 }
 
@@ -28,7 +24,7 @@ void DataBuffer::reset() {
   Head = 0;
   Cycle = 0;
   for (size_t k=0; k<NConsumers; k++)
-    Consumers[k]->reset(this);
+    Consumers[k]->reset();
 }
 
 
@@ -136,16 +132,15 @@ void DataBuffer::checkData(int32_t min, int32_t max) {
 }
 
 
-DataConsumer::DataConsumer(void) {
-  Data = NULL;
+DataConsumer::DataConsumer(const DataBuffer *data) {
+  data->addConsumer(this);
+  Data = data;
   Tail = 0;
 }
 
 
-void DataConsumer::reset(const DataBuffer *data) {
-  Data = data;
+void DataConsumer::reset() {
   Tail = 0;
-  Data->addConsumer(this);
 }
 
 

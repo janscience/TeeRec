@@ -44,8 +44,8 @@ class SDWriter : public DataConsumer {
 
  public:
 
-  // Initialize SD card.
-  SDWriter();
+  // Initialize SD card and assign data.
+  SDWriter(const DataBuffer &data);
   // End usage of SD card.
   ~SDWriter();
 
@@ -135,7 +135,7 @@ class SDWriter : public DataConsumer {
   bool endWrite();
   
   // Data buffer has been initialized.
-  virtual void reset(const DataBuffer *data);
+  virtual void reset();
   
 
  protected:

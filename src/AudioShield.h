@@ -16,7 +16,7 @@ class AudioPlayBuffer : public DataConsumer, public AudioStream {
   
  public:
   
-  AudioPlayBuffer();
+  AudioPlayBuffer(const DataBuffer &data);
   virtual void update();
   
 };
@@ -26,7 +26,7 @@ class AudioShield {
 
  public:
 
-  AudioShield();
+  AudioShield(const DataBuffer &data);
   ~AudioShield();
 
   void setup();
@@ -34,7 +34,7 @@ class AudioShield {
 
  protected:
 
-  AudioPlayBuffer AudioInput;
+  AudioPlayBuffer *AudioInput;
   AudioOutputI2S AudioOutput;
   AudioConnection *PatchCord1;
   AudioConnection *PatchCord2;

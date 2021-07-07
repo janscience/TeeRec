@@ -2,8 +2,8 @@
 #include <SDWriter.h>
 
 
-SDWriter::SDWriter() :
-  DataConsumer() {
+SDWriter::SDWriter(const DataBuffer &data) :
+  DataConsumer(&data) {
   NameCounter = 0;
   // start sdio interface to SD card:
   if (!SD.begin(SD_CONFIG)) {
@@ -215,7 +215,7 @@ size_t SDWriter::writeData() {
     return 0;
   size_t head = Data->head();
   size_t nwrite = 0;
-  if (Tail >= head && ! (head == 0 && Tail ==0)) {
+  if (Tail >= head && ! (head == 0 && Tail == 0)) {
     nwrite = Data->nbuffer() - Tail;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
@@ -246,6 +246,11 @@ size_t SDWriter::writeData() {
 
 
 void SDWriter::startWrite() {
+  if (Data == NULL) {
+    Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
+    Tail = 0;
+    return;
+  }
   Tail = Data->head();
 }
 
@@ -285,7 +290,7 @@ bool SDWriter::endWrite() {
 }
 
 
-void SDWriter::reset(const DataBuffer *data) {
-  DataConsumer::reset(data);
+void SDWriter::reset() {
+  DataConsumer::reset();
   FileSamples = 0;
 }

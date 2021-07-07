@@ -2,8 +2,9 @@
 #include "AudioShield.h"
 
 
-AudioPlayBuffer::AudioPlayBuffer()
-  : AudioStream(0, NULL) {
+AudioPlayBuffer::AudioPlayBuffer(const DataBuffer &data)
+  : DataConsumer(&data),
+    AudioStream(0, NULL) {
 }
 
 
@@ -57,21 +58,23 @@ void AudioPlayBuffer::update() {
 }
 
 
-AudioShield::AudioShield() {
+AudioShield::AudioShield(const DataBuffer &data) {
+  AudioInput = new AudioPlayBuffer(data);
 }
 
 
 AudioShield::~AudioShield() {
   delete PatchCord1;
   delete PatchCord2;
+  // delete AudioInput; ????
 }
 
 
 void AudioShield::setup() {
   AudioMemory(8);
 
-  PatchCord1 = new AudioConnection(AudioInput, 0, AudioOutput, 0);
-  //PatchCord2 = new AudioConnection(AudioInput, 1, AudioOutput, 1);
+  PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
+  //PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
   
   Shield.enable();
   Shield.volume(0.5);

@@ -111,15 +111,17 @@ class DataConsumer {
   
 public:
 
-  DataConsumer(void);
+  DataConsumer(const DataBuffer *data);
 
-  // Reset consumer and supply the buffer.
-  virtual void reset(const DataBuffer *data);
+  // Reset consumer.
+  virtual void reset();
+
+  // Number of samples available for consumption.
+  size_t available() const;
 
 
 protected:
-
-  size_t available() const;
+  
   const DataBuffer *Data;
   size_t Tail;       // index for reading the buffer.
   
