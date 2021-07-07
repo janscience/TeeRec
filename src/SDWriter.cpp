@@ -2,6 +2,23 @@
 #include <SDWriter.h>
 
 
+SDWriter::SDWriter() :
+  DataConsumer() {
+  NameCounter = 0;
+  // start sdio interface to SD card:
+  if (!SD.begin(SD_CONFIG)) {
+    SDAvailable = false;
+    return;
+  }    
+  SD.chvol();
+  SDAvailable = true;
+  File.close();
+  WriteInterval = 100;
+  FileSamples = 0;
+  FileMaxSamples = 0;
+}
+
+
 SDWriter::SDWriter(const DataBuffer &data) :
   DataConsumer(&data) {
   NameCounter = 0;
@@ -106,7 +123,7 @@ String SDWriter::incrementFileName(const String &fname) {
 	aa[1] = char('a' + ((NameCounter-1) % 26));
 	uint16_t major = (NameCounter-1) / 26;
 	if (major > 25) {
-	  Serial.println("file name overflow");
+	  Serial.println("WARNING: file name overflow");
 	  return "";
 	}
 	aa[0] = char('a' + major);
@@ -114,7 +131,7 @@ String SDWriter::incrementFileName(const String &fname) {
       }
       else if (num) {
 	if (NameCounter > 99) {
-	  Serial.println("file name overflow");
+	  Serial.println("WARNING: file name overflow");
 	  return "";
 	}
 	char nn[4];
@@ -137,7 +154,7 @@ bool SDWriter::open(const char *fname) {
     return false;
   }
   if (!File.open(fname, O_WRITE | O_CREAT))
-    Serial.printf("failed to open file %s\n", fname);
+    Serial.printf("WARNING: failed to open file %s\n", fname);
   FileSamples = 0;
   WriteTime = 0;
   return File.isOpen();
@@ -153,7 +170,7 @@ void SDWriter::close() {
   if (! File.isOpen())
     return;
   if (!File.close())
-    Serial.println("failed to close file");
+    Serial.println("WARNING: failed to close file");
 }
 
 
@@ -213,9 +230,14 @@ size_t SDWriter::writeData() {
     return 0;
   if (! File.isOpen())
     return 0;
+  size_t missed = overrun();
+  if (missed > 0)
+    Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
   size_t head = Data->head();
+  if (head == 0 || Tail == head)
+    return 0;
   size_t nwrite = 0;
-  if (Tail >= head && ! (head == 0 && Tail == 0)) {
+  if (Tail > head) {
     nwrite = Data->nbuffer() - Tail;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
@@ -223,8 +245,10 @@ size_t SDWriter::writeData() {
       nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
       samples0 = nbytes / sizeof(sample_t);
       Tail += samples0;
-      if (Tail >= Data->nbuffer())
+      if (Tail >= Data->nbuffer()) {
 	Tail -= Data->nbuffer();
+	TailCycle++;
+      }
       FileSamples += samples0;
     }
   }
@@ -237,8 +261,10 @@ size_t SDWriter::writeData() {
     nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
     Tail += samples1;
-    if (Tail >= Data->nbuffer())
+    if (Tail >= Data->nbuffer()) {
       Tail -= Data->nbuffer();
+      TailCycle++;
+    }
     FileSamples += samples1;
   }
   return samples0 + samples1;
@@ -249,9 +275,11 @@ void SDWriter::startWrite() {
   if (Data == NULL) {
     Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
     Tail = 0;
+    TailCycle = 0;
     return;
   }
   Tail = Data->head();
+  TailCycle = Data->headCycle();
 }
 
 

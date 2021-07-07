@@ -7,7 +7,7 @@ volatile sample_t __attribute__((aligned(32))) DataBuffer::Buffer[NBuffer];
 
 DataBuffer::DataBuffer() {
   Head = 0;
-  Cycle = 0;
+  HeadCycle = 0;
   Rate = 0;
   NChannels = 0;
   NConsumers = 0;
@@ -22,14 +22,9 @@ void DataBuffer::addConsumer(DataConsumer *consumer) const {
 
 void DataBuffer::reset() {
   Head = 0;
-  Cycle = 0;
+  HeadCycle = 0;
   for (size_t k=0; k<NConsumers; k++)
     Consumers[k]->reset();
-}
-
-
-void DataBuffer::setRate(uint32_t rate) {
-  Rate = rate;
 }
 
 
@@ -72,11 +67,22 @@ size_t DataBuffer::head() const {
 }
 
 
+size_t DataBuffer::headCycle() const {
+  unsigned char sreg_backup;
+  size_t headcycle = 0;
+  sreg_backup = SREG;
+  cli();
+  headcycle = HeadCycle;
+  SREG = sreg_backup;
+  return headcycle;
+}
+
+
 size_t DataBuffer::currentSample(size_t decr) {
   size_t idx = head();
   if (decr > 0) {
     idx += NBuffer - decr*NChannels;
-    while (idx >= NBuffer)
+    while (idx > NBuffer)
       idx -= NBuffer;
   }
   return idx;
@@ -85,7 +91,7 @@ size_t DataBuffer::currentSample(size_t decr) {
 
 size_t DataBuffer::decrementSample(size_t idx, size_t decr) {
   idx += NBuffer - decr*NChannels;
-  while (idx >= NBuffer)
+  while (idx > NBuffer)
     idx -= NBuffer;
   return idx;
 }
@@ -93,7 +99,7 @@ size_t DataBuffer::decrementSample(size_t idx, size_t decr) {
 
 size_t DataBuffer::incrementSample(size_t idx, size_t incr) {
   idx += incr*NChannels;
-  while (idx >= NBuffer)
+  while (idx > NBuffer)
     idx -= NBuffer;
   return idx;
 }
@@ -132,10 +138,21 @@ void DataBuffer::checkData(int32_t min, int32_t max) {
 }
 
 
+DataConsumer::DataConsumer() {
+  Tail = 0;
+  Data = 0;
+}
+
+
 DataConsumer::DataConsumer(const DataBuffer *data) {
+  Tail = 0;
+  setData(data);
+}
+
+
+void DataConsumer::setData(const DataBuffer *data) {
   data->addConsumer(this);
   Data = data;
-  Tail = 0;
 }
 
 
@@ -147,15 +164,43 @@ void DataConsumer::reset() {
 size_t DataConsumer::available() const {
   if (Data == NULL)
     return 0;
-  size_t tail = 0;
   size_t head = 0;
   unsigned char sreg_backup = SREG;
   cli();
-  tail = Tail;
   head = Data->Head;
   SREG = sreg_backup;
-  if (tail <= head)
-    return head - tail;
+  if (Tail <= head)
+    return head - Tail;
   else
-    return Data->NBuffer - tail + head;
+    return Data->NBuffer - Tail + head;
+}
+
+
+size_t DataConsumer::overrun() {
+  if (Data == NULL)
+    return 0;
+  // get head:
+  size_t head = 0;
+  size_t headcycle = 0;
+  unsigned char sreg_backup = SREG;
+  cli();
+  head = Data->Head;
+  headcycle = Data->HeadCycle;
+  SREG = sreg_backup;
+  // compute number of missed samples:
+  size_t missed = 0;
+  if (head >= Tail && headcycle > TailCycle)
+    missed = head - Tail + (headcycle-TailCycle-1)*Data->nbuffer();
+  else if (head < Tail && headcycle > TailCycle+1)
+    missed = Data->nbuffer() - Tail + head + (headcycle-TailCycle-2)*Data->nbuffer();
+  if (missed > 0) {
+    // update tail:
+    Tail = head + Data->nchannels();
+    TailCycle = headcycle - 1;
+    if (Tail >= Data->nbuffer()) {
+      Tail -= Data->nbuffer();
+      TailCycle++;
+    }
+  }
+  return missed;
 }

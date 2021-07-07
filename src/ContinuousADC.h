@@ -129,6 +129,9 @@ class ContinuousADC : public DataBuffer {
   // in the order they are multiplexed into the buffer.
   void channels(char *chans) const;
   
+  // Set the sampling rate per channel in Hertz.
+  void setRate(uint32_t rate);
+  
   // Set the resolution in bits per sample (valid values are 10, 12, 16 bit).
   void setResolution(uint8_t bits);
 

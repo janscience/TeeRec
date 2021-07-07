@@ -40,9 +40,6 @@ public:
 
   // Return resolution of data buffer in bits per sample (always 16 bits).
   uint8_t dataResolution() const { return DataBits; };
-  
-  // Set the sampling rate per channel in Hertz.
-  void setRate(uint32_t rate);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };
@@ -66,8 +63,11 @@ public:
   // str must hold at least 6 characters.
   void timeStr(size_t sample, char *str) const;
 
-  // Return current value of head.
+  // Return current value of the head index.
   size_t head() const;
+
+  // Return current value of the head cycle counter.
+  size_t headCycle() const;
 
   // Return sample right after most current data value in data buffer.
   size_t currentSample(size_t decr=0);
@@ -95,7 +95,7 @@ protected:
 #endif
   volatile static sample_t __attribute__((aligned(32))) Buffer[NBuffer]; // the one and only buffer
   volatile size_t Head;                     // current index of latest data
-  volatile size_t Cycle;                    // count buffer cycles
+  volatile size_t HeadCycle;                // count buffer cycles
   uint32_t Rate;                            // sampling rate per channel
   uint8_t NChannels;                        // number of channels multiplexed into the buffer
   static const uint8_t DataBits = 16;
@@ -111,7 +111,10 @@ class DataConsumer {
   
 public:
 
+  DataConsumer();
   DataConsumer(const DataBuffer *data);
+
+  void setData(const DataBuffer *data);
 
   // Reset consumer.
   virtual void reset();
@@ -119,11 +122,16 @@ public:
   // Number of samples available for consumption.
   size_t available() const;
 
+  // Number of samples that have been missed to be consumed.
+  // Sets the tail forward to the first still available sample.
+  size_t overrun();
+
 
 protected:
   
   const DataBuffer *Data;
   size_t Tail;       // index for reading the buffer.
+  size_t TailCycle;  // count buffer cycles.
   
 };
 

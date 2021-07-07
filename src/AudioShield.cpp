@@ -17,6 +17,10 @@ void AudioPlayBuffer::update() {
 
   if (Data->time(available()) < AUDIO_BLOCK_SAMPLES/AUDIO_SAMPLE_RATE_EXACT)
     return;
+
+  size_t head = Data->head();
+  if (head == 0)
+    return;
   
   // allocate audio blocks to transmit:
   block1 = allocate();
@@ -31,15 +35,17 @@ void AudioPlayBuffer::update() {
   // transfer data from buffer to blocks:
   for (uint8_t c=0; c<Data->nchannels(); c++) {
     unsigned int i = 0;
-    if (Tail > Data->head()) {
+    if (Tail > head) {
       for (i=0; i<AUDIO_BLOCK_SAMPLES && Tail < Data->nbuffer(); i++) {
 	block1->data[i] = Data->buffer()[Tail++];
       }
-      if (Tail >= Data->nbuffer())
-	Tail = 0;
+      if (Tail >= Data->nbuffer()) {
+	Tail -= Data->nbuffer();
+	TailCycle++;
+      }
     }
-    if (Tail < Data->head()) {
-      for ( ; i<AUDIO_BLOCK_SAMPLES && Tail < Data->head(); i++) {
+    if (Tail < head) {
+      for ( ; i<AUDIO_BLOCK_SAMPLES && Tail < head; i++) {
 	block1->data[i] = Data->buffer()[Tail++];
       }
     }

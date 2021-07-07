@@ -121,6 +121,11 @@ void ContinuousADC::channels(char *chans) const
 }
 
 
+void ContinuousADC::setRate(uint32_t rate) {
+  Rate = rate;
+}
+
+
 void ContinuousADC::setResolution(uint8_t bits) {
   Bits = bits;
   DataShift = DataBits - Bits;
@@ -356,7 +361,8 @@ void ContinuousADC::start() {
       }
     }
   }
-  reset();   // resets the consumers and they might want to know about Rate
+  reset();   // resets the buffer and consumers
+             // (they also might want to know about Rate)
 }
 
 
@@ -460,33 +466,32 @@ void ContinuousADC::isr(uint8_t adc) {
   DMAIndex[adc]++;
   if ( DMAIndex[adc] >= NMajors)
     DMAIndex[adc] = 0;
-  // transform and copy dma buffer:
+  // transform and copy DMA buffer:
   size_t step = 1;
   if (ADCUse == 3)
     step = 2;
+  if (DataHead[adc] >= NBuffer)
+    DataHead[adc] -= NBuffer;
   for (size_t k=0; k<MajorSize; k++) {
     uint16_t val = ADCBuffer[adc][dmai++];
     val <<= DataShift;  // make 16 bit
     val += 0x8000;      // convert to signed int
     Buffer[DataHead[adc]] = val;
     DataHead[adc] += step;
-    if (DataHead[adc] >= NBuffer)
-      DataHead[adc] -= NBuffer;
   }
   DMACounter[adc]++;
   if (ADCUse == 3) {
     if (DMACounter[0] == DMACounter[1]) {
       if (DataHead[0] < Head)
-	Cycle++;
+	HeadCycle++;
       Head = DataHead[0];
     }
   } else {
     if (DataHead[adc] < Head)
-      Cycle++;
+      HeadCycle++;
     Head = DataHead[adc];
   }
   DMABuffer[adc].clearInterrupt();
-  // TODO: check for buffer overrun! Only if we actually call writeData!
 }
 
 

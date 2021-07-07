@@ -44,6 +44,8 @@ class SDWriter : public DataConsumer {
 
  public:
 
+  // Initialize SD card.
+  SDWriter();
   // Initialize SD card and assign data.
   SDWriter(const DataBuffer &data);
   // End usage of SD card.
