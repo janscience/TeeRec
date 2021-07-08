@@ -1,5 +1,5 @@
 /*
-  Configurator - configure class instances from a configuration file.
+  Configurator - configure configurable class instances from a configuration file.
   Created by Jan Benda, May 26th, 2021.
 */
 

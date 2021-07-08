@@ -1,6 +1,6 @@
 /*
-  Configurable - make a class configurable.
-  Created by Jan Benda, May 26th, 2021.
+  Configurable - base class for all configurable classes.
+  Created by Jan Benda, July 8th, 2021.
 */
 
 #ifndef Configurable_h

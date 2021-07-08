@@ -1,6 +1,6 @@
 /*
-  Settings - Some configurable general settings.
-  Created by Jan Benda, May 26th, 2021.
+  Settings - common configurable settings (file name, path, etc.).
+  Created by Jan Benda, July 8th, 2021.
 */
 
 #ifndef Settings_h

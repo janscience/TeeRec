@@ -29,6 +29,7 @@ with contributions by
 - Generate test signals.
 - React to push buttons.
 - Feedback by blinking the LED.
+- Configurable through config file on SD card.
 
 
 ## Libraries
@@ -43,6 +44,9 @@ with contributions by
 - PushButtons: Manage and query push buttons with callback functions.
 - TestSignals: Generate test signals on pulse-width modulation pins.
 - TeensyBoard: Find out which Teensy board we are running on.
+- Configurable: Base class for all configurable classes.
+- Settings: Common configurable settings (file name, path, etc.)
+- Configurator: Configure configurable class instances from a configuration file.
 
 
 ## Examples
