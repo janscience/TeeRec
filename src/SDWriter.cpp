@@ -18,11 +18,6 @@ SDCard::~SDCard() {
 }
 
 
-bool SDCard::available() {
-  return Available;
-}
-
-
 void SDCard::end() {
   if (Available)
     SD.end();
@@ -186,7 +181,8 @@ bool SDWriter::open(const char *fname) {
     Serial.println("failed to open file because a file is still open.");
     return false;
   }
-  if (!File.open(fname, O_WRITE | O_CREAT))
+  File = SD->open(fname, O_WRITE | O_CREAT);
+  if (File.getError())
     Serial.printf("WARNING: failed to open file %s\n", fname);
   FileSamples = 0;
   WriteTime = 0;

@@ -50,7 +50,10 @@ class SDCard {
   ~SDCard();
 
   // Availability of a SD card. 
-  bool available();
+  bool available() { return Available; };
+
+  // End usage of SD card.
+  void end();
 
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
@@ -61,11 +64,11 @@ class SDCard {
   // Takes about 1-2ms.
   String incrementFileName(const String &fname);
 
-  // End usage of SD card.
-  void end();
-
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
+
+  // Open file on SD card.
+  FsFile open(const char *path, oflag_t oflag=0) {return SD.open(path, oflag); };
 
   
  protected:
