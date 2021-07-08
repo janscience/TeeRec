@@ -21,7 +21,7 @@ volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2
 
 
 ContinuousADC::ContinuousADC() :
-  Configurable("ContinuousADC") {
+  Configurable("ADC") {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;
@@ -365,7 +365,7 @@ void ContinuousADC::configure(const char *key, const char *val) {
     found = true;
   }
   if (found)
-    Serial.printf("  set ADC %s to %s\n", key, val);
+    Serial.printf("  set ADC-%s to %s\n", key, val);
 }
 
 

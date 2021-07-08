@@ -38,7 +38,7 @@ float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
 
-int stimulusFrequency = 200;         // Hertz
+int pulseFrequency = 200;         // Hertz
 #ifdef TEENSY32
 int signalPins[] = {3, 4, 5, 6, -1}; // pins where to put out test signals
 #else
@@ -48,12 +48,9 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 // ------------------------------------------------------------------------------------------
 
 Configurator config;
- 
 ContinuousADC aidata;
-
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-
 //AudioShield audio;
 
 Display screen;
@@ -65,6 +62,65 @@ elapsedMillis screenTime;
 
 RTClock rtclock;
 PushButtons buttons;
+
+class Settings : public Configurable {
+
+public:
+
+  Settings() : Configurable("Settings")
+    { strncpy(Path, "recordings", 100);
+      strncpy(FileName, fileName, 100);
+      FileTime = fileSaveTime;
+      DisplayTime = displayTime;
+      PulseFrequency = pulseFrequency; };
+
+  virtual void configure(const char *key, const char *val) {
+    bool found = false;
+    if (strcmp(key, "path") == 0) {
+      strncpy(Path, val, 100);
+      found = true;
+    }
+    else if (strcmp(key, "filename") == 0) {
+      strncpy(FileName, val, 100);
+      found = true;
+    }
+    else if (strcmp(key, "filetime") == 0) {
+      float time = atof(val);
+      for (size_t k=0; k<strlen(val); k++) {
+        if (val[k] == 'm') {
+          time *= 60.0;
+          break;
+        }
+      }
+      FileTime = time;
+      found = true;
+    }
+    else if (strcmp(key, "displaytime") == 0) {
+      DisplayTime = 0.001 * atof(val);
+      found = true;
+    }
+    else if (strcmp(key, "pulsefreq") == 0) {
+      float freq = atof(val);
+      for (size_t k=0; k<strlen(val); k++) {
+        if (val[k] == 'k') {
+          freq *= 1000.0;
+          break;
+        }
+      }
+      PulseFrequency = freq;
+      found = true;
+    }
+    if (found)
+      Serial.printf("  set Settings-%s to %s\n", key, val);
+ }
+
+ char Path[100];
+ char FileName[100];
+ float FileTime;
+ float DisplayTime;
+ float PulseFrequency;
+};
+Settings settings;
 
 
 void setupADC() {
@@ -81,7 +137,7 @@ void setupADC() {
 
 
 void openNextFile() {
-  String name = rtclock.makeStr(fileName, true);
+  String name = rtclock.makeStr(settings.FileName, true);
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
@@ -101,9 +157,9 @@ void openNextFile() {
 
 void setupStorage() {
   if (file.available())
-    file.dataDir("recordings");
+    file.dataDir(settings.Path);
   file.setWriteInterval(aidata);
-  file.setMaxFileTime(fileSaveTime);
+  file.setMaxFileTime(settings.FileTime);
 }
 
 
@@ -119,7 +175,7 @@ void startWrite(int id) {
 
 void stopWrite(int id) {
   // on button release:
-  file.setMaxFileTime(fileSaveTime);
+  file.setMaxFileTime(settings.FileTime);
 }
 
 
@@ -212,7 +268,7 @@ void plotData() {   // 85ms
     }
     screen.clearPlots();   // 16ms
     file.writeData();
-    size_t n = aidata.frames(displayTime);
+    size_t n = aidata.frames(settings.DisplayTime);
     float data[n];
     size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
@@ -250,7 +306,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  setupTestSignals(signalPins, stimulusFrequency);
+  setupTestSignals(signalPins, settings.PulseFrequency);
   setupButtons();
   setupADC();
   config.configure(sdcard);

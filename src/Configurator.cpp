@@ -53,7 +53,11 @@ void Configurator::configure(SDCard &sd) {
     char *key = NULL;
     char *val = NULL;
     int state = 0;
-    for (size_t k=0; line[k] != '\0' && line[k] != '#'; k++) {
+    for (size_t k=0; line[k] != '\0'; k++) {
+      if (line[k] == '#') {
+	line[k] = '\0';
+	break;
+      }
       if (line[k] == '\n' || line[k] == '\r')
 	line[k] = ' ';
       switch (state) {
