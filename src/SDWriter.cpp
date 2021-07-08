@@ -2,61 +2,35 @@
 #include <SDWriter.h>
 
 
-SDWriter::SDWriter() :
-  DataConsumer() {
+SDCard::SDCard() {
+  Available = false;
   NameCounter = 0;
   // start sdio interface to SD card:
-  if (!SD.begin(SD_CONFIG)) {
-    SDAvailable = false;
+  if (!SD.begin(SD_CONFIG))
     return;
-  }    
+  Available = true;
   SD.chvol();
-  SDAvailable = true;
-  File.close();
-  WriteInterval = 100;
-  FileSamples = 0;
-  FileMaxSamples = 0;
 }
 
 
-SDWriter::SDWriter(const DataBuffer &data) :
-  DataConsumer(&data) {
-  NameCounter = 0;
-  // start sdio interface to SD card:
-  if (!SD.begin(SD_CONFIG)) {
-    SDAvailable = false;
-    return;
-  }    
-  SD.chvol();
-  SDAvailable = true;
-  File.close();
-  WriteInterval = 100;
-  FileSamples = 0;
-  FileMaxSamples = 0;
-}
-
-
-SDWriter::~SDWriter() {
+SDCard::~SDCard() {
   end();
 }
 
 
-bool SDWriter::available() {
-  return SDAvailable;
+bool SDCard::available() {
+  return Available;
 }
 
 
-void SDWriter::end() {
-  if (SDAvailable) {  // end sdio interface to SD card:
-    if (File.isOpen())
-      File.close();
+void SDCard::end() {
+  if (Available)
     SD.end();
-  }
 }
 
 
-void SDWriter::dataDir(const char *path) {
-  if (! SDAvailable)
+void SDCard::dataDir(const char *path) {
+  if (! Available)
     return;
   if (! SD.exists(path))
     SD.mkdir(path);
@@ -65,10 +39,10 @@ void SDWriter::dataDir(const char *path) {
 }
 
 
-void SDWriter::removeFiles(const char *path) {
+void SDCard::removeFiles(const char *path) {
   FsFile dir;
   FsFile file;
-  if (! SDAvailable)
+  if (! Available)
     return;
   if (!dir.open(path))
     return;
@@ -91,23 +65,8 @@ void SDWriter::removeFiles(const char *path) {
 }
 
 
-void SDWriter::setWriteInterval(const ContinuousADC &adc) {
-  WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
-}
-
-
-bool SDWriter::needToWrite() {
-  if (File.isOpen() && WriteTime > WriteInterval) {
-    WriteTime -= WriteInterval;
-    return true;
-  }
-  else
-    return false;
-}
-
-
-String SDWriter::incrementFileName(const String &fname) {
-  if (! SDAvailable)
+String SDCard::incrementFileName(const String &fname) {
+  if (! Available)
     return "";
   bool num = false;
   bool anum = (fname.indexOf("ANUM") >= 0);
@@ -146,8 +105,82 @@ String SDWriter::incrementFileName(const String &fname) {
 }
 
 
+SDWriter::SDWriter(const DataBuffer &data) :
+  DataConsumer(&data) {
+  SD = new SDCard;
+  SDOwn = true;
+  File.close();
+  WriteInterval = 100;
+  FileSamples = 0;
+  FileMaxSamples = 0;
+}
+
+
+SDWriter::SDWriter(SDCard &sd, const DataBuffer &data) :
+  DataConsumer(&data) {
+  SD = &sd;
+  SDOwn = false;
+  File.close();
+  WriteInterval = 100;
+  FileSamples = 0;
+  FileMaxSamples = 0;
+}
+
+
+SDWriter::~SDWriter() {
+  end();
+}
+
+
+bool SDWriter::available() {
+  return (SD != NULL && SD->available());
+}
+
+
+void SDWriter::end() {
+  if (available()) {
+    if (File.isOpen())
+      File.close();
+    if (SDOwn) {
+      SD->end();
+      SDOwn = false;
+    }
+    SD = NULL;
+  }
+}
+
+
+void SDWriter::dataDir(const char *path) {
+  if (available())
+    SD->dataDir(path);
+}
+
+
+String SDWriter::incrementFileName(const String &fname) {
+  if (available())
+    return SD->incrementFileName(fname);
+  else
+    return "";
+}
+
+
+void SDWriter::setWriteInterval(const ContinuousADC &adc) {
+  WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
+}
+
+
+bool SDWriter::needToWrite() {
+  if (File.isOpen() && WriteTime > WriteInterval) {
+    WriteTime -= WriteInterval;
+    return true;
+  }
+  else
+    return false;
+}
+
+
 bool SDWriter::open(const char *fname) {
-  if (! SDAvailable || strlen(fname) == 0)
+  if (! available() || strlen(fname) == 0)
     return false;
   if (File.isOpen()) {
     Serial.println("failed to open file because a file is still open.");

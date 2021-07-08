@@ -40,28 +40,68 @@
 #endif
 
 
-class SDWriter : public DataConsumer {
+class SDCard {
 
  public:
 
   // Initialize SD card.
-  SDWriter();
-  // Initialize SD card and assign data.
-  SDWriter(const DataBuffer &data);
+  SDCard();
   // End usage of SD card.
+  ~SDCard();
+
+  // Availability of a SD card. 
+  bool available();
+
+  // Make directory if it does not exist and make it the currrent working directory.
+  void dataDir(const char *path);
+
+  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
+  // such that it specifies a non existing file. 
+  // If no SD card is available, or if no unique file can be found, return an empty string.
+  // Takes about 1-2ms.
+  String incrementFileName(const String &fname);
+
+  // End usage of SD card.
+  void end();
+
+  // Remove all files in path (non-recursively).
+  void removeFiles(const char *path);
+
+  
+ protected:
+
+  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
+  bool Available;
+
+  uint16_t NameCounter;
+};
+
+
+class SDWriter : public DataConsumer {
+
+ public:
+
+  // Initialize writer on default SD card.
+  SDWriter(const DataBuffer &data);
+  // Initialize writer on SD card.
+  SDWriter(SDCard &sd, const DataBuffer &data);
+  // Close file and end usage of SD card.
   ~SDWriter();
 
   // Availability of a SD card. 
   bool available();
 
-  // End usage of SD card.
+  // End usage of SD card if it was created by SDWriter.
   void end();
 
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
 
-  // Remove all files in path (non-recursively).
-  void removeFiles(const char *path);
+  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
+  // such that it specifies a non existing file. 
+  // If no SD card is available, or if no unique file can be found, return an empty string.
+  // Takes about 1-2ms.
+  String incrementFileName(const String &fname);
 
   // Set write interval depending on adc settings.
   // Call this *after* setting up ContinusADC in setup().
@@ -70,12 +110,6 @@ class SDWriter : public DataConsumer {
   // True if data need to be written to file.
   // Check this regularly in loop().
   bool needToWrite();
-
-  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
-  // such that it specifies a non existing file. 
-  // If no SD card is available, or if no unique file can be found, return an empty string.
-  // Takes about 1-2ms.
-  String incrementFileName(const String &fname);
 
   // Open new file for writing (<=11ms).
   // fname is the name of the file inclusively extension.
@@ -142,16 +176,14 @@ class SDWriter : public DataConsumer {
 
  protected:
 
-  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
-  bool SDAvailable;
+  SDCard *SD;
+  bool SDOwn;
   FsFile File;
 
   WaveHeader Wave;
 
   elapsedMillis WriteTime;
   uint WriteInterval;
-
-  uint16_t NameCounter;
 
   size_t FileSamples;    // current number of samples stored in the file.
   size_t FileMaxSamples; // maximum number of samples to be stored in a file.

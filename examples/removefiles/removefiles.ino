@@ -4,7 +4,7 @@
 
 char path[] = "recordings";
 
-SDWriter file;
+SDCard sd;
 Blink blink;
 
 
@@ -12,8 +12,9 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   blink.switchOn();
-  file.removeFiles(path);
+  sd.removeFiles(path);
   blink.switchOff();
+  sd.end();
 }
 
 
