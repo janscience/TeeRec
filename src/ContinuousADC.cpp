@@ -20,7 +20,8 @@ ContinuousADC *ContinuousADC::ADCC = 0;
 volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
 
 
-ContinuousADC::ContinuousADC() {
+ContinuousADC::ContinuousADC() :
+  Configurable("ContinuousADC") {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;

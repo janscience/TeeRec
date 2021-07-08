@@ -1,3 +1,4 @@
+#include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 //#include <AudioShield.h>
@@ -45,10 +46,13 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 #endif
 
 // ------------------------------------------------------------------------------------------
+
+Configurator config;
  
 ContinuousADC aidata;
 
-SDWriter file(aidata);
+SDCard sdcard;
+SDWriter file(sdcard, aidata);
 
 //AudioShield audio;
 
@@ -246,6 +250,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
+  config.configure(sdcard);
   setupTestSignals(signalPins, stimulusFrequency);
   setupButtons();
   setupADC();

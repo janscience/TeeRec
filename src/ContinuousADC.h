@@ -92,9 +92,10 @@
 #include <ADC.h>
 #include <DMAChannel.h>
 #include <DataBuffer.h>
+#include <Configurable.h>
 
 
-class ContinuousADC : public DataBuffer {
+class ContinuousADC : public DataBuffer, public Configurable {
 
  public:
 
