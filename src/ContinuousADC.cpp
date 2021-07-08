@@ -160,7 +160,7 @@ const char *ContinuousADC::conversionSpeedStr() const {
 
 const char *ContinuousADC::conversionSpeedShortStr() const {
   switch (ConversionSpeed) {
-#if defined(ADC_TEENSY_4) // Teensy 4
+#if defined(ADC_TEENSY_4)
 #else
     case ADC_CONVERSION_SPEED::VERY_LOW_SPEED:
       return (const char *)"verylow";
@@ -171,12 +171,12 @@ const char *ContinuousADC::conversionSpeedShortStr() const {
       return (const char *)"med";
     case ADC_CONVERSION_SPEED::HIGH_SPEED:
       return (const char *)"high";
-#if defined(ADC_TEENSY_4) // Teensy 4
+#if defined(ADC_TEENSY_4)
 #else
     case ADC_CONVERSION_SPEED::VERY_HIGH_SPEED:
       return (const char *)"veryhigh";
 #endif
-#if defined(ADC_TEENSY_4) // Teensy 4
+#if defined(ADC_TEENSY_4)
     case ADC_CONVERSION_SPEED::ADACK_10:
       return (const char *)"adack10";
     case ADC_CONVERSION_SPEED::ADACK_20:
@@ -195,6 +195,45 @@ const char *ContinuousADC::conversionSpeedShortStr() const {
 #endif
   }
   return (const char *)"none";
+}
+
+
+ADC_CONVERSION_SPEED ContinuousADC::conversionSpeedEnum(const char *conversion) const {
+  char str[strlen(conversion)+1];
+  for (size_t k=0; k<strlen(conversion)+1; k++)
+    str[k] = tolower(conversion[k]);
+  if (strcmp(str, "low") == 0)
+    return ADC_CONVERSION_SPEED::LOW_SPEED;
+  else if (strcmp(str, "med") == 0)
+    return ADC_CONVERSION_SPEED::MED_SPEED;
+  else if (strcmp(str, "high") == 0)
+    return ADC_CONVERSION_SPEED::HIGH_SPEED;
+#if defined(ADC_TEENSY_4)
+#else
+  else if (strcmp(str, "verylow") == 0)
+    return ADC_CONVERSION_SPEED::VERY_LOW_SPEED;
+  else if (strcmp(str, "veryhigh") == 0)
+    return ADC_CONVERSION_SPEED::VERY_HIGH_SPEED;
+#endif
+#if defined(ADC_TEENSY_4)
+  else if (strcmp(str, "adack10") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_10;
+  else if (strcmp(str, "adack20") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_20;
+#else
+  else if (strcmp(str, "high16") == 0)
+    return ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS;
+  else if (strcmp(str, "adack24") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_2_4;
+  else if (strcmp(str, "adack40") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_4_0;
+  else if (strcmp(str, "adack52") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_5_2;
+  else if (strcmp(str, "adack62") == 0)
+    return ADC_CONVERSION_SPEED::ADACK_6_2;
+#endif
+  else
+    return ADC_CONVERSION_SPEED::HIGH_SPEED;
 }
 
 
@@ -233,6 +272,33 @@ const char *ContinuousADC::samplingSpeedShortStr() const {
 }
 
 
+ADC_SAMPLING_SPEED ContinuousADC::samplingSpeedEnum(const char *sampling) const {
+  char str[strlen(sampling)+1];
+  for (size_t k=0; k<strlen(sampling)+1; k++)
+    str[k] = tolower(sampling[k]);
+  if (strcmp(str, "verylow") == 0)
+    return ADC_SAMPLING_SPEED::VERY_LOW_SPEED;
+  else if (strcmp(str, "low") == 0)
+    return ADC_SAMPLING_SPEED::LOW_SPEED;
+  else if (strcmp(str, "med") == 0)
+    return ADC_SAMPLING_SPEED::MED_SPEED;
+  else if (strcmp(str, "high") == 0)
+    return ADC_SAMPLING_SPEED::HIGH_SPEED;
+  else if (strcmp(str, "veryhigh") == 0)
+    return ADC_SAMPLING_SPEED::VERY_HIGH_SPEED;
+#if defined(ADC_TEENSY_4) // Teensy 4
+  else if (strcmp(str, "lowmed") == 0)
+    return ADC_SAMPLING_SPEED::LOW_MED_SPEED;
+  else if (strcmp(str, "medhigh") == 0)
+    return ADC_SAMPLING_SPEED::MED_HIGH_SPEED;
+  else if (strcmp(str, "highveryhigh") == 0)
+    return ADC_SAMPLING_SPEED::HIGH_VERY_HIGH_SPEED;
+#endif
+  else
+    return ADC_SAMPLING_SPEED::HIGH_SPEED;
+}
+
+
 void ContinuousADC::setReference(ADC_REFERENCE ref) {
   Reference = ref;
 }
@@ -247,6 +313,59 @@ const char *ContinuousADC::referenceStr() const {
     return (const char *)"EXT";
   else
     return (const char *)"NONE";
+}
+
+
+ADC_REFERENCE ContinuousADC::referenceEnum(const char *reference) const {
+  char str[strlen(reference)+1];
+  for (size_t k=0; k<strlen(reference)+1; k++)
+    str[k] = tolower(reference[k]);
+  if (strcmp(str, "3.3V") == 0)
+    return ADC_REFERENCE::REF_3V3;
+  else if (strcmp(str, "1.2V") == 0)
+    return ADC_REFERENCE::REF_1V2;
+  else if (strcmp(str, "EXT") == 0)
+    return ADC_REFERENCE::REF_EXT;
+  else
+    return ADC_REFERENCE::REF_3V3;
+}
+
+
+void ContinuousADC::configure(const char *key, const char *val) {
+  bool found = false;
+  if (strcmp(key, "samplingrate") == 0) {
+    float rate = atof(val);
+    for (size_t k=0; k<strlen(val); k++) {
+      if (val[k] == 'k') {
+	rate *= 1000.0;
+	break;
+      }
+    }
+    setRate(uint32_t(rate));
+    found = true;
+  }
+  else if (strcmp(key, "resolution") == 0) {
+    setResolution(atoi(val));
+    found = true;
+  }
+  else if (strcmp(key, "averaging") == 0) {
+    setAveraging(atoi(val));
+    found = true;
+  }
+  else if (strcmp(key, "conversion") == 0) {
+    setConversionSpeed(conversionSpeedEnum(val));
+    found = true;
+  }
+  else if (strcmp(key, "sampling") == 0) {
+    setSamplingSpeed(samplingSpeedEnum(val));
+    found = true;
+  }
+  else if (strcmp(key, "reference") == 0) {
+    setReference(referenceEnum(val));
+    found = true;
+  }
+  if (found)
+    Serial.printf("  set ADC %s to %s\n", key, val);
 }
 
 

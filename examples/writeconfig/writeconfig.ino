@@ -1,17 +1,18 @@
 #include <SDWriter.h>
 #include <Blink.h>
 
-const char *config = R"""(\
-# Configuration file for TeeRec based logger.
+const char *config = R"""(# Configuration file for TeeRec based logger.
 
 SDWriter:
   FileName: logger1-SDATETIME.wav
 
 ContinuousADC:
   SamplingRate: 44.1kHz
-  Averaging   : 8
+  Averaging   : 4
   Conversion  : high
   Sampling    : high
+  Resolution  : 12bit
+  Reference   : 3.3V
 )""";
 
 const char *fname = "teerec.cfg";

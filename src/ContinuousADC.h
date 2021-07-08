@@ -163,6 +163,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Return a short string describing the selected conversion speed.
   const char *conversionSpeedShortStr() const;
 
+  // Translate conversion speed short string to conversion speed enum.
+  ADC_CONVERSION_SPEED conversionSpeedEnum(const char *conversion) const;
+
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
   // decrease it for higher impedance ones.
@@ -182,6 +185,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Return a short string describing the selected sampling speed.
   const char *samplingSpeedShortStr() const;
 
+  // Translate sampling speed short string to sampling speed enum.
+  ADC_SAMPLING_SPEED samplingSpeedEnum(const char *sampling) const;
+
   // Set the voltage preference.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
   // Teensy 4.x has only 3V3, on Teensy 3.x EXT equals 3V3.
@@ -189,6 +195,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
   // Return string describing the selected voltage reference.
   const char *referenceStr() const;
+
+  // Translate voltage reference string to reference enum.
+  ADC_REFERENCE referenceEnum(const char *reference) const;
 
   // Print the assignment of AI pins to ADC0 and ADC1 to Serial.
   void pinAssignment();
@@ -210,6 +219,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
+
+  // Configure ADC settings with the provided key-value pair.
+  virtual void configure(const char *key, const char *val);
 
   // Interrupt service routine. For internal usage.
   void isr(uint8_t adc);

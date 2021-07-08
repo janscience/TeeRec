@@ -58,11 +58,13 @@ void Configurator::configure(SDCard &sd) {
 	line[k] = ' ';
       switch (state) {
       case 0: if (line[k] != ' ') {
+	  line[k] = tolower(line[k]);
 	  key = &line[k];
 	  state++;
 	}
 	break;
-      case 1: if (line[k] == ':') {
+      case 1: line[k] = tolower(line[k]);
+	if (line[k] == ':') {
 	  line[k] = '\0';
 	  state++;
 	  for (int i=k-1; i>=0; i--) {
@@ -76,12 +78,6 @@ void Configurator::configure(SDCard &sd) {
       case 2: if (line[k] != ' ') {
 	  val = &line[k];
 	  state++;
-	  for (int i=k-1; i>=0; i--) {
-	    if (line[i] != ' ') {
-	      line[i+1] = '\0';
-	      break;
-	    }
-	  }
 	}
 	break;
       }
@@ -89,8 +85,15 @@ void Configurator::configure(SDCard &sd) {
     if (state > 1) {
       if (val == NULL)
 	config = configurable(key);
-      else if (config)
+      else if (config) {
+	for (int i=strlen(val)-1; i>=0; i--) {
+	  if (val[i] != ' ') {
+	    val[i+1] = '\0';
+	    break;
+	  }
+	}
 	config->configure(key, val);
+      }
     }
   }
   file.close();

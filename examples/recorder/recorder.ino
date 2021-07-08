@@ -250,10 +250,11 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  config.configure(sdcard);
   setupTestSignals(signalPins, stimulusFrequency);
   setupButtons();
   setupADC();
+  config.configure(sdcard);
+  aidata.check();
   initScreen();
   splashScreen();
   setupScreen();
