@@ -5,13 +5,13 @@ const char *config = R"""(# Configuration file for TeeRec based logger.
 
 Settings:
   Path       : recordings  # path where to store data
-  FileName   : rec-SDATETIME.wav  # may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-  FileTime   : 10min       # s or min
-  DisplayTime: 5ms         # ms only
-  PulseFreq  : 200Hz       # Hz or kHz
+  FileName   : logger1-SDATETIME.wav  # may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+  FileTime   : 10min       # s, min, or h
+  PulseFreq  : 200Hz       # Hz, kHz, MHz
+  DisplayTime: 5ms         # ms, s
 
 ADC:
-  SamplingRate: 44.1kHz    # Hz or kHz
+  SamplingRate: 44.1kHz    # Hz, kHz, MHz
   Averaging   : 4
   Conversion  : high
   Sampling    : high
@@ -38,7 +38,7 @@ void setup() {
   else {
     Serial.printf("Wrote configuration file \"%s\".\n", fname);
     Serial.println();
-    Serial.println("Open this file in your favourite editor and adapt it to your needs.");
+    Serial.println("Rename and edit this file to your needs.");
   }
   file.close();
   blink.switchOff();

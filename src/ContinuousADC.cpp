@@ -332,38 +332,21 @@ ADC_REFERENCE ContinuousADC::referenceEnum(const char *reference) const {
 
 
 void ContinuousADC::configure(const char *key, const char *val) {
-  bool found = false;
-  if (strcmp(key, "samplingrate") == 0) {
-    float rate = atof(val);
-    for (size_t k=0; k<strlen(val); k++) {
-      if (val[k] == 'k') {
-	rate *= 1000.0;
-	break;
-      }
-    }
-    setRate(uint32_t(rate));
-    found = true;
-  }
-  else if (strcmp(key, "resolution") == 0) {
+  bool found = true;
+  if (strcmp(key, "samplingrate") == 0)
+    setRate(uint32_t(parseFrequency(val)));
+  else if (strcmp(key, "resolution") == 0)
     setResolution(atoi(val));
-    found = true;
-  }
-  else if (strcmp(key, "averaging") == 0) {
+  else if (strcmp(key, "averaging") == 0)
     setAveraging(atoi(val));
-    found = true;
-  }
-  else if (strcmp(key, "conversion") == 0) {
+  else if (strcmp(key, "conversion") == 0)
     setConversionSpeed(conversionSpeedEnum(val));
-    found = true;
-  }
-  else if (strcmp(key, "sampling") == 0) {
+  else if (strcmp(key, "sampling") == 0)
     setSamplingSpeed(samplingSpeedEnum(val));
-    found = true;
-  }
-  else if (strcmp(key, "reference") == 0) {
+  else if (strcmp(key, "reference") == 0)
     setReference(referenceEnum(val));
-    found = true;
-  }
+  else
+    found = false;
   if (found)
     Serial.printf("  set ADC-%s to %s\n", key, val);
 }

@@ -23,6 +23,12 @@ class Configurable {
   // Configure the class with the provided key-value pair.
   virtual void configure(const char *key, const char *val);
 
+  // Returns time in seconds from a string with unit (ms, s, min, or h).
+  static float parseTime(const char *val);
+
+  // Returns frequency in Hertz from a string with unit (Hz, kHz, MHz, or mHz).
+  static float parseFrequency(const char *val);
+
 
  private:
 

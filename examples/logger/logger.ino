@@ -1,6 +1,8 @@
+#include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <Settings.h>
 #include <Blink.h>
 #include <TestSignals.h>
 
@@ -16,15 +18,17 @@ int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A22, A10, A11};  // input p
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
-int stimulusFrequency = 200;         // Hertz
+int pulseFrequency = 200;            // Hertz
 int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
 // ------------------------------------------------------------------------------------------
  
+Configurator config;
 ContinuousADC aidata;
-SDWriter file(aidata);
-WaveHeader wave;
+SDCard sdcard;
+SDWriter file(sdcard, aidata);
+Settings settings("recordings", fileName, fileSaveTime, pulseFrequency);
 RTClock rtclock;
 Blink blink;
 
@@ -42,7 +46,7 @@ void setupADC() {
 
 
 void openNextFile() {
-  String name = rtclock.makeStr(fileName, true);
+  String name = rtclock.makeStr(settings.FileName, true);
   name = file.incrementFileName(name);
   if (name.length() == 0) {
     Serial.println("WARNING: failed to open file on SD card.");
@@ -68,9 +72,9 @@ void openNextFile() {
 
 
 void setupStorage() {
-  file.dataDir("recordings");
+  file.dataDir(settings.Path);
   file.setWriteInterval(aidata);
-  file.setMaxFileTime(fileSaveTime);
+  file.setMaxFileTime(settings.FileTime);
   file.startWrite();
   openNextFile();
   Serial.println();
@@ -104,8 +108,11 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  setupTestSignals(signalPins, stimulusFrequency);
   setupADC();
+  config.setConfigFile("logger.cfg");
+  config.configure(sdcard);
+  setupTestSignals(signalPins, settings.PulseFrequency);
+  aidata.check();
   blink.switchOff();
   setupStorage();
   aidata.start();

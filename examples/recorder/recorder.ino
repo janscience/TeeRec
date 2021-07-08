@@ -16,6 +16,7 @@
   #include <Adafruit_FT6206.h>
 #endif
 #include <RTClock.h>
+#include <Settings.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
   
@@ -38,7 +39,7 @@ float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
 
-int pulseFrequency = 200;         // Hertz
+int pulseFrequency = 200;            // Hertz
 #ifdef TEENSY32
 int signalPins[] = {3, 4, 5, 6, -1}; // pins where to put out test signals
 #else
@@ -60,67 +61,9 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 bool freezePlots = false;
 elapsedMillis screenTime;
 
+Settings settings("recordings", fileName, fileSaveTime, pulseFrequency, displayTime);
 RTClock rtclock;
 PushButtons buttons;
-
-class Settings : public Configurable {
-
-public:
-
-  Settings() : Configurable("Settings")
-    { strncpy(Path, "recordings", 100);
-      strncpy(FileName, fileName, 100);
-      FileTime = fileSaveTime;
-      DisplayTime = displayTime;
-      PulseFrequency = pulseFrequency; };
-
-  virtual void configure(const char *key, const char *val) {
-    bool found = false;
-    if (strcmp(key, "path") == 0) {
-      strncpy(Path, val, 100);
-      found = true;
-    }
-    else if (strcmp(key, "filename") == 0) {
-      strncpy(FileName, val, 100);
-      found = true;
-    }
-    else if (strcmp(key, "filetime") == 0) {
-      float time = atof(val);
-      for (size_t k=0; k<strlen(val); k++) {
-        if (val[k] == 'm') {
-          time *= 60.0;
-          break;
-        }
-      }
-      FileTime = time;
-      found = true;
-    }
-    else if (strcmp(key, "displaytime") == 0) {
-      DisplayTime = 0.001 * atof(val);
-      found = true;
-    }
-    else if (strcmp(key, "pulsefreq") == 0) {
-      float freq = atof(val);
-      for (size_t k=0; k<strlen(val); k++) {
-        if (val[k] == 'k') {
-          freq *= 1000.0;
-          break;
-        }
-      }
-      PulseFrequency = freq;
-      found = true;
-    }
-    if (found)
-      Serial.printf("  set Settings-%s to %s\n", key, val);
- }
-
- char Path[100];
- char FileName[100];
- float FileTime;
- float DisplayTime;
- float PulseFrequency;
-};
-Settings settings;
 
 
 void setupADC() {
@@ -306,10 +249,11 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  setupTestSignals(signalPins, settings.PulseFrequency);
   setupButtons();
   setupADC();
+  config.setConfigFile("recorder.cfg");
   config.configure(sdcard);
+  setupTestSignals(signalPins, settings.PulseFrequency);
   aidata.check();
   initScreen();
   splashScreen();
