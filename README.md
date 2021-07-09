@@ -29,7 +29,7 @@ with contributions by
 - Generate test signals.
 - React to push buttons.
 - Feedback by blinking the LED.
-- Configurable through config file on SD card.
+- Configurable via config file on SD card.
 
 
 ## Libraries
@@ -55,6 +55,7 @@ with contributions by
 - logger: Continuously store data on SD card.
 - recorder: Show acquired data on a display and store data on SD card upon user request.
 - averaging: Test various averaging settings for acquisition.
+- writeconfig: Write a defaul configuration file on SD card.
 - removefiles: Remove all files from a directory on SD card.
 - teensyboard: Print Teensy board version, serial number and MAC adress.
 - blink: Demonstrate usage of Blink class.

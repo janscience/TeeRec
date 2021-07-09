@@ -13,19 +13,30 @@ Settings::Settings(const char *path, const char *filename, float filetime,
 
 
 void Settings::configure(const char *key, const char *val) {
-  bool found = true;
-  if (strcmp(key, "path") == 0)
+  char pval[MaxStr];
+  if (strcmp(key, "path") == 0) {
     strncpy(Path, val, MaxStr);
-  else if (strcmp(key, "filename") == 0)
+    strcpy(pval, Path);
+  }
+  else if (strcmp(key, "filename") == 0) {
     strncpy(FileName, val, MaxStr);
-  else if (strcmp(key, "filetime") == 0)
+    strcpy(pval, FileName);
+  }
+  else if (strcmp(key, "filetime") == 0) {
     FileTime = parseTime(val);
-  else if (strcmp(key, "displaytime") == 0)
+    sprintf(pval, "%.0fs", FileTime);
+  }
+  else if (strcmp(key, "displaytime") == 0) {
     DisplayTime = parseTime(val);
-  else if (strcmp(key, "pulsefreq") == 0)
+    sprintf(pval, "%.0fms", 1000.0*DisplayTime);
+  }
+  else if (strcmp(key, "pulsefreq") == 0) {
     PulseFrequency = parseFrequency(val);
-  else
-    found = false;
-  if (found)
-    Serial.printf("  set Settings-%s to %s\n", key, val);
+    sprintf(pval, "%.0fHz", PulseFrequency);
+  }
+  else {
+    Serial.printf("  Settings key \"%s\" not found.\n", key);
+    return;
+  }
+  Serial.printf("  set Settings-%s to %s\n", key, pval);
 }

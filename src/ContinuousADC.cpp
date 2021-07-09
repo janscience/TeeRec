@@ -332,23 +332,36 @@ ADC_REFERENCE ContinuousADC::referenceEnum(const char *reference) const {
 
 
 void ContinuousADC::configure(const char *key, const char *val) {
-  bool found = true;
-  if (strcmp(key, "samplingrate") == 0)
+  char pval[30];
+  if (strcmp(key, "samplingrate") == 0) {
     setRate(uint32_t(parseFrequency(val)));
-  else if (strcmp(key, "resolution") == 0)
+    sprintf(pval, "%luHz", Rate);
+  }
+  else if (strcmp(key, "resolution") == 0) {
     setResolution(atoi(val));
-  else if (strcmp(key, "averaging") == 0)
+    sprintf(pval, "%hubits", Bits);
+  }
+  else if (strcmp(key, "averaging") == 0) {
     setAveraging(atoi(val));
-  else if (strcmp(key, "conversion") == 0)
+    sprintf(pval, "%hu", Averaging);
+  }
+  else if (strcmp(key, "conversion") == 0) {
     setConversionSpeed(conversionSpeedEnum(val));
-  else if (strcmp(key, "sampling") == 0)
+    strcpy(pval, conversionSpeedStr());
+  }
+  else if (strcmp(key, "sampling") == 0) {
     setSamplingSpeed(samplingSpeedEnum(val));
-  else if (strcmp(key, "reference") == 0)
+    strcpy(pval, samplingSpeedStr());
+  }
+  else if (strcmp(key, "reference") == 0) {
     setReference(referenceEnum(val));
-  else
-    found = false;
-  if (found)
-    Serial.printf("  set ADC-%s to %s\n", key, val);
+    strcpy(pval, referenceStr());
+  }
+  else {
+    Serial.printf("  ADC key \"%s\" not found.\n", key);
+    return;
+  }
+  Serial.printf("  set ADC-%s to %s\n", key, pval);
 }
 
 

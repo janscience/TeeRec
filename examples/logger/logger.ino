@@ -7,7 +7,8 @@
 #include <TestSignals.h>
 
 
-// Settings: --------------------------------------------------------------------------------
+// Default settings: -----------------------------------------------------------------------
+// (may be overwritten by config file logger.cfg)
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit
 int averaging = 8;                   // number of averages per sample: 0, 4, 8, 16, 32

@@ -46,8 +46,12 @@ void Configurator::setConfigFile(const char *fname) {
 void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   char line[100];
-  Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
   FsFile file = sd.open(ConfigFile, FILE_READ);
+  if (!file.isOpen() || file.available() < 10) {
+    Serial.printf("Configuration file \"%s\" not found or empty.\n", ConfigFile);
+    return;
+  }
+  Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
   while (file.available()) {
     file.fgets(line, sizeof(line));
     char *key = NULL;
@@ -87,8 +91,11 @@ void Configurator::configure(SDCard &sd) {
       }
     }
     if (state > 1) {
-      if (val == NULL)
+      if (val == NULL) {
 	config = configurable(key);
+	if (config == NULL)
+	  Serial.printf("  no configuration candidate for section \"%s\" found.\n", key);
+      }
       else if (config) {
 	for (int i=strlen(val)-1; i>=0; i--) {
 	  if (val[i] != ' ') {
