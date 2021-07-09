@@ -1,6 +1,6 @@
 # TeeRec - Teensy recorder
 
-Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.5/3.6 microcontrollers.
+Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6 microcontrollers.
 
 Based on Pedro Villanueva's [ADC](https://github.com/pedvide/ADC)
 library, Paul Stoffregen's
@@ -21,10 +21,10 @@ with contributions by
 - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
 - Highspeed timed acquisition up to 500kHz.
 - Conversion of data to signed 16bit for direct storage into WAV files.
-- Detailed metadta in wave file header: sampling rate, number of
+- Storing recorded data as wave files on SD cards.
+- Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
   version and its unique MAC address..
-- Storing recorded data as wave files on SD cards.
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
@@ -117,11 +117,30 @@ Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
 
 
+## Applications of the TeeRec libraries
+
+TeeRec is used in:
+
+- [EOD-Logger](https://github.com/muchaste/EOD-Logger): A 2-electrode
+  logger for recording electric-organ discharges of electric fish.
+
+Further planed applications are:
+
+- Fishfinder: A replacement for the usual and horrible RadioShack/MP3
+  player combination for recording electric fish EODs in their natural
+  habitats with lot's of additional features (display, online
+  analysis, environmental parameters).
+
+- Grid: An electrode array based on 8-16channel recording devices for
+  recording electric fish behavior in natural habitats (see [Henninger
+  et al. 2018](https://doi.org/10.1523/JNEUROSCI.0350-18.2018) and
+  [Henninger et al. 2020](https://doi.org/10.1242/jeb.206342)).
+
+
 ## Links
 
-- [EOD-Logger](https://github.com/muchaste/EOD-Logger)
 - [Audio](https://github.com/PaulStoffregen/Audio) library
-- microSoundRecorder - Environmental Sound Recorder for Teensy 3.6:
-  [github](https://github.com/WMXZ-EU/microSoundRecorder)
-  [wiki](https://github.com/WMXZ-EU/microSoundRecorder/wiki/Hardware-setup)
-  [forum](https://forum.pjrc.com/threads/52175?p=185386&viewfull=1#post185386)
+- [microSoundRecorder](https://github.com/WMXZ-EU/microSoundRecorder) - Environmental Sound Recorder for Teensy 3.6:
+  [[github]](https://github.com/WMXZ-EU/microSoundRecorder)
+  [[wiki]](https://github.com/WMXZ-EU/microSoundRecorder/wiki/Hardware-setup)
+  [[forum]](https://forum.pjrc.com/threads/52175?p=185386&viewfull=1#post185386)
