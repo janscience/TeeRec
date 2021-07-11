@@ -39,12 +39,12 @@ size_t DataBuffer::frames(float time) const {
 
 
 size_t DataBuffer::samples(float time) const {
-  return floor(time*Rate*NChannels);
+  return floor(time*Rate)*NChannels;
 }
 
 
 float DataBuffer::time(size_t samples) const {
-  return samples/float(NChannels)/float(Rate);
+  return float(samples/NChannels)/Rate;
 }
 
 

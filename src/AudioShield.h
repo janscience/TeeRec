@@ -18,6 +18,10 @@ class AudioPlayBuffer : public DataConsumer, public AudioStream {
   
   AudioPlayBuffer(const DataBuffer &data);
   virtual void update();
+
+ private:
+
+  double LPVals[16];
   
 };
 

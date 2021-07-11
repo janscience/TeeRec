@@ -1,7 +1,7 @@
 #include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
-//#include <AudioShield.h>
+#include <AudioShield.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -28,7 +28,7 @@ int bits = 12;                       // resolution: 10bit 12bit, or 16bit
 int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
 uint32_t samplingRate = 100000;       // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
-int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
+int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
 float displayTime = 0.005;
@@ -40,7 +40,7 @@ float fileSaveTime = 10;             // seconds
 
 int startPin = 24;
 
-int pulseFrequency = 200;            // Hertz
+int pulseFrequency = 500;            // Hertz
 #ifdef TEENSY32
 int signalPins[] = {3, 4, 5, 6, -1}; // pins where to put out test signals
 #else
@@ -53,7 +53,7 @@ Configurator config;
 ContinuousADC aidata;
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-//AudioShield audio;
+AudioShield audio(aidata);
 
 Display screen;
 #if defined(ILI9341)
@@ -256,11 +256,11 @@ void setup() {
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
   aidata.check();
-  initScreen();
-  splashScreen();
-  setupScreen();
+  //initScreen();
+  //splashScreen();
+  //setupScreen();
   setupStorage();
-  //audio.setup();
+  audio.setup();
   screenTime = 0;
   aidata.start();
   aidata.report();
@@ -270,5 +270,5 @@ void setup() {
 void loop() {
   buttons.update();
   storeData();
-  plotData();
+  //plotData();
 } 
