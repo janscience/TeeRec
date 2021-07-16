@@ -13,14 +13,6 @@ void AudioPlayBuffer::update() {
   audio_block_t *block1 = NULL;
   //audio_block_t *block2 = NULL;
 
-  unsigned int i = 0;
-  while (i<AUDIO_BLOCK_SAMPLES) {
-    block1->data[i++] = 0;
-  }
-
-  return;
-
-  /*
   if (Data->nchannels() == 0 || Data->rate() == 0)
     return;
 
@@ -36,6 +28,27 @@ void AudioPlayBuffer::update() {
   block1 = allocate();
   if (block1 == NULL)
     return;
+
+  /*
+  unsigned int i = 0;
+  while (i<AUDIO_BLOCK_SAMPLES) {
+    float x = 1.0;
+    if (i%64 < 16)
+      x = i/16;
+    else if (i%64 < 32)
+      x = 1.0-(i-16)/16;
+    else if (i%64 < 48)
+      x = -(i-32)/16;
+    else
+      x = -1+(i-48)/16;
+    block1->data[i++] = int16_t(4000*x);
+    //block1->data[i++] = 0;
+  }
+
+  transmit(block1, 0);
+  release(block1);
+
+  return;
   */
   /*
   if (Data->nchannels() > 1) {
@@ -45,34 +58,52 @@ void AudioPlayBuffer::update() {
   }
   */
 
-  /*
   // transfer data from buffer to blocks:
   int32_t nchannels = Data->nchannels();
-  double fac = 1.0/Data->rate()/(10.0*interval);  // make sure fac < 0.1
+  double fac = 1.0/Data->rate()/(20.0*interval);  // make sure fac < 0.1
   ssize_t tail = Tail;
   double time = 0.0;
   unsigned int i = 0;
-  while (i<AUDIO_BLOCK_SAMPLES) {
-    int32_t sum = 0;
-    for (uint8_t c=0; c<Data->nchannels(); c++)
-      sum += LPVals[c];
-    block1->data[i++] = sum/nchannels;
-    time += interval;
-    size_t nexttail = tail + Data->samples(time);
-    while (Tail < nexttail) {
-      for (uint8_t c=0; c<Data->nchannels(); c++) {
-	//LPVals[c] += (Data->buffer()[Tail++] - LPVals[c])*fac;
-	int32_t x = (Data->buffer()[Tail++] - LPVals[c])*fac;
-      }
-      if (Tail >= Data->nbuffer()) {
-	Tail -= Data->nbuffer();
-	tail -= Data->nbuffer();
-	nexttail -= Data->nbuffer();
-	TailCycle++;
+  if ( fac <= 0.02 ) {
+    while (i<AUDIO_BLOCK_SAMPLES) {
+      int32_t sum = 0;
+      for (uint8_t c=0; c<Data->nchannels(); c++)
+	sum += LPVals[c];
+      block1->data[i++] = sum/nchannels;
+      time += interval;
+      size_t nexttail = tail + Data->samples(time);
+      while (Tail < nexttail) {
+	for (uint8_t c=0; c<Data->nchannels(); c++) {
+	  LPVals[c] += (Data->buffer()[Tail++] - LPVals[c])*fac;
+	  //LPVals[c] = Data->buffer()[Tail++];
+	}
+	if (Tail >= Data->nbuffer()) {
+	  Tail -= Data->nbuffer();
+	  tail -= Data->nbuffer();
+	  nexttail -= Data->nbuffer();
+	  TailCycle++;
+	}
       }
     }
   }
-  */
+  else {
+    // interpolation:
+    // simulated data:
+    while (i<AUDIO_BLOCK_SAMPLES) {
+      float x = 1.0;
+      if (i%64 < 16)
+	x = i/16;
+      else if (i%64 < 32)
+	x = 1.0-(i-16)/16;
+      else if (i%64 < 48)
+	x = -(i-32)/16;
+      else
+	x = -1+(i-48)/16;
+      block1->data[i++] = int16_t(4000*x);
+      //block1->data[i++] = 0;
+    }
+  }
+
   /*
   if (Data->nchannels() == 1)
     memcpy(block2, block1, 2*AUDIO_BLOCK_SAMPLES);
