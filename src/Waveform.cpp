@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include "ContinuousADC.h"
 #include "Waveform.h"
 
 Waveform *Waveform::WF = NULL;
@@ -43,6 +44,12 @@ void Waveform::start(float freq, float ampl) {
   Index = 0;
   if ( !Timer.begin(write, 1.0e6/Rate) )
     Serial.printf("failed to start timer at frequency %.1kHz\n", 0.001*Rate);
+  else {
+    char pins[4];
+    analogPin(Pin, pins);
+    Serial.printf("Generate %.0fHz waveform on pin %s sampled with %.1fkHz\n",
+		  freq, pins, 0.001*Rate);
+  }
 }
 
 

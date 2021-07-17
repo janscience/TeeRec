@@ -1,19 +1,7 @@
 #include <Arduino.h>
 #include <ADC_util.h>
+#include <TeensyBoard.h>
 #include <ContinuousADC.h>
-
-
-#if !defined(PIN_A13)
-const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12};
-#elif !defined(PIN_A14)
-const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13};
-#elif !defined(PIN_A21)
-const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
-					A13, A14, A15, A16, A17, A18, A19, A20};
-#else
-const int ContinuousADC::Pins[NPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
-					A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23, A24, A25, A26};
-#endif
 
 
 ContinuousADC *ContinuousADC::ADCC = 0;
@@ -83,16 +71,10 @@ void ContinuousADC::channels(uint8_t adc, char *chans) const
 {
   bool first = true;
   for (uint8_t k=0; k<NChans[adc]; k++) {
-    int8_t ch = Channels[adc][k];
-    for (int p=0; p<NPins; p++) {
-      if (Pins[p] == ch) {
-	if ( ! first )
-	  *chans++ = ',';
-	chans += sprintf(chans, "A%d", p);
-	first = false;
-	break;
-      }
-    }
+    if ( ! first )
+      *chans++ = ',';
+    chans += analogPin(Channels[adc][k], chans);
+    first = false;
   }
   *chans = '\0';
 }
@@ -104,18 +86,10 @@ void ContinuousADC::channels(char *chans) const
   int nchan = NChans[0]>=NChans[1]?NChans[0]:NChans[1];
   for (uint8_t k=0; k<nchan; k++) {
     for (uint8_t adc=0; adc<2; adc++) {
-      if (k<NChans[adc]) {
-	int8_t ch = Channels[adc][k];
-	for (int p=0; p<NPins; p++) {
-	  if (Pins[p] == ch) {
-	    if ( ! first )
-	      *chans++ = ',';
-	    chans += sprintf(chans, "A%d", p);
-	    first = false;
-	    break;
-	  }
-	}
-      }
+      if ( ! first )
+	*chans++ = ',';
+      chans += analogPin(Channels[adc][k], chans);
+      first = false;
     }
   }
   *chans = '\0';
@@ -367,9 +341,9 @@ void ContinuousADC::configure(const char *key, const char *val) {
 
 void ContinuousADC::pinAssignment() {
   Serial.println("pin ADC0 ADC1");
-  for (int k=0; k<NPins; k++) {
-    Serial.printf("A%-2d    %d    %d\n", k, ADConv.adc[0]->checkPin(Pins[k]),
-		  ADConv.adc[1]->checkPin(Pins[k]));
+  for (int k=0; k<NAPins; k++) {
+    Serial.printf("A%-2d    %d    %d\n", k, ADConv.adc[0]->checkPin(APins[k]),
+		  ADConv.adc[1]->checkPin(APins[k]));
   }
 }
 
@@ -423,8 +397,20 @@ bool ContinuousADC::check() {
 void ContinuousADC::report() {
   if (!Serial)
     return;
-  char chans[100];
-  channels(chans);
+  char chans0[50];
+  char chans1[50];
+  channels(0, chans0);
+  channels(1, chans1);
+  if (chans0[0] == '\0')
+    strcpy(chans0, "-");
+  if (chans1[0] == '\0')
+    strcpy(chans1, "-");
+  float bt = bufferTime();
+  char bts[20];
+  if (bt < 1.0)
+    sprintf(bts, "%.0fms\n", 1000.0*bt);
+  else
+    sprintf(bts, "%.2fs\n", bt);
   Serial.println("ADC settings:");
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
@@ -432,14 +418,9 @@ void ContinuousADC::report() {
   Serial.printf("  conversion: %s\n", conversionSpeedStr());
   Serial.printf("  sampling:   %s\n", samplingSpeedStr());
   Serial.printf("  reference:  %s\n", referenceStr());
-  Serial.printf("  ADC0:       %dchannel%s\n", NChans[0], NChans[0]>1?"s":"");
-  Serial.printf("  ADC1:       %dchannel%s\n", NChans[1], NChans[1]>1?"s":"");
-  Serial.printf("  Pins:       %s\n", chans);
-  float bt = bufferTime();
-  if (bt < 1.0)
-    Serial.printf("  Buffer:     %.0fms\n", 1000.0*bt);
-  else
-    Serial.printf("  Buffer:     %.2fs\n", bt);
+  Serial.printf("  ADC0:       %s\n", chans0);
+  Serial.printf("  ADC1:       %s\n", chans1);
+  Serial.printf("  Buffer:     %s\n", bts);
   Serial.println();
 }
 

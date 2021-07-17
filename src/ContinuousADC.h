@@ -228,18 +228,6 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
 
  protected:
-
-  // pins:
-#if !defined(PIN_A13)
-  static const int NPins = 13;
-#elif !defined(PIN_A14)
-  static const int NPins = 14;
-#elif !defined(PIN_A21)
-  static const int NPins = 21;
-#else
-  static const int NPins = 27;
-#endif
-  static const int Pins[NPins];
   
   // ADC:
   static const int MaxChannels = 20;

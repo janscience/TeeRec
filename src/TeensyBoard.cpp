@@ -112,3 +112,14 @@ const char *teensyMAC(void) {
 	  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   return teensyMac;
 }
+
+
+int analogPin(int8_t pin, char *pins) {
+  for (int p=0; p<NAPins; p++) {
+    if (APins[p] == pin)
+      return sprintf(pins, "A%d", p);
+  }
+  pins[0] = '\0';
+  return 0;
+}
+

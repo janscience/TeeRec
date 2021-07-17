@@ -1,7 +1,7 @@
 #include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
-#include <AudioShield.h>
+//#include <AudioShield.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -53,7 +53,7 @@ Configurator config;
 ContinuousADC aidata;
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-AudioShield audio(aidata);
+//AudioShield audio(aidata);
 
 Display screen;
 #if defined(ILI9341)
@@ -160,18 +160,24 @@ void splashScreen() {
   screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   char msg[100];
   String convspeed = aidata.conversionSpeedShortStr();
-  convspeed.replace("_SPEED", "");
   String samplspeed = aidata.samplingSpeedShortStr();
-  samplspeed.replace("_SPEED", "");
+  char chans0[50];
+  char chans1[50];
+  aidata.channels(0, chans0);
+  aidata.channels(1, chans1);
+  if (chans0[0] == '\0')
+    strcpy(chans0, "-");
+  if (chans1[0] == '\0')
+    strcpy(chans1, "-");
   float bt = aidata.bufferTime();
+  char bts[20];
   if (bt < 1.0)
-    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.0fms",
-            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
-            aidata.nchannels(0), aidata.nchannels(1), 1000.0*bt);
+    sprintf(bts, "%.0fms\n", 1000.0*bt);
   else
-    sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%d channels\n%d channels\n%.2fs",
-            0.001*aidata.rate(), aidata.resolution(), aidata.averaging(), convspeed.c_str(), samplspeed.c_str(),
-            aidata.nchannels(0), aidata.nchannels(1), bt);
+    sprintf(bts, "%.2fs\n", bt);
+  sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%s\n%s\n%s",
+          0.001*aidata.rate(), aidata.resolution(), aidata.averaging(),
+          convspeed.c_str(), samplspeed.c_str(), chans0, chans1, bts);
   screen.writeText(2, msg);
   delay(1500);
   screen.clearText();
@@ -256,11 +262,11 @@ void setup() {
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
   aidata.check();
-  //initScreen();
-  //splashScreen();
-  //setupScreen();
+  initScreen();
+  splashScreen();
+  setupScreen();
   setupStorage();
-  audio.setup();
+  //audio.setup();
   screenTime = 0;
   aidata.start();
   aidata.report();
@@ -270,5 +276,5 @@ void setup() {
 void loop() {
   buttons.update();
   storeData();
-  //plotData();
+  plotData();
 } 

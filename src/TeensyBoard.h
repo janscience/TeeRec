@@ -57,4 +57,26 @@ void teensyMAC(uint8_t *mac);
 // MAC address as formated string in hex xx:xx:xx:xx:xx:xx
 const char *teensyMAC(void);
 
+// analog pins:
+#if !defined(PIN_A13)
+const int NAPins = 13;
+const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12};
+#elif !defined(PIN_A14)
+const int NAPins = 14;
+const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13};
+#elif !defined(PIN_A21)
+const int NAPins = 21;
+const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
+			   A13, A14, A15, A16, A17, A18, A19, A20};
+#else
+const int NAPins = 27;
+const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
+			   A13, A14, A15, A16, A17, A18, A19, A20, A21, A22, A23, A24, A25, A26};
+#endif
+
+
+// Return in pins the name of the analog pin (e.g. "A22", max 4 characters).
+// Returns the number of characters written into pins.
+int analogPin(int8_t pin, char *pins);
+
 #endif
