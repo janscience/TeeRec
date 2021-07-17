@@ -38,6 +38,10 @@ class Waveform {
   // Initialize waveform generator with sampling rate.
   void setup(float rate);
 
+  // Specify amplitudes and phases of harmonics relative to fundamental.
+  // Both arrays are terminated by negative numbers.
+  void setHarmonics(float *ampls, float *phases);
+
   // Start generating a signal on the specified DAC pin,
   // fundamental frequency and amplitude (0-1).
   // The signal is generated between pin and GND right next to it.
@@ -61,6 +65,11 @@ class Waveform {
   volatile size_t NData;
   volatile uint16_t *Data;
   volatile size_t Index;
+
+  static const size_t MaxHarmonics = 20;
+  size_t NHarmonics;
+  float Ampls[MaxHarmonics];
+  float Phases[MaxHarmonics];
 
 };
 

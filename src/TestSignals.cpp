@@ -81,6 +81,7 @@ Waveform::Waveform() {
   Pin = -1;
   Rate = 0.0;
   MaxValue = 1 << 11;
+  NHarmonics = 0;
   NData = 0;
   Data = NULL;
   Index = 0;
@@ -97,6 +98,16 @@ void Waveform::setup(float rate) {
   analogWriteResolution(12);
   MaxValue = 1 << 11;
   Rate = rate;
+}
+
+
+void Waveform::setHarmonics(float *ampls, float *phases) {
+  for (NHarmonics=0; NHarmonics < MaxHarmonics &&
+	 ampls[NHarmonics] > 0.0 && phases[NHarmonics] >= 0.0;
+       NHarmonics++) {
+    Ampls[NHarmonics] = ampls[NHarmonics];
+    Phases[NHarmonics] = phases[NHarmonics];
+  }
 }
 
 
@@ -117,10 +128,19 @@ void Waveform::start(int pin, float freq, float ampl) {
   freq = Rate/NData;
   if ( Data != NULL )
     stop();
+  // total amplitude:
+  float amplt = 1.0;
+  for (size_t j=0; j<NHarmonics; j++)
+    amplt += Ampls[j];
+  ampl /= amplt;
   // one period of data:
   Data = new uint16_t[NData];
-  for ( size_t k=0; k<NData; k++)
-    Data[k] = int16_t((MaxValue-1)*ampl*sin(TWO_PI*k/NData)) + MaxValue;
+  for ( size_t k=0; k<NData; k++) {
+    float x = sin(TWO_PI*k/NData);
+    for (size_t j=0; j<NHarmonics; j++)
+      x += Ampls[j]*sin(TWO_PI*k*(j+2)/NData + Phases[j]);
+    Data[k] = int16_t((MaxValue-1)*ampl*x) + MaxValue;
+  }
   Index = 0;
   if ( !Timer.begin(write, 1.0e6/Rate) )
     Serial.printf("ERROR in Waveform::start(): failed to start timer at frequency %.1kHz\n", 0.001*Rate);
