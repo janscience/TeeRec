@@ -70,3 +70,80 @@ void setupTestSignals(int pin0, int pin1, int frequency) {
   pins[n] = -1;
   setupTestSignals(pins, frequency);
 }
+
+
+
+Waveform *Waveform::WF = NULL;
+
+
+Waveform::Waveform() {
+  WF = this;
+  Pin = -1;
+  Rate = 0.0;
+  MaxValue = 1 << 11;
+  NData = 0;
+  Data = NULL;
+  Index = 0;
+  setup(100000.0);
+}
+
+
+Waveform::~Waveform() {
+  stop();
+}
+
+
+void Waveform::setup(float rate) {
+  analogWriteResolution(12);
+  MaxValue = 1 << 11;
+  Rate = rate;
+}
+
+
+void Waveform::start(int pin, float freq, float ampl) {
+  if ( Rate <= 0.0 ) {
+    Serial.println("ERROR in Waveform::start(): no sampling rate specified.");
+    return;
+  }
+  if (pin < 0) {
+    Serial.println("ERROR in Waveform::start(): invalid output pin specified.");
+    return;
+  }
+  Pin = pin;
+  pinMode(Pin, OUTPUT);
+  NData = round(Rate/freq);
+  if ( NData < 4 )
+    return;
+  freq = Rate/NData;
+  if ( Data != NULL )
+    stop();
+  // one period of data:
+  Data = new uint16_t[NData];
+  for ( size_t k=0; k<NData; k++)
+    Data[k] = int16_t((MaxValue-1)*ampl*sin(TWO_PI*k/NData)) + MaxValue;
+  Index = 0;
+  if ( !Timer.begin(write, 1.0e6/Rate) )
+    Serial.printf("ERROR in Waveform::start(): failed to start timer at frequency %.1kHz\n", 0.001*Rate);
+  else {
+    char pins[4];
+    analogPin(Pin, pins);
+    Serial.printf("Generate %.0fHz waveform with %d samples on pin %s sampled with %.1fkHz.\n",
+		  freq, NData, pins, 0.001*Rate);
+  }
+}
+
+
+void Waveform::stop() {
+  Timer.end();
+  delete [] Data;
+  Data = NULL;
+  NData = 0;
+  Index = 0;
+}
+
+
+void Waveform::write() {
+  if (WF->Index >= WF->NData)
+    WF->Index = 0;
+  analogWrite(WF->Pin, WF->Data[WF->Index++]);
+}

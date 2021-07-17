@@ -1,4 +1,4 @@
-#include <Waveform.h>
+#include <TestSignals.h>
 
 Waveform wave;
 
@@ -6,8 +6,8 @@ Waveform wave;
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  wave.setup(A21, 100000);
-  wave.start(400.0, 0.7);
+  wave.setup(140000);
+  wave.start(A21, 500.0, 0.5);
 }
 
 

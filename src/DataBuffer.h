@@ -69,7 +69,8 @@ public:
   // Return current value of the head cycle counter.
   size_t headCycle() const;
 
-  // Return sample right after most current data value in data buffer.
+  // Return sample right after most current data value in data buffer
+  // optionally decremented by decr frames.
   size_t currentSample(size_t decr=0);
 
   // Decrement sample index into data buffer by decr times number of channels.

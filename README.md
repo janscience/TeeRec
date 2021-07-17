@@ -42,7 +42,7 @@ with contributions by
 - RTClock: Time and date strings from the real time clock.
 - Blink: Blinking LEDs.
 - PushButtons: Manage and query push buttons with callback functions.
-- TestSignals: Generate test signals on pulse-width modulation pins.
+- TestSignals: Generate test signals on pulse-width modulation and DAC pins.
 - TeensyBoard: Find out which Teensy board we are running on.
 - Configurable: Base class for all configurable classes.
 - Settings: Common configurable settings (file name, path, etc.)
@@ -54,6 +54,7 @@ with contributions by
 - scope: Show acquired data on a display.
 - logger: Continuously store data on SD card.
 - recorder: Show acquired data on a display and store data on SD card upon user request.
+- sinegen: Sine-wave generator.
 - averaging: Test various averaging settings for acquisition.
 - writeconfig: Write a defaul configuration file on SD card.
 - removefiles: Remove all files from a directory on SD card.
