@@ -116,10 +116,25 @@ void Waveform::start(int pin, float freq, float ampl) {
     Serial.println("ERROR in Waveform::start(): no sampling rate specified.");
     return;
   }
-  if (pin < 0) {
+#if defined(TEENSY32)
+  if (pin != A14) {
     Serial.println("ERROR in Waveform::start(): invalid output pin specified.");
     return;
   }
+#elif defined(TEENSYLC)
+  if (pin != A12) {
+    Serial.println("ERROR in Waveform::start(): invalid output pin specified.");
+    return;
+  }
+#elif defined(TEENSY35) ||  defined(TEENSY36)
+  if (pin != A21 && pin != A22) {
+    Serial.println("ERROR in Waveform::start(): invalid output pin specified.");
+    return;
+  }
+#else
+  Serial.println("ERROR in Waveform::start(): DAC not supported by board.");
+  return;
+#endif
   Pin = pin;
   pinMode(Pin, OUTPUT);
   NData = round(Rate/freq);
