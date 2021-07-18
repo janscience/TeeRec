@@ -32,7 +32,8 @@ class Configurable {
 
  private:
 
-  char *ConfigName;
+  static const size_t MaxName = 100;
+  char ConfigName[MaxName];
 
 };
 

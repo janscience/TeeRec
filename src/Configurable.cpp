@@ -3,9 +3,10 @@
 
 
 Configurable::Configurable(const char *name) {
-  ConfigName = new char[strlen(name)+1];
-  for (size_t k=0; k<strlen(name)+1; k++)
+  size_t k=0;
+  for (; k<strlen(name) && k+1<MaxName; k++)
     ConfigName[k] = tolower(name[k]);
+  ConfigName[k] = '\0';
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
 }

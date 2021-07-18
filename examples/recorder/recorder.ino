@@ -1,7 +1,6 @@
 #include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
-//#include <AudioShield.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -22,12 +21,12 @@
   
 
 // Default settings: -----------------------------------------------------------------------
-// (may be overwritten by config file logger.cfg)
+// (may be overwritten by config file recorder.cfg)
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
 int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
 uint32_t samplingRate = 100000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels0 [] =  {A4, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
@@ -38,11 +37,11 @@ bool logging = false;                // keep saving to files
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
-int startPin = 24;
+int startPin = 16;
 
 int pulseFrequency = 500;            // Hertz
 #ifdef TEENSY32
-int signalPins[] = {3, 4, 5, 6, -1}; // pins where to put out test signals
+int signalPins[] = {3, 4, -1}; // pins where to put out test signals
 #else
 int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 #endif
@@ -53,7 +52,6 @@ Configurator config;
 ContinuousADC aidata;
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-//AudioShield audio(aidata);
 
 Display screen;
 #if defined(ILI9341)
@@ -124,17 +122,18 @@ void stopWrite(int id) {
 
 
 void initScreen() {
-  #define TFT_SCK   13
+  #define TFT_SCK   14 // 13
   #define TFT_MISO  12
-  #define TFT_MOSI  11
-  #define TFT_CS    10  
-  #define TFT_RST   9
-  #define TFT_DC    8 
+  #define TFT_MOSI  7 // 11
+  #define TFT_CS    2 // 10  
+  #define TFT_RST   1 // 9
+  #define TFT_DC    0 // 8 
 #if defined(ST7735)
   // Adafruit 1.44" TFT hardware specific initialization:
-  Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  //Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
+  Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->initR(INITR_144GREENTAB);
-  screen.init(tft, 1);
+  screen.init(tft, 3);
   screen.setDefaultFont(FreeSans7pt7b);
 #elif defined(ILI9341)
   Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST, TFT_MISO);
@@ -266,7 +265,6 @@ void setup() {
   splashScreen();
   setupScreen();
   setupStorage();
-  //audio.setup();
   screenTime = 0;
   aidata.start();
   aidata.report();
@@ -277,4 +275,4 @@ void loop() {
   buttons.update();
   storeData();
   plotData();
-} 
+}

@@ -9,8 +9,7 @@ Configurator *Configurator::Config = NULL;
 Configurator::Configurator() {
   Config = this;
   NConfigs = 0;
-  ConfigFile = new char[11];
-  strcpy(ConfigFile, "teerec.cfg");
+  strncpy(ConfigFile, "teerec.cfg", MaxFile);
 }
 
 
@@ -36,24 +35,22 @@ Configurable *Configurator::configurable(const char *name) {
 
 
 void Configurator::setConfigFile(const char *fname) {
-  if (ConfigFile != NULL)
-    delete [] ConfigFile;
-  ConfigFile = new char[strlen(fname)+1];
-  strcpy(ConfigFile, fname);
+  strncpy(ConfigFile, fname, MaxFile);
 }
 
 
 void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
-  char line[100];
+  const size_t nline = 100;
+  char line[nline];
   FsFile file = sd.open(ConfigFile, FILE_READ);
   if (!file.isOpen() || file.available() < 10) {
-    Serial.printf("Configuration file \"%s\" not found or empty.\n", ConfigFile);
+    Serial.printf("Configuration file \"%s\" not found or empty.\n\n", ConfigFile);
     return;
   }
   Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
   while (file.available()) {
-    file.fgets(line, sizeof(line));
+    file.fgets(line, nline);
     char *key = NULL;
     char *val = NULL;
     int state = 0;
