@@ -1,6 +1,5 @@
 #include <ContinuousADC.h>
-//#include <AudioShield.h>
-#include <AudioStream.h>
+#include <AudioShield.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -38,12 +37,7 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
 elapsedMillis screenTime;
 
-//AudioShield audio(aidata);
-// AudioPlayBuffer AudioInput(aidata);
-//AudioSynthKarplusStrong AudioInput;
-//  AudioOutputI2S AudioOutput;
-//  AudioConnection PatchCord1(AudioInput, 0, AudioOutput, 0);
-//  AudioControlSGTL5000 Shield;
+AudioShield audio(aidata);
 
 void setupADC() {
   aidata.setChannels(0, channels0);
@@ -122,10 +116,7 @@ void setup() {
   aidata.check();
   initScreen();
   setupScreen();
-   //Shield.enable();
-  //Shield.volume(0.5);
-
-//  audio.setup();
+  audio.setup();
   screenTime = 0;
   aidata.start();
   aidata.report();

@@ -126,9 +126,6 @@ void AudioPlayBuffer::update() {
   */
 }
 
-/*
-DMAMEM audio_block_t AudioShield::AudioMem[NAudioMem];
-
 
 AudioShield::AudioShield(const DataBuffer &data) {
   AudioInput = new AudioPlayBuffer(data);
@@ -143,10 +140,10 @@ AudioShield::~AudioShield() {
 
 
 void AudioShield::setup() {
+  AudioMemory(8);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   //  PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
-  AudioStream::initialize_memory(AudioMem, NAudioMem);
   Shield.enable();
   Shield.volume(0.5);
 }
-*/
+
