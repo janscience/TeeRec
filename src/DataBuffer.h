@@ -90,7 +90,7 @@ protected:
 
   // DANGER: Buffer size must be a multiple of ContinuousADC::MajorSize and the maximum number of channels per ADC (16)!
  #ifdef TEENSY32
-  static const size_t NBuffer = 256*64;     // buffer size: 32kB
+  static const size_t NBuffer = 256*32;     // buffer size: 16kB
 #else
   static const size_t NBuffer = 256*256;    // buffer size: 128kB
 #endif

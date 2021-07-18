@@ -138,6 +138,7 @@ void SDWriter::end() {
       File.close();
     if (SDOwn) {
       SD->end();
+      delete SD;
       SDOwn = false;
     }
     SD = NULL;

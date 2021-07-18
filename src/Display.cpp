@@ -34,7 +34,7 @@ Display::Display() {
     TextI[k] = 0;
     TextS[k] = false;
     TextHead[k] = 0;
-    TextCanvas[k] = 0;
+    TextCanvas[k] = NULL;
   }
   memset(Text, 0, sizeof(Text));
   Font = 0;
@@ -184,7 +184,7 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
   
 
 void Display::clearText(uint8_t area) {
-  if (TextW[area] == 0 )
+  if (TextW[area] == 0 || TextCanvas[area] == NULL)
     return;
   Text[area][TextHead[area]][0] = '\0';
   TextCanvas[area]->fillScreen(0x0000);
@@ -207,13 +207,13 @@ void Display::setDefaultFont(const GFXfont &font) {
 
 
 void Display::setFont(uint8_t area, const GFXfont &font) {
-  if ( TextCanvas[area] != 0 )
+  if ( TextCanvas[area] != NULL )
     TextCanvas[area]->setFont(&font);
 }
 
 
 void Display::drawText(uint8_t area, const char *text) {
-  if (TextW[area] == 0 )
+  if (TextW[area] == 0 || TextCanvas[area] == NULL)
     return;
   TextCanvas[area]->fillScreen(0x0000);
   TextCanvas[area]->setCursor(0, TextB[area]);
@@ -224,7 +224,7 @@ void Display::drawText(uint8_t area, const char *text) {
 
 
 void Display::writeText(uint8_t area, const char *text) {
-  if (TextW[area] == 0 )
+  if (TextW[area] == 0 || TextCanvas[area] == NULL)
     return;
   drawText(area, text);
   strncpy(Text[area][TextHead[area]], text, MaxChars);
@@ -255,7 +255,7 @@ void Display::pushText(uint8_t area, const char *text) {
 
 
 void Display::popText(uint8_t area) {
-  if (TextW[area] == 0 )
+  if (TextW[area] == 0 || TextCanvas[area] == NULL)
     return;
   if (TextHead[area] > 0)
     TextHead[area]--;
