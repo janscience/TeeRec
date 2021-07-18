@@ -8,7 +8,7 @@
 
 
 #include <Arduino.h>
-#include <Audio.h>
+#include <AudioStream.h>
 #include <ContinuousADC.h>
 
 
@@ -25,7 +25,7 @@ class AudioPlayBuffer : public DataConsumer, public AudioStream {
   
 };
 
-
+/*
 class AudioShield {
 
  public:
@@ -38,6 +38,9 @@ class AudioShield {
 
  protected:
 
+  static const size_t NAudioMem = 8;
+  static DMAMEM audio_block_t AudioMem[NAudioMem];
+  
   AudioPlayBuffer *AudioInput;
   AudioOutputI2S AudioOutput;
   AudioConnection *PatchCord1;
@@ -45,6 +48,6 @@ class AudioShield {
   AudioControlSGTL5000 Shield;
 
 };
-
+*/
 
 #endif
