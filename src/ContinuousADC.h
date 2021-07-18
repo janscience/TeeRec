@@ -102,6 +102,8 @@ class ContinuousADC : public DataBuffer, public Configurable {
   static ContinuousADC *ADCC;
   
   static const size_t MajorSize = 256;
+  
+  static const size_t MaxChannels = 8;
 
   // Initialize.
   ContinuousADC();
@@ -230,9 +232,8 @@ class ContinuousADC : public DataBuffer, public Configurable {
  protected:
   
   // ADC:
-  static const int MaxChannels = 20;
   uint8_t Channels[2][MaxChannels];
-  uint8_t SC1AChannels[2][MaxChannels];
+  static DMAMEM uint8_t SC1AChannels[2][MaxChannels] __attribute__((aligned(MaxChannels)));
   uint8_t NChans[2];
   uint8_t ADCUse;
 
@@ -246,12 +247,12 @@ class ContinuousADC : public DataBuffer, public Configurable {
   
   // DMA:
   static const size_t NMajors = 2;
-  DMAChannel DMABuffer[2];         // Buffer holding conversion results
-  DMAChannel DMASwitch[2];         // tell ADC from which pin to sample
-  volatile size_t DMAIndex[2];     // currently active DMABuffer segment
-  volatile size_t DMACounter[2];   // total count of DMABuffer segments
-  volatile DMAMEM static uint16_t __attribute__((aligned(32))) ADCBuffer[2][NMajors*MajorSize];
-  DMAChannel::TCD_t __attribute__ ((aligned (32))) TCDs[2][NMajors];
+  DMAChannel DMABuffer[2]; // DMA channel for ADCBuffer
+  DMAChannel DMASwitch[2]; // DMA channel for switching pins
+  volatile size_t DMAIndex[2];     // currently active ADCBuffer segment
+  volatile size_t DMACounter[2];   // total count of ADCBuffer segments
+  volatile static DMAMEM uint16_t ADCBuffer[2][NMajors*MajorSize];  // circular destination buffer must be aligned on its size, which must be a power of two!
+  static DMASetting DMASettings[2][NMajors];
 
   // Data (large buffer holding converted and multiplexed data from both ADCs):
   DataBuffer Data;

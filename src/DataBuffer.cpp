@@ -11,7 +11,7 @@ DataBuffer::DataBuffer() {
   Rate = 0;
   NChannels = 0;
   NConsumers = 0;
-  //memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
+  memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
 }
 
 

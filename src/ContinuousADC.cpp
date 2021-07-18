@@ -5,7 +5,12 @@
 
 
 ContinuousADC *ContinuousADC::ADCC = 0;
-volatile DMAMEM uint16_t __attribute__((aligned(32))) ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
+
+volatile DMAMEM uint16_t ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
+
+DMASetting ContinuousADC::DMASettings[2][NMajors];
+
+DMAMEM uint8_t ContinuousADC::SC1AChannels[2][MaxChannels] __attribute__((aligned(ContinuousADC::MaxChannels)));
 
 
 ContinuousADC::ContinuousADC() :
@@ -18,7 +23,7 @@ ContinuousADC::ContinuousADC() :
   }
   memset(Channels, 0, sizeof(Channels));
   memset(SC1AChannels, 0, sizeof(SC1AChannels));
-  memset(TCDs, 0, sizeof(TCDs));
+  memset(DMASettings, 0, sizeof(DMASettings));
 
   Bits = DataBits;
   DataShift = 0;
@@ -533,15 +538,15 @@ void ContinuousADC::setupDMA(uint8_t adc) {
   DMACounter[adc] = 0;
 
   DMABuffer[adc].begin();
-  for (int mi=NMajors-1; mi>=0; mi--) {
-    DMABuffer[adc].source(adc==0?ADC0_RA:ADC1_RA);
-    DMABuffer[adc].destinationCircular(&ADCBuffer[adc][mi*MajorSize], sizeof(uint16_t)*MajorSize);
-    DMABuffer[adc].transferSize(sizeof(uint16_t));
-    DMABuffer[adc].replaceSettingsOnCompletion(DMABuffer[adc]);
-    DMABuffer[adc].TCD->DLASTSGA = (int32_t)&TCDs[adc][(mi+1)%NMajors];
-    DMABuffer[adc].interruptAtCompletion();
-    memcpy(&TCDs[adc][mi], DMABuffer[adc].TCD, sizeof(DMAChannel::TCD_t));
+  DMABuffer[adc].disable();
+  for (size_t mi=0; mi<NMajors; mi++) {
+    DMASettings[adc][mi].source(adc==0?ADC0_RA:ADC1_RA);
+    DMASettings[adc][mi].destinationBuffer(&ADCBuffer[adc][mi*MajorSize], sizeof(uint16_t)*MajorSize);
+    DMASettings[adc][mi].transferSize(sizeof(uint16_t));
+    DMASettings[adc][mi].replaceSettingsOnCompletion(DMASettings[adc][(mi+1)%NMajors]);
+    DMASettings[adc][mi].interruptAtCompletion();
   }
+  DMABuffer[adc] = DMASettings[adc][0];
   DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
   DMABuffer[adc].enable();
