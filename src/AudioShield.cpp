@@ -41,99 +41,36 @@ void AudioPlayBuffer::update() {
   double fac = 1.0/rate/(20.0*interval);  // make sure fac < 0.1
   if (fac > 0.05)
     fac = 0.0;
+  double time = 0.0;
+  ssize_t start = Tail;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
     int32_t sum = 0;
-    for (uint8_t c=0; c<Data->nchannels(); c++) {
-      LPVals[c] += (Data->buffer()[Tail] - LPVals[c])*fac;
-      sum += Data->buffer()[Tail++] - LPVals[c];
-    }
+    for (uint8_t c=0; c<Data->nchannels(); c++)
+      sum += Data->buffer()[Tail+c] - LPVals[c];
     block1->data[i++] = sum/nchannels;
-    if (Tail >= Data->nbuffer()) {
-      Tail -= Data->nbuffer();
-      TailCycle++;
-    }
-  }
-
-  transmit(block1, 0);
-  release(block1);
-
-  return;
-
-
-  /*
-  // transfer data from buffer to blocks:
-  int32_t nchannels = Data->nchannels();
-  float rate = Data->rate();
-  double fac = 1.0/rate/(20.0*interval);  // make sure fac < 0.1
-  ssize_t tail = Tail;
-  double time = 0.0;
-  unsigned int i = 0;
-  if ( fac <= 0.02 ) {
-    while (i<AUDIO_BLOCK_SAMPLES) {
-      int32_t sum = 0;
+    time += interval;
+    while (Data->samples(time) > Tail - start + nchannels) {
       for (uint8_t c=0; c<Data->nchannels(); c++)
-	sum += LPVals[c];
-      block1->data[i++] = sum/nchannels;
-      time += interval;
-      size_t nexttail = tail + Data->samples(time);
-      while (Tail < nexttail) {
-	for (uint8_t c=0; c<Data->nchannels(); c++) {
-	  LPVals[c] += (Data->buffer()[Tail++] - LPVals[c])*fac;
-	  //LPVals[c] = Data->buffer()[Tail++];
-	}
-	if (Tail >= Data->nbuffer()) {
-	  Tail -= Data->nbuffer();
-	  tail -= Data->nbuffer();
-	  nexttail -= Data->nbuffer();
-	  TailCycle++;
-	}
+	LPVals[c] += (Data->buffer()[Tail+c] - LPVals[c])*fac;
+      Tail += nchannels;
+      if (Tail >= Data->nbuffer()) {
+	Tail -= Data->nbuffer();
+	start -= Data->nbuffer();
+	TailCycle++;
       }
     }
   }
-  else if (rate <= AUDIO_SAMPLE_RATE_EXACT) {
-    // linear interpolation:
-    while (i<AUDIO_BLOCK_SAMPLES) {
-      int32_t sum = 0;
-      for (uint8_t c=0; c<Data->nchannels(); c++) {
-	float diff = Data->buffer()[Tail+nchannels+c] - Data->buffer()[Tail+c];
-	sum += round(diff*rate*(time - Data->time(Tail-tail)) + Data->buffer()[Tail+c]);
-      }
-      block1->data[i++] = sum/nchannels;
-      time += interval;
-      if (Data->samples(time) > Tail - tail + nchannels) {
-	Tail += nchannels;
-	if (Tail >= Data->nbuffer()) {
-	  Tail -= Data->nbuffer();
-	  tail -= Data->nbuffer();
-	  TailCycle++;
-	}
-      }
-    }
-  }
-  else {
-    while (i<AUDIO_BLOCK_SAMPLES) {
-      size_t p = 128;
-      if (i%p < p/2)
-        block1->data[i++] = -32000;
-      else
-        block1->data[i++] = +32000;
-      //block1->data[i++] = 0;
-    }
-  }
-  */
+  
   /*
   if (Data->nchannels() == 1)
     memcpy(block2, block1, 2*AUDIO_BLOCK_SAMPLES);
   */
 
-  /*
   transmit(block1, 0);
-  //transmit(block1, 1);
-  //transmit(block2, 1);
+  transmit(block1, 1);
   release(block1);
   //release(block2);
-  */
 }
 
 
@@ -144,7 +81,7 @@ AudioShield::AudioShield(const DataBuffer &data) {
 
 AudioShield::~AudioShield() {
   delete PatchCord1;
-  // delete PatchCord2;
+  delete PatchCord2;
   // delete AudioInput; ????
 }
 
@@ -152,7 +89,7 @@ AudioShield::~AudioShield() {
 void AudioShield::setup() {
   AudioMemory(8);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
-  //  PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
+  PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
   Shield.enable();
   Shield.volume(0.5);
 }
