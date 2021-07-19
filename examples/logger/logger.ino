@@ -11,15 +11,15 @@
 // (may be overwritten by config file logger.cfg)
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit
-int averaging = 8;                   // number of averages per sample: 0, 4, 8, 16, 32
-uint32_t samplingRate = 50000;       // samples per second and channel in Hertz
+int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32
+uint32_t samplingRate = 100000;       // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
-int pulseFrequency = 200;            // Hertz
+int pulseFrequency = 230;            // Hertz
 int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
@@ -118,6 +118,7 @@ void setup() {
   setupStorage();
   aidata.start();
   aidata.report();
+  rtclock.report();
 }
 
 

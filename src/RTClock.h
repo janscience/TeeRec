@@ -46,6 +46,9 @@ class RTClock {
   // If dash, replace colons by dashes.
   String makeStr(const String &str, bool dash=false);
 
+  // Write out current time on serial.
+  void report();
+
 };
 
 

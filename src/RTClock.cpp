@@ -100,3 +100,9 @@ String RTClock::makeStr(const String &str, bool dash) {
 }
 
 
+void RTClock::report() {
+  char times[20];
+  dateTime(times);
+  Serial.println("RTC current time:");
+  Serial.printf("  %s\n\n", times);
+}
