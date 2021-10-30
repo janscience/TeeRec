@@ -36,6 +36,9 @@ def load_bin(filepath, offset=0):
 def plot_traces(path, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
+    if data is None:
+        print('file "%s" is empty!' % path)
+        return
     basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)

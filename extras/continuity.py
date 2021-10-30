@@ -1,9 +1,9 @@
+import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import wave
-from thunderfish.eventdetection import threshold_crossings
 
 
 def load_wave(filepath):
@@ -33,6 +33,7 @@ def test_continuity(pathes):
     isis = [[] for k in range(nchannels)]
     isis0 = np.zeros((nchannels, len(pathes)))
     isis1 = np.zeros((nchannels, len(pathes)))
+    prev_data = None
     n = 0;
     for k, path in enumerate(pathes):
         if not first:
@@ -49,14 +50,28 @@ def test_continuity(pathes):
             ndown = np.sum(data[:,c] < -1024*16)
             if nup + ndown < 9*len(data)/10 or min(nup, ndown) < len(data)/10:
                 continue
-            up, down = threshold_crossings(data[:,c], 0)
+            thresh = 0
+            up = np.nonzero((data[1:,c]>thresh) & (data[:-1,c]<=thresh))[0]
+            if prev_data is not None:
+                if prev_data[c] < thresh and data[0,c] > thresh:
+                    up = np.concatenate(([-1], up))
             isis[c].extend(np.diff(up))
             isis0[c][k] = up[0]
             isis1[c][k] = len(data) - up[-1]
+        prev_data = data[-1,:]
+    intervals = isis1[:,:n-1] + isis0[:,1:n]
+    # analyse:
+    for c in range(nchannels):
+        frequency = samplerate/np.mean(isis[c])
+        period = np.median(isis[c])
+        print('channel %2d: frequency=%6.1fHz' % (c, frequency))
+        for k, interval in enumerate(intervals[c]):
+            if abs(interval - period)/period > 0.05:
+                print('   interval deviates from median period in file %s' % os.path.basename(pathes[k]))
+    # plots:
     fig, axs = plt.subplots(2, nchannels//2)
     axs = axs.ravel()
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
-    intervals = isis1[:,:n-1] + isis0[:,1:n]
     for c in range(nchannels):
         if len(isis[c]) > 10:
             period = np.mean(isis[c])/samplerate

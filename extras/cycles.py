@@ -36,6 +36,8 @@ def load_bin(filepath, offset=0):
 
 def analyze_periodicity(path):
     data, rate = load_wave(path)
+    if data is None:
+        return
     #data, rate = load_bin(path, 108)
     nchannels = data.shape[1]
     basename = os.path.basename(path)
