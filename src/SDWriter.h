@@ -27,16 +27,28 @@
 #include <Arduino.h>
 #include <ContinuousADC.h>
 #include <WaveHeader.h>
-#include <SdFat.h>
 
-#define SD_FAT_TYPE 3
+#define SDCARD_USE_SDFAT
 
-#ifndef SD_CONFIG
-  #ifdef BUILTIN_SDCARD
-    #define SD_CONFIG BUILTIN_SDCARD
-  #else
-    #define SD_CONFIG SdioConfig(FIFO_SDIO)
+#ifdef SDCARD_USE_SDFAT
+  // Use Greimanns SdFat library:
+  #include <SdFat.h>
+
+  #define SD_FAT_TYPE 3
+
+  #ifndef SD_CONFIG
+    #ifdef BUILTIN_SDCARD
+      #define SD_CONFIG BUILTIN_SDCARD
+    #else
+      #define SD_CONFIG SdioConfig(FIFO_SDIO)
+    #endif
   #endif
+#else
+  // Use Teensy SD library:
+  #include <SD.h>
+  #include <SPI.h>
+  #define SD_CONFIG BUILTIN_SDCARD
+  #define FsFile File
 #endif
 
 
@@ -68,12 +80,14 @@ class SDCard {
   void removeFiles(const char *path);
 
   // Open file on SD card.
-  FsFile open(const char *path, oflag_t oflag=0) {return SD.open(path, oflag); };
+  FsFile open(const char *path, oflag_t oflag=0) { return SD.open(path, oflag); };
 
   
  protected:
 
+#ifdef SDCARD_USE_SDFAT
   SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
+#endif
   bool Available;
 
   uint16_t NameCounter;
@@ -181,7 +195,7 @@ class SDWriter : public DataConsumer {
 
   SDCard *SD;
   bool SDOwn;
-  FsFile File;
+  mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
 
   WaveHeader Wave;
 

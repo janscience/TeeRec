@@ -9,7 +9,9 @@ SDCard::SDCard() {
   if (!SD.begin(SD_CONFIG))
     return;
   Available = true;
+#ifdef SDCARD_USE_SDFAT
   SD.chvol();
+#endif
 }
 
 
@@ -19,8 +21,10 @@ SDCard::~SDCard() {
 
 
 void SDCard::end() {
+#ifdef SDCARD_USE_SDFAT
   if (Available)
     SD.end();
+#endif
 }
 
 
@@ -29,24 +33,39 @@ void SDCard::dataDir(const char *path) {
     return;
   if (! SD.exists(path))
     SD.mkdir(path);
+#ifdef SDCARD_USE_SDFAT
   SD.chdir(path);
+#endif
   NameCounter = 0;
 }
 
 
 void SDCard::removeFiles(const char *path) {
-  FsFile dir;
   FsFile file;
   if (! Available)
     return;
+#ifdef SDCARD_USE_SDFAT
+  FsFile dir;
   if (!dir.open(path))
     return;
+#else
+  FsFile dir = SD.open(path);
+  if (!dir)
+    return;
+#endif
   Serial.printf("Removing all files in %s:\n", path);
+#ifdef SDCARD_USE_SDFAT
   while (file.openNext(&dir, O_WRITE)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
       if (file.remove()) {
+#else
+  while (file = dir.openNextFile()) {
+    if (!file.isDirectory()) {
+      const char *fname = file.name();
+      if (SD.remove(fname)) {
+#endif
 	Serial.print("  ");
 	Serial.println(fname);
       }
@@ -104,7 +123,7 @@ SDWriter::SDWriter(const DataBuffer &data) :
   DataConsumer(&data) {
   SD = new SDCard;
   SDOwn = true;
-  File.close();
+  DataFile.close();
   WriteInterval = 100;
   FileSamples = 0;
   FileMaxSamples = 0;
@@ -115,7 +134,7 @@ SDWriter::SDWriter(SDCard &sd, const DataBuffer &data) :
   DataConsumer(&data) {
   SD = &sd;
   SDOwn = false;
-  File.close();
+  DataFile.close();
   WriteInterval = 100;
   FileSamples = 0;
   FileMaxSamples = 0;
@@ -134,8 +153,8 @@ bool SDWriter::available() {
 
 void SDWriter::end() {
   if (available()) {
-    if (File.isOpen())
-      File.close();
+    if (DataFile)
+      DataFile.close();
     if (SDOwn) {
       SD->end();
       delete SD;
@@ -166,7 +185,7 @@ void SDWriter::setWriteInterval(const ContinuousADC &adc) {
 
 
 bool SDWriter::needToWrite() {
-  if (File.isOpen() && WriteTime > WriteInterval) {
+  if (DataFile && WriteTime > WriteInterval) {
     WriteTime -= WriteInterval;
     return true;
   }
@@ -178,34 +197,34 @@ bool SDWriter::needToWrite() {
 bool SDWriter::open(const char *fname) {
   if (! available() || strlen(fname) == 0)
     return false;
-  if (File.isOpen()) {
+  if (DataFile) {
     Serial.println("failed to open file because a file is still open.");
     return false;
   }
-  File = SD->open(fname, O_WRITE | O_CREAT);
-  if (File.getError())
+  DataFile = SD->open(fname, O_WRITE | O_CREAT);
+  //if (DataFile.getError())
+  if (!DataFile)
     Serial.printf("WARNING: failed to open file %s\n", fname);
   FileSamples = 0;
   WriteTime = 0;
-  return File.isOpen();
+  return DataFile ? true : false;
 }
 
 
 bool SDWriter::isOpen() const {
-  return File.isOpen();
+  return DataFile ? true : false;
 }
 
 
 void SDWriter::close() {
-  if (! File.isOpen())
+  if (! DataFile)
     return;
-  if (!File.close())
-    Serial.println("WARNING: failed to close file");
+  DataFile.close();
 }
 
 
 FsFile &SDWriter::file() {
-  return File;
+  return DataFile;
 }
 
 
@@ -233,20 +252,22 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t sam
   else
     Wave.clearDateTime();
   Wave.assemble();                        // 0ms
-  if (File.write(Wave.Buffer, Wave.NBuffer) < 0) {  // 14ms
+  if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 14ms
     Serial.println("ERROR writing wave header");
   }
 }
 
 
 void SDWriter::closeWave() {
-  if (! File.isOpen())
+  if (! DataFile)
     return;
   if (FileSamples > 0) {
     Wave.setData(FileSamples);
     Wave.assemble();
-    File.seek(0);
-    File.write(Wave.Buffer, Wave.NBuffer);   // 2ms
+    DataFile.seek(0);
+    if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 2ms
+      Serial.println("ERROR writing wave header");
+    }
   }
   close();                                   // 6ms
 }
@@ -258,7 +279,7 @@ size_t SDWriter::writeData() {
   size_t samples1 = 0;
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
     return 0;
-  if (! File.isOpen())
+  if (! DataFile)
     return 0;
   size_t missed = overrun();
   if (missed > 0)
@@ -272,7 +293,7 @@ size_t SDWriter::writeData() {
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
-      nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
+      nbytes = DataFile.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
       samples0 = nbytes / sizeof(sample_t);
       Tail += samples0;
       if (Tail >= Data->nbuffer()) {
@@ -288,7 +309,7 @@ size_t SDWriter::writeData() {
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;
   if (nwrite > 0) {
-    nbytes = File.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
+    nbytes = DataFile.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
     Tail += samples1;
     if (Tail >= Data->nbuffer()) {

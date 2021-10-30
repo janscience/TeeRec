@@ -13,8 +13,8 @@
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit
 int averaging = 1;                   // number of averages per sample: 0, 4, 8, 16, 32
 uint32_t samplingRate = 40000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, A3, A4, A5, A6, A7, A8, A9, -1};      // input pins for ADC0
-int8_t channels1 [] =  {A16, A17, A18, A19, A20, A22, A12, A13, -1};  // input pins for ADC1
+int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0
+int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
 
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
