@@ -38,6 +38,8 @@
   Now, acquisition is continuously running and the cyclic buffer is
   filled.  Use, for example, `aidata.getData()` or
   `SDWriter::writeData()` to work with the acquired data.
+  Alternatively, you may write your own data consumer by subclassing
+  DataConsumer declared in DataBuffer.h.
 
 
   Teensy 3.5
@@ -110,13 +112,19 @@ class ContinuousADC : public DataBuffer, public Configurable {
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.
+  // Use pinAssignment() to see which pins are available for each ADC.
+  // Use check() to ensure a valid channel configuration.
   void setChannel(uint8_t adc, uint8_t channel);
 
   // Configure for acquisition from several channels on a single ADC.
   // channels is an array with pin specifications like A6, A19,
   // terminated by -1.
-  // The number of channels must be a power of two,
+  // The number of channels must be a power of two, e.g. 1, 2, 4, or 8,
   // because the channels have to fit into the 256 samples DMA buffer.
+  // If you intend to sample from both ADCs,
+  // the number of channels on both ADCs must be the same.
+  // Use pinAssignment() to see which pins are available for each ADC.
+  // Use check() to ensure a valid channel configuration.
   void setChannels(uint8_t adc, const int8_t *channels);
 
   // Return number of channels on specified ADC.
@@ -231,6 +239,17 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
  protected:
   
+  // DMA:
+  static const size_t NMajors = 2;
+  static DMASetting DMASettings[2][NMajors];
+  DMAChannel DMABuffer[2]; // DMA channel for ADCBuffer
+  DMAChannel DMASwitch[2]; // DMA channel for switching pins
+  volatile size_t DMAIndex[2];     // currently active ADCBuffer segment
+  volatile size_t DMACounter[2];   // total count of ADCBuffer segments
+  volatile static DMAMEM uint16_t ADCBuffer[2][NMajors*MajorSize];
+  // circular destination buffer must be aligned on its size,
+  // which must be a power of two! But we are not using a circular buffer.
+  
   // ADC:
   uint8_t Channels[2][MaxChannels];
   static DMAMEM uint8_t SC1AChannels[2][MaxChannels] __attribute__((aligned(MaxChannels)));
@@ -244,18 +263,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   ADC_REFERENCE Reference;
 
   ADC ADConv;
-  
-  // DMA:
-  static const size_t NMajors = 2;
-  DMAChannel DMABuffer[2]; // DMA channel for ADCBuffer
-  DMAChannel DMASwitch[2]; // DMA channel for switching pins
-  volatile size_t DMAIndex[2];     // currently active ADCBuffer segment
-  volatile size_t DMACounter[2];   // total count of ADCBuffer segments
-  volatile static DMAMEM uint16_t ADCBuffer[2][NMajors*MajorSize];  // circular destination buffer must be aligned on its size, which must be a power of two!
-  static DMASetting DMASettings[2][NMajors];
 
-  // Data (large buffer holding converted and multiplexed data from both ADCs):
-  DataBuffer Data;
+  // Data buffer:
+  DataBuffer Data;    // large buffer holding converted and multiplexed data from both ADCs
   size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
   uint8_t DataShift;  // number of bits ADC data need to be shifted to make them 16 bit.
   

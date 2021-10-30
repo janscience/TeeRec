@@ -215,7 +215,8 @@ void WaveHeader::assemble() {
   Info.Header.Size = 4;
   for (int k=3; k<nchunks-1; k++)
     Info.addSize(chunks[k]->NBuffer);
-  // expand to next multiple of 4:
+  // expand to next multiple of 4
+  // (without this we get some unwanted zeros into the file... why?)
   uint32_t infosize = ((Info.Header.Size+3) >> 2) << 2;
   infosize -= Info.Header.Size;
   Info.Header.Size += infosize;

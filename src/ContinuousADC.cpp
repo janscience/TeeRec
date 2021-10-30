@@ -4,13 +4,13 @@
 #include <ContinuousADC.h>
 
 
-ContinuousADC *ContinuousADC::ADCC = 0;
-
 volatile DMAMEM uint16_t ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
 
-DMASetting ContinuousADC::DMASettings[2][NMajors];
-
 DMAMEM uint8_t ContinuousADC::SC1AChannels[2][MaxChannels] __attribute__((aligned(ContinuousADC::MaxChannels)));
+
+ContinuousADC *ContinuousADC::ADCC = 0;
+
+DMASetting ContinuousADC::DMASettings[2][NMajors];
 
 
 ContinuousADC::ContinuousADC() :
