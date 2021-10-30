@@ -48,9 +48,9 @@ def plot_hist(path, save, subtract_mean=True):
     fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
     fig.suptitle(basename, fontsize=16)
     for c in range(nchannels):
-        m = np.mean(data[:,c])
-        s = np.std(data[:,c])
-        print('%s\t%2d\t%5.0f\t%5.0f' % (basename, c, m, s))
+        m = int(np.mean(data[:,c]))
+        s = int(np.std(data[:,c]))
+        print('%s\t%2d\t%5d\t%5d' % (basename, c, m, s))
         n, b = np.histogram(data[:,c], abins);
         nmax = np.max(n)
         i0 = np.argmax(n>0)

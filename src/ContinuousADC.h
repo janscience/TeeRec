@@ -209,6 +209,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Translate voltage reference string to reference enum.
   ADC_REFERENCE referenceEnum(const char *reference) const;
 
+  // Return DMA counter for specified adc.
+  size_t counter(uint8_t adc) const;
+
   // Print the assignment of AI pins to ADC0 and ADC1 to Serial.
   void pinAssignment();
 

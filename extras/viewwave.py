@@ -50,9 +50,9 @@ def plot_traces(path, save):
     #ascale = 1000.0*0.5*3.3/100.0
     ascale = 1.0
     for c in range(data.shape[1]):
-        #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
+        ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
         #ax.plot(1000.0*time[:], ascale*data[:,c]+1000*c, '-', label='%d' % c)
-        ax.plot(ascale*data[:,c]+1000*c, '-', label='%d' % c)
+        #ax.plot(ascale*data[:,c]+1000*c, '-', label='%d' % c)
     ax.set_ylim(-40000, 40000)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Amplitude [integer]')
