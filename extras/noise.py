@@ -36,6 +36,9 @@ def load_bin(filepath, offset=0):
 def plot_hist(path, save, subtract_mean=True):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
+    if data is None:
+        print('file "%s" is empty!' % path)
+        return
     nchannels = data.shape[1]
     basename = os.path.basename(path)
     abins = np.arange(-2**15, 2**15+1, 1)

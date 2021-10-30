@@ -348,6 +348,7 @@ size_t ContinuousADC::counter(uint8_t adc) const {
   return DMACounter[adc];
 }
 
+
 void ContinuousADC::pinAssignment() {
   Serial.println("pin ADC0 ADC1");
   for (int k=0; k<NAPins; k++) {
