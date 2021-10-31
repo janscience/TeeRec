@@ -47,6 +47,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   setupADC();
+  sdcard.begin();
   file.dataDir("tests");
   file.setWriteInterval(aidata);
   file.setMaxFileTime(fileSaveTime);

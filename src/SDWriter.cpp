@@ -5,12 +5,8 @@
 SDCard::SDCard() {
   Available = false;
   NameCounter = 0;
-  // start sdio interface to SD card:
-  if (!SD.begin(SD_CONFIG))
-    return;
-  Available = true;
-#ifdef SDCARD_USE_SDFAT
-  SD.chvol();
+#ifndef SDCARD_USE_SDFAT
+  CurrentPath = "/";
 #endif
 }
 
@@ -18,6 +14,55 @@ SDCard::SDCard() {
 SDCard::~SDCard() {
   end();
 }
+
+
+bool SDCard::begin() {
+  return begin(BUILTIN_SDCARD);
+}
+
+
+bool SDCard::begin(uint8_t csPin) {
+  if (!SD.begin(csPin))
+    return false;
+  Available = true;
+#ifdef SDCARD_USE_SDFAT
+  SD.chvol();
+#else
+  CurrentPath = "/";
+#endif
+  return true;
+}
+
+
+#ifdef SDCARD_USE_SDFAT
+
+bool SDCard::begin(SdCsPin_t csPin, uint32_t maxSck) {
+  if (!SD.begin(csPin, maxSck))
+    return false;
+  Available = true;
+  SD.chvol();
+  return true;
+}
+
+
+bool SDCard::begin(SdioConfig sdioConfig) {
+  if (!SD.begin(sdioConfig))
+    return false;
+  Available = true;
+  SD.chvol();
+  return true;
+}
+
+
+bool SDCard::begin(SdSpiConfig spiConfig) {
+  if (!SD.begin(spiConfig))
+    return false;
+  Available = true;
+  SD.chvol();
+  return true;
+}
+
+#endif
 
 
 void SDCard::end() {
@@ -35,8 +80,20 @@ void SDCard::dataDir(const char *path) {
     SD.mkdir(path);
 #ifdef SDCARD_USE_SDFAT
   SD.chdir(path);
+#else
+  CurrentPath = path;
+  CurrentPath += "/";
 #endif
   NameCounter = 0;
+}
+
+
+void SDCard::rootDir() {
+#ifdef SDCARD_USE_SDFAT
+  SD.chdir("/");
+#else
+  CurrentPath = "/";
+#endif
 }
 
 
@@ -63,8 +120,12 @@ void SDCard::removeFiles(const char *path) {
 #else
   while (file = dir.openNextFile()) {
     if (!file.isDirectory()) {
+      char file_path[200];
+      strcpy(file_path, path);
+      strcat(file_path, "/");
+      strcat(file_path, file.name());
       const char *fname = file.name();
-      if (SD.remove(fname)) {
+      if (SD.remove(file_path)) {
 #endif
 	Serial.print("  ");
 	Serial.println(fname);
@@ -111,17 +172,39 @@ String SDCard::incrementFileName(const String &fname) {
 	sprintf(nn, "%02d", NameCounter);
 	name.replace("NUM", nn);
       }
+#ifdef SDCARD_USE_SDFAT
     } while (SD.exists(name.c_str()));
+#else
+    } while (SD.exists((CurrentPath + name).c_str()));
+#endif
     return name;
   }
   else
     return fname;
 }
 
+    
+FsFile SDCard::openRead(const char *path) {
+#ifdef SDCARD_USE_SDFAT
+  return SD.open(path, O_READ);
+#else
+  return SD.open((CurrentPath + path).c_str(), FILE_READ);
+#endif
+}
+
+    
+FsFile SDCard::openWrite(const char *path) {
+#ifdef SDCARD_USE_SDFAT
+  return SD.open(path, O_RDWR | O_CREAT);
+#else
+  return SD.open((CurrentPath + path).c_str(), FILE_WRITE_BEGIN);
+#endif
+}
+
 
 SDWriter::SDWriter(const DataBuffer &data) :
   DataConsumer(&data) {
-  SD = new SDCard;
+  SDC = new SDCard;
   SDOwn = true;
   DataFile.close();
   WriteInterval = 100;
@@ -132,7 +215,7 @@ SDWriter::SDWriter(const DataBuffer &data) :
 
 SDWriter::SDWriter(SDCard &sd, const DataBuffer &data) :
   DataConsumer(&data) {
-  SD = &sd;
+  SDC = &sd;
   SDOwn = false;
   DataFile.close();
   WriteInterval = 100;
@@ -147,7 +230,7 @@ SDWriter::~SDWriter() {
 
 
 bool SDWriter::available() {
-  return (SD != NULL && SD->available());
+  return (SDC != NULL && SDC->available());
 }
 
 
@@ -156,24 +239,30 @@ void SDWriter::end() {
     if (DataFile)
       DataFile.close();
     if (SDOwn) {
-      SD->end();
-      delete SD;
+      SDC->end();
+      delete SDC;
       SDOwn = false;
     }
-    SD = NULL;
+    SDC = NULL;
   }
 }
 
 
 void SDWriter::dataDir(const char *path) {
   if (available())
-    SD->dataDir(path);
+    SDC->dataDir(path);
+}
+
+
+void SDWriter::rootDir() {
+  if (available())
+    SDC->rootDir();
 }
 
 
 String SDWriter::incrementFileName(const String &fname) {
   if (available())
-    return SD->incrementFileName(fname);
+    return SDC->incrementFileName(fname);
   else
     return "";
 }
@@ -201,7 +290,7 @@ bool SDWriter::open(const char *fname) {
     Serial.println("failed to open file because a file is still open.");
     return false;
   }
-  DataFile = SD->open(fname, O_WRITE | O_CREAT);
+  DataFile = SDC->openWrite(fname);
   //if (DataFile.getError())
   if (!DataFile)
     Serial.printf("WARNING: failed to open file %s\n", fname);

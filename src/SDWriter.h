@@ -4,20 +4,8 @@
 
   Install SdFat library from Tools->Manage Libraries (search for SdFat).
 
-  By default, the builtin SD card slot is used.
-
-  By definig SD_CONFIG, you can select and configure another slot.
-  Something along these lines *before* you include SDWriter.h:
-  ```
-  // Definition of the chip select pin used for the SD-card.
-  #ifndef SDCARD_SS_PIN
-    const uint8_t SD_CS_PIN = SS;
-  #else 
-    // assume built-in SD is used:
-    const uint8_t SD_CS_PIN = SDCARD_SS_PIN;
-  #endif
-  #define SD_CONFIG SdSpiConfig(SD_CS_PIN, DEDICATED_SPI, SD_SCK_MHZ(50))
-  ```
+  In case of library clashes, you might need to rename the library
+  (base directory only) to something else, like, for example, SdFatG.
 */
 
 #ifndef SDWriter_h
@@ -28,26 +16,18 @@
 #include <ContinuousADC.h>
 #include <WaveHeader.h>
 
+// undefine if you want to use the Teensy SD library instead:
 #define SDCARD_USE_SDFAT
 
+
 #ifdef SDCARD_USE_SDFAT
-  // Use Greimanns SdFat library:
+  // Use SdFat library:
   #include <SdFat.h>
-
   #define SD_FAT_TYPE 3
-
-  #ifndef SD_CONFIG
-    #ifdef BUILTIN_SDCARD
-      #define SD_CONFIG BUILTIN_SDCARD
-    #else
-      #define SD_CONFIG SdioConfig(FIFO_SDIO)
-    #endif
-  #endif
 #else
   // Use Teensy SD library:
   #include <SD.h>
   #include <SPI.h>
-  #define SD_CONFIG BUILTIN_SDCARD
   #define FsFile File
 #endif
 
@@ -56,19 +36,41 @@ class SDCard {
 
  public:
 
-  // Initialize SD card.
+  // Initialize. You need to call begin() for accessing the SD card.
   SDCard();
   // End usage of SD card.
   ~SDCard();
 
-  // Availability of a SD card. 
-  bool available() { return Available; };
+  // Initialize built in SD card.
+  // Return true on success.
+  bool begin();
 
+  // Initialize SD card on specified SPI chip select pin.
+  // Return true on success.
+  bool begin(uint8_t csPin);
+
+#ifdef SDCARD_USE_SDFAT
+  // Initialize SD card with clock speed.
+  bool begin(SdCsPin_t csPin, uint32_t maxSck);
+
+  // Initialize SD card via SdioConfig.
+  bool begin(SdioConfig sdioConfig);
+  
+  // Initialize SD card via SdSpiConfig.
+  bool begin(SdSpiConfig spiConfig);
+#endif
+  
   // End usage of SD card.
   void end();
 
+  // Availability of a SD card. 
+  bool available() { return Available; };
+
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
+
+  // Reset current working directory to root.
+  void rootDir();
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
@@ -79,15 +81,21 @@ class SDCard {
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 
-  // Open file on SD card.
-  FsFile open(const char *path, oflag_t oflag=0) { return SD.open(path, oflag); };
+  // Open file on SD card for reading.
+  FsFile openRead(const char *path);
+
+  // Open file on SD card for writing (not appending).
+  FsFile openWrite(const char *path);
 
   
  protected:
 
 #ifdef SDCARD_USE_SDFAT
   SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
+#else
+  String CurrentPath;
 #endif
+  
   bool Available;
 
   uint16_t NameCounter;
@@ -113,6 +121,9 @@ class SDWriter : public DataConsumer {
 
   // Make directory if it does not exist and make it the currrent working directory.
   void dataDir(const char *path);
+
+  // Reset current working directory to root.
+  void rootDir();
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
@@ -193,7 +204,7 @@ class SDWriter : public DataConsumer {
 
  protected:
 
-  SDCard *SD;
+  SDCard *SDC;
   bool SDOwn;
   mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
 

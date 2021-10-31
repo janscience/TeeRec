@@ -418,9 +418,9 @@ void ContinuousADC::report() {
   float bt = bufferTime();
   char bts[20];
   if (bt < 1.0)
-    sprintf(bts, "%.0fms\n", 1000.0*bt);
+    sprintf(bts, "%.0fms", 1000.0*bt);
   else
-    sprintf(bts, "%.2fs\n", bt);
+    sprintf(bts, "%.2fs", bt);
   Serial.println("ADC settings:");
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);

@@ -30,7 +30,8 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   blink.switchOn();
-  FsFile file = sd.open(fname, O_WRITE | O_CREAT);
+  sd.begin();
+  FsFile file = sd.openWrite(fname);
   size_t n = strlen(config);
   size_t m = file.write(config, n);
   if (n != m)

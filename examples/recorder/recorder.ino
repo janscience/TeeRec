@@ -257,6 +257,7 @@ void setup() {
   rtclock.check();
   setupButtons();
   setupADC();
+  sdcard.begin();
   //config.setConfigFile("recorder.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);

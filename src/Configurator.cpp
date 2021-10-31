@@ -43,14 +43,20 @@ void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   const size_t nline = 100;
   char line[nline];
-  FsFile file = sd.open(ConfigFile, FILE_READ);
+  FsFile file = sd.openRead(ConfigFile);
   if (!file || file.available() < 10) {
     Serial.printf("Configuration file \"%s\" not found or empty.\n\n", ConfigFile);
     return;
   }
   Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
   while (file.available()) {
+#ifdef SDCARD_USE_SDFAT
     file.fgets(line, nline);
+#else
+    #warning Reading text files not supported by Teensy SD library. Use SdFat instead.
+    file.close();
+    return;
+#endif
     char *key = NULL;
     char *val = NULL;
     int state = 0;

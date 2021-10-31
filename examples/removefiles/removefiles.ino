@@ -12,6 +12,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   blink.switchOn();
+  sd.begin();
   sd.removeFiles(path);
   blink.switchOff();
   sd.end();
