@@ -33,7 +33,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path, save):
+def plot_traces(path, tmax, step, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
     if data is None:
@@ -42,18 +42,16 @@ def plot_traces(path, save):
     basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
-    tmin = 0.0
-    trange = 0.1
-    #trange = 5.0
     time = np.arange(len(data))/rate
-    sel = (time>tmin) & (time<tmin+trange)
-    #ascale = 1000.0*0.5*3.3/100.0
-    ascale = 1.0
+    dtmax = time[-1]
+    if dtmax > tmax:
+        dtmax = tmax
+    max_idx = int(dtmax*rate)
     for c in range(data.shape[1]):
-        #ax.plot(1000.0*(time[sel]-tmin), ascale*data[sel,c]+1000*c, '-', label='%d' % c)
-        #ax.plot(1000.0*time[:], ascale*data[:,c]+1000*c, '-', label='%d' % c)
-        ax.plot(ascale*data[:,c]+1000*c, '-', label='%d' % c)
-    ax.set_ylim(-40000, 40000)
+        ax.plot(1000*time[:max_idx], 1.0*data[:max_idx,c]+step*c, '-',
+                label='%d' % c)
+    maxy = 40000 + data.shape[1]*step
+    ax.set_ylim(-40000, maxy)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Amplitude [integer]')
     if data.shape[1] > 1:
@@ -67,8 +65,30 @@ def plot_traces(path, save):
     
 if __name__ == '__main__':
     save = False
+    step = 0
+    tmax = 2
     for path in sys.argv[1:]:
+        if tmax is None:
+            tmax = float(path)
+            continue
+        if step is None:
+            step = float(path)
+            continue
         if path == '-s':
             save = True
             continue
-        plot_traces(path, save)
+        if path == '-t':
+            tmax = None
+            continue
+        if path == '-S':
+            step = None
+            continue
+        plot_traces(path, tmax, step, save)
+    else:
+        print("Usage:")
+        print("viewwave [-t TMAX] [-S STEP] [-s] FILE")
+        print()
+        print("-t TMAX: maximum time to show. Defaults to 2 seconds.")
+        print("-S STEP: shift each channel by STEP upwards.")
+        print("-s     : save plot to png file.")
+        print("FILE   : wave file with data to display.")
