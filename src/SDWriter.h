@@ -78,6 +78,10 @@ class SDCard {
   // Takes about 1-2ms.
   String incrementFileName(const String &fname);
 
+  // Reset the counter that is used by incrementFileName().
+  // Call it, whenever the filename changes, for example, because of a new date.
+  void resetFileCounter();
+
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 
@@ -130,6 +134,10 @@ class SDWriter : public DataConsumer {
   // If no SD card is available, or if no unique file can be found, return an empty string.
   // Takes about 1-2ms.
   String incrementFileName(const String &fname);
+
+  // Reset the counter that is used by incrementFileName().
+  // Call it, whenever the filename changes, for example, because of a new date.
+  void resetFileCounter();
 
   // Set write interval depending on adc settings.
   // Call this *after* setting up ContinusADC in setup().

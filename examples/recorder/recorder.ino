@@ -62,6 +62,7 @@ elapsedMillis screenTime;
 
 Settings settings("recordings", fileName, fileSaveTime, pulseFrequency, displayTime);
 RTClock rtclock;
+String prevname; // previous file name
 PushButtons buttons;
 
 
@@ -80,6 +81,10 @@ void setupADC() {
 
 void openNextFile() {
   String name = rtclock.makeStr(settings.FileName, true);
+  if (name != prevname) {
+    file.resetFileCounter();
+    prevname = name;
+  }
   name = file.incrementFileName(name);
   if (name.length() == 0 )
     return;
@@ -255,6 +260,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
+  prevname = "";
   setupButtons();
   setupADC();
   sdcard.begin();

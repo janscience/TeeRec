@@ -184,6 +184,11 @@ String SDCard::incrementFileName(const String &fname) {
 }
 
     
+void SDCard::resetFileCounter() {
+  NameCounter = 0;
+}
+
+
 FsFile SDCard::openRead(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_READ);
@@ -265,6 +270,12 @@ String SDWriter::incrementFileName(const String &fname) {
     return SDC->incrementFileName(fname);
   else
     return "";
+}
+
+
+void SDWriter::resetFileCounter() {
+  if (available())
+    return SDC->resetFileCounter();
 }
 
 

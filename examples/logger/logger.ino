@@ -31,6 +31,7 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 Settings settings("recordings", fileName, fileSaveTime, pulseFrequency);
 RTClock rtclock;
+String prevname; // previous file name
 Blink blink;
 
 
@@ -48,6 +49,10 @@ void setupADC() {
 
 String openNextFile() {
   String name = rtclock.makeStr(settings.FileName, true);
+  if (name != prevname) {
+    file.resetFileCounter();
+    prevname = name;
+  }
   name = file.incrementFileName(name);
   if (name.length() == 0) {
     Serial.println("WARNING: failed to open file on SD card.");
@@ -112,6 +117,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
+  prevname = "";
   setupADC();
   sdcard.begin();
   config.setConfigFile("logger.cfg");
