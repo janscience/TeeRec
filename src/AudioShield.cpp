@@ -1,9 +1,10 @@
 #include <Arduino.h>
+#include <DataBuffer.h>
 #include "AudioShield.h"
 
 
-AudioPlayBuffer::AudioPlayBuffer(const DataBuffer &data)
-  : DataConsumer(&data),
+AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
+  : DataWorker(&producer),
     AudioStream(0, NULL) {
   memset(LPVals, 0, sizeof(LPVals));
 }
@@ -20,8 +21,8 @@ void AudioPlayBuffer::update() {
   if (Data->time(available()) < (AUDIO_BLOCK_SAMPLES+2)*interval)
     return;
 
-  size_t head = Data->head();
-  if (head == 0)
+  size_t index = Producer->index();
+  if (index == 0)
     return;
   
   // allocate audio blocks to transmit:
@@ -42,23 +43,19 @@ void AudioPlayBuffer::update() {
   if (fac > 0.05)
     fac = 0.0;
   double time = 0.0;
-  ssize_t start = Tail;
+  ssize_t start = Index;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
     int32_t sum = 0;
     for (uint8_t c=0; c<Data->nchannels(); c++)
-      sum += Data->buffer()[Tail+c] - LPVals[c];
+      sum += Data->buffer()[Index+c] - LPVals[c];
     block1->data[i++] = sum/nchannels;
     time += interval;
-    while (Data->samples(time) > Tail - start + nchannels) {
+    while (Data->samples(time) > Index - start + nchannels) {
       for (uint8_t c=0; c<Data->nchannels(); c++)
-	LPVals[c] += (Data->buffer()[Tail+c] - LPVals[c])*fac;
-      Tail += nchannels;
-      if (Tail >= Data->nbuffer()) {
-	Tail -= Data->nbuffer();
+	LPVals[c] += (Data->buffer()[Index+c] - LPVals[c])*fac;
+      if (increment(nchannels))
 	start -= Data->nbuffer();
-	TailCycle++;
-      }
     }
   }
   
@@ -74,8 +71,8 @@ void AudioPlayBuffer::update() {
 }
 
 
-AudioShield::AudioShield(const DataBuffer &data) {
-  AudioInput = new AudioPlayBuffer(data);
+AudioShield::AudioShield(const DataWorker &producer) {
+  AudioInput = new AudioPlayBuffer(producer);
 }
 
 

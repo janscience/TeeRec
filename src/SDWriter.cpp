@@ -1,4 +1,3 @@
-#include <ContinuousADC.h>
 #include <SDWriter.h>
 
 
@@ -207,8 +206,8 @@ FsFile SDCard::openWrite(const char *path) {
 }
 
 
-SDWriter::SDWriter(const DataBuffer &data) :
-  DataConsumer(&data) {
+SDWriter::SDWriter(const DataWorker &producer) :
+  DataWorker(&producer) {
   SDC = new SDCard;
   SDOwn = true;
   DataFile.close();
@@ -218,8 +217,8 @@ SDWriter::SDWriter(const DataBuffer &data) :
 }
 
 
-SDWriter::SDWriter(SDCard &sd, const DataBuffer &data) :
-  DataConsumer(&data) {
+SDWriter::SDWriter(SDCard &sd, const DataWorker &producer) :
+  DataWorker(&producer) {
   SDC = &sd;
   SDOwn = false;
   DataFile.close();
@@ -384,38 +383,30 @@ size_t SDWriter::writeData() {
   size_t missed = overrun();
   if (missed > 0)
     Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
-  size_t head = Data->head();
-  if (head == 0 || Tail == head)
+  size_t index = Producer->index();
+  if (index == 0 || Index == index)
     return 0;
   size_t nwrite = 0;
-  if (Tail > head) {
-    nwrite = Data->nbuffer() - Tail;
+  if (Index > index) {
+    nwrite = Data->nbuffer() - Index;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
-      nbytes = DataFile.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
+      nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
       samples0 = nbytes / sizeof(sample_t);
-      Tail += samples0;
-      if (Tail >= Data->nbuffer()) {
-	Tail -= Data->nbuffer();
-	TailCycle++;
-      }
+      increment(samples0);
       FileSamples += samples0;
     }
   }
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
     return samples0;
-  nwrite = head - Tail;
+  nwrite = index - Index;
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;
   if (nwrite > 0) {
-    nbytes = DataFile.write((void *)&Data->buffer()[Tail], sizeof(sample_t)*nwrite);
+    nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
-    Tail += samples1;
-    if (Tail >= Data->nbuffer()) {
-      Tail -= Data->nbuffer();
-      TailCycle++;
-    }
+    increment(samples1);
     FileSamples += samples1;
   }
   return samples0 + samples1;
@@ -423,14 +414,8 @@ size_t SDWriter::writeData() {
 
 
 void SDWriter::startWrite() {
-  if (Data == NULL) {
+  if (!synchronize())
     Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
-    Tail = 0;
-    TailCycle = 0;
-    return;
-  }
-  Tail = Data->head();
-  TailCycle = Data->headCycle();
 }
 
 
@@ -470,6 +455,6 @@ bool SDWriter::endWrite() {
 
 
 void SDWriter::reset() {
-  DataConsumer::reset();
+  DataWorker::reset();
   FileSamples = 0;
 }

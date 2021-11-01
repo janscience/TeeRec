@@ -13,6 +13,7 @@
 
 
 #include <Arduino.h>
+#include <DataWorker.h>
 #include <ContinuousADC.h>
 #include <WaveHeader.h>
 
@@ -106,14 +107,14 @@ class SDCard {
 };
 
 
-class SDWriter : public DataConsumer {
+class SDWriter : public DataWorker {
 
  public:
 
   // Initialize writer on default SD card.
-  SDWriter(const DataBuffer &data);
+  SDWriter(const DataWorker &data);
   // Initialize writer on SD card.
-  SDWriter(SDCard &sd, const DataBuffer &data);
+  SDWriter(SDCard &sd, const DataWorker &data);
   // Close file and end usage of SD card.
   ~SDWriter();
 

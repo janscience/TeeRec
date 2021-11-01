@@ -17,14 +17,14 @@ int8_t channels0 [] =  {A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins 
 int8_t channels1 [] =  {A16, A17, A18, A19, -1, A20, A22, A12, A13};  // input pins for ADC1
 
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-float fileSaveTime = 10;             // seconds
+float fileSaveTime = 10*60;             // seconds
 
 int pulseFrequency = 230;            // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
 // ------------------------------------------------------------------------------------------
- 
+
 Configurator config;
 ContinuousADC aidata;
 SDCard sdcard;
@@ -99,7 +99,7 @@ void storeData() {
       Serial.println("ERROR: data acquisition not running.");
       Serial.println("sampling rate probably too high,");
       Serial.println("given the number of channels, averaging, sampling and conversion speed.");
-      while(1) {};
+      while (1) {};
     }
     if (file.endWrite()) {
       file.close();  // file size was set by openWave()

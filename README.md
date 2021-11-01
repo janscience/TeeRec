@@ -17,10 +17,11 @@ with contributions by
 
 ## Features
 
-- Continuous DMA-based data acquisition into a single multiplexed circular buffer.
+- Flexible producer/consumer data model based on a single multiplexed circular buffer.
+- Continuous DMA-based data acquisition.
 - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
 - Highspeed timed acquisition up to 500kHz.
-- Conversion of data to signed 16bit for direct storage into WAV files.
+- Conversion of data to signed 16bit for direct storage into wave files.
 - Storing recorded data as wave files on SD cards.
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
@@ -35,8 +36,9 @@ with contributions by
 ## Libraries
 
 - DataBuffer: A single cyclic, multiplexed buffer holding acquired data.
+- DataWorker - Producer/consumer working on a DataBuffer.
 - ContinousADC: Sample from multiple pins into a DataBuffer.
-- SDWrite: Write data on SD card.
+- SDWrite: Write data from a DataWorker on SD card.
 - WaveHeader: Setting up wave file header with metadata.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.

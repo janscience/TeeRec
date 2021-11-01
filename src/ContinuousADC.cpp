@@ -589,14 +589,14 @@ void ContinuousADC::isr(uint8_t adc) {
   DMACounter[adc]++;
   if (ADCUse == 3) {
     if (DMACounter[0] == DMACounter[1]) {
-      if (DataHead[0] < Head)
-	HeadCycle++;
-      Head = DataHead[0];
+      if (DataHead[0] < Index)
+	Cycle++;
+      Index = DataHead[0];
     }
   } else {
-    if (DataHead[adc] < Head)
-      HeadCycle++;
-    Head = DataHead[adc];
+    if (DataHead[adc] < Index)
+      Cycle++;
+    Index = DataHead[adc];
   }
   DMABuffer[adc].clearInterrupt();
 }

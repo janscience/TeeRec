@@ -9,14 +9,14 @@
 
 #include <Arduino.h>
 #include <Audio.h>
-#include <ContinuousADC.h>
+#include <DataWorker.h>
 
 
-class AudioPlayBuffer : public DataConsumer, public AudioStream {
+class AudioPlayBuffer : public DataWorker, public AudioStream {
   
  public:
   
-  AudioPlayBuffer(const DataBuffer &data);
+  AudioPlayBuffer(const DataWorker &producer);
   virtual void update();
 
  private:
@@ -30,7 +30,7 @@ class AudioShield {
 
  public:
 
-  AudioShield(const DataBuffer &data);
+  AudioShield(const DataWorker &producer);
   ~AudioShield();
 
   void setup();
