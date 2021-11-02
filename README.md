@@ -57,6 +57,7 @@ with contributions by
 - logger: Continuously store data on SD card.
 - recorder: Show acquired data on a display and store data on SD card upon user request.
 - sinegen: Sine-wave generator.
+- maxrate: Test for maximum sampling rate.
 - averaging: Test various averaging settings for acquisition.
 - writeconfig: Write a defaul configuration file on SD card.
 - removefiles: Remove all files from a directory on SD card.

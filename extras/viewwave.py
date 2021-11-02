@@ -84,7 +84,7 @@ if __name__ == '__main__':
             step = None
             continue
         plot_traces(path, tmax, step, save)
-    else:
+    if len(sys.argv) <= 1:
         print("Usage:")
         print("viewwave [-t TMAX] [-S STEP] [-s] FILE")
         print()
