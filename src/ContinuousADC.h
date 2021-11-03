@@ -19,8 +19,8 @@
   #include <ContinuousADC.h>
 
   uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
-  uint8_t channels0 [] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0, terminate with -1
-  uint8_t channels1 [] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1, terminate with -1
+  uint8_t channels0[] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0, terminate with -1
+  uint8_t channels1[] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1, terminate with -1
 
   ContinuousADC aidata;
 
@@ -56,6 +56,17 @@
   2         2           160   220
   4         4            85    90
   8         8            40    45
+
+  Measured with maxrate example:
+  channels0 channels1 10bit 12bit 16bit
+  1         0           523   531   453 
+  2         0           250   250   210 
+  4         0           125   125   105 
+  8         0            62    62    50 
+  1         1           531   519   453 
+  2         2           234   234   199 
+  4         4           117   117   101 
+  8         8            58    58    50 
 
 
   Output of `pinAssignment()`:

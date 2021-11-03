@@ -52,6 +52,10 @@ public:
   // str must hold at least 6 characters.
   void timeStr(size_t sample, char *str) const;
 
+  // Total time the buffer has been fed with samples in seconds.
+  // Can be much larger than bufferTime().
+  float sampledTime() const;
+
   // Return sample right after most current data value in data buffer
   // optionally decremented by decr frames.
   size_t currentSample(size_t decr=0);

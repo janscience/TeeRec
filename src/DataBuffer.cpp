@@ -44,6 +44,14 @@ void DataBuffer::timeStr(size_t samples, char *str) const {
 }
 
 
+float DataBuffer::sampledTime() const {
+  float sindex = cycle();
+  sindex *= NBuffer;
+  sindex += index();
+  return sindex/NChannels/Rate;
+}
+
+
 size_t DataBuffer::currentSample(size_t decr) {
   size_t idx = index();
   if (decr > 0) {
