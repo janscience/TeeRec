@@ -45,19 +45,9 @@
   Teensy 3.5
   ----------
 
-  Maximum sampling rates in kHz:
+  Maximum sampling rates in kHz with averaging of 1, high sampling and
+  conversion speeds (measured with the maxrate example):
 
-  channels0 channels1 16bit 12bit
-  1         0           440   520
-  2         0           185   210
-  4         0            95   110
-  8         0            45    50
-  1         1           440   520
-  2         2           160   220
-  4         4            85    90
-  8         8            40    45
-
-  Measured with maxrate example:
   channels0 channels1 10bit 12bit 16bit
   1         0           523   531   453 
   2         0           250   250   210 
@@ -67,6 +57,45 @@
   2         2           234   234   199 
   4         4           117   117   101 
   8         8            58    58    50 
+
+  Note that in an application these maximum sampling rates can be
+  substantially lower.
+
+  Effect of averaging on sampling rate in kHz for 12bit,
+  high conversion and sampling speed, and a single ADC:
+
+  channels a=1 a=4 a=16
+  1        531 148   35
+  2        250  70   15
+  4        125  35    7
+  8         62  15    3
+
+  Effect of conversion and sampling speeds on sampling rate in kHz for 12bit,
+  averaging set to 1, and a single ADC:
+
+  High conversion speed:
+
+  channels high med low sampling speed
+  1         531 457 386
+  2         250 218 187
+  4         125 109  93
+  8          62  54  46
+
+  Medium conversion speed:
+
+  channels high med low sampling speed
+  1         285 246 207
+  2         136	121 101
+  4          66	 62  50
+  8          31	 27  23
+
+  Low conversion speed:
+
+  channels high med low sampling speed
+  1         144 125 101
+  2          70	 62  50
+  4          35	 27  23
+  8          15	 15  11
 
 
   Output of `pinAssignment()`:

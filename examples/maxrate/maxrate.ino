@@ -1,3 +1,13 @@
+/* Tries different sampling rates to find out the maximum possible
+ * sampling rate for various resolutions and number of channels to
+ * be sampled from. Set averaging, conversion, and sampling speeds
+ * at the beginning of the checkRate() function. Then compile the
+ * code, upload it, and switch on the serial monitor. The sketch
+ * reports what it is currently testing and finishes with a summary
+ * table of the maximum sampling rates in kHz for the different
+ * conditions.
+ */
+
 #include <ContinuousADC.h>
 #include <Watchdog.h>
 // Install Watchdog library from Peter Polidoro via Library Manager.
@@ -77,10 +87,9 @@ void checkRate() {
       Serial.println();
       Serial.printf("channels0 channels1 10bit 12bit 16bit\n");
       for (uint16_t k=0; k<8; k++) {
-        for (uint16_t i=0; i<2; i++)
-          Serial.printf("%-9i ", results[k][i]);
+        Serial.printf("%-9i %-9i", results[k][0], results[k][1]);
         for (uint16_t i=2; i<5; i++)
-          Serial.printf("%5i ", results[k][i]);
+          Serial.printf(" %5i", results[k][i]);
         Serial.println();
       }
       while (true) {
