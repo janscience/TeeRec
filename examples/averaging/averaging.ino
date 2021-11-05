@@ -1,12 +1,17 @@
 /* Find the optimal combination of averaging, conversion and sampling speed 
  * for a given sampling rate, resolution, and channel configuration.
+ * 
  * First, connect the analog input channels to a fixed voltage
  * or short circuit them in your final hardware configuration.
+ * 
  * Insert an SD card.
- * Then run this sketch until it is finished. It records for each
- * combination of averaging, conversion and sampling speed 3.5sec
- * into files, stored in the tests/ directory of the SD card.
- * Then run the extras/noise.py script on these files to evaluate the
+ * 
+ * Then run this sketch until it tells you it finished.
+ * The sketch records for each combination of averaging, conversion and
+ * sampling speed one data buffer to files, stored in the tests/ directory
+ * of the SD card.
+ * 
+ * Finally, run the extras/noise.py script on these files to evaluate the
  * noise levels. Choose the setting with the lowest noise level
  * for your application.
  */ 
@@ -22,8 +27,6 @@ int bits = 12;                       // resolution: 10bit 12bit, or 16bit
 uint32_t samplingRate = 100000;       // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
-
-float fileSaveTime = 3.5;            // seconds, do not change!
 
 const uint8_t maxConversionSpeeds = 5;
 ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
@@ -94,11 +97,9 @@ void setup() {
   setupADC();
   sdcard.begin();
   file.dataDir("tests");
-  file.setWriteInterval(aidata);
-  file.setMaxFileTime(fileSaveTime);
-  blink.set(1000, 20);
-  delay(1000);
-  watchdog.enable(Watchdog::TIMEOUT_4S);
+  blink.set(1000, 50);
+  watchdog.enable(Watchdog::TIMEOUT_2S);
+  delay(500);
 }
 
 
@@ -113,37 +114,29 @@ void loop() {
     aidata.setAveraging(averages_list[k]);
     sprintf(fname, "averaging-%03.0fkHz-%02dbit-conv%s-sampl%s-avrg%02d.wav", 0.001*aidata.rate(),
             aidata.resolution(), convs, sampls, aidata.averaging());
-    Serial.printf("  %s\n", fname);
-    file.openWave(fname, aidata);
-    float filetime = fileSaveTime;
+    float buffertime = aidata.bufferTime();
+    if (buffertime > 1.0)
+      buffertime = 1.0;
+    // record data without SD card writing (no artifacts):
     aidata.start();
-    if ( file.isOpen() ) {
-      elapsedMillis wtime;
-      while (1) {
-        blink.update();
-        if (file.needToWrite()) {
-          file.writeData();
-          if (file.endWrite()) {
-            file.close();  // file size was set by openWave()
-            blink.blink(1000, 500);
-            break;
-          }
-        }
-      }
-    }
-    else {
-      filetime = 1;
-      delay(1000);
-    }
+    elapsedMillis wtime;
+    while (0.001*wtime < buffertime)
+      blink.update();
+    aidata.stop();
+    file.startWrite(aidata.nbuffer());
     delay(50);
     float sampledtime = aidata.sampledTime();
-    aidata.stop();
-    delay(50);
     Serial.printf("  avrg=%d: %5.3fsec\n", averages_list[k], sampledtime);
-    if (sampledtime < 0.99*filetime) {
+    if (sampledtime < 0.99*buffertime) {
       blink.switchOff();
-      file.file().remove(fname);
-      while (1) {};
+      while (1) {}; // wait for watchdog to restart
+    }
+    Serial.printf("  %s\n", fname);
+    file.openWave(fname, aidata, 0);
+    if ( file.isOpen() ) {
+      file.writeData();
+      file.closeWave();
+      blink.blink(1000, 500);
     }
   }
 }
