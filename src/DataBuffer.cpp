@@ -79,7 +79,7 @@ size_t DataBuffer::incrementSample(size_t idx, size_t incr) {
 }
 
 
-void DataBuffer::getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) {
+void DataBuffer::getData(uint8_t channel, size_t start, sample_t *buffer, size_t nbuffer) {
   if ( Rate == 0 || NChannels == 0 ) {
     memset(buffer, 0, sizeof(sample_t)*nbuffer);
     return;
@@ -87,6 +87,27 @@ void DataBuffer::getData(uint8_t channel, size_t start, float *buffer, size_t nb
   if (nbuffer*NChannels > NBuffer) {
     Serial.println("ERROR: requested too many samples.");
     memset(buffer, 0, sizeof(sample_t)*nbuffer);
+    return;
+  }
+  // copy:
+  start += channel;
+  for (size_t k=0; k<nbuffer; k++ ) {
+    if (start >= NBuffer)
+      start -= NBuffer;
+    buffer[k] = Buffer[start];
+    start += NChannels;
+  }
+}
+
+
+void DataBuffer::getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) {
+  if ( Rate == 0 || NChannels == 0 ) {
+    memset(buffer, 0, sizeof(float)*nbuffer);
+    return;
+  }
+  if (nbuffer*NChannels > NBuffer) {
+    Serial.println("ERROR: requested too many samples.");
+    memset(buffer, 0, sizeof(float)*nbuffer);
     return;
   }
   // copy:

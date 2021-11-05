@@ -33,7 +33,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_hist(path, save, subtract_mean=True):
+def plot_hist(path, subtract_mean=True, plot=True, save=False):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     if data is None:
@@ -41,6 +41,12 @@ def plot_hist(path, save, subtract_mean=True):
         return
     nchannels = data.shape[1]
     basename = os.path.basename(path)
+    for c in range(nchannels):
+        m = int(np.mean(data[:,c]))
+        s = int(np.std(data[:,c]))
+        print('%s\t%2d\t%5d\t%5d' % (basename, c, m, s))
+    if not plot:
+        return
     abins = np.arange(-2**15, 2**15+1, 1)
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True)
@@ -53,18 +59,17 @@ def plot_hist(path, save, subtract_mean=True):
     for c in range(nchannels):
         m = int(np.mean(data[:,c]))
         s = int(np.std(data[:,c]))
-        print('%s\t%2d\t%5d\t%5d' % (basename, c, m, s))
         n, b = np.histogram(data[:,c], abins);
         nmax = np.max(n)
         i0 = np.argmax(n>0)
         i1 = len(n) - np.argmax(n[::-1]>0)
         if subtract_mean:
             b -= m
-            axs[c].fill_between(b[i0:i1], n[i0:i1]);
+            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none', fc='tab:blue');
             axs[c].axvline(0, color='k')
             axs[c].plot([-s, +s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         else:
-            axs[c].fill_between(b[i0:i1], n[i0:i1]);
+            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none', fc='tab:blue');
             axs[c].axvline(m, color='k')
             axs[c].plot([m-s, m+s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         axs[c].set_title('channel %d' % c)
@@ -79,10 +84,18 @@ def plot_hist(path, save, subtract_mean=True):
 
     
 if __name__ == '__main__':
+    plot = False
     save = False
+    subtract_mean = False
     print('%s\t%2s\t%5s\t%5s' % ('file', 'channel', 'mean', 'std'))
     for path in sys.argv[1:]:
-        if path == '-s':
+        if path == '-m':
+            subtract_mean = True
+            continue
+        elif path == '-p':
+            plot = True
+            continue
+        elif path == '-s':
             save = True
             continue
-        plot_hist(path, save, True)
+        plot_hist(path, subtract_mean, plot, save)

@@ -119,7 +119,7 @@ class SDWriter : public DataWorker {
   ~SDWriter();
 
   // Availability of a SD card. 
-  bool available();
+  bool cardAvailable();
 
   // End usage of SD card if it was created by SDWriter.
   void end();

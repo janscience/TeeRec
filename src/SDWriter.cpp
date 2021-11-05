@@ -233,13 +233,13 @@ SDWriter::~SDWriter() {
 }
 
 
-bool SDWriter::available() {
+bool SDWriter::cardAvailable() {
   return (SDC != NULL && SDC->available());
 }
 
 
 void SDWriter::end() {
-  if (available()) {
+  if (cardAvailable()) {
     if (DataFile)
       DataFile.close();
     if (SDOwn) {
@@ -253,19 +253,19 @@ void SDWriter::end() {
 
 
 void SDWriter::dataDir(const char *path) {
-  if (available())
+  if (cardAvailable())
     SDC->dataDir(path);
 }
 
 
 void SDWriter::rootDir() {
-  if (available())
+  if (cardAvailable())
     SDC->rootDir();
 }
 
 
 String SDWriter::incrementFileName(const String &fname) {
-  if (available())
+  if (cardAvailable())
     return SDC->incrementFileName(fname);
   else
     return "";
@@ -273,7 +273,7 @@ String SDWriter::incrementFileName(const String &fname) {
 
 
 void SDWriter::resetFileCounter() {
-  if (available())
+  if (cardAvailable())
     return SDC->resetFileCounter();
 }
 
@@ -294,7 +294,7 @@ bool SDWriter::needToWrite() {
 
 
 bool SDWriter::open(const char *fname) {
-  if (! available() || strlen(fname) == 0)
+  if (! cardAvailable() || strlen(fname) == 0)
     return false;
   if (DataFile) {
     Serial.println("failed to open file because a file is still open.");

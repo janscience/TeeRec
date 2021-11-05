@@ -63,12 +63,15 @@ size_t DataWorker::cycle() const {
 
 
 size_t DataWorker::available() const {
-  if (Producer == 0 || Data == 0)
+  if (Producer == 0 && Data == 0)
     return 0;
   size_t index = 0;
   unsigned char sreg_backup = SREG;
   cli();
-  index = Producer->Index;
+  if (Producer != 0)
+    index = Producer->Index;
+  else
+    index = Data->Index;
   SREG = sreg_backup;
   if (Index <= index)
     return index - Index;
