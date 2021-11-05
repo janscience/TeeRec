@@ -413,9 +413,11 @@ size_t SDWriter::writeData() {
 }
 
 
-void SDWriter::startWrite() {
+void SDWriter::startWrite(size_t decr) {
   if (!synchronize())
     Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
+  if (decr > 0)
+    decrement(decr);
 }
 
 

@@ -181,8 +181,8 @@ class SDWriter : public DataWorker {
   // Returns number of written samples.
   size_t writeData();
 
-  // Start writing to a file from the current data head on.
-  void startWrite();
+  // Start writing to a file from the current minus decr sample on.
+  void startWrite(size_t decr=0);
 
   // Return current file size in samples.
   size_t fileSamples() const;
