@@ -118,12 +118,32 @@ bool DataWorker::synchronize() {
 }
 
 
-bool DataWorker::increment(size_t indices) {
-  Index += indices;
-  if (Index >= Data->nbuffer()) {
-    Index -= Data->nbuffer();
-    Cycle++;
+bool DataWorker::decrement(size_t indices) {
+  if (indices > Data->nbuffer())
+    indices = Data->nbuffer();
+  if (indices <= Index) {
+    Index -= indices;
+    return false;
+  }
+  else if (Cycle > 0) {
+    Index += Data->nbuffer() - indices;
+    Cycle--;
     return true;
   }
-  return false;
+  else {
+    Index = 0;
+    return false;
+  }
+}
+
+
+bool DataWorker::increment(size_t indices) {
+  Index += indices;
+  bool r = false;
+  while (Index >= Data->nbuffer()) {
+    Index -= Data->nbuffer();
+    Cycle++;
+    r = true;
+  }
+  return r;
 }
