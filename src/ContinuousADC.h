@@ -97,6 +97,77 @@
   4          35	 27  23
   8          15	 15  11
 
+  Conversion speed, sampling speed and in particular averaging help to
+  reduce noise. Noise also depends on the pin.
+  This can be tested with the averaging example.
+
+  For 40kHz and 12bit we get for the standard deviations in 16bit
+  integers of two channels:
+
+  convers  sampling avrg   A2  A16
+  veryhigh veryhigh    1   27   41
+  veryhigh veryhigh    4   16   23
+  veryhigh veryhigh    8   14   18
+  veryhigh veryhigh   16   12   16
+  veryhigh veryhigh   32   12   15
+  veryhigh high        1   30   43
+  veryhigh high        4   13   17
+  veryhigh high        8    9   10
+  veryhigh high       16    9    9 **
+  veryhigh med         1   29   46
+  veryhigh med         4   16   19
+  veryhigh med         8   10   15
+  veryhigh med        16   10   12
+  veryhigh low         1   27   35
+  veryhigh low         4   12   14
+  veryhigh low         8   10   11
+  veryhigh low        16    8    7  ***
+  veryhigh verylow     1   34   40
+  veryhigh verylow     4   10   14
+  veryhigh verylow     8   10   12
+  veryhigh verylow    16   10   10
+  high     veryhigh    1   28   42
+  high     veryhigh    4   14   20
+  high     veryhigh    8   14   20
+  high     veryhigh   16   12   18
+  high     high        1   31   45
+  high     high        4   13   16
+  high     high        8   10   12
+  high     med         1   27   38
+  high     med         4   11   15
+  high     med         8    9   11 *
+  high     low         1   29   44
+  high     low         4   13   19
+  high     low         8   10   15
+  high     verylow     1   31   40
+  high     verylow     4   13   16
+  high     verylow     8   10   12
+  med      veryhigh    1   30   40
+  med      veryhigh    4   16   21
+  med      veryhigh    8   12   15
+  med      high        1   28   38
+  med      high        4   16   22
+  med      high        8   25   20
+  med      med         1   28   41
+  med      med         4   15   21
+  med      low         1   67   69
+  med      low         4   61   56
+  med      verylow     1   26   47
+  med      verylow     4   16   30
+  low      veryhigh    1   64   59
+  low      veryhigh    4   59   51
+  low      high        1   60   63
+  low      high        4   56   55
+  low      med         1   56   64
+  low      low         1   40   56
+  low      verylow     1   28   43
+  verylow  veryhigh    1   60   62
+  verylow  veryhigh    4   54   56
+  verylow  high        1   29   38
+  verylow  high        4   17   23
+  verylow  med         1   28   43
+  verylow  low         1   38   39
+  verylow  verylow     1   28   41
 
   Output of `pinAssignment()`:
 

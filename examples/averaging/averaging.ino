@@ -24,7 +24,7 @@
 // https://github.com/janelia-arduino/Watchdog
 
 int bits = 12;                   // resolution: 10bit 12bit, or 16bit
-uint32_t samplingRate = 100000;  // samples per second and channel in Hertz
+uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
 const uint8_t nchannels = 2;     // always set this fitting to channels0 and channels1
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
@@ -37,6 +37,16 @@ ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
   ADC_CONVERSION_SPEED::LOW_SPEED,
   ADC_CONVERSION_SPEED::VERY_LOW_SPEED
 };
+
+/*
+const uint8_t maxConversionSpeeds = 4;
+ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
+  ADC_CONVERSION_SPEED::ADACK_2_4,
+  ADC_CONVERSION_SPEED::ADACK_4_0,
+  ADC_CONVERSION_SPEED::ADACK_5_2,
+  ADC_CONVERSION_SPEED::ADACK_6_2
+};
+*/
 
 const uint8_t maxSamplingSpeeds = 5;
 ADC_SAMPLING_SPEED samplingSpeeds[maxSamplingSpeeds] = {
@@ -97,6 +107,37 @@ double stdev(uint8_t c, size_t n) {
 }
 
 
+void report() {
+  Serial.println();
+  Serial.println("Standard deviations in 16bit integers for each channel:");
+  Serial.println();
+  Serial.printf("convers  sampling avrg");
+  uint8_t nch = nchannels;
+  if (channels0[0] >= 0 && channels1[0] >= 0)
+    nch /= 2;
+  for (uint8_t c=0; c<nch; c++) {
+    char cs[4];
+    if (channels0[0] >= 0 && channels0[c] >= 0) {
+      aidata.channelStr(channels0[c], cs);
+      Serial.printf(" %4s", cs);
+    }
+    if (channels1[0] >= 0 && channels1[c] >= 0) {
+      aidata.channelStr(channels1[c], cs);
+      Serial.printf(" %4s", cs);
+    }
+  }
+  Serial.println();
+  for (size_t j=0; j<counter; j++) {
+    Serial.printf("%-8s", aidata.conversionSpeedShortStr(conversionSpeeds[results_settings[j][0]]));
+    Serial.printf(" %-8s", aidata.samplingSpeedShortStr(samplingSpeeds[results_settings[j][1]]));
+    Serial.printf(" %4i", results_settings[j][2]);
+    for (uint8_t c=0; c<nchannels; c++)
+      Serial.printf(" %4.0f", results_stdevs[j][c]);
+    Serial.println();
+  }
+}
+
+
 // ------------------------------------------------------------------------------------------
 
 void setup() {
@@ -119,20 +160,7 @@ void setup() {
       convindex++;
       if (convindex >= maxConversionSpeeds) {
         Serial.println(">>> test finished <<<");
-        Serial.println();
-        Serial.println("Standard deviations in bits for each channel:");
-        Serial.println();
-        Serial.printf("conv sampl avrg ");
-        for (uint8_t c=0; c<nchannels; c++)
-          Serial.printf("c=%-2i ", c);
-        Serial.println();
-        for (size_t j=0; j<counter; j++) {
-          for (size_t i=0; i<3; i++)
-            Serial.printf("%4i ", results_settings[j][i]);
-          for (uint8_t c=0; c<nchannels; c++)
-            Serial.printf("%4.0f ", results_stdevs[j][c]);
-          Serial.println();
-        }
+        report();
         while (1) {
           watchdog.reset();
           delay(1000);
@@ -143,7 +171,6 @@ void setup() {
   setupADC();
   sdcard.begin();
   file.dataDir("tests");
-  blink.set(1000, 50);
   watchdog.enable(Watchdog::TIMEOUT_2S);
   delay(500);
 }
@@ -156,6 +183,9 @@ void loop() {
   Serial.printf("%s conversion speed, %s sampling speed:\n", convs, sampls);
   for (unsigned int k=0; k<sizeof(averages_list); k++) {
     watchdog.reset();
+    blink.switchOn();
+    delay(100);
+    blink.switchOff();
     aidata.setAveraging(averages_list[k]);
     sprintf(fname, "averaging-%03.0fkHz-%02dbit-conv%s-sampl%s-avrg%02d.wav", 0.001*aidata.rate(),
             aidata.resolution(), convs, sampls, aidata.averaging());
@@ -164,18 +194,14 @@ void loop() {
       buffertime = 1.0;
     // record data without SD card writing (no artifacts):
     aidata.start();
-    elapsedMillis wtime;
-    while (0.001*wtime < buffertime)
-      blink.update();
+    delay(1000*buffertime);
     aidata.stop();
     file.startWrite(aidata.nbuffer());
     delay(50);
     float sampledtime = aidata.sampledTime();
-    Serial.printf("  avrg=%d: %5.3fsec\n", averages_list[k], sampledtime);
-    if (sampledtime < 0.99*buffertime) {
-      blink.switchOff();
+    Serial.printf("  avrg=%2d: %5.3fsec", averages_list[k], sampledtime);
+    if (sampledtime < 0.99*buffertime)
       while (1) {}; // wait for watchdog to restart
-    }
     size_t nframes = file.available()/aidata.nchannels();
     results_settings[counter][0] = convindex;
     results_settings[counter][1] = samplindex;
@@ -183,13 +209,15 @@ void loop() {
     for (uint8_t c=0; c<nchannels; c++)
       results_stdevs[counter][c] = stdev(c, nframes);
     counter++;
-    Serial.printf("  %s\n", fname);
     file.openWave(fname, aidata, 0);
     if ( file.isOpen() ) {
       file.writeData();
       file.closeWave();
-      blink.blink(1000, 500);
+      Serial.printf(" -> saved to %s\n", fname);
     }
+    else
+      Serial.println();
   }
+  while (1) {}; // wait for watchdog to restart
 }
  
