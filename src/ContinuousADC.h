@@ -173,6 +173,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const;
 
+  // Return in chan the name of a pin.
+  void channelStr(int8_t pin, char *chan) const;
+
   // Return in chans a string with the channels/pins sampled on ADC adc.
   void channels(uint8_t adc, char *chans) const;
 
@@ -207,8 +210,14 @@ class ContinuousADC : public DataBuffer, public Configurable {
   //   as possible to the selected resolution.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
+  // Return string describing a conversion speed.
+  const char *conversionSpeedStr(ADC_CONVERSION_SPEED speed) const;
+
   // Return string describing the selected conversion speed.
   const char *conversionSpeedStr() const;
+
+  // Return a short string describing a conversion speed.
+  const char *conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const;
 
   // Return a short string describing the selected conversion speed.
   const char *conversionSpeedShortStr() const;
@@ -229,8 +238,14 @@ class ContinuousADC : public DataBuffer, public Configurable {
   //   as possible to the selected resolution.
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
+  // Return string describing a sampling speed.
+  const char *samplingSpeedStr(ADC_SAMPLING_SPEED speed) const;
+  
   // Return string describing the selected sampling speed.
   const char *samplingSpeedStr() const;
+
+  // Return a short string describing the sampling speed.
+  const char *samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const;
 
   // Return a short string describing the selected sampling speed.
   const char *samplingSpeedShortStr() const;

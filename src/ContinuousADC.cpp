@@ -72,6 +72,11 @@ uint8_t ContinuousADC::nchannels() const {
 }
 
 
+void ContinuousADC::channelStr(int8_t pin, char *chan) const {
+  analogPin(pin, chan);
+}
+
+
 void ContinuousADC::channels(uint8_t adc, char *chans) const
 {
   bool first = true;
@@ -132,13 +137,18 @@ void ContinuousADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
 }
 
 
-const char *ContinuousADC::conversionSpeedStr() const {
-  return getConversionEnumStr(ConversionSpeed);
+const char *ContinuousADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) const {
+  return getConversionEnumStr(speed);
 }
 
 
-const char *ContinuousADC::conversionSpeedShortStr() const {
-  switch (ConversionSpeed) {
+const char *ContinuousADC::conversionSpeedStr() const {
+  return conversionSpeedStr(ConversionSpeed);
+}
+
+
+const char *ContinuousADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const {
+  switch (speed) {
 #if defined(ADC_TEENSY_4)
 #else
     case ADC_CONVERSION_SPEED::VERY_LOW_SPEED:
@@ -174,6 +184,11 @@ const char *ContinuousADC::conversionSpeedShortStr() const {
 #endif
   }
   return (const char *)"none";
+}
+
+
+const char *ContinuousADC::conversionSpeedShortStr() const {
+  return conversionSpeedShortStr(ConversionSpeed);
 }
 
 
@@ -221,13 +236,18 @@ void ContinuousADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
 }
 
 
-const char *ContinuousADC::samplingSpeedStr() const {
-  return getSamplingEnumStr(SamplingSpeed);
+const char *ContinuousADC::samplingSpeedStr(ADC_SAMPLING_SPEED speed) const {
+  return getSamplingEnumStr(speed);
 }
 
 
-const char *ContinuousADC::samplingSpeedShortStr() const {
-  switch (SamplingSpeed) {
+const char *ContinuousADC::samplingSpeedStr() const {
+  return samplingSpeedStr(SamplingSpeed);
+}
+
+
+const char *ContinuousADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const {
+  switch (speed) {
   case ADC_SAMPLING_SPEED::VERY_LOW_SPEED:
     return (const char *)"verylow";
   case ADC_SAMPLING_SPEED::LOW_SPEED:
@@ -248,6 +268,11 @@ const char *ContinuousADC::samplingSpeedShortStr() const {
 #endif
   }
   return (const char *)"NONE";
+}
+
+
+const char *ContinuousADC::samplingSpeedShortStr() const {
+  return samplingSpeedShortStr(SamplingSpeed);
 }
 
 
