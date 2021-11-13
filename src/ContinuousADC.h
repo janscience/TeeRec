@@ -101,73 +101,73 @@
   reduce noise. Noise also depends on the pin.
   This can be tested with the averaging example.
 
-  For 40kHz and 12bit we get for the standard deviations in 16bit
-  integers of two channels:
+  For 40kHz and 12bit we get for the standard deviations of the raw
+  integer readings of two channels:
 
   convers  sampling avrg   A2  A16
-  veryhigh veryhigh    1   27   41
-  veryhigh veryhigh    4   16   23
-  veryhigh veryhigh    8   14   18
-  veryhigh veryhigh   16   12   16
-  veryhigh veryhigh   32   12   15
-  veryhigh high        1   30   43
-  veryhigh high        4   13   17
-  veryhigh high        8    9   10
-  veryhigh high       16    9    9 **
-  veryhigh med         1   29   46
-  veryhigh med         4   16   19
-  veryhigh med         8   10   15
-  veryhigh med        16   10   12
-  veryhigh low         1   27   35
-  veryhigh low         4   12   14
-  veryhigh low         8   10   11
-  veryhigh low        16    8    7  ***
-  veryhigh verylow     1   34   40
-  veryhigh verylow     4   10   14
-  veryhigh verylow     8   10   12
-  veryhigh verylow    16   10   10
-  high     veryhigh    1   28   42
-  high     veryhigh    4   14   20
-  high     veryhigh    8   14   20
-  high     veryhigh   16   12   18
-  high     high        1   31   45
-  high     high        4   13   16
-  high     high        8   10   12
-  high     med         1   27   38
-  high     med         4   11   15
-  high     med         8    9   11 *
-  high     low         1   29   44
-  high     low         4   13   19
-  high     low         8   10   15
-  high     verylow     1   31   40
-  high     verylow     4   13   16
-  high     verylow     8   10   12
-  med      veryhigh    1   30   40
-  med      veryhigh    4   16   21
-  med      veryhigh    8   12   15
-  med      high        1   28   38
-  med      high        4   16   22
-  med      high        8   25   20
-  med      med         1   28   41
-  med      med         4   15   21
-  med      low         1   67   69
-  med      low         4   61   56
-  med      verylow     1   26   47
-  med      verylow     4   16   30
-  low      veryhigh    1   64   59
-  low      veryhigh    4   59   51
-  low      high        1   60   63
-  low      high        4   56   55
-  low      med         1   56   64
-  low      low         1   40   56
-  low      verylow     1   28   43
-  verylow  veryhigh    1   60   62
-  verylow  veryhigh    4   54   56
-  verylow  high        1   29   38
-  verylow  high        4   17   23
-  verylow  med         1   28   43
-  verylow  low         1   38   39
-  verylow  verylow     1   28   41
+  veryhigh veryhigh    1  1.8  2.5
+  veryhigh veryhigh    4  1.0  1.4
+  veryhigh veryhigh    8  0.9  1.0
+  veryhigh veryhigh   16  0.7  1.0
+  veryhigh veryhigh   32  0.6  0.9
+  veryhigh high        1  2.1  2.3
+  veryhigh high        4  0.8  1.0
+  veryhigh high        8  0.6  0.7 *
+  veryhigh high       16  0.5  0.5 **
+  veryhigh med         1  1.7  2.3
+  veryhigh med         4  0.8  0.9
+  veryhigh med         8  0.6  0.8
+  veryhigh med        16  0.6  0.6 *
+  veryhigh low         1  1.8  2.5
+  veryhigh low         4  0.7  1.0
+  veryhigh low         8  0.6  0.7 *
+  veryhigh low        16  0.6  0.6 *
+  veryhigh verylow     1  1.9  2.3
+  veryhigh verylow     4  0.7  0.8
+  veryhigh verylow     8  0.6  0.7
+  veryhigh verylow    16  0.7  0.8
+  high     veryhigh    1  1.7  2.4
+  high     veryhigh    4  0.8  1.1
+  high     veryhigh    8  0.7  1.0
+  high     veryhigh   16  0.7  1.0
+  high     high        1  1.7  2.3
+  high     high        4  0.8  0.9
+  high     high        8  0.7  0.7
+  high     med         1  1.9  2.3
+  high     med         4  0.8  0.9
+  high     med         8  0.6  0.7
+  high     low         1  1.7  2.2
+  high     low         4  0.8  0.9
+  high     low         8  0.6  0.8
+  high     verylow     1  1.7  2.3
+  high     verylow     4  0.9  1.0
+  high     verylow     8  0.6  0.7
+  med      veryhigh    1  1.8  2.4
+  med      veryhigh    4  0.9  1.1
+  med      veryhigh    8  2.6  2.5
+  med      high        1  1.8  2.2
+  med      high        4  1.0  1.3
+  med      high        8  0.8  1.0
+  med      med         1  3.4  2.5
+  med      med         4  1.0  1.5
+  med      low         1  1.7  2.3
+  med      low         4  0.8  1.0
+  med      verylow     1  2.8  3.5
+  med      verylow     4  2.7  3.1
+  low      veryhigh    1  3.2  3.8
+  low      veryhigh    4  2.9  3.3
+  low      high        1  1.8  2.6
+  low      high        4  1.2  1.8
+  low      med         1  1.7  2.5
+  low      low         1  1.8  2.4
+  low      verylow     1  1.6  2.4
+  verylow  veryhigh    1  1.7  2.5
+  verylow  veryhigh    4  1.1  1.9
+  verylow  high        1  1.7  2.2
+  verylow  high        4  1.0  1.3
+  verylow  med         1  3.8  4.2
+  verylow  low         1  2.6  3.1
+  verylow  verylow     1  1.8  2.2
 
   Output of `pinAssignment()`:
 

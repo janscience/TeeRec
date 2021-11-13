@@ -81,6 +81,7 @@ void setupADC() {
   aidata.setChannels(0, channels0);
   aidata.setChannels(1, channels1);
   aidata.setRate(samplingRate);
+  aidata.unsetScaling();
   aidata.setResolution(bits);
   aidata.setConversionSpeed(conversionSpeeds[convindex]);
   aidata.setSamplingSpeed(samplingSpeeds[samplindex]);
@@ -109,7 +110,7 @@ double stdev(uint8_t c, size_t n) {
 
 void report() {
   Serial.println();
-  Serial.println("Standard deviations in 16bit integers for each channel:");
+  Serial.println("Standard deviations in raw integers for each channel:");
   Serial.println();
   Serial.printf("convers  sampling avrg");
   uint8_t nch = nchannels;
@@ -132,7 +133,7 @@ void report() {
     Serial.printf(" %-8s", aidata.samplingSpeedShortStr(samplingSpeeds[results_settings[j][1]]));
     Serial.printf(" %4i", results_settings[j][2]);
     for (uint8_t c=0; c<nchannels; c++)
-      Serial.printf(" %4.0f", results_stdevs[j][c]);
+      Serial.printf(" %4.1f", results_stdevs[j][c]);
     Serial.println();
   }
 }
