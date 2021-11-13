@@ -388,11 +388,11 @@ size_t SDWriter::writeData() {
   size_t missed = overrun();
   if (missed > 0)
     Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
-  size_t index = Producer->index();
-  if (index == 0 || Index == index)
+  if (available() == 0)
     return 0;
+  size_t index = Producer->index();
   size_t nwrite = 0;
-  if (Index > index) {
+  if (Index >= index) {
     nwrite = Data->nbuffer() - Index;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
