@@ -140,6 +140,9 @@ class SDWriter : public DataWorker {
   // Call it, whenever the filename changes, for example, because of a new date.
   void resetFileCounter();
 
+  // Set name of software to be saved in wave header by openWave().
+  void setSoftware(const char *software);
+
   // Set write interval depending on adc settings.
   // Call this *after* setting up ContinusADC in setup().
   void setWriteInterval(const ContinuousADC &adc);
@@ -169,7 +172,7 @@ class SDWriter : public DataWorker {
   // If no file extension is provided, ".wav" is added.
   // Takes about <=25ms.
   void openWave(const char *fname, const ContinuousADC &adc, int32_t samples=-1,
-                char *datetime=0);
+                const char *datetime=0);
 
   // Update wave header with proper file size and close file.
   // Takes about <=8ms.

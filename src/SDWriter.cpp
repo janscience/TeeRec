@@ -278,6 +278,11 @@ void SDWriter::resetFileCounter() {
 }
 
 
+void SDWriter::setSoftware(const char *software) {
+  Wave.setSoftware(software);
+}
+
+ 
 void SDWriter::setWriteInterval(const ContinuousADC &adc) {
   WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
 }
@@ -327,8 +332,8 @@ FsFile &SDWriter::file() {
 }
 
 
-void SDWriter::openWave(const char *fname, const ContinuousADC &adc, int32_t samples,
-	 	        char *datetime) {
+void SDWriter::openWave(const char *fname, const ContinuousADC &adc,
+			int32_t samples, const char *datetime) {
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
