@@ -66,17 +66,24 @@ size_t DataWorker::available() const {
   if (Producer == 0 && Data == 0)
     return 0;
   size_t index = 0;
+  size_t cycle = 0;
   unsigned char sreg_backup = SREG;
   cli();
-  if (Producer != 0)
+  if (Producer != 0) {
     index = Producer->Index;
-  else
+    cycle = Producer->Cycle;
+  }
+  else {
     index = Data->Index;
+    cycle = Data->Cycle;
+  }
   SREG = sreg_backup;
-  if (Index <= index)
+  if (Index < index)
     return index - Index;
-  else
+  else if (Cycle < cycle)
     return Data->nbuffer() - Index + index;
+  else
+    return 0;
 }
 
 
