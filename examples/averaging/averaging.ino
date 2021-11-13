@@ -4,14 +4,25 @@
  * First, connect the analog input channels to a fixed voltage
  * or short circuit them in your actual hardware configuration.
  * 
- * Optionally, insert an SD card.
+ * Connect the Teensy via USB to your computer and optionally insert an SD card.
  * 
- * Then run this sketch until it tells you it finished.
+ * Wait some time to the let the hardware settle in.
  * 
- * The sketch reports for each setting and channel the standard deviation
- * of the recorded raw integer data. The lower, the better. Idealy,
- * standard deviation sshould be smaller than one. Choose from the table
+ * Modify resolution, sampling rate and channel configuration, as well as
+ * conversion and sampling speeds to check for of this sketch according to
+ * your requirements.
+ * 
+ * Open the serial monitor.
+ * 
+ * Then run this sketch until it tells you it finished (takes a while).
+ * 
+ * The sketch reports the standard deviation of the recorded raw integer
+ * data for each setting and channel. The lower, the better. Ideally,
+ * standard deviation should be smaller than one. Choose from the table
  * the best settings und use them for your application.
+ * 
+ * Beware, the estimates of the standard deviations vary. Run the test
+ * a few times to get an idea of the variability.
  * 
  * If an SD card was inserted, the sketch records for each combination of
  * averaging, conversion and sampling speed one data buffer to files,
@@ -27,19 +38,21 @@
 // Install Watchdog library from Peter Polidoro via Library Manager.
 // https://github.com/janelia-arduino/Watchdog
 
-int bits = 12;                   // resolution: 10bit 12bit, or 16bit
-uint32_t samplingRate = 40000;   // samples per second and channel in Hertz
-const uint8_t nchannels = 2;     // always set this fitting to channels0 and channels1
-int8_t channels0 [] =  {A2, -1, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
-int8_t channels1 [] =  {A16, -1, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
+bool markdown = true;   // report as markdown table or plain text
 
-const uint8_t maxConversionSpeeds = 5;
+int bits = 12;                   // resolution: 10bit 12bit, or 16bit
+uint32_t samplingRate = 20000;   // samples per second and channel in Hertz
+const uint8_t nchannels = 8;     // always set this fitting to channels0 and channels1
+int8_t channels0 [] =  {A4, A5, A6, A7, -1, A0, A1, A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
+int8_t channels1 [] =  {A2, A3, A20, A22, -1, A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
+
+const uint8_t maxConversionSpeeds = 3;
 ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
   ADC_CONVERSION_SPEED::VERY_HIGH_SPEED,
   ADC_CONVERSION_SPEED::HIGH_SPEED,
   ADC_CONVERSION_SPEED::MED_SPEED,
-  ADC_CONVERSION_SPEED::LOW_SPEED,
-  ADC_CONVERSION_SPEED::VERY_LOW_SPEED
+  //ADC_CONVERSION_SPEED::LOW_SPEED,
+  //ADC_CONVERSION_SPEED::VERY_LOW_SPEED
 };
 
 /*
@@ -52,13 +65,13 @@ ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
 };
 */
 
-const uint8_t maxSamplingSpeeds = 5;
+const uint8_t maxSamplingSpeeds = 3;
 ADC_SAMPLING_SPEED samplingSpeeds[maxSamplingSpeeds] = {
   ADC_SAMPLING_SPEED::VERY_HIGH_SPEED,
   ADC_SAMPLING_SPEED::HIGH_SPEED,
   ADC_SAMPLING_SPEED::MED_SPEED,
-  ADC_SAMPLING_SPEED::LOW_SPEED,
-  ADC_SAMPLING_SPEED::VERY_LOW_SPEED
+  //ADC_SAMPLING_SPEED::LOW_SPEED,
+  //ADC_SAMPLING_SPEED::VERY_LOW_SPEED
 };
 
 const uint8_t maxAverages = 5;
@@ -93,52 +106,70 @@ void setupADC() {
 }
 
 
-// standard deviation over n samples from channel c
-double stdev(uint8_t c, size_t n) {
+// standard deviation over first m samples of buffer of size n from channel c
+double stdev(uint8_t c, size_t m, size_t n) {
   sample_t buffer[n];
   aidata.getData(c, 0, buffer, n);
-  double m = 0.0;
-  for (size_t k=0; k<n; k++)
-    m += (double(buffer[k]) - m ) / double(k+1);
+  double a = 0.0;
+  for (size_t k=0; k<m; k++)
+    a += (double(buffer[k]) - a ) / double(k+1);
   double v = 0.0;
   double ep = 0.0;
-  for (size_t k=0; k<n; k++) {
-    double s = double(buffer[k]) - m;
+  for (size_t k=0; k<m; k++) {
+    double s = double(buffer[k]) - a;
     v += s*s;
     ep += s;
   }
-  v = (v - ep*ep/n)/(n-1);
+  v = (v - ep*ep/m)/(m-1);
   return sqrt(v);
 }
 
 
-void report() {
+void report(bool markdown) {
   Serial.println();
   Serial.println("Standard deviations in raw integers for each channel:");
   Serial.println();
-  Serial.printf("convers  sampling avrg");
   uint8_t nch = nchannels;
   if (channels0[0] >= 0 && channels1[0] >= 0)
     nch /= 2;
+  char seps[4] = " ";
+  char starts[4] = "";
+  char ends[4] = "\n";
+  if (markdown) {
+    strcpy(seps, " | ");
+    strcpy(starts, "| ");
+    strcpy(ends, " |\n");
+  }
+  Serial.printf("%sconvers %ssampling%savrg", starts, seps, seps);
   for (uint8_t c=0; c<nch; c++) {
     char cs[4];
     if (channels0[0] >= 0 && channels0[c] >= 0) {
       aidata.channelStr(channels0[c], cs);
-      Serial.printf(" %4s", cs);
+      Serial.printf("%s%4s", seps, cs);
     }
     if (channels1[0] >= 0 && channels1[c] >= 0) {
       aidata.channelStr(channels1[c], cs);
-      Serial.printf(" %4s", cs);
+      Serial.printf("%s%4s", seps, cs);
     }
   }
-  Serial.println();
+  Serial.print(ends);
+  if (markdown) {
+    Serial.printf("%s:-------%s:-------%s---:", starts, seps, seps);
+    for (uint8_t c=0; c<nch; c++) {
+      if (channels0[0] >= 0 && channels0[c] >= 0)
+        Serial.printf("%s---:", seps);
+    if (channels1[0] >= 0 && channels1[c] >= 0)
+        Serial.printf("%s---:", seps);
+    }
+    Serial.print(ends);
+  }
   for (size_t j=0; j<counter; j++) {
-    Serial.printf("%-8s", aidata.conversionSpeedShortStr(conversionSpeeds[results_settings[j][0]]));
-    Serial.printf(" %-8s", aidata.samplingSpeedShortStr(samplingSpeeds[results_settings[j][1]]));
-    Serial.printf(" %4i", results_settings[j][2]);
+    Serial.printf("%s%-8s", starts, aidata.conversionSpeedShortStr(conversionSpeeds[results_settings[j][0]]));
+    Serial.printf("%s%-8s", seps, aidata.samplingSpeedShortStr(samplingSpeeds[results_settings[j][1]]));
+    Serial.printf("%s%4i", seps, results_settings[j][2]);
     for (uint8_t c=0; c<nchannels; c++)
-      Serial.printf(" %4.1f", results_stdevs[j][c]);
-    Serial.println();
+      Serial.printf("%s%4.1f", seps, results_stdevs[j][c]);
+    Serial.print(ends);
   }
 }
 
@@ -150,13 +181,15 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   arm_dcache_flush(&convindex, sizeof(convindex));
   arm_dcache_flush(&samplindex, sizeof(samplindex));
-  arm_dcache_flush(&results_settings, sizeof(results_settings));
-  arm_dcache_flush(&results_stdevs, sizeof(results_stdevs));
+  arm_dcache_flush(results_settings, sizeof(results_settings));
+  arm_dcache_flush(results_stdevs, sizeof(results_stdevs));
   arm_dcache_flush(&counter, sizeof(counter));
   if (!watchdog.tripped()) {
     convindex = 0;
     samplindex = 0;
     counter = 0;
+    memset(results_settings, 0, sizeof(results_settings));
+    memset(results_stdevs, 0, sizeof(results_stdevs));
   }
   else {
     samplindex++;
@@ -165,7 +198,7 @@ void setup() {
       convindex++;
       if (convindex >= maxConversionSpeeds) {
         Serial.println(">>> test finished <<<");
-        report();
+        report(markdown);
         while (1) {
           watchdog.reset();
           delay(1000);
@@ -176,7 +209,8 @@ void setup() {
   setupADC();
   sdcard.begin();
   file.dataDir("tests");
-  watchdog.enable(Watchdog::TIMEOUT_2S);
+  delay(4000);
+  watchdog.enable(Watchdog::TIMEOUT_4S);
   delay(500);
 }
 
@@ -199,26 +233,31 @@ void loop() {
       buffertime = 1.0;
     // record data without SD card writing (no artifacts):
     aidata.start();
-    delay(1000*buffertime);
+    delay(2000*buffertime);
     aidata.stop();
-    file.startWrite(aidata.nbuffer());
+    // We run it for 2 buffers,
+    // but analyse only the first half of the second buffer.
+    // This excludes startup and shutdown noise...
+    file.startWrite(aidata.nbuffer()/2);
     delay(50);
     float sampledtime = aidata.sampledTime();
     Serial.printf("  avrg=%2d: %5.3fsec", averages_list[k], sampledtime);
     if (sampledtime < 0.99*buffertime)
       while (1) {}; // wait for watchdog to restart
-    size_t nframes = file.available()/aidata.nchannels();
+    size_t nframes = aidata.nbuffer()/aidata.nchannels();
     results_settings[counter][0] = convindex;
     results_settings[counter][1] = samplindex;
     results_settings[counter][2] = averages_list[k];
     for (uint8_t c=0; c<nchannels; c++)
-      results_stdevs[counter][c] = stdev(c, nframes);
+      results_stdevs[counter][c] = stdev(c, nframes/2, nframes);
     counter++;
     file.openWave(fname, aidata, 0);
     if ( file.isOpen() ) {
       file.writeData();
       file.closeWave();
       Serial.printf(" -> saved to %s\n", fname);
+      watchdog.reset();
+      delay(1000);
     }
     else
       Serial.println();
