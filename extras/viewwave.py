@@ -33,7 +33,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path, toffs, tmax, step, save):
+def plot_traces(path, toffs, tmax, step, autoy, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
     if data is None:
@@ -52,7 +52,8 @@ def plot_traces(path, toffs, tmax, step, save):
         ax.plot(1000*time[idx0:dtidx], 1.0*data[idx0:dtidx,c]+step*c, '-',
                 label='%d' % c)
     maxy = 40000 + data.shape[1]*step
-    ax.set_ylim(-40000, maxy)
+    if not autoy:
+        ax.set_ylim(-40000, maxy)
     ax.set_xlabel('Time [ms]')
     ax.set_ylabel('Amplitude [integer]')
     if data.shape[1] > 1:
@@ -69,6 +70,7 @@ if __name__ == '__main__':
     step = 0
     tmax = 2
     toffs = 0
+    autoy = False
     for path in sys.argv[1:]:
         if tmax is None:
             tmax = float(path)
@@ -78,6 +80,9 @@ if __name__ == '__main__':
             continue
         if step is None:
             step = float(path)
+            continue
+        if path == '-a':
+            autoy = True
             continue
         if path == '-s':
             save = True
@@ -91,13 +96,14 @@ if __name__ == '__main__':
         if path == '-S':
             step = None
             continue
-        plot_traces(path, toffs, tmax, step, save)
+        plot_traces(path, toffs, tmax, step, autoy, save)
     if len(sys.argv) <= 1:
         print("Usage:")
-        print("viewwave [-t TMAX] [-o TOFFS] [-S STEP] [-s] FILE")
+        print("viewwave [-t TMAX] [-o TOFFS] [-S STEP] [-a] [-s] FILE")
         print()
         print("-t TMAX : maximum time to show. Defaults to 2 seconds.")
         print("-o TOFFS: show from this time on. Defaults to beginning of recording.")
         print("-S STEP : shift each channel by STEP upwards.")
+        print("-a      : auto scale y-axis.")
         print("-s      : save plot to png file.")
         print("FILE    : wave file with data to display.")
