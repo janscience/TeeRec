@@ -127,6 +127,7 @@ protected:
   FormatChunk Format;
   ListChunk Info;
   InfoChunk Bits;
+  InfoChunk DataBits;
   InfoChunk Channels;
   InfoChunk Averaging;
   InfoChunk Conversion;

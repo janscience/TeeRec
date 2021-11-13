@@ -7,12 +7,23 @@ volatile sample_t __attribute__((aligned(32))) DataBuffer::Buffer[NBuffer];
 
 DataBuffer::DataBuffer()
   : DataWorker() {
+  DataBits = 16;
   Rate = 0;
   NChannels = 0;
   NConsumers = 0;
   memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
   Data = this;
   Producer = 0;
+}
+
+
+void DataBuffer::setRate(uint32_t rate) {
+  Rate = rate;
+}
+
+
+void DataBuffer::setDataResolution(uint8_t bits) {
+  DataBits = bits;
 }
 
 

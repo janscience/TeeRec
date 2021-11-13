@@ -7,6 +7,7 @@ WaveHeader::WaveHeader() :
   Format(),
   Info("LIST", "INFO"),
   Bits("BITS", "16"),
+  DataBits("DBTS", "16"),
   Channels("PINS", ""),
   Averaging("AVRG", ""),
   Conversion("CNVS", ""),
@@ -72,7 +73,7 @@ void WaveHeader::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
   Format.sampleRate = samplerate;
   Format.byteRate = samplerate * nchannels * nbytes;
   Format.blockAlign = nchannels * nbytes;
-  Format.bitsPerSample = resolution;
+  Format.bitsPerSample = nbytes*8;
 }
 
 
@@ -120,6 +121,9 @@ void WaveHeader::setFormat(uint8_t nchannels, uint32_t samplerate,
   char bs[4];
   sprintf(bs, "%u", resolution);
   Bits.set(bs);
+  sprintf(bs, "%u", dataresolution);
+  DataBits.set(bs);
+  DataBits.Use = (dataresolution != Format.Format.bitsPerSample);
 }
 
 
@@ -177,13 +181,15 @@ void WaveHeader::clearSoftware() {
 
 void WaveHeader::assemble() {
   // riff chunks:
-  const int maxchunks = 14;
+  const int maxchunks = 15;
   int nchunks = 0;
   Chunk *chunks[maxchunks];
   chunks[nchunks++] = &Riff;
   chunks[nchunks++] = &Format;
   chunks[nchunks++] = &Info;
   chunks[nchunks++] = &Bits;
+  if (DataBits.Use)
+    chunks[nchunks++] = &DataBits;
   if (Channels.Use)
     chunks[nchunks++] = &Channels;
   if (Averaging.Use)
@@ -236,4 +242,3 @@ void WaveHeader::assemble() {
   idx += infosize;
   memcpy(&Buffer[idx], Data.Buffer, Data.NBuffer);
 }
-

@@ -27,6 +27,8 @@ ContinuousADC::ContinuousADC() :
 
   Bits = DataBits;
   DataShift = 0;
+  DataOffs = 0;
+  DataScaling = true;
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
   SamplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
@@ -107,13 +109,39 @@ void ContinuousADC::channels(char *chans) const
 
 
 void ContinuousADC::setRate(uint32_t rate) {
-  Rate = rate;
+  DataBuffer::setRate(rate);
+}
+
+
+void ContinuousADC::setScaling(bool scale) {
+  DataScaling = scale;
+}
+
+
+void ContinuousADC::unsetScaling() {
+  DataScaling = false;
 }
 
 
 void ContinuousADC::setResolution(uint8_t bits) {
   Bits = bits;
-  DataShift = DataBits - Bits;
+  ADConv.adc[0]->setResolution(Bits);
+  Bits = ADConv.adc[0]->getResolution();
+  setDataResolution();
+}
+
+
+void ContinuousADC::setDataResolution() {
+  if (DataScaling) {
+    DataBits = 16;
+    DataShift = DataBits - Bits;
+    DataOffs = 0x8000;
+  }
+  else {
+    DataBits = Bits;
+    DataShift = 0;
+    DataOffs = 0xFFFF << (DataBits - 1);
+  }
 }
 
 
@@ -544,7 +572,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setReference(Reference);
   ADConv.adc[adc]->setResolution(Bits);
   Bits = ADConv.adc[adc]->getResolution();
-  DataShift = DataBits - Bits;
+  setDataResolution();
   ADConv.adc[adc]->setAveraging(Averaging);
   ADConv.adc[adc]->setConversionSpeed(ConversionSpeed);  
   ADConv.adc[adc]->setSamplingSpeed(SamplingSpeed);
@@ -607,7 +635,7 @@ void ContinuousADC::isr(uint8_t adc) {
   for (size_t k=0; k<MajorSize; k++) {
     uint16_t val = ADCBuffer[adc][dmai++];
     val <<= DataShift;  // make 16 bit
-    val += 0x8000;      // convert to signed int
+    val += DataOffs;      // convert to signed int
     Buffer[DataHead[adc]] = val;
     DataHead[adc] += step;
   }

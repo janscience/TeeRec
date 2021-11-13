@@ -27,11 +27,17 @@ public:
   // Return the buffer.
   volatile sample_t *buffer() const { return Buffer; };
 
-  // Return resolution of data buffer in bits per sample (always 16 bits).
+  // Return used resolution of data buffer in bits per sample (max 16 bits).
   uint8_t dataResolution() const { return DataBits; };
+
+  // Set used resolution of data buffer in bits per sample (max 16 bits).
+  void setDataResolution(uint8_t bits);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };
+  
+  // Set the sampling rate per channel in Hertz.
+  void setRate(uint32_t rate);
 
   // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const { return NChannels; };
@@ -87,7 +93,7 @@ protected:
   volatile static sample_t __attribute__((aligned(32))) Buffer[NBuffer]; // the one and only buffer
   uint32_t Rate;             // sampling rate per channel
   uint8_t NChannels;         // number of channels multiplexed into the buffer
-  static const uint8_t DataBits = 16;
+  uint8_t DataBits;
 };
 
 

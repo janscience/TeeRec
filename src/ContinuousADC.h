@@ -253,6 +253,15 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Return in chans a string with the channels/pins sampled from both ADCs
   // in the order they are multiplexed into the buffer.
   void channels(char *chans) const;
+
+  // If set true, ADC data are scaled to 16bit and are converted to
+  // signed integers. Call this *before* setResolution().
+  void setScaling(bool scale=true);
+  
+  // Do not scale ADC data to 16bit, keep the resolution requested by
+  // setResoution(). Nevertheless convert ADC data to signed
+  // integers. Call this *before* setResolution().
+  void unsetScaling();
   
   // Set the sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
@@ -397,6 +406,8 @@ class ContinuousADC : public DataBuffer, public Configurable {
   DataBuffer Data;    // large buffer holding converted and multiplexed data from both ADCs
   size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
   uint8_t DataShift;  // number of bits ADC data need to be shifted to make them 16 bit.
+  uint16_t DataOffs;  // offset to be added to ADC data to convert them to signed integers.
+  bool DataScaling;   // scale ADC data to 16bit.
   
   void setupChannels(uint8_t adc);
   void setupADC(uint8_t adc);
@@ -406,6 +417,14 @@ class ContinuousADC : public DataBuffer, public Configurable {
 #else
   #error "Need to implement startTimer() for Teensy 4 for both ADCs"
 #endif
+
+
+private:
+  
+  // Set used resolution of data buffer in bits per sample based on
+  // requested resolution and scaling.
+  void setDataResolution();
+
 };
 
 
