@@ -39,6 +39,8 @@ class Waveform {
   void setup(float rate);
 
   // Specify amplitudes and phases of harmonics relative to fundamental.
+  // Amplituds are relative to the amplitude of the fundamental frequency.
+  // Phases are in multiples of 2 pi.
   // Both arrays are terminated by negative numbers.
   void setHarmonics(float *ampls, float *phases);
 

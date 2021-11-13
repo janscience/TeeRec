@@ -106,7 +106,7 @@ void Waveform::setHarmonics(float *ampls, float *phases) {
 	 ampls[NHarmonics] > 0.0 && phases[NHarmonics] >= 0.0;
        NHarmonics++) {
     Ampls[NHarmonics] = ampls[NHarmonics];
-    Phases[NHarmonics] = phases[NHarmonics];
+    Phases[NHarmonics] = TWO_PI*phases[NHarmonics];
   }
 }
 
@@ -138,8 +138,10 @@ void Waveform::start(int pin, float freq, float ampl) {
   Pin = pin;
   pinMode(Pin, OUTPUT);
   NData = round(Rate/freq);
-  if ( NData < 4 )
+  if ( NData < 4 ) {
+    Serial.println("ERROR in Waveform::start(): requested fundamental frequency to high.");
     return;
+  }
   freq = Rate/NData;
   if ( Data != NULL )
     stop();
@@ -154,7 +156,7 @@ void Waveform::start(int pin, float freq, float ampl) {
     float x = sin(TWO_PI*k/NData);
     for (size_t j=0; j<NHarmonics; j++)
       x += Ampls[j]*sin(TWO_PI*k*(j+2)/NData + Phases[j]);
-    Data[k] = int16_t((MaxValue-1)*ampl*x) + MaxValue;
+    Data[k] = uint16_t((MaxValue-1)*ampl*x + MaxValue);
   }
   Index = 0;
   if ( !Timer.begin(write, 1.0e6/Rate) )
