@@ -2,18 +2,22 @@
  * for a given sampling rate, resolution, and channel configuration.
  * 
  * First, connect the analog input channels to a fixed voltage
- * or short circuit them in your final hardware configuration.
+ * or short circuit them in your actual hardware configuration.
  * 
- * Insert an SD card.
+ * Optionally, insert an SD card.
  * 
  * Then run this sketch until it tells you it finished.
- * The sketch records for each combination of averaging, conversion and
- * sampling speed one data buffer to files, stored in the tests/ directory
- * of the SD card.
  * 
- * Finally, run the extras/noise.py script on these files to evaluate the
- * noise levels. Choose the setting with the lowest noise level
- * for your application.
+ * The sketch reports for each setting and channel the standard deviation
+ * of the recorded raw integer data. The lower, the better. Idealy,
+ * standard deviation sshould be smaller than one. Choose from the table
+ * the best settings und use them for your application.
+ * 
+ * If an SD card was inserted, the sketch records for each combination of
+ * averaging, conversion and sampling speed one data buffer to files,
+ * stored in the tests/ directory of the SD card. You may run the
+ * extras/noise.py script on these files to display histograms and to
+ * evaluate the noise levels in more detail.
  */ 
 
 #include <ContinuousADC.h>
@@ -24,7 +28,7 @@
 // https://github.com/janelia-arduino/Watchdog
 
 int bits = 12;                   // resolution: 10bit 12bit, or 16bit
-uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
+uint32_t samplingRate = 40000;   // samples per second and channel in Hertz
 const uint8_t nchannels = 2;     // always set this fitting to channels0 and channels1
 int8_t channels0 [] =  {A2, -1, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
 int8_t channels1 [] =  {A16, -1, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
