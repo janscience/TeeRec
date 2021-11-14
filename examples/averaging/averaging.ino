@@ -41,18 +41,17 @@
 bool markdown = true;   // report as markdown table or plain text
 
 int bits = 12;                   // resolution: 10bit 12bit, or 16bit
-uint32_t samplingRate = 20000;   // samples per second and channel in Hertz
-const uint8_t nchannels = 8;     // always set this fitting to channels0 and channels1
-int8_t channels0 [] =  {A4, A5, A6, A7, -1, A0, A1, A2, A3, A4, A5, -1, A6, A7, A8, A9};      // input pins for ADC0
-int8_t channels1 [] =  {A2, A3, A20, A22, -1, A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
+uint32_t samplingRate = 40000;   // samples per second and channel in Hertz
+int8_t channels0 [] =  {A0, A1, A2, A3, A4, -1, A5, A6, A7, A8, A9};  // input pins for ADC0
+int8_t channels1 [] =  {A16, A17, A18, A19, -1, A20, A22, A10, A11};  // input pins for ADC1
 
-const uint8_t maxConversionSpeeds = 3;
+const uint8_t maxConversionSpeeds = 5;
 ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
   ADC_CONVERSION_SPEED::VERY_HIGH_SPEED,
   ADC_CONVERSION_SPEED::HIGH_SPEED,
   ADC_CONVERSION_SPEED::MED_SPEED,
-  //ADC_CONVERSION_SPEED::LOW_SPEED,
-  //ADC_CONVERSION_SPEED::VERY_LOW_SPEED
+  ADC_CONVERSION_SPEED::LOW_SPEED,
+  ADC_CONVERSION_SPEED::VERY_LOW_SPEED
 };
 
 /*
@@ -65,24 +64,24 @@ ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
 };
 */
 
-const uint8_t maxSamplingSpeeds = 3;
+const uint8_t maxSamplingSpeeds = 5;
 ADC_SAMPLING_SPEED samplingSpeeds[maxSamplingSpeeds] = {
   ADC_SAMPLING_SPEED::VERY_HIGH_SPEED,
   ADC_SAMPLING_SPEED::HIGH_SPEED,
   ADC_SAMPLING_SPEED::MED_SPEED,
-  //ADC_SAMPLING_SPEED::LOW_SPEED,
-  //ADC_SAMPLING_SPEED::VERY_LOW_SPEED
+  ADC_SAMPLING_SPEED::LOW_SPEED,
+  ADC_SAMPLING_SPEED::VERY_LOW_SPEED
 };
 
 const uint8_t maxAverages = 5;
 uint8_t averages_list[maxAverages] = {1, 4, 8, 16, 32};
 
-
+uint8_t nchannels;
 DMAMEM uint8_t convindex;
 DMAMEM uint8_t samplindex;
 
 DMAMEM uint8_t results_settings[maxConversionSpeeds*maxSamplingSpeeds*maxAverages][3];
-DMAMEM double results_stdevs[maxConversionSpeeds*maxSamplingSpeeds*maxAverages][nchannels];
+DMAMEM double results_stdevs[maxConversionSpeeds*maxSamplingSpeeds*maxAverages][32];
 DMAMEM size_t counter;
 
 // ------------------------------------------------------------------------------------------
@@ -184,6 +183,19 @@ void setup() {
   arm_dcache_flush(results_settings, sizeof(results_settings));
   arm_dcache_flush(results_stdevs, sizeof(results_stdevs));
   arm_dcache_flush(&counter, sizeof(counter));
+  nchannels = 0;
+  for (uint8_t k=0; k<16; k++) {
+    if (channels0[k] < 0)
+      break;
+    else
+      nchannels++;
+  }
+  for (uint8_t k=0; k<16; k++) {
+    if (channels1[k] < 0)
+      break;
+    else
+      nchannels++;
+  }
   if (!watchdog.tripped()) {
     convindex = 0;
     samplindex = 0;
