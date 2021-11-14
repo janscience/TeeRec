@@ -46,9 +46,9 @@ def test_continuity(pathes):
         print(path)
         n += 1
         for c in range(nchannels):
-            nup = np.sum(data[:,c] > 1024*16)
-            ndown = np.sum(data[:,c] < -1024*16)
-            if nup + ndown < 9*len(data)/10 or min(nup, ndown) < len(data)/10:
+            nup = np.sum(data[:,c] > 1024*10)
+            ndown = np.sum(data[:,c] < -1024*10)
+            if nup + ndown < len(data)/2 or min(nup, ndown) < len(data)/10:
                 continue
             thresh = 0
             up = np.nonzero((data[1:,c]>thresh) & (data[:-1,c]<=thresh))[0]

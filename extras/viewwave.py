@@ -33,7 +33,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path, toffs, tmax, step, autoy, save):
+def plot_traces(path, channel, toffs, tmax, step, autoy, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
     if data is None:
@@ -49,8 +49,9 @@ def plot_traces(path, toffs, tmax, step, autoy, save):
     dtidx = int((toffs+dtmax)*rate)
     idx0 = int(toffs*rate)
     for c in range(data.shape[1]):
-        ax.plot(1000*time[idx0:dtidx], 1.0*data[idx0:dtidx,c]+step*c, '-',
-                label='%d' % c)
+        if channel < 0 or c == channel:
+            ax.plot(1000*time[idx0:dtidx], 1.0*data[idx0:dtidx,c]+step*c, '-',
+                    label='%d' % c)
     maxy = 40000 + data.shape[1]*step
     if not autoy:
         ax.set_ylim(-40000, maxy)
@@ -66,12 +67,16 @@ def plot_traces(path, toffs, tmax, step, autoy, save):
 
     
 if __name__ == '__main__':
-    save = False
-    step = 0
-    tmax = 2
+    channel = -1
     toffs = 0
+    tmax = 2
+    step = 0
     autoy = False
+    save = False
     for path in sys.argv[1:]:
+        if channel is None:
+            channel = int(path)
+            continue
         if tmax is None:
             tmax = float(path)
             continue
@@ -81,29 +86,33 @@ if __name__ == '__main__':
         if step is None:
             step = float(path)
             continue
+        if path == '-c':
+            channel = None
+            continue
+        if path == '-o':
+            toffs = None
+            continue
+        if path == '-t':
+            tmax = None
+            continue
+        if path == '-S':
+            step = None
+            continue
         if path == '-a':
             autoy = True
             continue
         if path == '-s':
             save = True
             continue
-        if path == '-t':
-            tmax = None
-            continue
-        if path == '-o':
-            toffs = None
-            continue
-        if path == '-S':
-            step = None
-            continue
-        plot_traces(path, toffs, tmax, step, autoy, save)
+        plot_traces(path, channel, toffs, tmax, step, autoy, save)
     if len(sys.argv) <= 1:
         print("Usage:")
-        print("viewwave [-t TMAX] [-o TOFFS] [-S STEP] [-a] [-s] FILE")
+        print("viewwave [-c CHANNEL] [-t TMAX] [-o TOFFS] [-S STEP] [-a] [-s] FILE")
         print()
-        print("-t TMAX : maximum time to show. Defaults to 2 seconds.")
-        print("-o TOFFS: show from this time on. Defaults to beginning of recording.")
-        print("-S STEP : shift each channel by STEP upwards.")
-        print("-a      : auto scale y-axis.")
-        print("-s      : save plot to png file.")
-        print("FILE    : wave file with data to display.")
+        print("-c CHANNEL: show trace of channel CHANNEL only.")
+        print("-t TMAX   : maximum time to show. Defaults to 2 seconds.")
+        print("-o TOFFS  : show from this time on. Defaults to beginning of recording.")
+        print("-S STEP   : shift each channel by STEP upwards.")
+        print("-a        : auto scale y-axis.")
+        print("-s        : save plot to png file.")
+        print("FILE      : wave file with data to display.")
