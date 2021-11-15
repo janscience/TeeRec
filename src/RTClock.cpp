@@ -8,11 +8,11 @@ time_t getTeensy3Time() {
 
 
 RTClock::RTClock() {
-#ifdef DS1307RTC_h
-  setSyncProvider(RTC.get);
-#else
+  //#ifdef DS1307RTC_h
+  //  setSyncProvider(RTC.get);
+  //#else
   setSyncProvider(getTeensy3Time);
-#endif
+  //#endif
 }
 
 

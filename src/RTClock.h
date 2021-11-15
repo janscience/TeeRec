@@ -6,8 +6,9 @@
 
   By default the Teensy on-board real-time clock is used.
 
-  If you want to use the DS1307RTC clock, then simply include
-  DS1307RTC.h before using RTClock.
+  If you want to use the DS1307RTC clock, then include
+  DS1307RTC.h and call setSyncProvider(RTC.get) after
+  instantiating RTClock.
 */
 
 #ifndef RTClock_h
