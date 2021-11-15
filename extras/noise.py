@@ -2,6 +2,7 @@ import os
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
 import wave
 
 
@@ -33,7 +34,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_hist(path, subtract_mean=True, plot=True, save=False):
+def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     if data is None:
@@ -41,53 +42,72 @@ def plot_hist(path, subtract_mean=True, plot=True, save=False):
         return
     nchannels = data.shape[1]
     basename = os.path.basename(path)
+    parts = basename.split('-')
+    rate = 1000*float(parts[1][:3])
+    bits = int(parts[2][:2])
+    convs = parts[3][4:]
+    sampls = parts[4][5:]
+    avrgs = int(parts[5][4:6])
+    if header:
+        print(f'rate bits convers  sampling avrg', end='')
+        for c in range(nchannels):
+            print(f' c{c:<3d}', end='')
+        print()
+    print(f'{0.001*rate:4.0f} {bits:4d} {convs:8s} {sampls:8s} {avrgs:4d}', end='')
     for c in range(nchannels):
-        m = int(np.mean(data[:,c]))
-        s = int(np.std(data[:,c]))
-        print('%s\t%2d\t%5d\t%5d' % (basename, c, m, s))
+        m = np.mean(data[:,c])
+        s = np.std(data[:,c])
+        print(f' {s:4.1f}', end='')
+    print()
     if not plot:
         return
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     abins = np.arange(-2**15, 2**15+1, 1)
     if nchannels > 1:
-        fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+        fig, axs = plt.subplots(2, nchannels//2, sharex=True, sharey=True)
         axs = axs.ravel()
     else:
         fig, ax = plt.subplots()
         axs = [ax]
-    fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
-    fig.suptitle(basename, fontsize=16)
+    fig.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.96, hspace=0.3)
+    fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)
     for c in range(nchannels):
-        m = int(np.mean(data[:,c]))
-        s = int(np.std(data[:,c]))
+        m = np.mean(data[:,c])
+        s = np.std(data[:,c])
         n, b = np.histogram(data[:,c], abins);
         nmax = np.max(n)
         i0 = np.argmax(n>0)
         i1 = len(n) - np.argmax(n[::-1]>0)
         if subtract_mean:
-            b -= m
-            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none', fc='tab:blue');
+            b -= int(m)
+            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none',
+                                fc=colors[c%len(colors)]);
             axs[c].axvline(0, color='k')
             axs[c].plot([-s, +s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         else:
-            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none', fc='tab:blue');
+            axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none',
+                                fc=colors[c%len(colors)]);
             axs[c].axvline(m, color='k')
             axs[c].plot([m-s, m+s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
         axs[c].set_title('channel %d' % c)
-        if c % 2 == 1 or nchannels == 1:
-            axs[c].set_xlabel('Amplitude [integer]')
+        axs[c].spines['top'].set_visible(False)
+        axs[c].spines['right'].set_visible(False)
         axs[c].text(0.95, 0.87, '$\mu$=%.0f' % m, ha='right', transform=axs[c].transAxes)
-        axs[c].text(0.95, 0.75, '$\sigma$=%.0f' % s, ha='right', transform=axs[c].transAxes)
+        axs[c].text(0.95, 0.75, '$\sigma$=%.1f' % s, ha='right', transform=axs[c].transAxes)
+    fig.text(0.55, 0.02, 'Amplitude [integer]', ha='center')
     if save:
-        fig.savefig(os.path.splitext(path)[0] + '-noise.png')
+        fig.savefig(os.path.splitext(basename)[0] + '-noise.png')
     else:
         plt.show()
 
     
 if __name__ == '__main__':
+    plt.rcParams['axes.xmargin'] = 0
+    plt.rcParams['axes.ymargin'] = 0
     plot = False
     save = False
     subtract_mean = False
-    print('%s\t%2s\t%5s\t%5s' % ('file', 'channel', 'mean', 'std'))
+    header = True
     for path in sys.argv[1:]:
         if path == '-m':
             subtract_mean = True
@@ -98,4 +118,5 @@ if __name__ == '__main__':
         elif path == '-s':
             save = True
             continue
-        plot_hist(path, subtract_mean, plot, save)
+        plot_hist(path, header, subtract_mean, plot, save)
+        header = False
