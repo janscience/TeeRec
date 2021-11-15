@@ -61,7 +61,7 @@ def plot_traces(path, channel, toffs, tmax, step, autoy, save):
         ax.legend(loc='lower right')
     ax.set_title(basename, fontsize=16)
     if save:
-        fig.savefig(os.path.splitext(path)[0] + '-traces.png')
+        fig.savefig(os.path.splitext(os.path.basename(path))[0] + '-traces.png')
     else:
         plt.show()
 
