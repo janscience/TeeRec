@@ -5,11 +5,10 @@
   and on contributions from Stefan Mucha and Lydia Federman.
   See also https://www.pjrc.com/teensy/td_libs_Time.html .
 
-  By default the Teensy on-board real-time clock is used.
-
-  If you want to use the DS1307RTC clock, then include
-  DS1307RTC.h and call setSyncProvider(RTC.get) after
-  instantiating RTClock.
+  If a DS1307 chip is present, it is used as the source for getting
+  real time.  Without such a chip the Teensy on-board real-time clock
+  is used - you just need to attach a 3V battery to VBAT to make it
+  work.
 */
 
 #ifndef RTClock_h
@@ -24,17 +23,21 @@ class RTClock {
 
  public:
 
-  // Initialize.
+  // Initialize.  Set the source for real time clock to DS1307 chip if
+  // present, otherwise the Teensy on-board real time clock is used.
   RTClock();
 
   // Check whether clock is available and set.
+  // If not print message to serial.
   bool check();
 
-  // String with the current date in the format YYYY-MM-DD. str needs to hold 11 characters.
+  // String with the current date in the format YYYY-MM-DD.
+  // str needs to hold 11 characters.
   // If brief, without the dashes.
   void date(char *str, bool brief=false);
 
-  // String with the current time in the format HH:MM:SS. str needs to hold 9 characters.
+  // String with the current time in the format HH:MM:SS.
+  // str needs to hold 9 characters.
   // If brief, without the colons. If dash, replace colons by dashes.
   void time(char *str, bool brief=false, bool dash=false);
 
@@ -48,8 +51,13 @@ class RTClock {
   // If dash, replace colons by dashes.
   String makeStr(const String &str, bool dash=false);
 
-  // Write out current time and error message on serial.
+  // Write out current time, real time provider, and potential error message
+  // on serial.
   void report();
+
+private:
+
+  int RTCSource;
 
 };
 

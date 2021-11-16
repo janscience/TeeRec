@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <DS1307RTC.h>
 #include <RTClock.h>
 
 
@@ -8,18 +9,22 @@ time_t getTeensy3Time() {
 
 
 RTClock::RTClock() {
-  //#ifdef DS1307RTC_h
-  //  setSyncProvider(RTC.get);
-  //#else
-  setSyncProvider(getTeensy3Time);
-  //#endif
+  RTCSource = RTC.chipPresent() ? 1 : 0;
+  if (RTCSource == 1)
+    setSyncProvider(RTC.get);
+  else
+    setSyncProvider(getTeensy3Time);
 }
 
 
 bool RTClock::check() {
   bool status = (timeStatus() == timeSet);
-  if (!status)
-     Serial.println("Unable to sync with the RTC");
+  if (!status) {
+    if (timeStatus() == timeNotSet)
+      Serial.println("RTC: time has never been set!");
+    else if (timeStatus() == timeNeedsSync)
+      Serial.println("RTC: unable to sync time with RTC!");
+  }
   return status;
 }
 
@@ -101,9 +106,14 @@ String RTClock::makeStr(const String &str, bool dash) {
 
 
 void RTClock::report() {
+  char source[10];
+  if (RTCSource == 1)
+    strcpy(source, "DS1307");
+  else
+    strcpy(source, "on-board");
   char times[20];
   dateTime(times);
-  Serial.printf("RTC current time: %s\n", times);
+  Serial.printf("RTC (%s) current time: %s\n", source, times);
   if (timeStatus() != timeSet) {
     if (timeStatus() == timeNotSet)
       Serial.println("  time has never been set!");
