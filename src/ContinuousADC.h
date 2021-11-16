@@ -279,7 +279,7 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Return the number of averages taken by each sample.
   uint8_t averaging(void) const;
 
-  // Set the conversion speed by chaning the ADC clock.
+  // Set the conversion speed by changing the ADC clock.
   // One of VERY_LOW_SPEED, LOW_SPEED, MED_SPEED, HIGH_SPEED_16BITS,
   // HIGH_SPEED, VERY_HIGH_SPEED, ADACK_2_4, ADACK_4_0, ADACK_5_2 or ADACK_6_2.
   // From https://forum.pjrc.com/threads/25532-ADC-library-update-now-with-support-for-Teensy-3-1:
