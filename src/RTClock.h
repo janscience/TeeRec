@@ -3,6 +3,7 @@
   Created by Jan Benda, June 3rd, 2021.
   Based on https://github.com/PaulStoffregen/Time
   and on contributions from Stefan Mucha and Lydia Federman.
+  See also https://www.pjrc.com/teensy/td_libs_Time.html .
 
   By default the Teensy on-board real-time clock is used.
 
@@ -47,7 +48,7 @@ class RTClock {
   // If dash, replace colons by dashes.
   String makeStr(const String &str, bool dash=false);
 
-  // Write out current time on serial.
+  // Write out current time and error message on serial.
   void report();
 
 };

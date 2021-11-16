@@ -103,6 +103,12 @@ String RTClock::makeStr(const String &str, bool dash) {
 void RTClock::report() {
   char times[20];
   dateTime(times);
-  Serial.println("RTC current time:");
-  Serial.printf("  %s\n\n", times);
+  Serial.printf("RTC current time: %s\n", times);
+  if (timeStatus() != timeSet) {
+    if (timeStatus() == timeNotSet)
+      Serial.println("  time has never been set!");
+    else if (timeStatus() == timeNeedsSync)
+      Serial.println("  unable to sync time with RTC!");
+  }
+  Serial.println();
 }
