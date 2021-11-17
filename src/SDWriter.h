@@ -83,6 +83,10 @@ class SDCard {
   // Call it, whenever the filename changes, for example, because of a new date.
   void resetFileCounter();
 
+  // Remove the specified file from the current working directory.
+  // Return true on success.
+  bool removeFile(const char *path);
+
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 

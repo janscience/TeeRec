@@ -96,6 +96,17 @@ void SDCard::rootDir() {
 }
 
 
+bool SDCard::removeFile(const char *path) {
+  FsFile file;
+#ifdef SDCARD_USE_SDFAT
+  file = SD.open(path, O_READ);
+  return file.remove();
+#else
+  return SD.remove((CurrentPath + path).c_str());
+#endif
+}
+
+
 void SDCard::removeFiles(const char *path) {
   FsFile file;
   if (! Available)
