@@ -119,6 +119,7 @@ void storeData() {
 // ------------------------------------------------------------------------------------------
 
 void setup() {
+  elapsedMillis time;
   blink.switchOn();
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
@@ -126,6 +127,7 @@ void setup() {
   prevname = "";
   setupADC();
   sdcard.begin();
+  rtclock.setFromFile(sdcard, "setttime.cfg", time);
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);

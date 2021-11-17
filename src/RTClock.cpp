@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <DS1307RTC.h>
 #include <RTClock.h>
+#include <SDWriter.h>
 
 
 time_t getTeensy3Time() {
@@ -26,6 +27,78 @@ bool RTClock::check() {
       Serial.println("RTC: unable to sync time with RTC!");
   }
   return status;
+}
+
+
+bool RTClock::setFromFile(SDCard &sdcard, const char *path, int ms) {
+  FsFile file = sdcard.openRead(path);
+  if (!file)
+    return false;
+  char datetime[20];
+  file.read(datetime, sizeof(datetime));
+  file.close();
+  // parse date-time string YYYY-MM-DDTHH:MM:SS
+  int sepi[6] = {4, 7, 10, 13, 16, 19};
+  datetime[19] = '\0';
+  for (int k=0; k<6; k++) {
+    if (datetime[sepi[k]] != '-' &&
+	datetime[sepi[k]] != 'T' &&
+	datetime[sepi[k]] != ':' &&
+	datetime[sepi[k]] != '\0') {
+      Serial.printf("File \"%s\" does not contain a valid date-time string.\n", path);
+      return false;
+    }
+    else
+      datetime[sepi[k]] = '\0';
+  }
+  int year = atoi(datetime);
+  int month = atoi(&datetime[5]);
+  int day = atoi(&datetime[8]);
+  int hour = atoi(&datetime[11]);
+  int min = atoi(&datetime[14]);
+  int sec = atoi(&datetime[17]);
+  if (year < 2020) {
+    Serial.printf("Invalid year \"%s\" in file \"%s\".\n", datetime, path);
+    return false;
+  }
+  if (month < 1 || month > 12) {
+    Serial.printf("Invalid month \"%s\" in file \"%s\".\n", &datetime[5], path);
+    return false;
+  }
+  if (day < 1 || day > 31) {
+    Serial.printf("Invalid day \"%s\" in file \"%s\".\n", &datetime[8], path);
+    return false;
+  }
+  if (hour < 0 || hour > 23) {
+    Serial.printf("Invalid hour \"%s\" in file \"%s\".\n", &datetime[11], path);
+    return false;
+  }
+  if (min < 0 || min > 59) {
+    Serial.printf("Invalid minute \"%s\" in file \"%s\".\n", &datetime[14], path);
+    return false;
+  }
+  if (sec < 0 || sec > 59) {
+    Serial.printf("Invalid second \"%s\" in file \"%s\".\n", &datetime[17], path);
+    return false;
+  }
+  // set time:
+  tmElements_t tm;
+  tm.Year = year - 1970;
+  tm.Month = month;
+  tm.Day = day;
+  tm.Hour = hour;
+  tm.Minute = min;
+  tm.Second = sec;
+  time_t t = makeTime(tm);
+  t += ms/1000;
+  setTime(t);
+  if (RTCSource == 1)
+    RTC.set(t);
+  else
+    Teensy3Clock.set(t);
+  sdcard.removeFile(path);
+  Serial.printf("Set real time clock from file \"%s\".\n", path);
+  return true;
 }
 
 

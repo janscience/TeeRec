@@ -19,6 +19,9 @@
 #include <TimeLib.h>
 
 
+class SDCard;
+
+
 class RTClock {
 
  public:
@@ -30,6 +33,15 @@ class RTClock {
   // Check whether clock is available and set.
   // If not print message to serial.
   bool check();
+
+  // Set the current time from a file path on the sdcard.
+  // If the file was found and the time set, the file is deleted.
+  // Optionally, ms milliseconds are added to the time found in the file
+  // to account for start-up delays.
+  // Return true if the time was set from the file.
+  // The file contains a single line with the time in the format
+  // YYYY-MM-DDTHH:MM:SS
+  bool setFromFile(SDCard &sdcard, const char *path, int ms=0);
 
   // String with the current date in the format YYYY-MM-DD.
   // str needs to hold 11 characters.
