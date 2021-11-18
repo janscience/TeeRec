@@ -67,11 +67,14 @@ class SDCard {
   // Availability of a SD card. 
   bool available() { return Available; };
 
-  // Make directory if it does not exist and make it the currrent working directory.
-  void dataDir(const char *path);
+  // Make directory if it does not exist and
+  // make it the currrent working directory.
+  // Return true on succes.
+  bool dataDir(const char *path);
 
   // Reset current working directory to root.
-  void rootDir();
+  // Return true on succes.
+  bool rootDir();
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
@@ -128,11 +131,14 @@ class SDWriter : public DataWorker {
   // End usage of SD card if it was created by SDWriter.
   void end();
 
-  // Make directory if it does not exist and make it the currrent working directory.
-  void dataDir(const char *path);
+  // Make directory if it does not exist and
+  // make it the currrent working directory.
+  // Return true on succes.
+  bool dataDir(const char *path);
 
   // Reset current working directory to root.
-  void rootDir();
+  // Return true on succes.
+  bool rootDir();
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 

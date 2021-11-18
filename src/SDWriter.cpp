@@ -72,26 +72,30 @@ void SDCard::end() {
 }
 
 
-void SDCard::dataDir(const char *path) {
+bool SDCard::dataDir(const char *path) {
   if (! Available)
-    return;
+    return false;
   if (! SD.exists(path))
     SD.mkdir(path);
+  NameCounter = 0;
 #ifdef SDCARD_USE_SDFAT
-  SD.chdir(path);
+  return SD.chdir(path);
 #else
   CurrentPath = path;
   CurrentPath += "/";
+  return true;
 #endif
-  NameCounter = 0;
 }
 
 
-void SDCard::rootDir() {
+bool SDCard::rootDir() {
+  if (! Available)
+    return false;
 #ifdef SDCARD_USE_SDFAT
-  SD.chdir("/");
+  return SD.chdir("/");
 #else
   CurrentPath = "/";
+  return true;
 #endif
 }
 
@@ -262,15 +266,13 @@ void SDWriter::end() {
 }
 
 
-void SDWriter::dataDir(const char *path) {
-  if (cardAvailable())
-    SDC->dataDir(path);
+bool SDWriter::dataDir(const char *path) {
+  return SDC->dataDir(path);
 }
 
 
-void SDWriter::rootDir() {
-  if (cardAvailable())
-    SDC->rootDir();
+bool SDWriter::rootDir() {
+  return SDC->rootDir();
 }
 
 

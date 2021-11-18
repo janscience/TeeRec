@@ -86,7 +86,8 @@ String openNextFile() {
 
 
 String setupStorage() {
-  file.dataDir(settings.Path);
+  if (file.dataDir(settings.Path))
+    Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval(aidata);
   file.setMaxFileTime(settings.FileTime);
   file.startWrite();
