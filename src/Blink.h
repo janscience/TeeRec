@@ -54,6 +54,8 @@ class Blink {
   // Call this function as often as possible in your loop().
   void update();
 
+  // Delay sketch by delayms milliseconds while blinking.
+  void delay(uint32_t delayms);
 
  protected:
   

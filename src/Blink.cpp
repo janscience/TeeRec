@@ -124,3 +124,12 @@ void Blink::update() {
     }
   }
 }
+
+
+void Blink::delay(uint32_t delayms) {
+  elapsedMillis time;
+  while (time < delayms) {
+    update();
+  };
+}
+
