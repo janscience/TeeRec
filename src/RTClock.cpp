@@ -30,7 +30,7 @@ bool RTClock::check() {
 }
 
 
-bool RTClock::setFromFile(SDCard &sdcard, const char *path, int ms) {
+bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
   FsFile file = sdcard.openRead(path);
   if (!file)
     return false;
@@ -90,14 +90,19 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, int ms) {
   tm.Minute = min;
   tm.Second = sec;
   time_t t = makeTime(tm);
-  t += ms/1000;
+  if (from_start)
+    t += millis()/1000;
   setTime(t);
   if (RTCSource == 1)
     RTC.set(t);
   else
     Teensy3Clock.set(t);
   sdcard.removeFile(path);
-  Serial.printf("Set real time clock from file \"%s\".\n", path);
+  // get time:
+  char times[20];
+  dateTime(times);
+  Serial.printf("Set real time clock from file \"%s\" to %s.\n\n",
+		path, times);
   return true;
 }
 
