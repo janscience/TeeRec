@@ -85,15 +85,13 @@ String openNextFile() {
 }
 
 
-String setupStorage() {
+void setupStorage() {
   if (file.dataDir(settings.Path))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval(aidata);
   file.setMaxFileTime(settings.FileTime);
   file.startWrite();
-  String name = openNextFile();
-  Serial.println();
-  return name;
+  openNextFile();
 }
 
 
@@ -128,18 +126,16 @@ void setup() {
   setupADC();
   sdcard.begin();
   rtclock.setFromFile(sdcard);
+  rtclock.report();
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
   aidata.check();
-  blink.switchOff();
-  delay(200);   // make this configurable and set a blinking pattern
-  String name = setupStorage();
   aidata.start();
   aidata.report();
-  rtclock.report();
-  if (name.length() != 0)
-    Serial.println(name);
+  blink.switchOff();
+  delay(200);   // make this configurable and set a blinking pattern
+  setupStorage();
 }
 
 
