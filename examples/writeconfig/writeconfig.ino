@@ -4,11 +4,12 @@
 const char *config = R"""(# Configuration file for TeeRec based logger.
 
 Settings:
-  Path       : recordings  # path where to store data
-  FileName   : logger1-SDATETIME.wav  # may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-  FileTime   : 10min       # s, min, or h
-  PulseFreq  : 200Hz       # Hz, kHz, MHz
-  DisplayTime: 5ms         # ms, s
+  Path        : recordings  # path where to store data
+  FileName    : logger1-SDATETIME.wav  # may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+  FileTime    : 10min       # s, min, or h
+  PulseFreq   : 200Hz       # Hz, kHz, MHz
+  DisplayTime : 5ms         # ms, s
+  InitialDelay: 5s          # ms, s, or min
 
 ADC:
   SamplingRate: 44.1kHz    # Hz, kHz, MHz

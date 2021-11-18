@@ -21,6 +21,8 @@ int8_t channels1 [] =  {A2, -1, A16, A17, A18, A19, A20, A22, A12, A13};  // inp
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
+float initialDelay = 5.0;            // seconds
+
 int pulseFrequency = 230;            // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
@@ -31,7 +33,8 @@ Configurator config;
 ContinuousADC aidata;
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-Settings settings("recordings", fileName, fileSaveTime, pulseFrequency);
+Settings settings("recordings", fileName, fileSaveTime, pulseFrequency,
+                  0.0, initialDelay);
 RTClock rtclock;
 String prevname; // previous file name
 Blink blink;
@@ -134,7 +137,13 @@ void setup() {
   aidata.start();
   aidata.report();
   blink.switchOff();
-  delay(200);   // make this configurable and set a blinking pattern
+  if (settings.InitialDelay >= 2.0) {
+    uint32_t delayblinks[] = {50, 150, 50, 2000, 0};
+    blink.setDelayed(1000, delayblinks);
+    blink.delay(uint32_t(1000.0*settings.InitialDelay));
+  }
+  else
+    delay(uint32_t(1000.0*settings.InitialDelay));
   setupStorage();
 }
 
