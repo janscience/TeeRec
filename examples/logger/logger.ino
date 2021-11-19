@@ -21,7 +21,7 @@ int8_t channels1 [] =  {A2, -1, A16, A17, A18, A19, A20, A22, A12, A13};  // inp
 char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;             // seconds
 
-float initialDelay = 5.0;            // seconds
+float initialDelay = 2.0;            // seconds
 
 int pulseFrequency = 230;            // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
@@ -53,7 +53,8 @@ void setupADC() {
 }
 
 
-String openNextFile() {
+bool openNextFile() {
+  blink.clear();
   String name = rtclock.makeStr(settings.FileName, true);
   if (name != prevname) {
     file.resetFileCounter();
@@ -64,7 +65,7 @@ String openNextFile() {
     Serial.println("WARNING: failed to open file on SD card.");
     Serial.println("SD card probably not inserted.");
     Serial.println();
-    return "";
+    return false;
   }
   char dts[20];
   rtclock.dateTime(dts);
@@ -77,13 +78,13 @@ String openNextFile() {
     else
       blink.set(5000, 100);
     blink.blink(2000, 1000);
-    return name;
+    return true;
   }
   else {
     Serial.println();
     Serial.println("WARNING: failed to open file on SD card.");
     Serial.println("SD card probably not inserted.");
-    return "";
+    return false;
   }
 }
 
@@ -111,7 +112,6 @@ void storeData() {
     }
     if (file.endWrite()) {
       file.close();  // file size was set by openWave()
-      blink.clear();
       openNextFile();
     }
   }
