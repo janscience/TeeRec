@@ -42,6 +42,7 @@ def plot_traces(path, channel, toffs, tmax, step, autoy, save):
     basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.06, right=0.98, top=0.94, bottom=0.09)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     time = np.arange(len(data))/rate
     dtmax = time[-1] - toffs
     if dtmax > tmax:
@@ -51,7 +52,7 @@ def plot_traces(path, channel, toffs, tmax, step, autoy, save):
     for c in range(data.shape[1]):
         if channel < 0 or c == channel:
             ax.plot(1000*time[idx0:dtidx], 1.0*data[idx0:dtidx,c]+step*c, '-',
-                    label='%d' % c)
+                    color=colors[c%len(colors)], label='%d' % c)
     maxy = 40000 + data.shape[1]*step
     if not autoy:
         ax.set_ylim(-40000, maxy)
