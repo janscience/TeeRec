@@ -10,7 +10,7 @@
 // Default settings: -----------------------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
 
-uint32_t samplingRate = 40000;       // samples per second and channel in Hertz
+uint32_t samplingRate = 44000;      // samples per second and channel in Hertz
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit
 int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32
 ADC_CONVERSION_SPEED convs = ADC_CONVERSION_SPEED::HIGH_SPEED;
