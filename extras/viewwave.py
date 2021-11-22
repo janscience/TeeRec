@@ -1,5 +1,6 @@
 import os
 import sys
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import wave
@@ -68,52 +69,37 @@ def plot_traces(path, channel, toffs, tmax, step, autoy, save):
 
     
 if __name__ == '__main__':
-    channel = -1
-    toffs = 0
-    tmax = 2
-    step = 0
-    autoy = False
-    save = False
-    for path in sys.argv[1:]:
-        if channel is None:
-            channel = int(path)
-            continue
-        if tmax is None:
-            tmax = float(path)
-            continue
-        if toffs is None:
-            toffs = float(path)
-            continue
-        if step is None:
-            step = float(path)
-            continue
-        if path == '-c':
-            channel = None
-            continue
-        if path == '-o':
-            toffs = None
-            continue
-        if path == '-t':
-            tmax = None
-            continue
-        if path == '-S':
-            step = None
-            continue
-        if path == '-a':
-            autoy = True
-            continue
-        if path == '-s':
-            save = True
-            continue
-        plot_traces(path, channel, toffs, tmax, step, autoy, save)
-    if len(sys.argv) <= 1:
-        print("Usage:")
-        print("viewwave [-c CHANNEL] [-t TMAX] [-o TOFFS] [-S STEP] [-a] [-s] FILE")
-        print()
-        print("-c CHANNEL: show trace of channel CHANNEL only.")
-        print("-t TMAX   : maximum time to show. Defaults to 2 seconds.")
-        print("-o TOFFS  : show from this time on. Defaults to beginning of recording.")
-        print("-S STEP   : shift each channel by STEP upwards.")
-        print("-a        : auto scale y-axis.")
-        print("-s        : save plot to png file.")
-        print("FILE      : wave file with data to display.")
+    # command line arguments:
+    parser = argparse.ArgumentParser(add_help=True,
+        description='Display a segment of a wave file.')
+        #epilog='version %s by Benda-Lab (2015-%s)' % (__version__, __year__))
+    #parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument('-c', dest='channel', default=-1, type=int,
+                        help='show trace of channel CHANNEL only',
+                        metavar='CHANNEL')
+    parser.add_argument('-o', dest='toffs', default=0.0, type=float,
+                        help='show from this time on (default 0, i.e. beginning of recording)',
+                        metavar='OFFS')
+    parser.add_argument('-t', dest='tmax', default=1.0, type=float,
+                        help='maximum time to show (defaults 1 second)',
+                        metavar='TMAX')
+    parser.add_argument('-S', dest='step', default=0, type=int,
+                        help='shift each channel by STEP integers upwards',
+                        metavar='STEP')
+    parser.add_argument('-a', dest='autoy', action='store_true',
+                        help='auto scale y-axis')
+    parser.add_argument('-s', dest='save', action='store_true',
+                        help='save plot to png file')
+    parser.add_argument('file', nargs=1, type=str,
+                        help='wave file containing the data to be shown')
+    args = parser.parse_args()
+    # options:
+    channel = args.channel
+    toffs = args.toffs
+    tmax = args.tmax
+    step = args.step
+    autoy = args.autoy
+    save = args.save
+    path = args.file[0]
+    # load and plot:
+    plot_traces(path, channel, toffs, tmax, step, autoy, save)
