@@ -34,7 +34,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path, channel, toffs, tmax, step, autoy, save):
+def plot_traces(path, channel, toffs, tmax, step, gain, autoy, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
     if data is None:
@@ -50,15 +50,20 @@ def plot_traces(path, channel, toffs, tmax, step, autoy, save):
         dtmax = tmax
     dtidx = int((toffs+dtmax)*rate)
     idx0 = int(toffs*rate)
+    scale = 1.0
+    unit = 'integer'
+    if gain is not None:
+        scale = 1.66/2**15 * 1000.0/gain
+        unit = 'mV'
     for c in range(data.shape[1]):
         if channel < 0 or c == channel:
-            ax.plot(1000*time[idx0:dtidx], 1.0*data[idx0:dtidx,c]+step*c, '-',
-                    color=colors[c%len(colors)], label='%d' % c)
+            ax.plot(1000*time[idx0:dtidx], scale*data[idx0:dtidx,c]+step*c,
+                    '-', color=colors[c%len(colors)], label='%d' % c)
     maxy = 40000 + data.shape[1]*step
     if not autoy:
-        ax.set_ylim(-40000, maxy)
+        ax.set_ylim(-40000*scale, maxy*scale)
     ax.set_xlabel('Time [ms]')
-    ax.set_ylabel('Amplitude [integer]')
+    ax.set_ylabel('Amplitude [%s]' % unit)
     if data.shape[1] > 1:
         ax.legend(loc='lower right')
     ax.set_title(basename, fontsize=16)
@@ -81,11 +86,14 @@ if __name__ == '__main__':
                         help='show from this time on (default 0, i.e. beginning of recording)',
                         metavar='OFFS')
     parser.add_argument('-t', dest='tmax', default=1.0, type=float,
-                        help='maximum time to show (defaults 1 second)',
+                        help='maximum time to show (default 1 second)',
                         metavar='TMAX')
     parser.add_argument('-S', dest='step', default=0, type=int,
                         help='shift each channel by STEP integers upwards',
                         metavar='STEP')
+    parser.add_argument('-g', dest='gain', default=None, type=float,
+                        help='Gain of an amplifier (default no gain, i.e. rwa integer recordings)',
+                        metavar='TMAX')
     parser.add_argument('-a', dest='autoy', action='store_true',
                         help='auto scale y-axis')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -98,8 +106,9 @@ if __name__ == '__main__':
     toffs = args.toffs
     tmax = args.tmax
     step = args.step
+    gain = args.gain
     autoy = args.autoy
     save = args.save
     path = args.file[0]
     # load and plot:
-    plot_traces(path, channel, toffs, tmax, step, autoy, save)
+    plot_traces(path, channel, toffs, tmax, step, gain, autoy, save)
