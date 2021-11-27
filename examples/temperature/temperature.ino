@@ -1,21 +1,22 @@
+#include <Sensors.h>
 #include <Temperature.h>
 
 
-Temperature temp;
+Temperature temp(10);  // DATA on pin 10
+Sensors sensors;
 
 
 void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  temp.begin(10);
-  Serial.printf("ROM = %s\n", temp.address());
+  sensors.setInterval(3000);
+  sensors.addSensor(&temp);
+  sensors.start();
+  Serial.printf("ROM = %s\n", temp.identifier());
   Serial.printf("Chip = %s\n", temp.chip());
 }
 
 void loop(void) {
-  temp.request();    
-  delay(temp.delay());
-  temp.read();
-  Serial.printf("T=%5.2fC\n", temp.temperature());
-  delay(2000);
+  if (sensors.update())
+    sensors.report();
 }

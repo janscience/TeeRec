@@ -40,6 +40,8 @@ with contributions by
 - ContinousADC: Sample from multiple pins into a DataBuffer.
 - SDWrite: Write data from a DataWorker on SD card.
 - WaveHeader: Setting up wave file header with metadata.
+- Sensor: Virtual base class for environmental sensors.
+- Sensors: Manage environmental sensors.
 - Temperature: Read temperature from a 1-wire device.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.

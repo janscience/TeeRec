@@ -24,9 +24,10 @@
 
 #include <Arduino.h>
 #include <OneWire.h>
+#include <Sensor.h>
 
 
-class Temperature {
+class Temperature : public Sensor {
 
  public:
   
@@ -34,28 +35,37 @@ class Temperature {
   Temperature(uint8_t pin);
   void begin(uint8_t pin);
 
-  // Return ROM of temperature sensor (unique ID) as string.
-  const char* address() const { return AddrS; };
+  // Return "temperature".
+  virtual const char* parameter() const { return "temperature"; };
+
+  // Return unit of temperature readings: "celsius".
+  virtual const char* unit() const { return "celsius"; };
 
   // Return name of chip as string.
-  const char* chip() const { return Chip; };
+  virtual const char* chip() const { return Chip; };
+
+  // Return ROM of temperature sensor (unique ID) as string.
+  virtual const char* identifier() const { return AddrS; };
+
+  // Return true if temperature sensor is available.
+  virtual bool available();
 
   // Request a temperature conversion.
-  void request();
+  virtual void request();
 
-  // Recommended delay between a request() and read().
-  unsigned long delay() const { return 1000; };
+  // Recommended delay between a request() and read() in milliseconds.
+  virtual unsigned long delay() const { return 1000; };
 
   // Retrieve a temperature reading from the device.
-  // You need to call request() at least 1sec before.
-  void read();
+  // You need to call request() at least delay() milliseconds before.
+  virtual void read();
 
   // The temperature in degrees celsius.
-  // On error, return -1000.
+  // On error, return -INFINITY.
   // Before you can retrieve a temperature reading,
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
-  float temperature() const { return Celsius; };
+  virtual float value() const { return Celsius; };
   
   
  private:

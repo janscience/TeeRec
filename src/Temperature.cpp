@@ -6,7 +6,7 @@ Temperature::Temperature() {
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
   memset(Chip, 0, sizeof(Chip));
-  Celsius = -1000.0;
+  Celsius = NoValue;
 }
 
 
@@ -20,7 +20,7 @@ void Temperature::begin(uint8_t pin) {
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
   memset(Chip, 0, sizeof(Chip));
-  Celsius = -1000.0;
+  Celsius = NoValue;
 
   OW.begin(pin);
 
@@ -64,6 +64,11 @@ void Temperature::begin(uint8_t pin) {
 }
 
 
+bool Temperature::available() {
+  return (Type_s >= 0);
+}
+
+
 void Temperature::request() {
   if (Type_s < 0)
     return;
@@ -78,7 +83,7 @@ void Temperature::request() {
 
 
 void Temperature::read() {
-  Celsius = -1000.0;
+  Celsius = NoValue;
   if (Type_s < 0)
     return;
     
