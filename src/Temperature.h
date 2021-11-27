@@ -14,8 +14,11 @@
   https://create.arduino.cc/projecthub/TheGadgetBoy/ds18b20-digital-temperature-sensor-and-arduino-9cc806
   step 4 for wiring.
 
-  More resourves on the OneWire protocol can be found here:
+  More resources on the OneWire protocol can be found here:
   https://create.arduino.cc/projecthub/TheGadgetBoy/ds18b20-digital-temperature-sensor-and-arduino-9cc806
+
+  The [DS18B20 data
+  sheet](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf).
 */
 
 #ifndef Temperature_h
@@ -45,6 +48,9 @@ class Temperature : public Sensor {
 
   // Return ROM of temperature sensor (unique ID) as string.
   const char* identifier() const { return AddrS; };
+
+  // Return resolution of the temperature readings.
+  virtual float resolution() const;
 
   // Return true if temperature sensor is available.
   virtual bool available();

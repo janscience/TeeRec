@@ -33,6 +33,9 @@ class Sensor {
 
   // Set unit of environmental sensor reading to unit.
   void setUnit(const char *unit) { strcpy(Unit, unit); };
+
+  // Return resolution of the sensor readings.
+  virtual float resolution() const = 0;
   
   // Return true if sensor is available.
   virtual bool available() = 0;

@@ -71,9 +71,14 @@ bool Temperature::available() {
 }
 
 
+float Temperature::resolution() const {
+  return 0.0625;  // 12 bit default resolution
+}
+
+
 void Temperature::report() {
   if (available())
-    Serial.printf("Temperature device %s (ID: %s)\n", Chip, AddrS);
+    Serial.printf("Temperature device %s (ID: %s) at %.2f%s resolution\n", Chip, AddrS, resolution(), unit());
 }
 
 
