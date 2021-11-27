@@ -100,6 +100,15 @@ bool SDCard::rootDir() {
 }
 
 
+bool SDCard::exists(const char *path) {
+#ifdef SDCARD_USE_SDFAT
+  return SD.exists(path);
+#else
+  return SD.exists((CurrentPath + name).c_str());
+#endif
+}
+
+
 bool SDCard::removeFile(const char *path) {
   FsFile file;
 #ifdef SDCARD_USE_SDFAT
@@ -210,12 +219,21 @@ FsFile SDCard::openRead(const char *path) {
 #endif
 }
 
-    
+
 FsFile SDCard::openWrite(const char *path) {
 #ifdef SDCARD_USE_SDFAT
-  return SD.open(path, O_RDWR | O_CREAT);
+  return SD.open(path, O_WRITE | O_CREAT);
 #else
   return SD.open((CurrentPath + path).c_str(), FILE_WRITE_BEGIN);
+#endif
+}
+
+
+FsFile SDCard::openAppend(const char *path) {
+#ifdef SDCARD_USE_SDFAT
+  return SD.open(path, O_WRITE | O_APPEND);
+#else
+  return SD.open((CurrentPath + path).c_str(), FILE_WRITE);
 #endif
 }
 

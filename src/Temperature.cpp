@@ -124,3 +124,9 @@ void Temperature::read() {
   Celsius = (float)raw / 16.0;
   OW.depower();
 }
+
+
+int Temperature::print(char *s) const {
+  return sprintf(s, "%.2f", value());
+}
+

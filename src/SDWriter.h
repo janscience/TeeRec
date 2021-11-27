@@ -76,6 +76,9 @@ class SDCard {
   // Return true on succes.
   bool rootDir();
 
+  // Return true if path exists.
+  bool exists(const char *path);
+
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
   // If no SD card is available, or if no unique file can be found, return an empty string.
@@ -98,6 +101,9 @@ class SDCard {
 
   // Open file on SD card for writing (not appending).
   FsFile openWrite(const char *path);
+
+  // Open file on SD card for appending to existing file.
+  FsFile openAppend(const char *path);
 
   
  protected:

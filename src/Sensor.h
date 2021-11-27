@@ -1,6 +1,6 @@
 /*
   Sensor - Virtual base class for environmental sensors.
-  Created by Jan Benda, Novemeber 27th, 2021.
+  Created by Jan Benda, November 27th, 2021.
 */
 
 #ifndef Sensor_h
@@ -47,6 +47,10 @@ class Sensor {
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
   virtual float value() const = 0;
+  
+  // Print the sensor reading into string s.
+  // Return the number of printed characters.
+  virtual int print(char *s) const = 0;
   
 };
 

@@ -1,6 +1,6 @@
 /*
   Temperature - read temperature from a 1-wire device.
-  Created by Jan Benda, Novemeber 27th, 2021.
+  Created by Jan Benda, November 27th, 2021.
   Based on https://github.com/PaulStoffregen/OneWire/blob/master/examples/DS18x20_Temperature/DS18x20_Temperature.pde
 
   The temperature sensor needs to be connected to the Teensy in the
@@ -36,10 +36,10 @@ class Temperature : public Sensor {
   void begin(uint8_t pin);
 
   // Return "temperature".
-  virtual const char* parameter() const { return "temperature"; };
+  virtual const char* parameter() const { return "temp"; };
 
   // Return unit of temperature readings: "celsius".
-  virtual const char* unit() const { return "celsius"; };
+  virtual const char* unit() const { return "ºC"; };
 
   // Return name of chip as string.
   virtual const char* chip() const { return Chip; };
@@ -66,6 +66,10 @@ class Temperature : public Sensor {
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
   virtual float value() const { return Celsius; };
+
+  // Print the temperature in degrees celsius into string s.
+  // Return the number of printed characters.
+  virtual int print(char *s) const;
   
   
  private:
