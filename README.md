@@ -128,17 +128,18 @@ TeeRec is used in:
 - [EOD-Logger](https://github.com/muchaste/EOD-Logger): A 2-electrode
   logger for recording electric-organ discharges of electric fish.
 
+- [TeeGrid](https://github.com/janscience/TeeGrid): Electrode arrays
+  based on 8-16channel recording devices for recording electric fish
+  behavior in natural habitats (see [Henninger et
+  al. 2018](https://doi.org/10.1523/JNEUROSCI.0350-18.2018) and
+  [Henninger et al. 2020](https://doi.org/10.1242/jeb.206342)).
+
 Further planed applications are:
 
 - Fishfinder: A replacement for the usual and horrible RadioShack/MP3
   player combination for recording electric fish EODs in their natural
   habitats with lot's of additional features (display, online
   analysis, environmental parameters).
-
-- Grid: An electrode array based on 8-16channel recording devices for
-  recording electric fish behavior in natural habitats (see [Henninger
-  et al. 2018](https://doi.org/10.1523/JNEUROSCI.0350-18.2018) and
-  [Henninger et al. 2020](https://doi.org/10.1242/jeb.206342)).
 
 
 ## Links
