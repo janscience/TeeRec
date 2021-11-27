@@ -1,6 +1,9 @@
 # Backup files
 *~
 
+# Arduino development:
+.development
+
 # Prerequisites
 *.d
 
