@@ -60,7 +60,7 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save):
         unit = 'mV'
     for c in range(data.shape[1]):
         if channel < 0 or c == channel:
-            ax.plot(1000*time[idx0:dtidx], scale*(data[idx0:dtidx,c]+offs+step*c),
+            ax.plot(1000*time[idx0:dtidx], scale*data[idx0:dtidx,c]+scale*(offs+step*c),
                     '-', color=colors[c%len(colors)], label='%d' % c)
     maxy = 40000 + data.shape[1]*step
     if not autoy:
