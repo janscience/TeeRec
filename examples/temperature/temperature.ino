@@ -7,7 +7,7 @@
 Temperature temp(10);  // DATA on pin 10
 Sensors sensors;
 SDCard sdcard;
-RTClock rtc;
+RTClock rtclock;
 
 
 void setup(void) {
@@ -17,8 +17,9 @@ void setup(void) {
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
   sensors.report();
-  sensors.writeCSVHeader(sdcard, "temperatures.csv", rtc);
+  sensors.writeCSVHeader(sdcard, "temperatures.csv", rtclock);
   sensors.start();
+  Serial.println();
 }
 
 void loop(void) {
