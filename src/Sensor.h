@@ -16,20 +16,29 @@ class Sensor {
 
   float NoValue = -INFINITY;
 
+  // Initialize the sensor.
+  Sensor() { Name[0] = '\0'; Unit[0] = '\0'; };
+
+  // Initialize the sensor and set name and unit of sensor readings.
+  Sensor(const char *name, const char *unit) { setName(name); setUnit(unit); };
+
   // Return name of environmental sensor reading as character array.
-  virtual const char* parameter() const = 0;
+  const char* name() const { return Name; };
+
+  // Set name of environmental sensor reading to name.
+  void setName(const char *name) { strcpy(Name, name); };
 
   // Return unit of sensor readings as character array.
-  virtual const char* unit() const = 0;
+  const char* unit() const { return Unit; };
 
-  // Return name of sensor chip as character array.
-  virtual const char* chip() const = 0;
-
-  // Return unique identifier as character array.
-  virtual const char* identifier() const = 0;
-
+  // Set unit of environmental sensor reading to unit.
+  void setUnit(const char *unit) { strcpy(Unit, unit); };
+  
   // Return true if sensor is available.
   virtual bool available() = 0;
+  
+  // Report sensor device on serial monitor.
+  virtual void report() {};
 
   // Request a sensor reading.
   virtual void request() {};
@@ -51,6 +60,12 @@ class Sensor {
   // Print the sensor reading into string s.
   // Return the number of printed characters.
   virtual int print(char *s) const = 0;
+
+
+private:
+
+  char Name[50];
+  char Unit[50];
   
 };
 

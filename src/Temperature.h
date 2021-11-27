@@ -30,25 +30,27 @@
 class Temperature : public Sensor {
 
  public:
-  
+
+  // Do not initialize temperature device yet.
   Temperature();
+  
+  // Initialize temperature device with DATA on pin.
   Temperature(uint8_t pin);
+  
+  // Initialize temperature device with DATA on pin.
   void begin(uint8_t pin);
 
-  // Return "temperature".
-  virtual const char* parameter() const { return "temp"; };
-
-  // Return unit of temperature readings: "celsius".
-  virtual const char* unit() const { return "ºC"; };
-
   // Return name of chip as string.
-  virtual const char* chip() const { return Chip; };
+  const char* chip() const { return Chip; };
 
   // Return ROM of temperature sensor (unique ID) as string.
-  virtual const char* identifier() const { return AddrS; };
+  const char* identifier() const { return AddrS; };
 
   // Return true if temperature sensor is available.
   virtual bool available();
+
+  // Report temperature device on serial monitor.
+  virtual void report();
 
   // Request a temperature conversion.
   virtual void request();

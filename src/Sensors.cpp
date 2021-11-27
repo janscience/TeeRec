@@ -31,6 +31,12 @@ void Sensors::setInterval(float interval) {
 }
 
 
+void Sensors::report() {
+  for (uint8_t k=0; k<NSensors; k++)
+    Snsrs[k]->report();
+}
+
+
 void Sensors::start() {
   Time = Interval - MaxDelay;
   State = 0;
@@ -58,9 +64,9 @@ bool Sensors::update() {
 }
 
 
-void Sensors::report() {
+void Sensors::print() {
   for (uint8_t k=0; k<NSensors; k++)
-    Serial.printf("%s = %5.2f%s\n", Snsrs[k]->parameter(),
+    Serial.printf("%s = %5.2f%s\n", Snsrs[k]->name(),
 		  Snsrs[k]->value(), Snsrs[k]->unit());
 }
 
@@ -70,12 +76,12 @@ bool Sensors::writeCSVHeader(SDCard &sd, const char *path,
   // compose header line:
   size_t n = 5;
   for (uint8_t k=0; k<NSensors; k++)
-    n += strlen(Snsrs[k]->parameter()) + strlen(Snsrs[k]->unit()) + 2;
+    n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
   char s[n];
   char *sp = s;
   sp += sprintf(sp, "time,");
   for (uint8_t k=0; k<NSensors; k++)
-    sp += sprintf(sp, "%s/%s,", Snsrs[k]->parameter(), Snsrs[k]->unit());
+    sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
   *(--sp) = '\n';
   // create file and write header:
   SDC = &sd;

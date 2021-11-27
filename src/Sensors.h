@@ -31,6 +31,9 @@ class Sensors {
   // Set update interval for reading sensor values to interval seconds.
   void setInterval(float interval);
 
+  // Report all sensor devices on serial monitor.
+  void report();
+
   // Start acquisition of sensor values.
   void start();
 
@@ -40,7 +43,7 @@ class Sensors {
   bool update();
 
   // Report all sensor readings on serial monitor.
-  void report();
+  void print();
 
   // Write csv for sensor readings to path on SD card sd.
   // Use rtc for getting time of sensor readings.

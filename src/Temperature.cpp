@@ -1,7 +1,8 @@
 #include <Temperature.h>
 
 
-Temperature::Temperature() {
+Temperature::Temperature()
+  : Sensor("temp", "ºC") {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
@@ -10,7 +11,8 @@ Temperature::Temperature() {
 }
 
 
-Temperature::Temperature(uint8_t pin) {
+Temperature::Temperature(uint8_t pin)
+  : Temperature() {
   begin(pin);
 }
 
@@ -66,6 +68,12 @@ void Temperature::begin(uint8_t pin) {
 
 bool Temperature::available() {
   return (Type_s >= 0);
+}
+
+
+void Temperature::report() {
+  if (available())
+    Serial.printf("Temperature device %s (ID: %s)\n", Chip, AddrS);
 }
 
 

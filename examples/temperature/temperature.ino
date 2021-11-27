@@ -16,15 +16,14 @@ void setup(void) {
   sdcard.begin();
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
+  sensors.report();
   sensors.writeCSVHeader(sdcard, "temperatures.csv", rtc);
   sensors.start();
-  Serial.printf("ROM = %s\n", temp.identifier());
-  Serial.printf("Chip = %s\n", temp.chip());
 }
 
 void loop(void) {
   if (sensors.update()) {
-    sensors.report();
+    sensors.print();
     sensors.writeCSV();
   }
 }
