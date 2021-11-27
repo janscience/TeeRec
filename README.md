@@ -40,6 +40,7 @@ with contributions by
 - ContinousADC: Sample from multiple pins into a DataBuffer.
 - SDWrite: Write data from a DataWorker on SD card.
 - WaveHeader: Setting up wave file header with metadata.
+- Temperature: Read temperature from a 1-wire device.
 - Display: Display data on a monitor.
 - RTClock: Time and date strings from the real time clock.
 - Blink: Blinking LEDs.
@@ -59,6 +60,7 @@ with contributions by
 - sinegen: Sine-wave generator.
 - maxrate: Test for maximum sampling rate.
 - averaging: Test various averaging settings for acquisition.
+- temperature: Read temperature from 1-wire device.
 - writeconfig: Write a defaul configuration file on SD card.
 - removefiles: Remove all files from a directory on SD card.
 - teensyboard: Print Teensy board version, serial number and MAC adress.
