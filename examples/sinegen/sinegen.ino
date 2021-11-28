@@ -12,7 +12,7 @@ float phases[] = {0.0, -1.0};
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  blink.set(2000, 100);
+  blink.setSingle();
   wave.setup(140000);
   wave.setHarmonics(ampls, phases);
   wave.start(A21, freq, ampl);

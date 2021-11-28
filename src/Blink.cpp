@@ -11,11 +11,112 @@ Blink::Blink(int pin) {
   Index = 0;
   State = 0;
   Delay = 0;
+  Interval = 2000;
+  OnTime = 50;
+  OffTime = 150;
 }
 
 
 Blink::~Blink() {
   switchOff();
+}
+
+
+void Blink::setTiming(uint32_t intervalms, uint32_t onms, uint32_t offms) {
+  Interval = intervalms;
+  OnTime = onms;
+  OffTime = offms;
+}
+
+
+void Blink::setSingle() {
+  Times[0][0] = OnTime;
+  Times[0][1] = Interval - OnTime;
+  Times[0][2] = 0;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
+void Blink::setDouble() {
+  Times[0][0] = OnTime;
+  Times[0][1] = OffTime;
+  Times[0][2] = OnTime;
+  Times[0][3] = Interval - 2*OnTime - OffTime;
+  Times[0][4] = 0;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
+void Blink::setTriple() {
+  Times[0][0] = OnTime;
+  Times[0][1] = OffTime;
+  Times[0][2] = OnTime;
+  Times[0][3] = OffTime;
+  Times[0][4] = OnTime;
+  Times[0][5] = Interval - 3*OnTime - 2*OffTime;
+  Times[0][6] = 0;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
+void Blink::blinkSingle(uint32_t intervalms, uint32_t onms) {
+  if (intervalms == 0)
+    intervalms = Interval;
+  if (onms == 0)
+    onms = OnTime;
+  Times[1][0] = onms;
+  Times[1][1] = intervalms - onms;
+  Times[1][2] = 0;
+  State = 1;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
+void Blink::blinkDouble(uint32_t intervalms, uint32_t onms, uint32_t offms) {
+  if (intervalms == 0)
+    intervalms = Interval;
+  if (onms == 0)
+    onms = OnTime;
+  if (offms == 0)
+    offms = OffTime;
+  Times[1][0] = onms;
+  Times[1][1] = offms;
+  Times[1][2] = onms;
+  Times[1][3] = intervalms - 2*onms - offms;
+  Times[1][4] = 0;
+  State = 1;
+  Index = 0;
+  Time = 0;
+  switchOn();
+}
+
+
+void Blink::blinkTriple(uint32_t intervalms, uint32_t onms, uint32_t offms) {
+  if (intervalms == 0)
+    intervalms = Interval;
+  if (onms == 0)
+    onms = OnTime;
+  if (offms == 0)
+    offms = OffTime;
+  Times[1][0] = onms;
+  Times[1][1] = offms;
+  Times[1][2] = onms;
+  Times[1][3] = offms;
+  Times[1][4] = onms;
+  Times[1][5] = intervalms - 3*onms - 2*offms;
+  Times[1][6] = 0;
+  State = 1;
+  Index = 0;
+  Time = 0;
+  switchOn();
 }
 
 
@@ -56,14 +157,6 @@ void Blink::setDelayed(uint32_t delayms, const uint32_t *times) {
 }
 
 
-void Blink::clear() {
-  Times[0][0] = 0;
-  Index = 0;
-  Time = 0;
-  switchOff();
-}
-
-
 void Blink::blink(uint32_t intervalms, uint32_t onms) {
   Times[1][0] = onms;
   Times[1][1] = intervalms - onms;
@@ -87,16 +180,12 @@ void Blink::blink(const uint32_t *times) {
 }
 
 
-void Blink::switchOn(bool on) {
-  if ( on != On ) {
-    digitalWrite(Pin, on);
-    On = on;
-  }
-}
-
-
-void Blink::switchOff() {
-  switchOn(false);
+void Blink::clear() {
+  Times[0][0] = 0;
+  State = 0;
+  Index = 0;
+  Time = 0;
+  switchOff();
 }
 
 
@@ -128,8 +217,22 @@ void Blink::update() {
 
 void Blink::delay(uint32_t delayms) {
   elapsedMillis time;
+  time = 0;
   while (time < delayms) {
     update();
   };
+}
+
+
+void Blink::switchOn(bool on) {
+  if ( on != On ) {
+    digitalWrite(Pin, on);
+    On = on;
+  }
+}
+
+
+void Blink::switchOff() {
+  switchOn(false);
 }
 

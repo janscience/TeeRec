@@ -73,11 +73,8 @@ bool openNextFile() {
   file.write();
   Serial.println(name);
   if (file.isOpen()) {
-    if (fileSaveTime < 30)
-      blink.set(2000, 100);
-    else
-      blink.set(5000, 100);
-    blink.blink(2000, 1000);
+    blink.setSingle();
+    blink.blinkSingle(0, 1000);
     return true;
   }
   else {
@@ -90,6 +87,8 @@ bool openNextFile() {
 
 
 void setupStorage() {
+  if (settings.FileTime > 30)
+    blink.setTiming(5000);
   if (file.dataDir(settings.Path))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval();
@@ -138,9 +137,9 @@ void setup() {
   aidata.report();
   blink.switchOff();
   if (settings.InitialDelay >= 2.0) {
-    uint32_t delayblinks[] = {50, 150, 50, 2000, 0};
-    blink.setDelayed(1000, delayblinks);
-    blink.delay(uint32_t(1000.0*settings.InitialDelay));
+    delay(1000);
+    blink.setDouble();
+    blink.delay(uint32_t(1000.0*settings.InitialDelay)-1000);
   }
   else
     delay(uint32_t(1000.0*settings.InitialDelay));
