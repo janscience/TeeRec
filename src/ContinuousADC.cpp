@@ -422,6 +422,9 @@ bool ContinuousADC::check() {
     ADCUse = 0;
     return false;
   }
+  if (bufferTime() < 0.1)
+    Serial.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
+		  1000.0*bufferTime());
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       if (NChans[adc] == 0) {
