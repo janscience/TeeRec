@@ -67,8 +67,7 @@ class Sensors {
   unsigned long Interval;
   elapsedMillis Time;
   int State;
-  SDCard *SDC;
-  char Path[100];
+  FsFile DF;
   RTClock *RTC;
 };
 

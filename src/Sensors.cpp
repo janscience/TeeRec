@@ -7,8 +7,6 @@ Sensors::Sensors() {
   Interval = 10000;
   Time = 0;
   State = 0;
-  SDC = 0;
-  Path[0] = '\0';
   RTC = 0;
 }
 
@@ -84,26 +82,24 @@ bool Sensors::writeCSVHeader(SDCard &sd, const char *path,
     sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
   *(--sp) = '\n';
   // create file and write header:
-  SDC = &sd;
   RTC = &rtc;
-  strcpy(Path, path);
-  if (append && sd.exists(Path))
-    return true;
-  FsFile df = SDC->openWrite(Path);
-  if (df) {
-    df.write(s, strlen(s));
-    df.close();
+  if (append && sd.exists(path)) {
+    DF = sd.openAppend(path);
     return true;
   }
-  else {
-    Path[0] = '\0';
+  DF = sd.openWrite(path);
+  if (DF) {
+    DF.write(s, strlen(s));
+    DF.close();
+    return true;
+  }
+  else
     return false;
-  }
 }
 
 
 bool Sensors::writeCSV() {
-  if (strlen(Path) == 0)
+  if (!DF)
     return false;
   char ts[20];
   if (RTC != 0)
@@ -121,13 +117,8 @@ bool Sensors::writeCSV() {
   }
   *(--sp) = '\n';
   *(++sp) = '\0';
-  // open file and write data:
-  FsFile df = SDC->openAppend(Path);
-  if (df) {
-    df.write(s, strlen(s));
-    df.close();
-    return true;
-  }
-  else
-    return false;
+  // write data:
+  DF.write(s, strlen(s));
+  DF.flush();
+  return bool(DF);
 }
