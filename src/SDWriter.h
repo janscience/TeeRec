@@ -70,7 +70,7 @@ class SDCard {
   bool available() const { return Available; };
 
   // True if SD card is busy.
-  bool isBusy() const;
+  bool isBusy();
 
   // Make directory if it does not exist and
   // make it the currrent working directory.

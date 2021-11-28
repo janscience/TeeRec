@@ -72,7 +72,7 @@ void SDCard::end() {
 }
 
 
-bool SDCard::isBusy() const {
+bool SDCard::isBusy() {
 #ifdef SDCARD_USE_SDFAT
   return SD.isBusy();
 #else
