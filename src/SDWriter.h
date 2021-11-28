@@ -6,6 +6,8 @@
 
   In case of library clashes, you might need to rename the library
   (base directory only) to something else, like, for example, SdFatG.
+
+  See https://forum.pjrc.com/threads/55114-SD-Datalogging-Best-Practice-in-2019?p=197915&viewfull=1#post197915 for tips.
 */
 
 #ifndef SDWriter_h
