@@ -91,12 +91,12 @@ void openNextFile() {
   char datetime[20];
   rtclock.dateTime(datetime);
   file.openWave(name.c_str(), aidata, -1, datetime);
-  file.writeData();
+  file.write();
   if (file.isOpen()) {
     screen.clearText(0);                // 35ms!
-    file.writeData();
+    file.write();
     screen.writeText(1, name.c_str());  // 25ms
-    file.writeData();
+    file.write();
     Serial.println(name);
   }
 }
@@ -114,7 +114,7 @@ void startWrite(int id) {
   // on button press:
   if (file.available() && !file.isOpen()) {
     file.setMaxFileSamples(0);
-    file.startWrite();
+    file.start();
     openNextFile();
   }
 }
@@ -221,7 +221,7 @@ void plotData() {   // 85ms
       screen.writeText(0, ts);
     }
     screen.clearPlots();   // 16ms
-    file.writeData();
+    file.write();
     size_t n = aidata.frames(settings.DisplayTime);
     float data[n];
     size_t start = aidata.currentSample(n);
@@ -235,7 +235,7 @@ void plotData() {   // 85ms
 
 void storeData() {
   if (file.needToWrite()) {
-    file.writeData();
+    file.write();
     if (file.endWrite()) {
       file.closeWave();
       if (logging)

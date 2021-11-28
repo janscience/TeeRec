@@ -70,7 +70,7 @@ bool openNextFile() {
   char dts[20];
   rtclock.dateTime(dts);
   file.openWave(name.c_str(), aidata, -1, dts);
-  file.writeData();
+  file.write();
   Serial.println(name);
   if (file.isOpen()) {
     if (fileSaveTime < 30)
@@ -94,14 +94,14 @@ void setupStorage() {
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval(aidata);
   file.setMaxFileTime(settings.FileTime);
-  file.startWrite();
+  file.start();
   openNextFile();
 }
 
 
 void storeData() {
   if (file.needToWrite()) {
-    size_t samples = file.writeData();
+    size_t samples = file.write();
     if (samples == 0) {
       blink.clear();
       Serial.println();

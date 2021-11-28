@@ -250,7 +250,7 @@ void loop() {
     // We run it for 2 buffers,
     // but analyse only the first half of the second buffer.
     // This excludes startup and shutdown noise...
-    file.startWrite(aidata.nbuffer()/2);
+    file.start(aidata.nbuffer()/2);
     delay(50);
     float sampledtime = aidata.sampledTime();
     Serial.printf("  avrg=%2d: %5.3fsec", averages_list[k], sampledtime);
@@ -265,7 +265,7 @@ void loop() {
     counter++;
     file.openWave(fname, aidata, 0);
     if ( file.isOpen() ) {
-      file.writeData();
+      file.write();
       file.closeWave();
       Serial.printf(" -> saved to %s\n", fname);
       watchdog.reset();

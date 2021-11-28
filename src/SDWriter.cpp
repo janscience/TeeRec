@@ -313,8 +313,8 @@ void SDWriter::setSoftware(const char *software) {
 }
 
  
-void SDWriter::setWriteInterval(const ContinuousADC &adc) {
-  WriteInterval = uint(250*adc.bufferTime()); // a quarter of the buffer
+void SDWriter::setWriteInterval() {
+  WriteInterval = uint(250*Data->bufferTime()); // a quarter of the buffer
 }
 
 
@@ -407,7 +407,7 @@ void SDWriter::closeWave() {
 }
 
 
-size_t SDWriter::writeData() {
+size_t SDWriter::write() {
   size_t nbytes = 0;
   size_t samples0 = 0;
   size_t samples1 = 0;
@@ -438,6 +438,7 @@ size_t SDWriter::writeData() {
   nwrite = index - Index;
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;
+  nwrite = (nwrite/MajorSize)*MajorSize;          // write only full blocks
   if (nwrite > 0) {
     nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
@@ -448,7 +449,7 @@ size_t SDWriter::writeData() {
 }
 
 
-void SDWriter::startWrite(size_t decr) {
+void SDWriter::start(size_t decr) {
   if (!synchronize())
     Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
   if (decr > 0)
@@ -462,22 +463,22 @@ size_t SDWriter::fileSamples() const {
 
 
 float SDWriter::fileTime() const {
-  return ContinuousADC::ADCC->time(FileSamples);
+  return Data->time(FileSamples);
 }
 
 
 void SDWriter::fileTimeStr(char *str) const {
-  ContinuousADC::ADCC->timeStr(FileSamples, str);
+  Data->timeStr(FileSamples, str);
 }
 
 
 void SDWriter::setMaxFileSamples(size_t samples) {
-  FileMaxSamples = (samples/ContinuousADC::MajorSize)*ContinuousADC::MajorSize;
+  FileMaxSamples = (samples/MajorSize)*MajorSize;
 }
 
 
 void SDWriter::setMaxFileTime(float secs) {
-  setMaxFileSamples(ContinuousADC::ADCC->samples(secs));
+  setMaxFileSamples(Data->samples(secs));
 }
 
 

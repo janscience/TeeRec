@@ -124,6 +124,10 @@ class SDWriter : public DataWorker {
 
  public:
 
+  // Size of blocks for writing.
+  // Must be an integer multiple of ContinuousADC::MajorSize.
+  static const size_t MajorSize = 512;
+
   // Initialize writer on default SD card.
   SDWriter(const DataWorker &data);
   // Initialize writer on SD card.
@@ -159,9 +163,9 @@ class SDWriter : public DataWorker {
   // Set name of software to be saved in wave header by openWave().
   void setSoftware(const char *software);
 
-  // Set write interval depending on adc settings.
-  // Call this *after* setting up ContinusADC in setup().
-  void setWriteInterval(const ContinuousADC &adc);
+  // Set write interval depending on DataBuffer settings.
+  // Call this *after* setting up DataBuffer in setup().
+  void setWriteInterval();
 
   // True if data need to be written to file.
   // Check this regularly in loop().
@@ -198,10 +202,10 @@ class SDWriter : public DataWorker {
   // Write available data to file (if the file is open).
   // If maxFileSamples() is set (>0), then stop writing after that many samples. 
   // Returns number of written samples.
-  size_t writeData();
+  size_t write();
 
   // Start writing to a file from the current minus decr sample on.
-  void startWrite(size_t decr=0);
+  void start(size_t decr=0);
 
   // Return current file size in samples.
   size_t fileSamples() const;
