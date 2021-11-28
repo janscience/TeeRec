@@ -25,7 +25,6 @@ ContinuousADC::ContinuousADC() :
   memset(SC1AChannels, 0, sizeof(SC1AChannels));
   memset(DMASettings, 0, sizeof(DMASettings));
 
-  Bits = DataBits;
   DataShift = 0;
   DataOffs = 0;
   DataScaling = true;
@@ -123,10 +122,14 @@ void ContinuousADC::unsetScaling() {
 }
 
 
+uint8_t ContinuousADC::resolution() const {
+  return ADCUse>0?Bits:0;
+}
+
+
 void ContinuousADC::setResolution(uint8_t bits) {
-  Bits = bits;
-  ADConv.adc[0]->setResolution(Bits);
-  Bits = ADConv.adc[0]->getResolution();
+  ADConv.adc[0]->setResolution(bits);
+  DataBuffer::setResolution(ADConv.adc[0]->getResolution());
   setDataResolution();
 }
 
@@ -142,11 +145,6 @@ void ContinuousADC::setDataResolution() {
     DataShift = 0;
     DataOffs = 0xFFFF << (DataBits - 1);
   }
-}
-
-
-uint8_t ContinuousADC::resolution() const {
-  return ADCUse>0?Bits:0;
 }
 
 
@@ -488,6 +486,18 @@ void ContinuousADC::report() {
   Serial.printf("  ADC1:       %s\n", chans1);
   Serial.printf("  Buffer:     %s\n", bts);
   Serial.println();
+}
+
+
+void ContinuousADC::setWaveHeader(WaveHeader &wave) const {
+  DataWorker::setWaveHeader(wave);
+  char cs[100];
+  channels(cs);
+  wave.setChannels(cs);
+  wave.setAveraging(averaging());
+  wave.setConversionSpeed(conversionSpeedShortStr());
+  wave.setSamplingSpeed(samplingSpeedShortStr());
+  wave.setReference(referenceStr());
 }
 
   

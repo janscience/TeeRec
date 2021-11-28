@@ -8,6 +8,7 @@
 
 
 #include <Arduino.h>
+#include <WaveHeader.h>
 
 
 class DataBuffer;
@@ -42,6 +43,13 @@ public:
   // Number of samples that have been missed to be consumed.
   // Sets the tail forward to the first still available sample.
   size_t overrun();
+
+  // Add metadata to the header of a wave file holding the data of the
+  // buffer.
+  // The default implementation calls this function of the producer.
+  // When implementing this function, you should call this default
+  // implementation first.
+  virtual void setWaveHeader(WaveHeader &wave) const;
 
 
 protected:

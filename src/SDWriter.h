@@ -16,7 +16,6 @@
 
 #include <Arduino.h>
 #include <DataWorker.h>
-#include <ContinuousADC.h>
 #include <WaveHeader.h>
 
 // undefine if you want to use the Teensy SD library instead:
@@ -190,13 +189,15 @@ class SDWriter : public DataWorker {
   FsFile &file();
 
 
-  // Open new file for writing and write wave header for settings from adc.
-  // For samples<0, take max file size from adc.
-  // For samples=0, initialize wave header with unspecified size.
-  // You then need to close the file with closeWave() and provide the number of samples there.
+  // Open new file for writing and write wave header with metadata
+  // from all data producers.
+  // For samples<0, take max file size.
+  // For samples=0, initialize wave header with unspecified size.  You
+  // then need to close the file with closeWave() and provide the
+  // number of samples there.
   // If no file extension is provided, ".wav" is added.
   // Takes about <=25ms.
-  void openWave(const char *fname, const ContinuousADC &adc, int32_t samples=-1,
+  void openWave(const char *fname, int32_t samples=-1,
                 const char *datetime=0);
 
   // Update wave header with proper file size and close file.

@@ -90,7 +90,7 @@ void openNextFile() {
     return;
   char datetime[20];
   rtclock.dateTime(datetime);
-  file.openWave(name.c_str(), aidata, -1, datetime);
+  file.openWave(name.c_str(), -1, datetime);
   file.write();
   if (file.isOpen()) {
     screen.clearText(0);                // 35ms!

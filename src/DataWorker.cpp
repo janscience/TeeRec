@@ -117,6 +117,12 @@ size_t DataWorker::overrun() {
 }
 
 
+void DataWorker::setWaveHeader(WaveHeader &wave) const {
+  if (Producer != 0)
+    Producer->setWaveHeader(wave);
+}
+
+
 bool DataWorker::synchronize() {
   if (Producer == 0) {
     reset();

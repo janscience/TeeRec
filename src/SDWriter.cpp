@@ -1,3 +1,4 @@
+#include <DataBuffer.h>
 #include <SDWriter.h>
 
 
@@ -371,8 +372,8 @@ FsFile &SDWriter::file() {
 }
 
 
-void SDWriter::openWave(const char *fname, const ContinuousADC &adc,
-			int32_t samples, const char *datetime) {
+void SDWriter::openWave(const char *fname, int32_t samples,
+			const char *datetime) {
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
@@ -380,15 +381,9 @@ void SDWriter::openWave(const char *fname, const ContinuousADC &adc,
     return;
   if (samples < 0)
     samples = FileMaxSamples;
-  Wave.setFormat(adc.nchannels(), adc.rate(), adc.resolution(),
-		 adc.dataResolution());
-  char channels[100];
-  adc.channels(channels);
-  Wave.setChannels(channels);
-  Wave.setAveraging(adc.averaging());
-  Wave.setConversionSpeed(adc.conversionSpeedShortStr());
-  Wave.setSamplingSpeed(adc.samplingSpeedShortStr());
-  Wave.setReference(adc.referenceStr());
+  Wave.setFormat(Data->nchannels(), Data->rate(), Data->resolution(),
+		 Data->dataResolution());
+  setWaveHeader(Wave);    // recursively calls setWaveHeader on all producers.
   Wave.setData(samples);
   if (datetime != 0)
     Wave.setDateTime(datetime);

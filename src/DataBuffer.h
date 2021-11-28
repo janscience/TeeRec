@@ -27,34 +27,45 @@ public:
   // Return the buffer.
   volatile sample_t *buffer() const { return Buffer; };
 
+  // Return resolution at data acquisition in bits per sample.
+  uint8_t resolution() const { return Bits; };
+  
+  // Set resolution of data acquisition to bits per sample.
+  virtual void setResolution(uint8_t bits);
+
   // Return used resolution of data buffer in bits per sample (max 16 bits).
   uint8_t dataResolution() const { return DataBits; };
 
   // Set used resolution of data buffer in bits per sample (max 16 bits).
-  void setDataResolution(uint8_t bits);
+  virtual void setDataResolution(uint8_t bits);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };
   
-  // Set the sampling rate per channel in Hertz.
+  // Set sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
 
   // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const { return NChannels; };
 
-  // Time the cyclic buffer can hold in seconds.
+  // Time the cyclic buffer can hold in seconds given the
+  // sampling rate and the number of channels.
   float bufferTime() const;
 
-  // Number of frames (samples of a single channel) corresponding to time (in seconds).
+  // Number of frames (samples of a single channel) corresponding to
+  // time (in seconds).
   size_t frames(float time) const;
 
-  // Number of samples (samples of all channel) corresponding to time (in seconds).
+  // Number of samples (samples of all channel) corresponding to time
+  // (in seconds).
   size_t samples(float time) const;
 
-  // Time in seconds corresponding to a given number of samples (not frames).
+  // Time in seconds corresponding to a given number of samples
+  // (not frames).
   float time(size_t samples) const;
 
-  // Return time corresponding to samples as a string displaying minutes and seconds.
+  // Return time corresponding to samples as a string displaying
+  // minutes and seconds.
   // str must hold at least 6 characters.
   void timeStr(size_t sample, char *str) const;
 
@@ -78,19 +89,21 @@ public:
   // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
   void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
 
-  // Check whether data in the whole buffer are within the specified range (for debugging).
+  // Check whether data in the whole buffer are within the specified range
+  // (for debugging).
   void checkData(int32_t min, int32_t max);
 
   
 protected:
 
   // DANGER: Buffer size must be a multiple of ContinuousADC::MajorSize and the maximum number of channels per ADC (16)!
- #ifdef TEENSY32
+#ifdef TEENSY32
   static const size_t NBuffer = 256*32;     // buffer size: 16kB
 #else
   static const size_t NBuffer = 256*256;    // buffer size: 128kB
 #endif
   volatile static sample_t __attribute__((aligned(32))) Buffer[NBuffer]; // the one and only buffer
+  uint8_t Bits;
   uint32_t Rate;             // sampling rate per channel
   uint8_t NChannels;         // number of channels multiplexed into the buffer
   uint8_t DataBits;

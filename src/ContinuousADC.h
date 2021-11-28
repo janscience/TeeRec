@@ -265,15 +265,16 @@ class ContinuousADC : public DataBuffer, public Configurable {
   
   // Set the sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
-  
-  // Set the resolution in bits per sample (valid values are 10, 12, 16 bit).
-  void setResolution(uint8_t bits);
 
   // Return ADC resolution in bits per sample.
   uint8_t resolution() const;
+  
+  // Set resolution of data acquisition in bits per sample
+  // Valid values are 10, 12, or 16 bit.
+  virtual void setResolution(uint8_t bits);
 
   // Set the number of averages taken by each sample.
-  // Can be 0, 4, 8, 16, or 32.
+  // Valid values are 0, 4, 8, 16, or 32.
   void setAveraging(uint8_t num);
 
   // Return the number of averages taken by each sample.
@@ -359,6 +360,10 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Print current settings on Serial.
   void report();
  
+  // Add metadata to the header of a wave file holding the data of the
+  // buffer.
+  virtual void setWaveHeader(WaveHeader &wave) const;
+
   // Start the acquisition based on the channel, rate, and buffer settings.
   void start();
 
@@ -394,7 +399,6 @@ class ContinuousADC : public DataBuffer, public Configurable {
   uint8_t NChans[2];
   uint8_t ADCUse;
 
-  uint8_t Bits;
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;
   ADC_SAMPLING_SPEED SamplingSpeed;

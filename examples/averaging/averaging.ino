@@ -263,7 +263,7 @@ void loop() {
     for (uint8_t c=0; c<nchannels; c++)
       results_stdevs[counter][c] = stdev(c, nframes/2, nframes);
     counter++;
-    file.openWave(fname, aidata, 0);
+    file.openWave(fname, 0);
     if ( file.isOpen() ) {
       file.write();
       file.closeWave();
