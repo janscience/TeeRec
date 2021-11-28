@@ -72,6 +72,15 @@ void SDCard::end() {
 }
 
 
+bool SDCard::isBusy() const {
+#ifdef SDCARD_USE_SDFAT
+  return SD.isBusy();
+#else
+  return false;
+#endif
+}
+
+
 bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;
@@ -265,7 +274,7 @@ SDWriter::~SDWriter() {
 }
 
 
-bool SDWriter::cardAvailable() {
+bool SDWriter::cardAvailable() const {
   return (SDC != NULL && SDC->available());
 }
 
@@ -319,7 +328,7 @@ void SDWriter::setWriteInterval() {
 
 
 bool SDWriter::needToWrite() {
-  if (DataFile && WriteTime > WriteInterval) {
+  if (DataFile && WriteTime > WriteInterval && SDC != 0 && !SDC->isBusy()) {
     WriteTime -= WriteInterval;
     return true;
   }

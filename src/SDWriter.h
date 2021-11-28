@@ -65,7 +65,10 @@ class SDCard {
   void end();
 
   // Availability of a SD card. 
-  bool available() { return Available; };
+  bool available() const { return Available; };
+
+  // True if SD card is busy.
+  bool isBusy() const;
 
   // Make directory if it does not exist and
   // make it the currrent working directory.
@@ -136,7 +139,7 @@ class SDWriter : public DataWorker {
   ~SDWriter();
 
   // Availability of a SD card. 
-  bool cardAvailable();
+  bool cardAvailable() const;
 
   // End usage of SD card if it was created by SDWriter.
   void end();
