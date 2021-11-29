@@ -1,5 +1,5 @@
 /*
-  SDWriter - library for writing recorded data to SD card.
+  SDWriter - library for writing data from a DataWorker to SD card.
   Created by Jan Benda, May 26th, 2021.
 
   Install SdFat library from Tools->Manage Libraries (search for SdFat).

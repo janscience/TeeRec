@@ -22,10 +22,11 @@ with contributions by
 - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
 - Highspeed timed acquisition up to 500kHz.
 - Conversion of data to signed 16bit for direct storage into wave files.
-- Storing recorded data as wave files on SD cards.
+- Continuous storing recorded data as wave files on SD cards.
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
-  version and its unique MAC address..
+  version, and its unique MAC address..
+- Acquisition of environmental sensor readings into CSV file with time stamps.
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
@@ -35,39 +36,75 @@ with contributions by
 
 ## Libraries
 
-- DataBuffer: A single cyclic, multiplexed buffer holding acquired data.
-- DataWorker - Producer/consumer working on a DataBuffer.
-- ContinousADC: Sample from multiple pins into a DataBuffer.
-- SDWrite: Write data from a DataWorker on SD card.
-- WaveHeader: Setting up wave file header with metadata.
-- Sensor: Virtual base class for environmental sensors.
-- Sensors: Manage environmental sensors.
-- Temperature: Read temperature from a 1-wire device.
-- Display: Display data on a monitor.
-- RTClock: Time and date strings from the real time clock.
-- Blink: Blinking LEDs.
-- PushButtons: Manage and query push buttons with callback functions.
-- TestSignals: Generate test signals on pulse-width modulation and DAC pins.
-- TeensyBoard: Find out which Teensy board we are running on.
-- Configurable: Base class for all configurable classes.
-- Settings: Common configurable settings (file name, path, etc.)
-- Configurator: Configure configurable class instances from a configuration file.
+The features provided by TeeRec are provided by many C++ classes,
+defined in the following libraries:
+
+### Data acquisition
+
+- [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
+- [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
+- [ContinousADC](src/ContinuousADC.h): Sample from multiple pins into a DataBuffer.
+- [SDWrite](src/SDWrite.h): Write data from a DataWorker to SD card.
+- [WaveHeader](src/WaveHeader.h): Setting up wave file header with metadata.
+
+### Sensor readings
+
+- [Sensor](src/Sensor.h): Virtual base class for environmental sensors.
+- [Sensors](src/Sensors.h): Manage environmental sensors.
+- [Temperature](src/Temperature.h): Read temperature from a 1-wire device.
+
+### Configuration
+
+- [Configurable](src/Configurable.h): Base class for all configurable classes.
+- [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
+- [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
+
+### Utilities
+
+- [Display](src/Display.h): Display data on a monitor.
+- [RTClock](src/RTClock.h): Time and date strings from the real time clock.
+- [Blink](src/Blink.h): Blinking LEDs.
+- [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
+- [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
+- [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
 
 
 ## Examples
 
-- scope: Show acquired data on a display.
-- logger: Continuously store data on SD card.
-- recorder: Show acquired data on a display and store data on SD card upon user request.
-- sinegen: Sine-wave generator.
-- maxrate: Test for maximum sampling rate.
-- averaging: Test various averaging settings for acquisition.
-- temperature: Read temperature from 1-wire device.
-- writeconfig: Write a defaul configuration file on SD card.
-- removefiles: Remove all files from a directory on SD card.
-- teensyboard: Print Teensy board version, serial number and MAC adress.
-- blink: Demonstrate usage of Blink class.
-- pushbuttons: Demonstrate usage of PushButtons class.
+In [examples/](examples) you find sketches demonstrating the use of
+the TeeRec libraries.
+
+### Data acquisition
+
+These examples could be used as the basis for you data acquisition application.
+
+- [scope](examples/scope): Show acquired data on a display.
+- [logger](examples/logger): Continuously store data on SD card.
+- [recorder](examples/recorder): Show acquired data on a display and store data on SD card upon user request.
+
+### Testing data acquisition
+
+Useful sketches for checking out the performance of the data acquisition.
+
+- [maxrate](examples/maxrate): Test for maximum possible sampling rate.
+- [averaging](examples/averaging): Test various averaging settings for acquisition.
+
+### Utilities
+
+Some useful utilities.
+
+- [sinegen](examples/sinegen): Sine-wave generator.
+- [teensyboard](examples/teensyboard): Print Teensy board version, serial number and MAC adress.
+- [writeconfig](examples/writeconfig): Write a default configuration file on SD card.
+- [removefiles](examples/removefiles): Remove all files from a directory on SD card.
+
+### Demos
+
+Demonstrate the usage of some of the provided libraries.
+
+- [temperature](examples/temperature): Read temperature from 1-wire device.
+- [blink](examples/blink): Demonstrate usage of Blink class.
+- [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
 
 
 ## Dependencies
