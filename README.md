@@ -26,7 +26,7 @@ with contributions by
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
   version, and its unique MAC address..
-- Acquisition of environmental sensor readings into CSV file with time stamps.
+- Acquisition of environmental sensor readings into CSV files with time stamps.
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
@@ -49,9 +49,9 @@ defined in the following libraries:
 
 ### Sensor readings
 
-- [Sensor](src/Sensor.h): Virtual base class for environmental sensors.
 - [Sensors](src/Sensors.h): Manage environmental sensors.
-- [Temperature](src/Temperature.h): Read temperature from a 1-wire device.
+- [Sensor](src/Sensor.h): Virtual base class for environmental sensors.
+- [Temperature](src/Temperature.h): A Sensor that reads temperature from a 1-wire device.
 
 ### Configuration
 

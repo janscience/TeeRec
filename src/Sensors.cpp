@@ -37,10 +37,21 @@ void Sensors::setInterval(float interval) {
 
 
 void Sensors::report() {
+  char ds[2] = {'\0', '\0'};
+  if (NSensors > 1)
+    ds[1] = 's';
+  Serial.printf("Sensors: %d device%s, read every %gs, stored in %d files\n",
+		NSensors, ds, 0.001*Interval, NFiles);
+  int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
+    if (Snsrs[k]->available()) {
+      Serial.printf("  ");
       Snsrs[k]->report();
+      n++;
+    }
   }
+  if (n == 0)
+    Serial.println("  no sensors avilable!");
 }
 
 
