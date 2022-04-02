@@ -6,6 +6,7 @@ Sensors::Sensors() :
   NSensors = 0;
   MaxDelay = 0;
   Interval = 10000;
+  UseInterval = Interval;
   Time = 0;
   State = 0;
   RTC = 0;
@@ -49,7 +50,12 @@ void Sensors::start() {
     if (Snsrs[k]->available() && Snsrs[k]->delay() > MaxDelay)
       MaxDelay = Snsrs[k]->delay();
   }
-  Time = Interval - MaxDelay;
+  UseInterval = Interval;
+  if (NFiles > 0)
+    UseInterval = Interval / NFiles;
+  if (UseInterval < 2*MaxDelay)
+    UseInterval = 2*MaxDelay;
+  Time = UseInterval - MaxDelay;
   State = 0;
   CFile = NFiles-1;
 }
@@ -57,17 +63,17 @@ void Sensors::start() {
 
 bool Sensors::update() {
   switch (State) {
-  case 0: if (Time > Interval - MaxDelay) {
+  case 0: if (Time > UseInterval - MaxDelay) {
       for (uint8_t k=0; k<NSensors; k++)
 	Snsrs[k]->request();
       State = 1;
     }
     break;
-  case 1: if (Time > Interval) {
+  case 1: if (Time > UseInterval) {
       for (uint8_t k=0; k<NSensors; k++)
 	Snsrs[k]->read();
       State = 0;
-      Time -= Interval;
+      Time -= UseInterval;
       return true;
     }
     break;
@@ -168,7 +174,7 @@ bool Sensors::writeCSV() {
 void Sensors::configure(const char *key, const char *val) {
   bool found = true;
   char pval[30];
-  if (strcmp(key, "interval") == 0) {
+  if (strcmp(key, "writeinterval") == 0) {
     setInterval(parseTime(val));
     sprintf(pval, "%gs", 0.001*Interval);
     Serial.printf("  set Sensors-%s to %s\n", key, pval);

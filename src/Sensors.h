@@ -77,6 +77,7 @@ class Sensors : public Configurable {
   Sensor *Snsrs[MaxSensors];
   unsigned long MaxDelay;
   unsigned long Interval;
+  unsigned long UseInterval;
   elapsedMillis Time;
   int State;
   static const uint8_t MaxFiles = 5; 
