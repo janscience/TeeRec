@@ -64,7 +64,11 @@ class Sensor {
   // Return the number of printed characters.
   virtual int print(char *s) const = 0;
 
+  // Configure Sensor settings with the provided key-value pair.
+  // Return true if key was used.
+  virtual bool configure(const char *key, const char *val) { return false; };
 
+  
 private:
 
   char Name[50];

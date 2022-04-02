@@ -1,14 +1,15 @@
 #include <Sensors.h>
 
 
-Sensors::Sensors() {
+Sensors::Sensors() :
+  Configurable("Sensors") {
   NSensors = 0;
   MaxDelay = 0;
   Interval = 10000;
   Time = 0;
   State = 0;
   RTC = 0;
-  NFiles = 0;
+  NFiles = 1;
   CFile = 0;
 }
 
@@ -23,6 +24,13 @@ void Sensors::addSensor(Sensor &sensor) {
     if (sensor.delay() > MaxDelay)
       MaxDelay = sensor.delay();
   }
+}
+
+
+void Sensors::setNFiles(int nfiles) {
+  NFiles = nfiles;
+  if (NFiles > MaxFiles)
+    NFiles = MaxFiles;
 }
 
 
@@ -74,9 +82,8 @@ void Sensors::print() {
 
 bool Sensors::openCSV(SDCard &sd, const char *path,
 		      RTClock &rtc, bool append) {
-  CFile = NFiles;
-  if (NFiles >= MaxFiles)
-    return false;
+  CFile = NFiles - 1;
+  RTC = &rtc;
   // compose header line:
   size_t n = 5;
   for (uint8_t k=0; k<NSensors; k++)
@@ -87,20 +94,30 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
   for (uint8_t k=0; k<NSensors; k++)
     sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
   *(--sp) = '\n';
-  // create file and write header:
-  RTC = &rtc;
-  if (append && sd.exists(path))
-    DF[NFiles] = sd.openAppend(path);
-  else
-    DF[NFiles] = sd.openWrite(path);
-  if (DF[NFiles]) {
-    DF[NFiles].write(s, strlen(s));
-    DF[NFiles].flush();
-    NFiles++;
-    return true;
+  // create files and write header:
+  char fpath[strlen(path)+10];
+  char ns[2];
+  strcpy(ns, "1");
+  bool success = true;
+  for (int nfiles=0; nfiles < NFiles; nfiles++) {
+    strcpy(fpath, path);
+    if (NFiles > 1) {
+      strcat(fpath, ns);
+      ns[0]++;
+    }
+    strcat(fpath, ".csv");
+    if (append && sd.exists(fpath))
+      DF[nfiles] = sd.openAppend(fpath);
+    else
+      DF[nfiles] = sd.openWrite(fpath);
+    if (DF[nfiles]) {
+      DF[nfiles].write(s, strlen(s));
+      DF[nfiles].flush();
+    }
+    else
+      success = false;
   }
-  else
-    return false;
+  return success;
 }
 
 
@@ -132,4 +149,31 @@ bool Sensors::writeCSV() {
   DF[CFile].write(s, strlen(s));
   DF[CFile].flush();
   return bool(DF[CFile]);
+}
+
+
+void Sensors::configure(const char *key, const char *val) {
+  bool found = true;
+  char pval[30];
+  if (strcmp(key, "interval") == 0) {
+    setInterval(parseTime(val));
+    sprintf(pval, "%gs", 0.001*Interval);
+    Serial.printf("  set Sensors-%s to %s\n", key, pval);
+  }
+  else if (strcmp(key, "nfiles") == 0) {
+    setNFiles(atoi(val));
+    sprintf(pval, "%d", NFiles);
+    Serial.printf("  set Sensors-%s to %s\n", key, pval);
+  }
+  else {
+    found = false;
+    for (uint8_t k=0; k<NSensors; k++) {
+      if (Snsrs[k]->configure(key, val)) {
+	found = true;
+	break;
+      }
+    }
+  }
+  if (!found)
+    Serial.printf("  Sensors key \"%s\" not found.\n", key);
 }

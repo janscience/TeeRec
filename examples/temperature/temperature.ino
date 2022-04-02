@@ -14,11 +14,11 @@ void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   sdcard.begin();
+  sensors.setNFiles(2);
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
   sensors.report();
-  sensors.openCSV(sdcard, "temperatures1.csv", rtclock);
-  sensors.openCSV(sdcard, "temperatures2.csv", rtclock);
+  sensors.openCSV(sdcard, "temperatures", rtclock);
   sensors.start();
   Serial.println();
 }

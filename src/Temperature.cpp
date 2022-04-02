@@ -143,3 +143,23 @@ int Temperature::print(char *s) const {
   return sprintf(s, "%.2f", value());
 }
 
+
+bool Temperature::configure(const char *key, const char *val) {
+  bool found = true;
+  char pval[30];
+  if (strcmp(key, "ds18x20-pin") == 0) {
+    int pin = -1;
+    if (strcmp(val, "none") != 0)
+      pin = atoi(val);
+    if (pin >= 0) {
+      sprintf(pval, "%d", pin);
+      Serial.printf("  initialize Temperature-%s at pin %s\n", key, pval);
+      begin(pin);
+    }
+    else
+      Serial.printf("  do not initialize Temperature-%s\n", key);
+  }
+  else
+    found = false;
+  return found;
+}

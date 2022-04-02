@@ -8,12 +8,13 @@
 
 
 #include <Arduino.h>
+#include <Configurable.h>
 #include <Sensor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 
 
-class Sensors {
+class Sensors : public Configurable {
 
  public:
 
@@ -27,6 +28,9 @@ class Sensors {
 
   // The index-th sensor.
   Sensor &operator[](uint8_t index) { return *Snsrs[index]; };
+
+  // Set number of csv files to be written.
+  void setNFiles(int nfiles);
 
   // Set update interval for reading sensor values to interval seconds.
   void setInterval(float interval);
@@ -45,8 +49,11 @@ class Sensors {
   // Report all sensor readings on serial monitor.
   void print();
 
-  // Open csv file for sensor readings to path on SD card sd
+  // Open csv files for sensor readings to path on SD card sd
   // and write header line.
+  // path is without extension. 'csv' is added.
+  // NFiles csv files are opened.
+  // If nfiles is greater than one, a number is added to path.
   // If append and path already exists, then keep the file
   // and do not write the header.
   // Return true on success.
@@ -59,7 +66,10 @@ class Sensors {
   // Return true on success.
   bool writeCSV();
 
- 
+  // Configure Sensor settings with the provided key-value pair.
+  virtual void configure(const char *key, const char *val);
+
+  
  private:
 
   static const uint8_t MaxSensors = 10; 

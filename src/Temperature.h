@@ -78,6 +78,12 @@ class Temperature : public Sensor {
   // Print the temperature in degrees celsius into string s.
   // Return the number of printed characters.
   virtual int print(char *s) const;
+
+  // Configure Temperature settings with the provided key-value pair.
+  // Return true if key was used.
+  // If key equals "ds18x20-pin", initialize temperature device on
+  // specified pin. If value is negative or "none", do not initialize.
+  virtual bool configure(const char *key, const char *val);
   
   
  private:
