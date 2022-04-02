@@ -45,15 +45,17 @@ class Sensors {
   // Report all sensor readings on serial monitor.
   void print();
 
-  // Write csv for sensor readings to path on SD card sd.
-  // Use rtc for getting time of sensor readings.
+  // Open csv file for sensor readings to path on SD card sd
+  // and write header line.
   // If append and path already exists, then keep the file
   // and do not write the header.
-  // Return on success.
-  bool writeCSVHeader(SDCard &sd, const char *path, RTClock &rtc,
-		      bool append=true);
+  // Return true on success.
+  // You can open up to MaxFiles files by calling this function
+  // repeatedly with different pathes.
+  bool openCSV(SDCard &sd, const char *path, RTClock &rtc,
+	       bool append=false);
 
-  // Write current sensor readings to csv file.
+  // Write current time and sensor readings to csv file.
   // Return true on success.
   bool writeCSV();
 
@@ -67,7 +69,10 @@ class Sensors {
   unsigned long Interval;
   elapsedMillis Time;
   int State;
-  FsFile DF;
+  static const uint8_t MaxFiles = 5; 
+  uint8_t NFiles;   // number of open csv files
+  uint8_t CFile;    // index of csv file to be written next
+  FsFile DF[MaxFiles];
   RTClock *RTC;
 };
 

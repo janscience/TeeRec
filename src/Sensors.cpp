@@ -8,6 +8,8 @@ Sensors::Sensors() {
   Time = 0;
   State = 0;
   RTC = 0;
+  NFiles = 0;
+  CFile = 0;
 }
 
 
@@ -38,6 +40,7 @@ void Sensors::report() {
 void Sensors::start() {
   Time = Interval - MaxDelay;
   State = 0;
+  CFile = NFiles-1;
 }
 
 
@@ -69,8 +72,11 @@ void Sensors::print() {
 }
 
 
-bool Sensors::writeCSVHeader(SDCard &sd, const char *path,
-			     RTClock &rtc, bool append) {
+bool Sensors::openCSV(SDCard &sd, const char *path,
+		      RTClock &rtc, bool append) {
+  CFile = NFiles;
+  if (NFiles >= MaxFiles)
+    return false;
   // compose header line:
   size_t n = 5;
   for (uint8_t k=0; k<NSensors; k++)
@@ -83,14 +89,14 @@ bool Sensors::writeCSVHeader(SDCard &sd, const char *path,
   *(--sp) = '\n';
   // create file and write header:
   RTC = &rtc;
-  if (append && sd.exists(path)) {
-    DF = sd.openAppend(path);
-    return true;
-  }
-  DF = sd.openWrite(path);
-  if (DF) {
-    DF.write(s, strlen(s));
-    DF.close();
+  if (append && sd.exists(path))
+    DF[NFiles] = sd.openAppend(path);
+  else
+    DF[NFiles] = sd.openWrite(path);
+  if (DF[NFiles]) {
+    DF[NFiles].write(s, strlen(s));
+    DF[NFiles].flush();
+    NFiles++;
     return true;
   }
   else
@@ -99,8 +105,13 @@ bool Sensors::writeCSVHeader(SDCard &sd, const char *path,
 
 
 bool Sensors::writeCSV() {
-  if (!DF)
+  // next file:
+  CFile++;
+  if (CFile >= NFiles)
+    CFile = 0;
+  if (CFile >= NFiles || !DF[CFile])
     return false;
+  // get time:
   char ts[20];
   if (RTC != 0)
     RTC->dateTime(ts);
@@ -118,7 +129,7 @@ bool Sensors::writeCSV() {
   *(--sp) = '\n';
   *(++sp) = '\0';
   // write data:
-  DF.write(s, strlen(s));
-  DF.flush();
-  return bool(DF);
+  DF[CFile].write(s, strlen(s));
+  DF[CFile].flush();
+  return bool(DF[CFile]);
 }

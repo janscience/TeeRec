@@ -17,7 +17,8 @@ void setup(void) {
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
   sensors.report();
-  sensors.writeCSVHeader(sdcard, "temperatures.csv", rtclock);
+  sensors.openCSV(sdcard, "temperatures1.csv", rtclock);
+  sensors.openCSV(sdcard, "temperatures2.csv", rtclock);
   sensors.start();
   Serial.println();
 }
