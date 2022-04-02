@@ -19,11 +19,7 @@ void Sensors::addSensor(Sensor &sensor) {
     Serial.println("Maximum number of supported sensors exceeded!");
     return;
   }
-  if (sensor.available()) {
-    Snsrs[NSensors++] = &sensor;
-    if (sensor.delay() > MaxDelay)
-      MaxDelay = sensor.delay();
-  }
+  Snsrs[NSensors++] = &sensor;
 }
 
 
@@ -40,12 +36,19 @@ void Sensors::setInterval(float interval) {
 
 
 void Sensors::report() {
-  for (uint8_t k=0; k<NSensors; k++)
-    Snsrs[k]->report();
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      Snsrs[k]->report();
+  }
 }
 
 
 void Sensors::start() {
+  MaxDelay = 0;
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available() && Snsrs[k]->delay() > MaxDelay)
+      MaxDelay = Snsrs[k]->delay();
+  }
   Time = Interval - MaxDelay;
   State = 0;
   CFile = NFiles-1;
@@ -74,9 +77,13 @@ bool Sensors::update() {
 
 
 void Sensors::print() {
-  for (uint8_t k=0; k<NSensors; k++)
-    Serial.printf("%s = %5.2f%s\n", Snsrs[k]->name(),
-		  Snsrs[k]->value(), Snsrs[k]->unit());
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      Serial.printf("%s = %5.2f%s\n", Snsrs[k]->name(),
+		    Snsrs[k]->value(), Snsrs[k]->unit());
+    else
+      Serial.printf("%s not available\n", Snsrs[k]->name());
+  }
 }
 
 
@@ -86,13 +93,17 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
   RTC = &rtc;
   // compose header line:
   size_t n = 5;
-  for (uint8_t k=0; k<NSensors; k++)
-    n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
+  }
   char s[n];
   char *sp = s;
   sp += sprintf(sp, "time,");
-  for (uint8_t k=0; k<NSensors; k++)
-    sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+  }
   *(--sp) = '\n';
   // create files and write header:
   char fpath[strlen(path)+10];
@@ -140,8 +151,10 @@ bool Sensors::writeCSV() {
   char *sp = s;
   sp += sprintf(sp, "%s,", ts);
   for (uint8_t k=0; k<NSensors; k++) {
-    sp += Snsrs[k]->print(sp);
-    *(++sp) = ',';
+    if (Snsrs[k]->available()) {
+      sp += Snsrs[k]->print(sp);
+      *(++sp) = ',';
+    }
   }
   *(--sp) = '\n';
   *(++sp) = '\0';
