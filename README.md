@@ -89,6 +89,11 @@ Useful sketches for checking out the performance of the data acquisition.
 - [maxrate](examples/maxrate): Test for maximum possible sampling rate.
 - [averaging](examples/averaging): Test various averaging settings for acquisition.
 
+### Environmental sensors
+
+- [temperature](examples/temperature): read temperature from DS18x20 one-wire temeprature sensor.
+- [sensorlogger](examples/sensorlogger): periodically write sensor readings with time stamp into a CSV file.
+
 ### Utilities
 
 Some useful utilities.

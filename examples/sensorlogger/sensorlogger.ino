@@ -40,10 +40,15 @@ void setup() {
   if (!temp.available() && tempPin >= 0)
     temp.begin(tempPin);
   sensors.report();
-  sensors.openCSV(sdcard, "sensors", rtclock);
-  sensors.start();
+  bool success = sensors.openCSV(sdcard, "sensors", rtclock);
   blink.switchOff();
-  blink.setSingle();
+  if (success) {
+    sensors.start();
+    blink.setSingle();
+  }
+  else {
+    while (1) {};
+  }
 }
 
 
