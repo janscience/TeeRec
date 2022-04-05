@@ -23,25 +23,25 @@
 // Default settings: -----------------------------------------------------------------------
 // (may be overwritten by config file recorder.cfg)
 
-int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
-int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
-uint32_t samplingRate = 100000;       // samples per second and channel in Hertz
+int bits = 12;                  // resolution: 10bit 12bit, or 16bit 
+int averaging = 4;              // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
+uint32_t samplingRate = 100000; // samples per second and channel in Hertz
 int8_t channels0 [] =  {A4, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-uint updateScreen = 500;             // milliseconds
+uint updateScreen = 500;        // milliseconds
 float displayTime = 0.005;
 //float displayTime = 0.001*updateScreen;
 
-bool logging = false;                // keep saving to files
-char fileName[] = "SDATELNUM.wav";   // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-float fileSaveTime = 10;             // seconds
+bool logging = false;           // keep saving to files
+char fileName[] = "SDATELNUM";  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+float fileSaveTime = 10;        // seconds
 
 int startPin = 16;
 
-int pulseFrequency = 500;            // Hertz
+int pulseFrequency = 500;       // Hertz
 #ifdef TEENSY32
-int signalPins[] = {3, 4, -1}; // pins where to put out test signals
+int signalPins[] = {3, 4, -1};  // pins where to put out test signals
 #else
 int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 #endif
@@ -60,7 +60,8 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 bool freezePlots = false;
 elapsedMillis screenTime;
 
-Settings settings("recordings", fileName, fileSaveTime, pulseFrequency, displayTime);
+Settings settings("recordings", fileName, fileSaveTime,
+		  pulseFrequency, displayTime);
 RTClock rtclock;
 String prevname; // previous file name
 PushButtons buttons;
@@ -87,8 +88,13 @@ void openNextFile() {
     prevname = name;
   }
   name = file.incrementFileName(name);
-  if (name.length() == 0 )
-    return;
+  if (name.length() == 0) {
+    Serial.println("WARNING: failed to open file on SD card.");
+    Serial.println("SD card probably not inserted.");
+    Serial.println();
+    return false;
+  }
+  name += ".wav";
   char datetime[20];
   rtclock.dateTime(datetime, t);
   file.openWave(name.c_str(), -1, datetime);
