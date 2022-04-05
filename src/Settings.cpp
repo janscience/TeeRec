@@ -21,6 +21,9 @@ void Settings::configure(const char *key, const char *val) {
     strcpy(pval, Path);
   }
   else if (strcmp(key, "filename") == 0) {
+    char *sp = strrchr(val, '.');
+    if (sp != NULL)
+      *sp = '\0';    // truncate file extension
     strncpy(FileName, val, MaxStr);
     strcpy(pval, FileName);
   }
