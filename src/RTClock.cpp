@@ -107,11 +107,13 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
 }
 
 
-void RTClock::date(char *str, bool brief) {
+void RTClock::date(char *str, time_t t, bool brief) {
   str[0] = '\0';
-  if (timeStatus() == timeNotSet)
-    return;
-  time_t t = now();
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return;
+    t = now();
+  }
   if (brief)
     sprintf(str, "%04d%02d%02d", year(t), month(t), day(t));
   else
@@ -119,11 +121,13 @@ void RTClock::date(char *str, bool brief) {
 }
 
 
-void RTClock::time(char *str, bool brief, bool dash) {
+void RTClock::time(char *str, time_t t, bool brief, bool dash) {
   str[0] = '\0';
-  if (timeStatus() == timeNotSet)
-    return;
-  time_t t = now();
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return;
+    t = now();
+  }
   if (brief)
     sprintf(str, "%02d%02d%02d", hour(t), minute(t), second(t));
   else if (dash)
@@ -133,11 +137,13 @@ void RTClock::time(char *str, bool brief, bool dash) {
 }
 
 
-void RTClock::dateTime(char *str, bool brief, bool dash) {
+void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) {
   str[0] = '\0';
-  if (timeStatus() == timeNotSet)
-    return;
-  time_t t = now();
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return;
+    t = now();
+  }
   if (brief)
     sprintf(str, "%04d%02d%02dT%02d%02d%02d",
 	    year(t), month(t), day(t), hour(t), minute(t), second(t));
@@ -150,33 +156,36 @@ void RTClock::dateTime(char *str, bool brief, bool dash) {
 }
 
 
-String RTClock::makeStr(const String &str, bool dash) {
+String RTClock::makeStr(const String &str, time_t t, bool dash) {
   char ts[20];
   String tstr = str;
-  if (timeStatus() == timeNotSet)
-    return "";
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return "";
+    t = now();
+  }
   if (tstr.indexOf("SDATETIME") >= 0) {
-    dateTime(ts, true);
+    dateTime(ts, t, true);
     tstr.replace("SDATETIME", ts);
   }
   else if (tstr.indexOf("DATETIME") >= 0) {
-    dateTime(ts, false, dash);
+    dateTime(ts, t, false, dash);
     tstr.replace("DATETIME", ts);
   }
   else if (tstr.indexOf("SDATE") >= 0) {
-    date(ts, true);
+    date(ts, t, true);
     tstr.replace("SDATE", ts);
   }
   else if (tstr.indexOf("DATE") >= 0) {
-    date(ts, false);
+    date(ts, t, false);
     tstr.replace("DATE", ts);
   }
   else if (tstr.indexOf("STIME") >= 0) {
-    time(ts, true);
+    time(ts, t, true);
     tstr.replace("STIME", ts);
   }
   else if (tstr.indexOf("TIME") >= 0) {
-    time(ts, false, dash);
+    time(ts, t, false, dash);
     tstr.replace("TIME", ts);
   }
   return tstr;

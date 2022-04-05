@@ -80,7 +80,8 @@ void setupADC() {
 
 
 void openNextFile() {
-  String name = rtclock.makeStr(settings.FileName, true);
+  time_t t = now();
+  String name = rtclock.makeStr(settings.FileName, t, true);
   if (name != prevname) {
     file.resetFileCounter();
     prevname = name;
@@ -89,7 +90,7 @@ void openNextFile() {
   if (name.length() == 0 )
     return;
   char datetime[20];
-  rtclock.dateTime(datetime);
+  rtclock.dateTime(datetime, t);
   file.openWave(name.c_str(), -1, datetime);
   file.write();
   if (file.isOpen()) {
@@ -105,7 +106,7 @@ void openNextFile() {
 void setupStorage() {
   if (file.available())
     file.dataDir(settings.Path);
-  file.setWriteInterval(aidata);
+  file.setWriteInterval();
   file.setMaxFileTime(settings.FileTime);
 }
 

@@ -55,7 +55,8 @@ void setupADC() {
 
 bool openNextFile() {
   blink.clear();
-  String name = rtclock.makeStr(settings.FileName, true);
+  time_t t = now();
+  String name = rtclock.makeStr(settings.FileName, t, true);
   if (name != prevname) {
     file.resetFileCounter();
     prevname = name;
@@ -68,7 +69,7 @@ bool openNextFile() {
     return false;
   }
   char dts[20];
-  rtclock.dateTime(dts);
+  rtclock.dateTime(dts, t);
   file.openWave(name.c_str(), -1, dts);
   file.write();
   Serial.println(name);
