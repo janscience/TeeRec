@@ -78,8 +78,8 @@ float Temperature::resolution() const {
 
 void Temperature::report() {
   if (available())
-    Serial.printf("Temperature device %s (ID: %s) at %.2f%s resolution.\n",
-		  Chip, AddrS, resolution(), unit());
+    Serial.printf("%s (%s): temperature device %s (ID: %s) at %.2f%s resolution.\n",
+		  name(), unit(), Chip, AddrS, resolution(), unit());
 }
 
 
