@@ -9,6 +9,7 @@ Sensors::Sensors() :
   UseInterval = Interval;
   Time = 0;
   State = 0;
+  Pending = false;
   RTC = 0;
   NFiles = 1;
   CFile = 0;
@@ -68,6 +69,7 @@ void Sensors::start() {
     UseInterval = 2*MaxDelay;
   Time = UseInterval - MaxDelay;
   State = 0;
+  Pending = false;
   CFile = NFiles-1;
 }
 
@@ -85,11 +87,19 @@ bool Sensors::update() {
 	Snsrs[k]->read();
       State = 0;
       Time -= UseInterval;
+      Pending = true;
       return true;
     }
     break;
   }
   return false;
+}
+
+
+bool Sensors::pending() {
+  bool p = Pending;
+  Pending = false;
+  return p;
 }
 
 

@@ -46,6 +46,10 @@ class Sensors : public Configurable {
   // Returns true if the sensor readings have been updated.
   bool update();
 
+  // Return true if sensor readings are pending.
+  // The pending state is cleared by this function.
+  bool pending();
+
   // Report all sensor readings on serial monitor.
   void print();
 
@@ -80,6 +84,7 @@ class Sensors : public Configurable {
   unsigned long UseInterval;
   elapsedMillis Time;
   int State;
+  bool Pending;
   static const uint8_t MaxFiles = 5; 
   uint8_t NFiles;   // number of open csv files
   uint8_t CFile;    // index of csv file to be written next
