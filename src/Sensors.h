@@ -60,14 +60,16 @@ class Sensors : public Configurable {
   // If nfiles is greater than one, a number is added to path.
   // If append and path already exists, then keep the file
   // and do not write the header.
-  // Return true on success.
+  // Return true on success, false on failure, no available sensors,
+  // or no files should be written.
   // You can open up to MaxFiles files by calling this function
   // repeatedly with different pathes.
   bool openCSV(SDCard &sd, const char *path, RTClock &rtc,
 	       bool append=false);
 
   // Write current time and sensor readings to csv file.
-  // Return true on success.
+  // Return true on success, false on failure or if no file is open
+  // for writing.
   bool writeCSV();
 
   // Configure Sensor settings with the provided key-value pair.

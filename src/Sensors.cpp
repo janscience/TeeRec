@@ -116,6 +116,8 @@ void Sensors::print() {
 
 bool Sensors::openCSV(SDCard &sd, const char *path,
 		      RTClock &rtc, bool append) {
+  if (NFiles == 0)
+    return false;
   CFile = NFiles - 1;
   RTC = &rtc;
   // compose header line:
@@ -123,6 +125,11 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available())
       n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
+  }
+  if (n <= 5) {
+    // no sensors:
+    NFiles = 0;
+    return false;
   }
   char s[n];
   char *sp = s;
@@ -160,6 +167,8 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
 
 
 bool Sensors::writeCSV() {
+  if (NFiles == 0)
+    return false;
   // next file:
   CFile++;
   if (CFile >= NFiles)
