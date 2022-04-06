@@ -199,6 +199,7 @@ void Sensors::configure(const char *key, const char *val) {
     found = false;
     for (uint8_t k=0; k<NSensors; k++) {
       if (Snsrs[k]->configure(key, val)) {
+	Snsrs[k]->setConfigured();
 	found = true;
 	break;
       }

@@ -9,6 +9,7 @@ Configurable::Configurable(const char *name) {
   ConfigName[k] = '\0';
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
+  Configured = false;
 }
 
 

@@ -28,6 +28,8 @@ class Configurator {
 
   void configure(SDCard &sd);
 
+  bool configured() const { return Configured; };
+
   static Configurator *Config;
 
   
@@ -39,6 +41,8 @@ class Configurator {
 
   static const size_t MaxFile = 100;
   char ConfigFile[MaxFile];
+
+  bool Configured;
 
 };
 

@@ -17,7 +17,7 @@ class Sensor {
   float NoValue = -INFINITY;
 
   // Initialize the sensor.
-  Sensor() { Name[0] = '\0'; Unit[0] = '\0'; };
+  Sensor() { Name[0] = '\0'; Unit[0] = '\0'; Configured = false; };
 
   // Initialize the sensor and set name and unit of sensor readings.
   Sensor(const char *name, const char *unit) { setName(name); setUnit(unit); };
@@ -68,11 +68,18 @@ class Sensor {
   // Return true if key was used.
   virtual bool configure(const char *key, const char *val) { return false; };
 
+  // Called from Sensors when this has been configured from a file, for example.
+  void setConfigured() { Configured = true; };
+
+  // True if this Sensor was configured from a file, for example.
+  bool configured() const { return Configured; };
+
   
 private:
 
   char Name[50];
   char Unit[50];
+  bool Configured;
   
 };
 

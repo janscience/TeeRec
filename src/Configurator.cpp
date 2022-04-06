@@ -10,6 +10,7 @@ Configurator::Configurator() {
   Config = this;
   NConfigs = 0;
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
+  Configured = false;
 }
 
 
@@ -46,6 +47,7 @@ void Configurator::configure(SDCard &sd) {
   FsFile file = sd.openRead(ConfigFile);
   if (!file || file.available() < 10) {
     Serial.printf("Configuration file \"%s\" not found or empty.\n\n", ConfigFile);
+    Configured = false;
     return;
   }
   Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
@@ -107,9 +109,11 @@ void Configurator::configure(SDCard &sd) {
 	  }
 	}
 	config->configure(key, val);
+	config->setConfigured();
       }
     }
   }
+  Configured = true;
   file.close();
   Serial.println();
 }

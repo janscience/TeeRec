@@ -29,11 +29,18 @@ class Configurable {
   // Returns frequency in Hertz from a string with unit (Hz, kHz, MHz, or mHz).
   static float parseFrequency(const char *val);
 
+  // Called from Configurator when this configurable is configured.
+  void setConfigured() { Configured = true; };
+
+  // True if this was configured from a file, for example.
+  bool configured() const { return Configured; };
+
 
  private:
 
   static const size_t MaxName = 100;
   char ConfigName[MaxName];
+  bool Configured;
 
 };
 
