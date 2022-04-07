@@ -117,6 +117,13 @@ bool Sensors::pending() {
 }
 
 
+bool Sensors::isBusy() {
+  if (NFiles == 0)
+    return false;
+  return DF[0].isBusy();
+}
+
+
 void Sensors::print() {
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available())

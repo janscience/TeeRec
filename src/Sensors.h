@@ -53,6 +53,9 @@ class Sensors : public Configurable {
   // The pending state is cleared by this function.
   bool pending();
 
+  // Return true if we write to files and SD card is busy.
+  bool isBusy();
+
   // Report all sensor readings on serial monitor.
   void print();
 
