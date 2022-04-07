@@ -13,6 +13,20 @@ Sensors::Sensors() :
   RTC = 0;
   NFiles = 1;
   CFile = 0;
+  Header = 0;
+}
+
+
+Sensors::Sensors(RTClock &rtc) :
+  Sensors() {
+  RTC = &rtc;
+}
+
+
+Sensors::~Sensors() {
+  if (Header != 0)
+    delete [] Header;
+  Header = 0;
 }
 
 
@@ -114,12 +128,14 @@ void Sensors::print() {
 }
 
 
-bool Sensors::openCSV(SDCard &sd, const char *path,
-		      RTClock &rtc, bool append) {
-  if (NFiles == 0)
-    return false;
-  CFile = NFiles - 1;
+void Sensors::setRTClock(RTClock &rtc) {
   RTC = &rtc;
+}
+
+
+void Sensors::makeCSVHeader() {
+  if (Header != 0)
+    delete [] Header;
   // compose header line:
   size_t n = 5;
   for (uint8_t k=0; k<NSensors; k++) {
@@ -128,21 +144,43 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
   }
   if (n <= 5) {
     // no sensors:
+    Header = new char[1];
+    *Header = '\0';
+    return;
+  }
+  Header = new char[n];
+  char *hp = Header;
+  hp += sprintf(hp, "time,");
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+  }
+  *(--hp) = '\n';
+}
+
+
+bool Sensors::openCSV(SDCard &sd, const char *path, bool append) {
+  if (NFiles == 0)
+    return false;
+  CFile = NFiles - 1;
+  if (Header == 0)
+    makeCSVHeader();
+  if (*Header == '\0') {
+    // no sensors:
     NFiles = 0;
     return false;
   }
-  char s[n];
-  char *sp = s;
-  sp += sprintf(sp, "time,");
-  for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
-      sp += sprintf(sp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
-  }
-  *(--sp) = '\n';
   // create files and write header:
   char fpath[strlen(path)+10];
   char ns[2];
   strcpy(ns, "1");
+  /*
+  uint64_t nbytes = (n*60*60*60*1000/Interval/512+1)*512;
+  if (nbytes < 1024)
+    nbytes = 1024;
+  char zeros[512];
+  memset(zeros, 0, 512);
+  */
   bool success = true;
   for (int nfiles=0; nfiles < NFiles; nfiles++) {
     strcpy(fpath, path);
@@ -153,10 +191,18 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
     strcat(fpath, ".csv");
     if (append && sd.exists(fpath))
       DF[nfiles] = sd.openAppend(fpath);
-    else
+    else {
       DF[nfiles] = sd.openWrite(fpath);
+      /*
+      DF[nfiles].preAllocate(nbytes);
+      DF[nfiles].sync();
+      for (uint64_t k=0; k<nbytes/512; k++)
+	DF[nfiles].write(zeros, 512);
+      DF[nfiles].seek(0);
+      */
+    }
     if (DF[nfiles]) {
-      DF[nfiles].write(s, strlen(s));
+      DF[nfiles].write(Header, strlen(Header));
       DF[nfiles].flush();
     }
     else
@@ -198,6 +244,22 @@ bool Sensors::writeCSV() {
   DF[CFile].write(s, strlen(s));
   DF[CFile].flush();
   return bool(DF[CFile]);
+}
+
+
+bool Sensors::closeCSV() {
+  if (NFiles == 0)
+    return false;
+  bool success = true;
+  for (int nfiles=0; nfiles < NFiles; nfiles++) {
+    /*
+    if (!DF[nfiles].truncate())
+      success = false;
+    */
+    if (!DF[nfiles].close())
+      success = false;
+  }
+  return success;
 }
 
 

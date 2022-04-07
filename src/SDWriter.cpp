@@ -232,7 +232,7 @@ FsFile SDCard::openRead(const char *path) {
 
 FsFile SDCard::openWrite(const char *path) {
 #ifdef SDCARD_USE_SDFAT
-  return SD.open(path, O_WRITE | O_CREAT);
+  return SD.open(path, O_RDWR | O_CREAT);
 #else
   return SD.open((CurrentPath + path).c_str(), FILE_WRITE_BEGIN);
 #endif
@@ -241,7 +241,7 @@ FsFile SDCard::openWrite(const char *path) {
 
 FsFile SDCard::openAppend(const char *path) {
 #ifdef SDCARD_USE_SDFAT
-  return SD.open(path, O_WRITE | O_APPEND);
+  return SD.open(path, O_RDWR | O_APPEND);
 #else
   return SD.open((CurrentPath + path).c_str(), FILE_WRITE);
 #endif

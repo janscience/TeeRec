@@ -4,10 +4,10 @@
 #include <RTClock.h>
 
 
-Temperature temp(10);  // DATA on pin 10
-Sensors sensors;
-SDCard sdcard;
 RTClock rtclock;
+Temperature temp(10);  // DATA on pin 10
+Sensors sensors(rtclock);
+SDCard sdcard;
 
 
 void setup(void) {
@@ -18,7 +18,7 @@ void setup(void) {
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
   sensors.report();
-  sensors.openCSV(sdcard, "temperatures", rtclock);
+  sensors.openCSV(sdcard, "temperatures");
   sensors.start();
   Serial.println();
 }

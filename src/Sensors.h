@@ -19,6 +19,8 @@ class Sensors : public Configurable {
  public:
 
   Sensors();
+  Sensors(RTClock &rtc);
+  ~Sensors();
 
   // Add a sensor if available.
   void addSensor(Sensor &sensor);
@@ -43,6 +45,7 @@ class Sensors : public Configurable {
 
   // Update sensor readings.
   // Call as often as possible in loop().
+  // You need to start the acquisition before by calling start()
   // Returns true if the sensor readings have been updated.
   bool update();
 
@@ -53,8 +56,16 @@ class Sensors : public Configurable {
   // Report all sensor readings on serial monitor.
   void print();
 
+  // Pass real-time clock to Sensors, needed by writeCSV().
+  void setRTClock(RTClock &rtc);
+  
+  // Create header line for CSV files.
+  // Usually, this is automatically called by openCSV().
+  void makeCSVHeader();
+
   // Open csv files for sensor readings to path on SD card sd
   // and write header line.
+  // If no header line was ever created, makeCSVHeader() is called.
   // path is without extension. 'csv' is added.
   // NFiles csv files are opened.
   // If nfiles is greater than one, a number is added to path.
@@ -62,15 +73,16 @@ class Sensors : public Configurable {
   // and do not write the header.
   // Return true on success, false on failure, no available sensors,
   // or no files should be written.
-  // You can open up to MaxFiles files by calling this function
-  // repeatedly with different pathes.
-  bool openCSV(SDCard &sd, const char *path, RTClock &rtc,
-	       bool append=false);
+  bool openCSV(SDCard &sd, const char *path, bool append=false);
 
   // Write current time and sensor readings to csv file.
   // Return true on success, false on failure or if no file is open
   // for writing.
   bool writeCSV();
+
+  // Close all csv files.
+  // Return true on success.
+  bool closeCSV();
 
   // Configure Sensor settings with the provided key-value pair.
   virtual void configure(const char *key, const char *val);
@@ -92,6 +104,7 @@ class Sensors : public Configurable {
   uint8_t CFile;    // index of csv file to be written next
   FsFile DF[MaxFiles];
   RTClock *RTC;
+  char *Header;
 };
 
 
