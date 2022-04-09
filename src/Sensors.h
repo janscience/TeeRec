@@ -31,9 +31,6 @@ class Sensors : public Configurable {
   // The index-th sensor.
   Sensor &operator[](uint8_t index) { return *Snsrs[index]; };
 
-  // Set number of csv files to be written.
-  void setNFiles(int nfiles);
-
   // Set update interval for reading sensor values to interval seconds.
   void setInterval(float interval);
 
@@ -62,28 +59,25 @@ class Sensors : public Configurable {
   // Pass real-time clock to Sensors, needed by writeCSV().
   void setRTClock(RTClock &rtc);
   
-  // Create header line for CSV files.
+  // Create header line for CSV file.
   // Usually, this is automatically called by openCSV().
   void makeCSVHeader();
 
-  // Open csv files for sensor readings to path on SD card sd
+  // Open csv file for sensor readings at path on SD card sd
   // and write header line.
   // If no header line was ever created, makeCSVHeader() is called.
   // path is without extension. 'csv' is added.
-  // NFiles csv files are opened.
-  // If nfiles is greater than one, a number is added to path.
   // If append and path already exists, then keep the file
   // and do not write the header.
-  // Return true on success, false on failure, no available sensors,
-  // or no files should be written.
+  // Return true on success, false on failure or no available sensors.
   bool openCSV(SDCard &sd, const char *path, bool append=false);
 
   // Write current time and sensor readings to csv file.
-  // Return true on success, false on failure or if no file is open
+  // Return true on success, false on failure or if file is not open
   // for writing.
   bool writeCSV();
 
-  // Close all csv files.
+  // Close csv file.
   // Return true on success.
   bool closeCSV();
 
@@ -102,12 +96,9 @@ class Sensors : public Configurable {
   elapsedMillis Time;
   int State;
   bool Pending;
-  static const uint8_t MaxFiles = 5; 
-  uint8_t NFiles;   // number of open csv files
-  uint8_t CFile;    // index of csv file to be written next
-  FsFile DF[MaxFiles];
-  RTClock *RTC;
+  FsFile DF;
   char *Header;
+  RTClock *RTC;
 };
 
 

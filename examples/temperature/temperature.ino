@@ -14,7 +14,6 @@ void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   sdcard.begin();
-  sensors.setNFiles(2);
   sensors.setInterval(3.0);
   sensors.addSensor(temp);
   sensors.report();

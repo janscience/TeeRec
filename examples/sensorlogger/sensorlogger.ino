@@ -10,7 +10,6 @@
 // (may be overwritten by config file sensorlogger.cfg)
 
 uint8_t tempPin = 10;         // pin for DATA line of thermometer
-int sensorsNFiles = 2;        // number of files used for storing sensor data
 float sensorsInterval = 10.0; // interval between sensors readings in seconds
 
 // ------------------------------------------------------------------------------------------
@@ -33,7 +32,6 @@ void setup() {
   rtclock.report();
   sensors.addSensor(temp);
   sensors.setInterval(sensorsInterval);
-  sensors.setNFiles(sensorsNFiles);
   sdcard.begin();
   config.setConfigFile("sensorlogger.cfg");
   config.configure(sdcard);

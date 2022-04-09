@@ -2,18 +2,17 @@
 
 
 Sensors::Sensors() :
-  Configurable("Sensors") {
-  NSensors = 0;
-  MaxDelay = 0;
-  Interval = 10000;
+  Configurable("Sensors"),
+  NSensors(0),
+  MaxDelay(0),
+  Interval(10000),
+  Time(0),
+  State(0),
+  Pending(false),
+  DF(),
+  Header(0),
+  RTC(0) {
   UseInterval = Interval;
-  Time = 0;
-  State = 0;
-  Pending = false;
-  RTC = 0;
-  NFiles = 1;
-  CFile = 0;
-  Header = 0;
 }
 
 
@@ -39,13 +38,6 @@ void Sensors::addSensor(Sensor &sensor) {
 }
 
 
-void Sensors::setNFiles(int nfiles) {
-  NFiles = nfiles;
-  if (NFiles > MaxFiles)
-    NFiles = MaxFiles;
-}
-
-
 void Sensors::setInterval(float interval) {
   Interval = (unsigned long)(1000.0*interval);
 }
@@ -55,8 +47,8 @@ void Sensors::report() {
   char ds[2] = {'\0', '\0'};
   if (NSensors > 1)
     ds[1] = 's';
-  Serial.printf("Sensors: %d device%s, read every %gs, stored in %d files\n",
-		NSensors, ds, 0.001*Interval, NFiles);
+  Serial.printf("Sensors: %d device%s, read every %gs\n",
+		NSensors, ds, 0.001*Interval);
   int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
@@ -77,14 +69,11 @@ void Sensors::start() {
       MaxDelay = Snsrs[k]->delay();
   }
   UseInterval = Interval;
-  if (NFiles > 0)
-    UseInterval = Interval / NFiles;
   if (UseInterval < 2*MaxDelay)
     UseInterval = 2*MaxDelay;
   Time = UseInterval - MaxDelay;
   State = 0;
   Pending = false;
-  CFile = NFiles-1;
 }
 
 
@@ -118,9 +107,10 @@ bool Sensors::pending() {
 
 
 bool Sensors::isBusy() {
-  if (NFiles == 0)
+  if (DF)
+    return DF.isBusy();
+  else
     return false;
-  return DF[0].isBusy();
 }
 
 
@@ -167,66 +157,34 @@ void Sensors::makeCSVHeader() {
 
 
 bool Sensors::openCSV(SDCard &sd, const char *path, bool append) {
-  if (NFiles == 0)
-    return false;
-  CFile = NFiles - 1;
+  if (DF)
+    closeCSV();
   if (Header == 0)
     makeCSVHeader();
   if (*Header == '\0') {
     // no sensors:
-    NFiles = 0;
     return false;
   }
-  // create files and write header:
+  // create file and write header:
   char fpath[strlen(path)+10];
-  char ns[2];
-  strcpy(ns, "1");
-  /*
-  uint64_t nbytes = (n*60*60*60*1000/Interval/512+1)*512;
-  if (nbytes < 1024)
-    nbytes = 1024;
-  char zeros[512];
-  memset(zeros, 0, 512);
-  */
-  bool success = true;
-  for (int nfiles=0; nfiles < NFiles; nfiles++) {
-    strcpy(fpath, path);
-    if (NFiles > 1) {
-      strcat(fpath, ns);
-      ns[0]++;
-    }
-    strcat(fpath, ".csv");
-    if (append && sd.exists(fpath))
-      DF[nfiles] = sd.openAppend(fpath);
-    else {
-      DF[nfiles] = sd.openWrite(fpath);
-      /*
-      DF[nfiles].preAllocate(nbytes);
-      DF[nfiles].sync();
-      for (uint64_t k=0; k<nbytes/512; k++)
-	DF[nfiles].write(zeros, 512);
-      DF[nfiles].seek(0);
-      */
-    }
-    if (DF[nfiles]) {
-      DF[nfiles].write(Header, strlen(Header));
-      DF[nfiles].flush();
-    }
-    else
-      success = false;
+  strcpy(fpath, path);
+  strcat(fpath, ".csv");
+  if (append && sd.exists(fpath))
+    DF = sd.openAppend(fpath);
+  else
+    DF = sd.openWrite(fpath);
+  if (DF) {
+    DF.write(Header, strlen(Header));
+    DF.flush();
+    return true;
   }
-  return success;
+  else
+    return false;
 }
 
 
 bool Sensors::writeCSV() {
-  if (NFiles == 0)
-    return false;
-  // next file:
-  CFile++;
-  if (CFile >= NFiles)
-    CFile = 0;
-  if (CFile >= NFiles || !DF[CFile])
+  if (!DF)
     return false;
   // get time:
   char ts[20];
@@ -248,25 +206,16 @@ bool Sensors::writeCSV() {
   *(--sp) = '\n';
   *(++sp) = '\0';
   // write data:
-  DF[CFile].write(s, strlen(s));
-  DF[CFile].flush();
-  return bool(DF[CFile]);
+  DF.write(s, strlen(s));
+  DF.flush();
+  return bool(DF);
 }
 
 
 bool Sensors::closeCSV() {
-  if (NFiles == 0)
+  if (!DF)
     return false;
-  bool success = true;
-  for (int nfiles=0; nfiles < NFiles; nfiles++) {
-    /*
-    if (!DF[nfiles].truncate())
-      success = false;
-    */
-    if (!DF[nfiles].close())
-      success = false;
-  }
-  return success;
+  return (!DF.close());
 }
 
 
@@ -276,11 +225,6 @@ void Sensors::configure(const char *key, const char *val) {
   if (strcmp(key, "writeinterval") == 0) {
     setInterval(parseTime(val));
     sprintf(pval, "%gs", 0.001*Interval);
-    Serial.printf("  set Sensors-%s to %s\n", key, pval);
-  }
-  else if (strcmp(key, "nfiles") == 0) {
-    setNFiles(atoi(val));
-    sprintf(pval, "%d", NFiles);
     Serial.printf("  set Sensors-%s to %s\n", key, pval);
   }
   else {
