@@ -167,9 +167,14 @@ class SDWriter : public DataWorker {
   // Set name of software to be saved in wave header by openWave().
   void setSoftware(const char *software);
 
-  // Set write interval depending on DataBuffer settings.
-  // Call this *after* setting up DataBuffer in setup().
+  // Return write interval in seconds.
+  float writeInterval() const;
+
+  // Set write interval depending on settings of the DataWorker.
   void setWriteInterval();
+
+  // Return time after last write in seconds.
+  float writeTime() const;
 
   // True if data need to be written to file.
   // Check this regularly in loop().
@@ -206,7 +211,8 @@ class SDWriter : public DataWorker {
 
   
   // Write available data to file (if the file is open).
-  // If maxFileSamples() is set (>0), then stop writing after that many samples. 
+  // If maxFileSamples() is set (>0), then stop writing after that
+  // many samples.
   // Returns number of written samples.
   size_t write();
 

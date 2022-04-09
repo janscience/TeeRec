@@ -254,6 +254,7 @@ SDWriter::SDWriter(const DataWorker &producer) :
   SDOwn = true;
   DataFile.close();
   WriteInterval = 100;
+  WriteTime = 0;
   FileSamples = 0;
   FileMaxSamples = 0;
 }
@@ -265,6 +266,7 @@ SDWriter::SDWriter(SDCard &sd, const DataWorker &producer) :
   SDOwn = false;
   DataFile.close();
   WriteInterval = 100;
+  WriteTime = 0;
   FileSamples = 0;
   FileMaxSamples = 0;
 }
@@ -291,6 +293,8 @@ void SDWriter::end() {
     }
     SDC = NULL;
   }
+  WriteTime = 0;
+  FileSamples = 0;
 }
 
 
@@ -322,9 +326,19 @@ void SDWriter::setSoftware(const char *software) {
   Wave.setSoftware(software);
 }
 
+
+float SDWriter::writeInterval() const {
+  return 0.001*WriteInterval;
+}
+
  
 void SDWriter::setWriteInterval() {
   WriteInterval = uint(250*Data->bufferTime()); // a quarter of the buffer
+}
+
+
+float SDWriter::writeTime() const {
+  return 0.001*WriteTime;
 }
 
 
