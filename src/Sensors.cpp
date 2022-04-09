@@ -91,26 +91,20 @@ bool Sensors::update() {
       State = 0;
       Time -= UseInterval;
       Pending = true;
-      return true;
     }
     break;
   }
-  return false;
+  return pending();
 }
 
 
 bool Sensors::pending() {
   bool p = Pending;
-  Pending = false;
-  return p;
-}
-
-
-bool Sensors::isBusy() {
   if (DF)
-    return DF.isBusy();
-  else
-    return false;
+    p = (Pending && !DF.isBusy());
+  if (p)
+    Pending = false;
+  return p;
 }
 
 
