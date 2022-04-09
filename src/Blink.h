@@ -14,14 +14,20 @@ class Blink {
 
  public:
 
+  // Initialize Blink. At some point you need to specify the pin to be
+  // used for controling a LED via setPin().
+  Blink();
+
   // Control LED on pin.
-  Blink(int pin=LED_BUILTIN);
+  Blink(int pin);
 
   // Switch off LED.
   ~Blink();
 
+  // Set pin of LED.
+  void setPin(int pin=LED_BUILTIN);
 
-  // abstract level:
+  // abstract level (requires update() to be called regularly):
 
   // Set interval, on time, and off time in milliseconds.
   // Defaults are 2000, 50, and 150 milliseconds, respectively.
@@ -50,21 +56,27 @@ class Blink {
 
   // One-shot single blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming().
+  // setTiming(). After this single blink, the blinking pattern
+  // provided by setSingle(), setDouble(), setTriple(), set() or
+  // setDelayed() is resumed.
   void blinkSingle(uint32_t intervalms=0, uint32_t onms=0);
 
   // One-shot double blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming().
+  // setTiming(). After this single blink, the blinking pattern
+  // provided by setSingle(), setDouble(), setTriple(), set() or
+  // setDelayed() is resumed.
   void blinkDouble(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0);
 
   // One-shot triple blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming().
+  // setTiming(). After this single blink, the blinking pattern
+  // provided by setSingle(), setDouble(), setTriple(), set() or
+  // setDelayed() is resumed.
   void blinkTriple(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0);
  
 
-  // detailed level:
+  // detailed level (requires update() to be called regularly):
 
   // Set simple blink interval. Every intervalms the LED is on for onms.
   void set(uint32_t intervalms, uint32_t onms);

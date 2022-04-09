@@ -2,10 +2,8 @@
 #include "Blink.h"
 
 
-Blink::Blink(int pin) {
-  Pin = pin;
-  pinMode(Pin, OUTPUT);
-  digitalWrite(Pin, LOW);
+Blink::Blink() {
+  Pin = -1;
   On = false;
   memset(Times, 0, sizeof(Times));
   Index = 0;
@@ -17,8 +15,21 @@ Blink::Blink(int pin) {
 }
 
 
+Blink::Blink(int pin) :
+  Blink() {
+  setPin(pin);
+}
+
+
 Blink::~Blink() {
   switchOff();
+}
+
+
+void Blink::setPin(int pin) {
+  Pin = pin;
+  pinMode(Pin, OUTPUT);
+  digitalWrite(Pin, LOW);
 }
 
 
@@ -226,7 +237,8 @@ void Blink::delay(uint32_t delayms) {
 
 void Blink::switchOn(bool on) {
   if ( on != On ) {
-    digitalWrite(Pin, on);
+    if (Pin >=0 )
+      digitalWrite(Pin, on);
     On = on;
   }
 }
