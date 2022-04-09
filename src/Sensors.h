@@ -46,7 +46,7 @@ class Sensors : public Configurable {
   // Returns true if the sensor readings have been updated.
   bool update();
 
-  // Return true if sensor readings are pending.
+  // Return true if sensor readings are pending and the csv file is not busy.
   // The pending state is cleared by this function.
   bool pending();
 

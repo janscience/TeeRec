@@ -91,10 +91,11 @@ bool Sensors::update() {
       State = 0;
       Time -= UseInterval;
       Pending = true;
+      return true;
     }
     break;
   }
-  return pending();
+  return false;
 }
 
 
