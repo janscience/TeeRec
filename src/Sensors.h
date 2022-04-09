@@ -31,10 +31,13 @@ class Sensors : public Configurable {
   // The index-th sensor.
   Sensor &operator[](uint8_t index) { return *Snsrs[index]; };
 
+  // Update interval for reading sensor values in seconds.
+  float interval() const;
+
   // Set update interval for reading sensor values to interval seconds.
   void setInterval(float interval);
 
-  // Report all sensor devices on serial monitor.
+  // Report properties of all sensor devices on serial monitor.
   void report();
 
   // Start acquisition of sensor values.
@@ -46,14 +49,14 @@ class Sensors : public Configurable {
   // Returns true if the sensor readings have been updated.
   bool update();
 
-  // Return true if sensor readings are pending and the csv file is not busy.
-  // The pending state is cleared by this function.
+  // Return true if sensor readings prepared for csv files are pending
+  // and the csv file is not busy.
   bool pending();
 
   // Report all sensor readings on serial monitor.
   void print();
 
-  // Pass real-time clock to Sensors, needed by writeCSV().
+  // Pass real-time clock to Sensors, needed to get time stamps.
   void setRTClock(RTClock &rtc);
   
   // Create header line for CSV file.
@@ -83,6 +86,9 @@ class Sensors : public Configurable {
 
   
  private:
+  
+  // Create data line for CSV file.
+  void makeCSVData();
 
   static const uint8_t MaxSensors = 10; 
   uint8_t NSensors; 
@@ -92,9 +98,11 @@ class Sensors : public Configurable {
   unsigned long UseInterval;
   elapsedMillis Time;
   int State;
-  bool Pending;
   FsFile DF;
-  char *Header;
+  char *Header;   // header string for CSV file
+  char *Data;     // 100 data lines for CSV file
+  size_t NData;      // size of Data string
+  size_t MData;      // Approximate size of single data line
   RTClock *RTC;
 };
 

@@ -491,6 +491,11 @@ size_t SDWriter::maxFileSamples() const {
 }
 
 
+float SDWriter::maxFileTime() const {
+  return Data->time(FileMaxSamples);
+}
+
+
 bool SDWriter::endWrite() {
   return ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples );
 }

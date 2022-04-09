@@ -232,6 +232,9 @@ class SDWriter : public DataWorker {
   // Return actually used maximum file size in samples.
   size_t maxFileSamples() const;
 
+  // Return maximum file size in seconds.
+  float maxFileTime() const;
+
   // Return true if maximum number of samples have been written
   // and a new file needs to be opened.
   bool endWrite();
