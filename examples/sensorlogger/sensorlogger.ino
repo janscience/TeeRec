@@ -19,7 +19,7 @@ Configurator config;
 Temperature temp;
 Sensors sensors(rtclock);
 SDCard sdcard;
-Blink blink;
+Blink blink(LED_BUILTIN);
 
 
 // ------------------------------------------------------------------------------------------
@@ -51,7 +51,8 @@ void setup() {
 
 
 void loop() {
-  if (sensors.update())
+  sensors.update();
+  if (sensors.pending())
     sensors.writeCSV();
   blink.update();
 }

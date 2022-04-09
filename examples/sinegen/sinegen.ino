@@ -2,7 +2,7 @@
 #include <Blink.h>
 
 Waveform wave;
-Blink blink;
+Blink blink(LED_BUILTIN);
 
 float freq = 500.0;
 float ampl = 0.02;

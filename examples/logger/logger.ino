@@ -37,7 +37,7 @@ Settings settings("recordings", fileName, fileSaveTime, pulseFrequency,
                   0.0, initialDelay);
 RTClock rtclock;
 String prevname; // previous file name
-Blink blink;
+Blink blink(LED_BUILTIN);
 
 
 void setupADC() {

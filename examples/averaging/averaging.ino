@@ -89,7 +89,7 @@ DMAMEM size_t counter;
 ContinuousADC aidata;
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-Blink blink;
+Blink blink(LED_BUILTIN);
 Watchdog watchdog;
 
 

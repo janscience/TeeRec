@@ -5,7 +5,7 @@
 char path[] = "recordings";
 
 SDCard sd;
-Blink blink;
+Blink blink(LED_BUILTIN);
 
 
 void setup() {

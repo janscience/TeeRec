@@ -24,7 +24,7 @@ const char *fname = "teerec.cfg";
 
 
 SDCard sd;
-Blink blink;
+Blink blink(LED_BUILTIN);
 
 
 void setup() {

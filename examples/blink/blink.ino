@@ -1,6 +1,6 @@
 #include <Blink.h>
 
-Blink blink;
+Blink blink(LED_BUILTIN);
 elapsedMillis Time;
 
 
