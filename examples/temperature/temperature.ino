@@ -12,12 +12,11 @@ void setup(void) {
   temp.setName("T");
   sensors.setInterval(1.0);
   sensors.addSensor(temp);
-  sensors.report();
   sensors.start();
-  Serial.println();
+  sensors.printHeader();
 }
 
 void loop(void) {
   if (sensors.update())
-    sensors.print();
+    sensors.printValues();
 }

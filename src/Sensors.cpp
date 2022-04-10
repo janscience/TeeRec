@@ -130,6 +130,24 @@ void Sensors::print() {
 }
 
 
+void Sensors::printHeader() {
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      Serial.printf("%s/%s\t", Snsrs[k]->name(), Snsrs[k]->unit());
+  }
+  Serial.println();
+}
+
+
+void Sensors::printValues() {
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      Serial.printf("%5.2f\t", Snsrs[k]->value());
+  }
+  Serial.println();
+}
+
+
 void Sensors::setRTClock(RTClock &rtc) {
   RTC = &rtc;
 }

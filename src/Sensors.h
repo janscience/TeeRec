@@ -53,8 +53,15 @@ class Sensors : public Configurable {
   // and the csv file is not busy.
   bool pending();
 
-  // Report all sensor readings on serial monitor.
+  // Report sensor readings with name and unit on serial monitor.
   void print();
+
+  // Report sensor names and units separated by tabs on serial monitor.
+  void printHeader();
+
+  // Report sensor readings separated by tabs on serial monitor.
+  // Use printHeader() to annotate the printed columns.
+  void printValues();
 
   // Pass real-time clock to Sensors, needed to get time stamps.
   void setRTClock(RTClock &rtc);
