@@ -14,8 +14,8 @@ float sensorsInterval = 10.0; // interval between sensors readings in seconds
 
 // ------------------------------------------------------------------------------------------
 
-RTClock rtclock;
 Configurator config;
+RTClock rtclock;
 Temperature temp;
 Sensors sensors(rtclock);
 SDCard sdcard;
@@ -43,6 +43,7 @@ void setup() {
   if (success) {
     sensors.start();
     blink.setSingle();
+    Serial.println();
   }
   else {
     while (1) {};
@@ -51,7 +52,8 @@ void setup() {
 
 
 void loop() {
-  sensors.update();
+  if (sensors.update())
+    sensors.print();
   if (sensors.pending())
     sensors.writeCSV();
   blink.update();
