@@ -176,9 +176,9 @@ class SDWriter : public DataWorker {
   // Return time after last write in seconds.
   float writeTime() const;
 
-  // True if data need to be written to file.
-  // Check this regularly in loop().
-  bool needToWrite();
+  // True if data are pending that need to be written to file.
+  // Check this regularly in loop() and call write() if true is returned.
+  bool pending();
 
   // Open new file for writing (<=11ms).
   // fname is the name of the file inclusively extension.

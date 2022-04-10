@@ -342,7 +342,7 @@ float SDWriter::writeTime() const {
 }
 
 
-bool SDWriter::needToWrite() {
+bool SDWriter::pending() {
   if (DataFile && WriteTime > WriteInterval && SDC != 0 && !SDC->isBusy()) {
     WriteTime -= WriteInterval;
     return true;

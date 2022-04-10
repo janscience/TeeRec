@@ -241,7 +241,7 @@ void plotData() {   // 85ms
 
 
 void storeData() {
-  if (file.needToWrite()) {
+  if (file.pending()) {
     file.write();
     if (file.endWrite()) {
       file.closeWave();
