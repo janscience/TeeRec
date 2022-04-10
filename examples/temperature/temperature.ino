@@ -1,30 +1,23 @@
 #include <Sensors.h>
 #include <Temperature.h>
-#include <SDWriter.h>
-#include <RTClock.h>
 
 
-RTClock rtclock;
 Temperature temp(10);  // DATA on pin 10
-Sensors sensors(rtclock);
-SDCard sdcard;
+Sensors sensors;
 
 
 void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  sdcard.begin();
-  sensors.setInterval(3.0);
+  temp.setName("T");
+  sensors.setInterval(1.0);
   sensors.addSensor(temp);
   sensors.report();
-  sensors.openCSV(sdcard, "temperatures");
   sensors.start();
   Serial.println();
 }
 
 void loop(void) {
-  if (sensors.update()) {
+  if (sensors.update())
     sensors.print();
-    sensors.writeCSV();
-  }
 }
