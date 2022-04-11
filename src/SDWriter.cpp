@@ -334,7 +334,7 @@ float SDWriter::writeInterval() const {
  
 void SDWriter::setWriteInterval() {
   WriteInterval = uint(250*Data->bufferTime()); // a quarter of the buffer
-  //WriteInterval = uint(100*Data->bufferTime()); // a thenth of the buffer
+  //WriteInterval = uint(100*Data->bufferTime()); // a tenth of the buffer
 }
 
 

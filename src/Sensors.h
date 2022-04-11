@@ -67,7 +67,9 @@ class Sensors : public Configurable {
   
   // Create header line for CSV file.
   // Usually, this is automatically called by openCSV().
-  void makeCSVHeader();
+  // Returns true if header line was created.
+  // Returns false if no sensors are available or header line is too long.
+  bool makeCSVHeader();
 
   // Open csv file for sensor readings at path on SD card sd
   // and write header line.
@@ -94,7 +96,8 @@ class Sensors : public Configurable {
  private:
   
   // Create data line for CSV file.
-  void makeCSVData();
+  // Return false on overflow of data buffer.
+  bool makeCSVData();
 
   static const uint8_t MaxSensors = 10; 
   uint8_t NSensors; 
@@ -105,11 +108,11 @@ class Sensors : public Configurable {
   elapsedMillis Time;
   int State;
   FsFile DF;
-  const size_t NHeader = 256;  // size of Header string
-  char Header[NHeader];        // header string for CSV file
-  const size_t NData = 2048;   // 2kB size of Data string
-  char Data[NData];            // data lines for CSV file
-  size_t MData;                // approximate size of single data line
+  static const size_t NHeader = 256; // size of Header string
+  char Header[NHeader];              // header string for CSV file
+  static const size_t NData = 2048;  // 2kB size of Data string
+  char Data[NData];                  // data lines for CSV file
+  size_t MData;                      // approximate size of single data line
   RTClock *RTC;
 };
 

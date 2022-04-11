@@ -139,7 +139,7 @@ void Sensors::setRTClock(RTClock &rtc) {
 }
 
 
-void Sensors::makeCSVHeader() {
+bool Sensors::makeCSVHeader() {
   Header[0] = '\0';
   Data[0] = '\0';
   MData = 0;
@@ -153,9 +153,9 @@ void Sensors::makeCSVHeader() {
     }
   }
   if (m == 0) // no sensors
-    return;
+    return false;
   if (n > NHeader) // header too long
-    return;
+    return false;
   MData = 20 + m*10;
   // compose header line:
   char *hp = Header;
@@ -165,15 +165,16 @@ void Sensors::makeCSVHeader() {
       hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
   }
   *(--hp) = '\n';
+  return true;
 }
 
 
-void Sensors::makeCSVData() {
+bool Sensors::makeCSVData() {
   if (MData == 0)
-    return;
+    return false;
   if (strlen(Data) > NData - MData) {
-    // XXX buffer overflow!
-    return;
+    Serial.println("WARNING: overflow of sensors data!");
+    return false;
   }
   // get time:
   char ts[20];
@@ -192,6 +193,7 @@ void Sensors::makeCSVData() {
   }
   *(--sp) = '\n';
   *(++sp) = '\0';
+  return true;
 }
 
 
