@@ -452,6 +452,10 @@ size_t SDWriter::write() {
       samples0 = nbytes / sizeof(sample_t);
       increment(samples0);
       FileSamples += samples0;
+      if (samples0 < nwrite) {
+	Serial.printf("ERROR: only wrote %d samples of %d to the end of the data buffer\n", samples0, nwrite);
+	return samples0;
+      }
     }
   }
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
@@ -463,6 +467,8 @@ size_t SDWriter::write() {
   if (nwrite > 0) {
     nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
     samples1 = nbytes / sizeof(sample_t);
+    if (samples1 < nwrite)
+      Serial.printf("ERROR: only wrote %d samples of %d\n", samples1, nwrite);
     increment(samples1);
     FileSamples += samples1;
   }
