@@ -9,30 +9,17 @@ Sensors::Sensors() :
   Time(0),
   State(0),
   DF(),
-  Header(0),
-  Data(0),
-  NData(0),
   MData(0),
   RTC(0) {
   UseInterval = Interval;
+  Header[0] = '\0';
+  Data[0] = '\0';
 }
 
 
 Sensors::Sensors(RTClock &rtc) :
   Sensors() {
   RTC = &rtc;
-}
-
-
-Sensors::~Sensors() {
-  if (Header != 0)
-    delete [] Header;
-  Header = 0;
-  if (Data != 0)
-    delete [] Data;
-  Data = 0;
-  NData = 0;
-  MData = 0;
 }
 
 
@@ -85,8 +72,7 @@ void Sensors::start() {
     UseInterval = 2*MaxDelay;
   Time = UseInterval - MaxDelay;
   State = 0;
-  if (Data != 0)
-    *Data = '\0';
+  Data[0] = '\0';
 }
 
 
@@ -113,8 +99,8 @@ bool Sensors::update() {
 
 
 bool Sensors::pending() {
-  if (DF && Data != 0)
-    return (strlen(Data) > 0 && !DF.isBusy());
+  if (DF)
+    return (strlen(Data) > NData/2 && !DF.isBusy());
   return false;
 }
 
@@ -154,30 +140,24 @@ void Sensors::setRTClock(RTClock &rtc) {
 
 
 void Sensors::makeCSVHeader() {
-  if (Header != 0)
-    delete [] Header;
-  if (Data != 0)
-    delete [] Data;
-  Data = 0;
-  NData = 0;
+  Header[0] = '\0';
+  Data[0] = '\0';
   MData = 0;
   // size of header and data line:
   size_t m = 0;
-  size_t n = 5;
+  size_t n = 6;
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
       n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
       m++;
     }
   }
-  if (m == 0) {
-    // no sensors:
-    Header = new char[1];
-    *Header = '\0';
+  if (m == 0) // no sensors
     return;
-  }
+  if (n > NHeader) // header too long
+    return;
+  MData = 20 + m*10;
   // compose header line:
-  Header = new char[n];
   char *hp = Header;
   hp += sprintf(hp, "time,");
   for (uint8_t k=0; k<NSensors; k++) {
@@ -185,19 +165,14 @@ void Sensors::makeCSVHeader() {
       hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
   }
   *(--hp) = '\n';
-  // allocate data line:
-  MData = 20 + m*10;
-  NData = (100*MData/512+1)*512;   // store up to about 100 lines
-  Data = new char[NData];
-  *Data = '\0';
 }
 
 
 void Sensors::makeCSVData() {
-  if (Data == 0 || NData == 0)
+  if (MData == 0)
     return;
   if (strlen(Data) > NData - MData) {
-    // buffer overflow!
+    // XXX buffer overflow!
     return;
   }
   // get time:
@@ -223,12 +198,10 @@ void Sensors::makeCSVData() {
 bool Sensors::openCSV(SDCard &sd, const char *path, bool append) {
   if (DF)
     closeCSV();
-  if (Header == 0)
+  if (Header[0] == '\0')
     makeCSVHeader();
-  if (*Header == '\0') {
-    // no sensors:
+  if (Header[0] == '\0') // no sensors
     return false;
-  }
   // create file and write header:
   char fpath[strlen(path)+10];
   strcpy(fpath, path);
@@ -248,7 +221,7 @@ bool Sensors::openCSV(SDCard &sd, const char *path, bool append) {
 
 
 bool Sensors::writeCSV() {
-  if (Data == 0 || *Data == '\0' || !DF)
+  if (Data[0] == '\0' || !DF)
     return false;
   // write data:
   bool success = true;
@@ -256,7 +229,7 @@ bool Sensors::writeCSV() {
   if (n < strlen(Data))
     success = false;
   DF.flush();
-  *Data = '\0';        // clear buffer
+  Data[0] = '\0';        // clear buffer
   if (!DF)
     success = false;
   return success;
@@ -266,6 +239,7 @@ bool Sensors::writeCSV() {
 bool Sensors::closeCSV() {
   if (!DF)
     return false;
+  writeCSV();
   return (!DF.close());
 }
 

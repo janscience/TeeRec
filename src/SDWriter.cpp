@@ -334,6 +334,7 @@ float SDWriter::writeInterval() const {
  
 void SDWriter::setWriteInterval() {
   WriteInterval = uint(250*Data->bufferTime()); // a quarter of the buffer
+  //WriteInterval = uint(100*Data->bufferTime()); // a thenth of the buffer
 }
 
 
@@ -343,6 +344,8 @@ float SDWriter::writeTime() const {
 
 
 bool SDWriter::pending() {
+  //if (DataFile && available() >= 2048 && SDC != 0 && !SDC->isBusy()) {
+  // or a combination of samples and writetime!!!
   if (DataFile && WriteTime > WriteInterval && SDC != 0 && !SDC->isBusy()) {
     WriteTime -= WriteInterval;
     return true;

@@ -20,7 +20,6 @@ class Sensors : public Configurable {
 
   Sensors();
   Sensors(RTClock &rtc);
-  ~Sensors();
 
   // Add a sensor if available.
   void addSensor(Sensor &sensor);
@@ -106,10 +105,11 @@ class Sensors : public Configurable {
   elapsedMillis Time;
   int State;
   FsFile DF;
-  char *Header;   // header string for CSV file
-  char *Data;     // 100 data lines for CSV file
-  size_t NData;      // size of Data string
-  size_t MData;      // Approximate size of single data line
+  const size_t NHeader = 256;  // size of Header string
+  char Header[NHeader];        // header string for CSV file
+  const size_t NData = 2048;   // 2kB size of Data string
+  char Data[NData];            // data lines for CSV file
+  size_t MData;                // approximate size of single data line
   RTClock *RTC;
 };
 
