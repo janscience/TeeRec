@@ -62,12 +62,16 @@ def test_continuity(pathes):
     intervals = isis1[:,:n-1] + isis0[:,1:n]
     # analyse:
     for c in range(nchannels):
-        frequency = samplerate/np.mean(isis[c])
+        isis[c] = np.asarray(isis[c])
         period = np.median(isis[c])
+        frequency = samplerate/period
         print('channel %2d: frequency=%6.1fHz' % (c, frequency))
         for k, interval in enumerate(intervals[c]):
-            if abs(interval - period)/period > 0.05:
-                print('   interval deviates from median period in file %s' % os.path.basename(pathes[k]))
+            if abs(interval - period) > 1:
+                print('   %3d-th interval=%3d deviates from median period=%3d in file %s' % (k, interval, period, os.path.basename(pathes[k]),))
+        idx = np.nonzero(np.abs(isis[c]-period)>1)[0]
+        for i, isi in zip(idx, isis[c][idx]):
+            print('   %7d-th isi=%3d deviates from median period=%3d' % (i, isi, period))
     # plots:
     fig, axs = plt.subplots(2, nchannels//2)
     axs = axs.ravel()
