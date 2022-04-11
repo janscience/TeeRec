@@ -64,7 +64,7 @@ def test_continuity(pathes):
     for c in range(nchannels):
         isis[c] = np.asarray(isis[c])
         period = np.median(isis[c])
-        frequency = samplerate/period
+        frequency = samplerate/np.mean(isis[c])
         print('channel %2d: frequency=%6.1fHz' % (c, frequency))
         for k, interval in enumerate(intervals[c]):
             if abs(interval - period) > 1:
