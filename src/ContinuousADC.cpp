@@ -528,7 +528,7 @@ void ContinuousADC::start() {
       if ( (ADCUse & (adc+1)) == adc+1 ) {
 	ADConv.adc[adc]->startTimer(Rate*NChans[adc]);
 #if defined(ADC_USE_PDB)
-	NVIC_DISABLE_IRQ(IRQ_PDB); // we don not need the PDB interrupt
+	NVIC_DISABLE_IRQ(IRQ_PDB); // we do not need the PDB interrupt
 #endif
 	Rate = ADConv.adc[adc]->getTimerFrequency()/NChans[adc];
       }

@@ -102,14 +102,21 @@ void setupStorage() {
 
 void storeData() {
   if (file.pending()) {
-    size_t samples = file.write();
-    if (samples == 0) {
+    ssize_t samples = file.write();
+    if (samples <= 0) {
       blink.clear();
       Serial.println();
-      Serial.println("ERROR: data acquisition not running.");
+      Serial.println("ERROR in writing data to file:");
+      switch (samples) {
+        case -1: Serial.println("  File not open."); break;
+        case -2: Serial.println("  No data available, data acquisition probably not running."); break;
+        case -3: Serial.println("  File already full."); break;
+        case 0: Serial.println("  Nothing written into the file."); break;
+        default: Serial.printf("  Unknown error %d.\n", samples);
+      }
       Serial.println("sampling rate probably too high,");
       Serial.println("given the number of channels, averaging, sampling and conversion speed.");
-      while (1) {};
+      while(1) {};
     }
     if (file.endWrite()) {
       file.close();  // file size was set by openWave()

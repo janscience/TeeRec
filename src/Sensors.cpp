@@ -242,6 +242,7 @@ bool Sensors::closeCSV() {
   if (!DF)
     return false;
   writeCSV();
+  Data[0] = '\0';        // clear buffer
   return (!DF.close());
 }
 

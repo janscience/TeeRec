@@ -428,19 +428,19 @@ void SDWriter::closeWave() {
 }
 
 
-size_t SDWriter::write() {
+ssize_t SDWriter::write() {
   size_t nbytes = 0;
   size_t samples0 = 0;
   size_t samples1 = 0;
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
-    return 0;
+    return -3;
   if (! DataFile)
-    return 0;
+    return -1;
   size_t missed = overrun();
   if (missed > 0)
     Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
   if (available() == 0)
-    return 0;
+    return -2;
   size_t index = Producer->index();
   size_t nwrite = 0;
   if (Index >= index) {
