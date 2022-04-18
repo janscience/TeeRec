@@ -25,7 +25,6 @@
 #ifdef SDCARD_USE_SDFAT
   // Use SdFat library:
   #include <SdFat.h>
-  #define SD_FAT_TYPE 3
 #else
   // Use Teensy SD library:
   #include <SD.h>
