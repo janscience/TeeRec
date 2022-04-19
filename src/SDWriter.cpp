@@ -408,7 +408,7 @@ void SDWriter::openWave(const char *fname, int32_t samples,
     Wave.clearDateTime();
   Wave.assemble();                        // 0ms
   if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 14ms
-    Serial.println("ERROR writing wave header");
+    Serial.println("ERROR: initial writing of wave header");
   }
 }
 
@@ -421,7 +421,7 @@ void SDWriter::closeWave() {
     Wave.assemble();
     DataFile.seek(0);
     if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 2ms
-      Serial.println("ERROR writing wave header");
+      Serial.println("ERROR: final writing of wave header");
     }
   }
   close();                                   // 6ms
