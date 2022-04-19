@@ -112,6 +112,18 @@ Demonstrate the usage of some of the provided libraries.
 - [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
 
 
+## Utilities
+
+In [utils/](utils) you find some useful python scripts.
+
+- [viewwave](utils/viewwave): display the traces in a wave file.
+- [continuity](utils/continuity): check whether pulse signals recorded into wave file have consistent periods overmany wave files.
+- [cycles](utils/cycles): plot failures in pulse traces? - needs update.
+- [noise](utils/noise): plot and analyse baseline noise levels from wave files.
+- [spectra](utils/spectra): power spectra of traces in wave files.
+- [sensors](utils/sensors): plot the content of the csv file written by the [Sensors](src/Sensors.h) library.
+
+
 ## Dependencies
 
 TeeRec is based on the following libraries:
