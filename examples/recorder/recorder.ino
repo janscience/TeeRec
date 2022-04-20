@@ -80,7 +80,7 @@ void setupADC() {
 }
 
 
-void openNextFile() {
+bool openNextFile() {
   time_t t = now();
   String name = rtclock.makeStr(settings.FileName, t, true);
   if (name != prevname) {
@@ -89,23 +89,27 @@ void openNextFile() {
   }
   name = file.incrementFileName(name);
   if (name.length() == 0) {
-    Serial.println("WARNING: failed to open file on SD card.");
+    Serial.println("WARNING: failed to increment file name.");
     Serial.println("SD card probably not inserted.");
     Serial.println();
     return false;
   }
   name += ".wav";
-  char datetime[20];
-  rtclock.dateTime(datetime, t);
-  file.openWave(name.c_str(), -1, datetime);
-  file.write();
-  if (file.isOpen()) {
-    screen.clearText(0);                // 35ms!
-    file.write();
-    screen.writeText(1, name.c_str());  // 25ms
-    file.write();
-    Serial.println(name);
+  char dts[20];
+  rtclock.dateTime(dts, t);
+  if (! file.openWave(name.c_str(), -1, dts)) {
+    Serial.println();
+    Serial.println("WARNING: failed to open file on SD card.");
+    Serial.println("SD card probably not inserted or full.");
+    return false;
   }
+  file.write();
+  screen.clearText(0);                // 35ms!
+  file.write();
+  screen.writeText(1, name.c_str());  // 25ms
+  file.write();
+  Serial.println(name);
+  return true;
 }
 
 
@@ -242,8 +246,29 @@ void plotData() {   // 85ms
 
 void storeData() {
   if (file.pending()) {
-    file.write();
-    if (file.endWrite()) {
+    ssize_t samples = file.write();
+    if (samples <= 0) {
+      Serial.println();
+      Serial.println("ERROR in writing data to file:");
+      switch (samples) {
+        case 0:
+          Serial.println("  Nothing written into the file.");
+          Serial.println("  SD card probably full.");
+          break;
+        case -1:
+          Serial.println("  File not open.");
+          break;
+        case -2:
+          Serial.println("  File already full.");
+          break;
+        case -3:
+          Serial.println("  No data available, data acquisition probably not running.");
+          Serial.println("  sampling rate probably too high,");
+          Serial.println("  given the number of channels, averaging, sampling and conversion speed.");
+          break;
+      }
+    }
+    if (file.endWrite() || samples <= 0) {
       file.closeWave();
       if (logging)
         openNextFile();

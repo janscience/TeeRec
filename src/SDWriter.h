@@ -179,15 +179,16 @@ class SDWriter : public DataWorker {
   // Check this regularly in loop() and call write() if true is returned.
   bool pending();
 
-  // Open new file for writing (<=11ms).
+  // Open new file for writing.
   // fname is the name of the file inclusively extension.
   bool open(const char *fname);
 
   // True if file is open.
   bool isOpen() const;
 
-  // Close file (<=6ms).
-  void close();
+  // Close file.
+  // Return true if file was not open or file was successfully closed.
+  bool close();
 
   // Return file object.
   FsFile &file();
@@ -200,13 +201,15 @@ class SDWriter : public DataWorker {
   // then need to close the file with closeWave() and provide the
   // number of samples there.
   // If no file extension is provided, ".wav" is added.
-  // Takes about <=25ms.
-  void openWave(const char *fname, int32_t samples=-1,
+  // Returns true if the file was successfully opened.
+  bool openWave(const char *fname, int32_t samples=-1,
                 const char *datetime=0);
 
   // Update wave header with proper file size and close file.
-  // Takes about <=8ms.
-  void closeWave();
+  // Returns true if the file was not open or the file was sucessfully
+  // closed, including an update of the wave header with the actual
+  // file size.
+  bool closeWave();
 
   
   // Write available data to file (if the file is open).
@@ -214,8 +217,8 @@ class SDWriter : public DataWorker {
   // many samples.
   // Returns number of written samples or a negative number on error:
   // -1: file is not open.
-  // -2: no data are available.
-  // -3: file is already full according too maxFileSamples().
+  // -2: file is already full according too maxFileSamples().
+  // -3: no data are available.
   ssize_t write();
 
   // Start writing to a file from the current minus decr sample on.

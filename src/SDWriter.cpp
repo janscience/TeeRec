@@ -359,13 +359,10 @@ bool SDWriter::open(const char *fname) {
   if (! cardAvailable() || strlen(fname) == 0)
     return false;
   if (DataFile) {
-    Serial.println("failed to open file because a file is still open.");
+    Serial.println("failed to open file because the file is still open.");
     return false;
   }
   DataFile = SDC->openWrite(fname);
-  //if (DataFile.getError())
-  if (!DataFile)
-    Serial.printf("WARNING: failed to open file %s\n", fname);
   FileSamples = 0;
   WriteTime = 0;
   return DataFile ? true : false;
@@ -377,10 +374,10 @@ bool SDWriter::isOpen() const {
 }
 
 
-void SDWriter::close() {
+bool SDWriter::close() {
   if (! DataFile)
-    return;
-  DataFile.close();
+    return true;
+  return DataFile.close();
 }
 
 
@@ -389,13 +386,13 @@ FsFile &SDWriter::file() {
 }
 
 
-void SDWriter::openWave(const char *fname, int32_t samples,
+bool SDWriter::openWave(const char *fname, int32_t samples,
 			const char *datetime) {
   String name(fname);
   if (name.indexOf('.') < 0 )
     name += ".wav";
   if (!open(name.c_str()))                // 11ms
-    return;
+    return false;
   if (samples < 0)
     samples = FileMaxSamples;
   Wave.setFormat(Data->nchannels(), Data->rate(), Data->resolution(),
@@ -409,22 +406,28 @@ void SDWriter::openWave(const char *fname, int32_t samples,
   Wave.assemble();                        // 0ms
   if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 14ms
     Serial.println("ERROR: initial writing of wave header");
+    return false;
   }
+  return DataFile ? true : false;
 }
 
 
-void SDWriter::closeWave() {
+bool SDWriter::closeWave() {
   if (! DataFile)
-    return;
+    return true;
+  bool success = true;
   if (FileSamples > 0) {
     Wave.setData(FileSamples);
     Wave.assemble();
     DataFile.seek(0);
     if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 2ms
       Serial.println("ERROR: final writing of wave header");
+      success = false;
     }
   }
-  close();                                   // 6ms
+  if (! close())
+    success = false;
+  return success;
 }
 
 
@@ -432,15 +435,15 @@ ssize_t SDWriter::write() {
   size_t nbytes = 0;
   size_t samples0 = 0;
   size_t samples1 = 0;
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
-    return -3;
   if (! DataFile)
     return -1;
+  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+    return -2;
   size_t missed = overrun();
   if (missed > 0)
     Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
   if (available() == 0)
-    return -2;
+    return -3;
   size_t index = Producer->index();
   size_t nwrite = 0;
   if (Index >= index) {
