@@ -55,7 +55,7 @@ protected:
   uint16_t Interval;
 
   int NButtons = 0;                     // Number of buttons.
-  Bounce2::Button Buttons[MaxButtons];  // The buttons.
+  Button Buttons[MaxButtons];  // The buttons.
   Callback OnPress[MaxButtons];
   Callback OnRelease[MaxButtons];
 

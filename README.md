@@ -140,15 +140,16 @@ The Display library currently uses:
 - [Adafruit ILI9341 Arduino Library](https://github.com/adafruit/Adafruit_ILI9341)
 
 
-The [Arduino Time Library](https://github.com/PaulStoffregen/Time) and
-[ADC](https://github.com/pedvide/ADC) libraries are already included
-in [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
+The [Arduino Time Library](https://github.com/PaulStoffregen/Time),
+[ADC](https://github.com/pedvide/ADC), [SdFat
+version2](https://github.com/greiman/SdFat), and
+[Bounce2](https://github.com/thomasfredericks/Bounce2) libraries are
+already included in
+[Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
 installing Teensyduino make sure you selected them.
 
-For installing [SdFat version2](https://github.com/greiman/SdFat),
-[Bounce2](https://github.com/thomasfredericks/Bounce2), and the
-libraries for the TFT monitor, open in the Arduino IDE: Tools - Manage
-libraries. Search for "SdFat", "Bounce2" and the TFT libraries and
+For installing the libraries for the TFT monitor, open in the Arduino
+IDE: Tools - Manage libraries. Search for the TFT libraries and
 install them.
 
 
