@@ -105,26 +105,36 @@ bool Sensors::pending() {
 }
 
 
-void Sensors::print() {
+void Sensors::print(bool symbols) {
   char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
       Snsrs[k]->print(s);
-      Serial.printf("%s = %s%s\n", Snsrs[k]->name(), s, Snsrs[k]->unit());
+      if (symbols)
+	Serial.printf("%s = %s%s\n", Snsrs[k]->symbol(), s, Snsrs[k]->unit());
+      else
+	Serial.printf("%s = %s%s\n", Snsrs[k]->name(), s, Snsrs[k]->unit());
     }
-    else
-      Serial.printf("%s not available\n", Snsrs[k]->name());
+    else {
+      if (symbols)
+	Serial.printf("%s not available\n", Snsrs[k]->symbol());
+      else
+	Serial.printf("%s not available\n", Snsrs[k]->name());
+    }
   }
 }
 
 
-void Sensors::printHeader() {
+void Sensors::printHeader(bool symbols) {
   int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
       if (n > 0)
 	Serial.print('\t');
-      Serial.print(Snsrs[k]->name());
+      if (symbols)
+	Serial.print(Snsrs[k]->symbol());
+      else
+	Serial.print(Snsrs[k]->name());
       if (strlen(Snsrs[k]->unit()) > 0)
 	Serial.printf("/%s\t", Snsrs[k]->unit());
       n++;
@@ -155,16 +165,20 @@ void Sensors::setRTClock(RTClock &rtc) {
 }
 
 
-bool Sensors::makeCSVHeader() {
+bool Sensors::makeCSVHeader(bool symbols) {
   Header[0] = '\0';
   Data[0] = '\0';
   MData = 0;
   // size of header and data line:
   size_t m = 0;
-  size_t n = 6;
+  size_t n = symbols ? 3 : 8;
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      n += strlen(Snsrs[k]->name()) + strlen(Snsrs[k]->unit()) + 2;
+      if (symbols)
+	n += strlen(Snsrs[k]->symbol());
+      else
+	n += strlen(Snsrs[k]->name());
+      n += strlen(Snsrs[k]->unit()) + 2;
       m++;
     }
   }
@@ -175,16 +189,22 @@ bool Sensors::makeCSVHeader() {
   MData = 20 + m*10;
   // compose header line:
   char *hp = Header;
-  hp += sprintf(hp, "time,");
+  if (symbols)
+    hp += sprintf(hp, "t/s");
+  else
+    hp += sprintf(hp, "time/s");
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      if (strlen(Snsrs[k]->unit()) == 0)
-	hp += sprintf(hp, "%s,", Snsrs[k]->name());
+      *(hp++) = ',';
+      if (symbols)
+	hp += sprintf(hp, Snsrs[k]->symbol());
       else
-	hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+	hp += sprintf(hp, Snsrs[k]->name());
+      if (strlen(Snsrs[k]->unit()) > 0)
+	hp += sprintf(hp, "/%s", Snsrs[k]->unit());
     }
   }
-  *(--hp) = '\n';
+  *hp = '\n';
   return true;
 }
 
@@ -217,11 +237,12 @@ bool Sensors::makeCSVData() {
 }
 
 
-bool Sensors::openCSV(SDCard &sd, const char *path, bool append) {
+bool Sensors::openCSV(SDCard &sd, const char *path,
+		      bool symbols, bool append) {
   if (DF)
     closeCSV();
   if (Header[0] == '\0')
-    makeCSVHeader();
+    makeCSVHeader(symbols);
   if (Header[0] == '\0') // no sensors
     return false;
   // create file and write header:

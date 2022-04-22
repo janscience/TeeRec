@@ -19,8 +19,9 @@ class Sensor {
   // Initialize the sensor.
   Sensor();
 
-  // Initialize the sensor and set name, unit, and format of sensor readings.
-  Sensor(const char *name, const char *unit,
+  // Initialize the sensor and set name, mthematical symbol, unit, and
+  // format of sensor readings.
+  Sensor(const char *name, const char *symbol, const char *unit,
 	 const char *format, float fac=1.0);
 
   // Return name of environmental sensor reading as character array.
@@ -28,6 +29,16 @@ class Sensor {
 
   // Set name of environmental sensor reading to name.
   void setName(const char *name);
+
+  // Set name and mathematical symbol of environmental sensor reading.
+  void setName(const char *name, const char *symbol);
+
+  // Return mathematical symbol of environmental sensor reading as
+  // character array.
+  const char* symbol() const;
+
+  // Set mathematical symbol of environmental sensor reading to name.
+  void setSymbol(const char *symbol);
 
   // Return unit of sensor readings as character array.
   const char* unit() const;
@@ -93,7 +104,8 @@ class Sensor {
 protected:
 
   char Name[50];
-  char Unit[50];
+  char Symbol[20];
+  char Unit[20];
   char Format[10];
   float Fac;
   bool Configured;

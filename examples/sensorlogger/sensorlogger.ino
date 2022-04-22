@@ -25,6 +25,7 @@ PressureBME280 pres(&bme);
 Sensors sensors(rtclock);
 SDCard sdcard;
 Blink blink(LED_BUILTIN);
+bool symbols = false;
 
 
 // ------------------------------------------------------------------------------------------
@@ -47,7 +48,7 @@ void setup() {
   if (!temp.available() && tempPin >= 0)
     temp.begin(tempPin);
   sensors.report();
-  bool success = sensors.openCSV(sdcard, "sensors");
+  bool success = sensors.openCSV(sdcard, "sensors", symbols);
   blink.switchOff();
   if (success) {
     sensors.start();
@@ -64,7 +65,7 @@ void setup() {
 
 void loop() {
   if (sensors.update()) {
-    sensors.print();
+    sensors.print(symbols);
     Serial.println();
   }
   if (sensors.pending())

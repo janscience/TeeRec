@@ -52,11 +52,12 @@ class Sensors : public Configurable {
   // and the csv file is not busy.
   bool pending();
 
-  // Report sensor readings with name and unit on serial monitor.
-  void print();
+  // Report sensor readings with name (or symbol) and unit on serial monitor.
+  void print(bool symbols=false);
 
-  // Report sensor names and units separated by tabs on serial monitor.
-  void printHeader();
+  // Report sensor names (or symbol) and units separated by tabs on
+  // serial monitor.
+  void printHeader(bool symbols=false);
 
   // Report sensor readings separated by tabs on serial monitor.
   // Use printHeader() to annotate the printed columns.
@@ -69,16 +70,18 @@ class Sensors : public Configurable {
   // Usually, this is automatically called by openCSV().
   // Returns true if header line was created.
   // Returns false if no sensors are available or header line is too long.
-  bool makeCSVHeader();
+  bool makeCSVHeader(bool symbols=false);
 
   // Open csv file for sensor readings at path on SD card sd
   // and write header line.
   // If no header line was ever created, makeCSVHeader() is called.
   // path is without extension. 'csv' is added.
+  // If symbols, use mathematical symbols instead of names for the header.
   // If append and path already exists, then keep the file
   // and do not write the header.
   // Return true on success, false on failure or no available sensors.
-  bool openCSV(SDCard &sd, const char *path, bool append=false);
+  bool openCSV(SDCard &sd, const char *path,
+	       bool symbols=false, bool append=false);
 
   // Write current time and sensor readings to csv file.
   // Return true on success, false on failure or if file is not open

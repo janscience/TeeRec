@@ -10,10 +10,11 @@ Sensor::Sensor() :
 }
 
 
-Sensor::Sensor(const char *name, const char *unit,
+Sensor::Sensor(const char *name, const char *symbol, const char *unit,
 	       const char *format, float fac) :
   Sensor() {
   setName(name);
+  setSymbol(symbol);
   setUnit(unit, fac);
   setFormat(format);
 }
@@ -26,6 +27,22 @@ const char* Sensor::name() const {
 
 void Sensor::setName(const char *name) {
   strcpy(Name, name);
+}
+
+
+void Sensor::setName(const char *name, const char *symbol) {
+  strcpy(Name, name);
+  strcpy(Symbol, symbol);
+}
+
+
+const char* Sensor::symbol() const {
+  return Symbol;
+}
+
+
+void Sensor::setSymbol(const char *symbol) {
+  strcpy(Symbol, symbol);
 }
 
 

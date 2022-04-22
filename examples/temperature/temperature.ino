@@ -21,7 +21,7 @@ void setup(void) {
   sensors.addSensor(tempbme);
   sensors.addSensor(hum);
   pres.setUnit("kPa", 0.001, "%.2f");
-  sensors.addSensor(pres);
+  //sensors.addSensor(pres);
   sensors.start();
   sensors.printHeader();
 }

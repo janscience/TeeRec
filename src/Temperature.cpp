@@ -2,7 +2,7 @@
 
 
 Temperature::Temperature()
-  : Sensor("temp", "ºC", "%.2f") {
+  : Sensor("temperature", "T", "ºC", "%.2f") {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
@@ -78,8 +78,8 @@ float Temperature::resolution() const {
 
 void Temperature::report() {
   if (available())
-    Serial.printf("%s (%s): temperature device %s (ID: %s) at %.2f%s resolution.\n",
-		  name(), unit(), Chip, AddrS, resolution(), unit());
+    Serial.printf("%s %s (%s): temperature device %s (ID: %s) at %.2f%s resolution.\n",
+		  name(), symbol(), unit(), Chip, AddrS, resolution(), unit());
 }
 
 
