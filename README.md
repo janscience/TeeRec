@@ -148,6 +148,11 @@ already included in
 [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
 installing Teensyduino make sure you selected them.
 
+_Note_: you need Arduino 1.8.19 and Teensyduoino 1.56 or higher! When
+installing Teensyduoino simply select all libraries for installation.
+Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
+they are now supplied by Teensyduoino.
+
 For installing the libraries for the TFT monitor, open in the Arduino
 IDE: Tools - Manage libraries. Search for the TFT libraries and
 install them.
