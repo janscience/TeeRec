@@ -135,7 +135,7 @@ AbsoluteHumidityBME280::AbsoluteHumidityBME280(SenseBME280 *bme)
 
 
 float AbsoluteHumidityBME280::resolution() const {
-  return 0.07;
+  return 0.1;
 }
 
 
@@ -144,7 +144,7 @@ float AbsoluteHumidityBME280::value() const {
   float temp = BME->temperature();
   float humidity = BME->humidity();
   const float mw = 18.01534; 	// molar mass of water g/mol
-  const float R = 8.31447215; 	// Universal gas constant J/mol/K
+  const float R = 8.31447215; 	// universal gas constant J/mol/K
   temp = pow(2.718281828, (17.67 * temp) / (temp + 243.5));
   return Fac * (6.112 * temp * humidity * mw)/((273.15 + temp) * R);
 }

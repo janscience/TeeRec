@@ -22,6 +22,7 @@
 #include <Sensor.h>
 
 
+// Simple wrapper around Spark Fun BME280 library.
 class SenseBME280 : protected BME280 {
 
  public:
@@ -82,6 +83,7 @@ class SenseBME280 : protected BME280 {
 };
 
 
+// Base class for sensors that read out SenseBME280.
 class SensorBME280 : public Sensor {
 
  public:
