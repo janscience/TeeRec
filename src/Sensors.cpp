@@ -106,10 +106,12 @@ bool Sensors::pending() {
 
 
 void Sensors::print() {
+  char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
-      Serial.printf("%s = %5.2f%s\n", Snsrs[k]->name(),
-		    Snsrs[k]->value(), Snsrs[k]->unit());
+    if (Snsrs[k]->available()) {
+      Snsrs[k]->print(s);
+      Serial.printf("%s = %s%s\n", Snsrs[k]->name(), s, Snsrs[k]->unit());
+    }
     else
       Serial.printf("%s not available\n", Snsrs[k]->name());
   }
@@ -126,9 +128,12 @@ void Sensors::printHeader() {
 
 
 void Sensors::printValues() {
+  char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
-      Serial.printf("%5.2f\t", Snsrs[k]->value());
+    if (Snsrs[k]->available()) {
+      Snsrs[k]->print(s);
+      Serial.printf("%s\t", s);
+    }
   }
   Serial.println();
 }

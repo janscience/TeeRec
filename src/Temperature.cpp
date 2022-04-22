@@ -2,7 +2,7 @@
 
 
 Temperature::Temperature()
-  : Sensor("temp", "ºC") {
+  : Sensor("temp", "ºC", "%.2f") {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
@@ -137,11 +137,6 @@ void Temperature::read() {
   }
   Celsius = (float)raw / 16.0;
   OW.depower();
-}
-
-
-int Temperature::print(char *s) const {
-  return sprintf(s, "%.2f", value());
 }
 
 

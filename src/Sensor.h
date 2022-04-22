@@ -17,22 +17,28 @@ class Sensor {
   float NoValue = -INFINITY;
 
   // Initialize the sensor.
-  Sensor() { Name[0] = '\0'; Unit[0] = '\0'; Configured = false; };
+  Sensor();
 
-  // Initialize the sensor and set name and unit of sensor readings.
-  Sensor(const char *name, const char *unit) { setName(name); setUnit(unit); };
+  // Initialize the sensor and set name, unit, and format of sensor readings.
+  Sensor(const char *name, const char *unit, const char *format);
 
   // Return name of environmental sensor reading as character array.
-  const char* name() const { return Name; };
+  const char* name() const;
 
   // Set name of environmental sensor reading to name.
-  void setName(const char *name) { strcpy(Name, name); };
+  void setName(const char *name);
 
   // Return unit of sensor readings as character array.
-  const char* unit() const { return Unit; };
+  const char* unit() const;
 
   // Set unit of environmental sensor reading to unit.
-  void setUnit(const char *unit) { strcpy(Unit, unit); };
+  void setUnit(const char *unit);
+
+  // Return format string for sensor readings as character array.
+  const char* format() const;
+
+  // Set format string for environmental sensor reading to format.
+  void setFormat(const char *format);
 
   // Return resolution of the sensor readings.
   virtual float resolution() const = 0;
@@ -60,9 +66,9 @@ class Sensor {
   // and then call read().
   virtual float value() const = 0;
   
-  // Print the sensor reading into string s.
+  // Print the sensor reading using format string into string s.
   // Return the number of printed characters.
-  virtual int print(char *s) const = 0;
+  int print(char *s) const;
 
   // Configure Sensor settings with the provided key-value pair.
   // Return true if key was used.
@@ -79,6 +85,7 @@ private:
 
   char Name[50];
   char Unit[50];
+  char Format[10];
   bool Configured;
   
 };

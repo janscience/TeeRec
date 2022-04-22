@@ -85,7 +85,7 @@ void SenseBME280::init() {
 
 
 TemperatureBME280::TemperatureBME280(SenseBME280 *bme)
-  : Sensor("temperature", "ºC"),
+  : Sensor("temperature", "ºC", "%.2f"),
     BME(bme) {
 }
 
@@ -102,13 +102,8 @@ void TemperatureBME280::report() {
 }
 
 
-int TemperatureBME280::print(char *s) const {
-  return sprintf(s, "%.2f", value());
-}
-
-
 HumidityBME280::HumidityBME280(SenseBME280 *bme)
-  : Sensor("humidity", "%"),
+  : Sensor("humidity", "%", "%.1f"),
     BME(bme) {
 }
 
@@ -125,13 +120,8 @@ void HumidityBME280::report() {
 }
 
 
-int HumidityBME280::print(char *s) const {
-  return sprintf(s, "%.1f", value());
-}
-
-
 PressureBME280::PressureBME280(SenseBME280 *bme)
-  : Sensor("pressure", "Pa"),
+  : Sensor("pressure", "Pa", "%.0f"),
     BME(bme) {
 }
 
@@ -145,10 +135,5 @@ void PressureBME280::report() {
   if (available())
     Serial.printf("%s (%s): pressure device %s at %.2f%s resolution.\n",
 		  name(), unit(), BME->chip(), resolution(), unit());
-}
-
-
-int PressureBME280::print(char *s) const {
-  return sprintf(s, "%.0f", value());
 }
 

@@ -110,10 +110,6 @@ class TemperatureBME280 : public Sensor {
   // On error, return -INFINITY.
   virtual float value() const { return BME->temperature(); };
 
-  // Print the temperature in degrees celsius into string s.
-  // Return the number of printed characters.
-  virtual int print(char *s) const;
-
   
  private:
 
@@ -150,10 +146,6 @@ class HumidityBME280 : public Sensor {
   // On error, return -INFINITY.
   virtual float value() const { return BME->humidity(); };
 
-  // Print the relative humidity in percent into string s.
-  // Return the number of printed characters.
-  virtual int print(char *s) const;
-
   
  private:
 
@@ -189,10 +181,6 @@ class PressureBME280 : public Sensor {
   // The pressure in Pascal.
   // On error, return -INFINITY.
   virtual float value() const { return BME->pressure(); };
-
-  // Print the pressure in Pascal into string s.
-  // Return the number of printed characters.
-  virtual int print(char *s) const;
 
   
  private:

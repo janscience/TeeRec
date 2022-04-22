@@ -75,10 +75,6 @@ class Temperature : public Sensor {
   // and then call read().
   virtual float value() const { return Celsius; };
 
-  // Print the temperature in degrees celsius into string s.
-  // Return the number of printed characters.
-  virtual int print(char *s) const;
-
   // Configure Temperature settings with the provided key-value pair.
   // Return true if key was used.
   // If key equals "ds18x20-pin", initialize temperature device on
