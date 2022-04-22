@@ -52,7 +52,7 @@ void SenseBME280::request() {
 
 unsigned long SenseBME280::delay() const
 {
-  return 1000;
+  return 50;  // this is generous, <10 for no oversampling , <40 for 16x oversampling
 }
 
 
@@ -75,21 +75,17 @@ void SenseBME280::init() {
   case 0x58: strcpy(Chip, "BMP280"); break;
   case 0x60: strcpy(Chip, "BME280"); break;
   }
-  // XXX Configure timing, oversampling, and filtering!
-  /*
-  setFilter(1); //0 to 4 is valid. Filter coefficient. See 3.4.4
-  setStandbyTime(0); //0 to 7 valid. Time between readings. See table 27.
-
-  setTempOverSample(1); //0 to 16 are valid. 0 disables temp sensing. See table 24.
-  setPressureOverSample(1); //0 to 16 are valid. 0 disables pressure sensing. See table 23.
-  setHumidityOverSample(1); //0 to 16 are valid. 0 disables humidity sensing. See table 19.
-  */
+  setFilter(0); // 0 (off) to 4. Filter coefficient. Table 28 in data sheet.
+  setStandbyTime(1); // 0 to 7 valid. Time between readings. Table 27 in data sheet.
+  setTempOverSample(1); // powers of two from 0 to 16 are valid. 0 disables temp sensing. Table 24 in data sheet.
+  setPressureOverSample(1); // powers of two from 0 to 16 are valid. 0 disables pressure sensing. Table 23 in data sheet.
+  setHumidityOverSample(1); // powers of two from 0 to 16 are valid. 0 disables humidity sensing. table 19 in data sheet.
   setMode(MODE_SLEEP); // power down
 }
 
 
 TemperatureBME280::TemperatureBME280(SenseBME280 *bme)
-  : Sensor("temp", "ºC"),
+  : Sensor("temperature", "ºC"),
     BME(bme) {
 }
 
