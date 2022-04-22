@@ -1,6 +1,7 @@
 #include <Configurator.h>
 #include <Sensors.h>
 #include <Temperature.h>
+#include <SenseBME280.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <Blink.h>
@@ -10,13 +11,17 @@
 // (may be overwritten by config file sensorlogger.cfg)
 
 uint8_t tempPin = 10;         // pin for DATA line of thermometer
-float sensorsInterval = 10.0; // interval between sensors readings in seconds
+float sensorsInterval = 2.0; // interval between sensors readings in seconds
 
 // ------------------------------------------------------------------------------------------
 
 Configurator config;
 RTClock rtclock;
 Temperature temp;
+SenseBME280 bme;
+TemperatureBME280 tempbme(&bme);
+HumidityBME280 hum(&bme);
+PressureBME280 pres(&bme);
 Sensors sensors(rtclock);
 SDCard sdcard;
 Blink blink(LED_BUILTIN);
@@ -31,6 +36,10 @@ void setup() {
   rtclock.check();
   rtclock.report();
   sensors.addSensor(temp);
+  bme.beginI2C(Wire, 0x77);
+  sensors.addSensor(tempbme);
+  sensors.addSensor(hum);
+  sensors.addSensor(pres);
   sensors.setInterval(sensorsInterval);
   sdcard.begin();
   config.setConfigFile("sensorlogger.cfg");
@@ -46,14 +55,18 @@ void setup() {
     Serial.println();
   }
   else {
+    Serial.println();
+    Serial.println("ERROR: SD card no available -> halt!");
     while (1) {};
   }
 }
 
 
 void loop() {
-  if (sensors.update())
+  if (sensors.update()) {
     sensors.print();
+    Serial.println();
+  }
   if (sensors.pending())
     sensors.writeCSV();
   blink.update();
