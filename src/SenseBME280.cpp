@@ -102,6 +102,11 @@ void TemperatureBME280::report() {
 }
 
 
+float TemperatureBME280::value() const {
+  return Fac*BME->temperature();
+}
+
+
 HumidityBME280::HumidityBME280(SenseBME280 *bme)
   : Sensor("humidity", "%", "%.1f"),
     BME(bme) {
@@ -117,6 +122,11 @@ void HumidityBME280::report() {
   if (available())
     Serial.printf("%s (%s): humidity device %s at %.2f%s resolution.\n",
 		  name(), unit(), BME->chip(), resolution(), unit());
+}
+
+
+float HumidityBME280::value() const {
+  return Fac*BME->humidity();
 }
 
 
@@ -137,3 +147,7 @@ void PressureBME280::report() {
 		  name(), unit(), BME->chip(), resolution(), unit());
 }
 
+
+float PressureBME280::value() const {
+  return Fac*BME->pressure();
+}

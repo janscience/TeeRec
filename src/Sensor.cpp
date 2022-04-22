@@ -5,14 +5,16 @@ Sensor::Sensor() :
   Name(""),
   Unit(""),
   Format("%.2f"),
+  Fac(1.0),
   Configured(false) {
 }
 
 
-Sensor::Sensor(const char *name, const char *unit, const char *format) :
+Sensor::Sensor(const char *name, const char *unit,
+	       const char *format, float fac) :
   Sensor() {
   setName(name);
-  setUnit(unit);
+  setUnit(unit, fac);
   setFormat(format);
 }
 
@@ -32,8 +34,16 @@ const char* Sensor::unit() const {
 }
 
 
-void Sensor::setUnit(const char *unit) {
+void Sensor::setUnit(const char *unit, float fac) {
   strcpy(Unit, unit);
+  Fac = fac;
+}
+
+
+void Sensor::setUnit(const char *unit, float fac, const char *format) {
+  strcpy(Unit, unit);
+  Fac = fac;
+  strcpy(Format, format);
 }
 
 

@@ -20,7 +20,8 @@ class Sensor {
   Sensor();
 
   // Initialize the sensor and set name, unit, and format of sensor readings.
-  Sensor(const char *name, const char *unit, const char *format);
+  Sensor(const char *name, const char *unit,
+	 const char *format, float fac=1.0);
 
   // Return name of environmental sensor reading as character array.
   const char* name() const;
@@ -32,7 +33,13 @@ class Sensor {
   const char* unit() const;
 
   // Set unit of environmental sensor reading to unit.
-  void setUnit(const char *unit);
+  // Optionally, the sensor reading can be mutliplied by fac to result
+  // in the desired unit.
+  void setUnit(const char *unit, float fac=1.0);
+
+  // Set unit, conversion factor, and format string of environmental
+  // sensor reading.
+  void setUnit(const char *unit, float fac, const char *format);
 
   // Return format string for sensor readings as character array.
   const char* format() const;
@@ -64,6 +71,8 @@ class Sensor {
   // Before you can retrieve a sensor reading,
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
+  // Any implementation should multiply the sensor reading with Fac
+  // before returning the value.
   virtual float value() const = 0;
   
   // Print the sensor reading using format string into string s.
@@ -81,11 +90,12 @@ class Sensor {
   bool configured() const { return Configured; };
 
   
-private:
+protected:
 
   char Name[50];
   char Unit[50];
   char Format[10];
+  float Fac;
   bool Configured;
   
 };

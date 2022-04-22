@@ -140,6 +140,11 @@ void Temperature::read() {
 }
 
 
+float Temperature::value() const {
+  return Fac*Celsius;
+}
+
+
 bool Temperature::configure(const char *key, const char *val) {
   bool found = true;
   char pval[30];

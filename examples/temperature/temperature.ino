@@ -15,11 +15,12 @@ void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   temp.setName("T");
-  sensors.setInterval(1.0);
+  sensors.setInterval(0.1);
   sensors.addSensor(temp);
   bme.beginI2C(Wire, 0x77);
   sensors.addSensor(tempbme);
   sensors.addSensor(hum);
+  pres.setUnit("kPa", 0.001, "%.2f");
   sensors.addSensor(pres);
   sensors.start();
   sensors.printHeader();

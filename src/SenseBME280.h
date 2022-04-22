@@ -108,7 +108,7 @@ class TemperatureBME280 : public Sensor {
 
   // The temperature in degrees celsius.
   // On error, return -INFINITY.
-  virtual float value() const { return BME->temperature(); };
+  virtual float value() const;
 
   
  private:
@@ -144,7 +144,7 @@ class HumidityBME280 : public Sensor {
 
   // The relative humidity in percent.
   // On error, return -INFINITY.
-  virtual float value() const { return BME->humidity(); };
+  virtual float value() const;
 
   
  private:
@@ -180,7 +180,7 @@ class PressureBME280 : public Sensor {
 
   // The pressure in Pascal.
   // On error, return -INFINITY.
-  virtual float value() const { return BME->pressure(); };
+  virtual float value() const;
 
   
  private:
