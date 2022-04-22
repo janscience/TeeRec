@@ -7,7 +7,11 @@ Temperature temp(10);  // DATA on pin 10
 SenseBME280 bme;
 TemperatureBME280 tempbme(&bme);
 HumidityBME280 hum(&bme);
+AbsoluteHumidityBME280 abshum(&bme);
+DewPointBME280 dp(&bme);
+HeatIndexBME280 hi(&bme);
 PressureBME280 pres(&bme);
+SeaLevelPressureBME280 slpres(&bme, 460.0);
 Sensors sensors;
 
 
@@ -20,8 +24,13 @@ void setup(void) {
   bme.beginI2C(Wire, 0x77);
   sensors.addSensor(tempbme);
   sensors.addSensor(hum);
+  sensors.addSensor(abshum);
+  sensors.addSensor(dp);
+  sensors.addSensor(hi);
   pres.setUnit("kPa", 0.001, "%.2f");
-  //sensors.addSensor(pres);
+  slpres.setUnit("kPa", 0.001, "%.2f");
+  sensors.addSensor(pres);
+  sensors.addSensor(slpres);
   sensors.start();
   sensors.printHeader();
 }

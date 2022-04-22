@@ -82,17 +82,15 @@ class SenseBME280 : protected BME280 {
 };
 
 
-class TemperatureBME280 : public Sensor {
+class SensorBME280 : public Sensor {
 
  public:
 
-  TemperatureBME280(SenseBME280 *bme);
+  SensorBME280(SenseBME280 *bme, const char *name, const char *symbol,
+	       const char *unit, const char *format);
 
   // Return true if temperature sensor is available.
   virtual bool available() { return BME->available(); };
-
-  // Return resolution of the temperature readings.
-  virtual float resolution() const;
 
   // Report temperature device on serial monitor.
   virtual void report();
@@ -106,89 +104,120 @@ class TemperatureBME280 : public Sensor {
   // Retrieve a temperature reading from the device.
   virtual void read() { BME->read(); };
 
-  // The temperature in degrees celsius.
-  // On error, return -INFINITY.
-  virtual float value() const;
-
   
- private:
+ protected:
 
   SenseBME280 *BME;
 
 };
 
 
-class HumidityBME280 : public Sensor {
+class TemperatureBME280 : public SensorBME280 {
+
+ public:
+
+  TemperatureBME280(SenseBME280 *bme);
+
+  // Return resolution of the temperature readings.
+  virtual float resolution() const;
+
+  // The temperature in degrees celsius.
+  // On error, return -INFINITY.
+  virtual float value() const;
+};
+
+
+class HumidityBME280 : public SensorBME280 {
 
  public:
 
   HumidityBME280(SenseBME280 *bme);
 
-  // Return true if humidity sensor is available.
-  virtual bool available() { return BME->available(); };
-
   // Return resolution of the humidity readings.
   virtual float resolution() const;
-
-  // Report humidity device on serial monitor.
-  virtual void report();
-
-  // Request a humidity conversion.
-  virtual void request() { BME->request(); };
-
-  // Recommended delay between a request() and read() in milliseconds.
-  virtual unsigned long delay() const { return BME->delay(); };
-
-  // Retrieve a humidity reading from the device.
-  virtual void read() { BME->read(); };
 
   // The relative humidity in percent.
   // On error, return -INFINITY.
   virtual float value() const;
-
-  
- private:
-
-  SenseBME280 *BME;
-
 };
 
 
-class PressureBME280 : public Sensor {
+class AbsoluteHumidityBME280 : public SensorBME280 {
+
+ public:
+
+  AbsoluteHumidityBME280(SenseBME280 *bme);
+
+  // Return resolution of the absolute humidity readings.
+  virtual float resolution() const;
+
+  // The absolute humidity in g/m^3.
+  // On error, return -INFINITY.
+  virtual float value() const;
+};
+
+
+class DewPointBME280 : public SensorBME280 {
+
+ public:
+
+  DewPointBME280(SenseBME280 *bme);
+
+  // Return resolution of the dew point readings.
+  virtual float resolution() const;
+
+  // The dew point in degrees celsius.
+  // On error, return -INFINITY.
+  virtual float value() const;
+};
+
+
+class HeatIndexBME280 : public SensorBME280 {
+
+ public:
+
+  HeatIndexBME280(SenseBME280 *bme);
+
+  // Return resolution of the heat index readings.
+  virtual float resolution() const;
+
+  // The heat index (apparent temperature) in degrees celsius.
+  // On error, return -INFINITY.
+  virtual float value() const;
+};
+
+
+class PressureBME280 : public SensorBME280 {
 
  public:
 
   PressureBME280(SenseBME280 *bme);
 
-  // Return true if pressure sensor is available.
-  virtual bool available() { return BME->available(); };
-
   // Return resolution of the pressure readings.
   virtual float resolution() const;
-
-  // Report pressure device on serial monitor.
-  virtual void report();
-
-  // Request a pressure conversion.
-  virtual void request() { BME->request(); };
-
-  // Recommended delay between a request() and read() in milliseconds.
-  virtual unsigned long delay() const { return BME->delay(); };
-
-  // Retrieve a pressure reading from the device.
-  virtual void read() { BME->read(); };
 
   // The pressure in Pascal.
   // On error, return -INFINITY.
   virtual float value() const;
-
-  
- private:
-
-  SenseBME280 *BME;
-
 };
 
+
+class SeaLevelPressureBME280 : public PressureBME280 {
+
+ public:
+
+  // Provide altitude in meter.
+  SeaLevelPressureBME280(SenseBME280 *bme, float altitude);
+  
+  // The equivalent sea level pressure in Pascal.
+  // On error, return -INFINITY.
+  virtual float value() const;
+
+protected:
+
+  float Altitude;
+  
+};
 
 
 #endif
