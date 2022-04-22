@@ -1,9 +1,9 @@
 #include <Sensors.h>
-#include <Temperature.h>
+#include <TemperatureDS18x20.h>
 #include <SenseBME280.h>
 
 
-Temperature temp(10);  // DATA on pin 10
+TemperatureDS18x20 temp(10);  // DATA on pin 10
 SenseBME280 bme;
 TemperatureBME280 tempbme(&bme);
 HumidityBME280 hum(&bme);

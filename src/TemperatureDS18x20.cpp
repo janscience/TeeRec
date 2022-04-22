@@ -1,7 +1,7 @@
-#include <Temperature.h>
+#include <TemperatureDS18x20.h>
 
 
-Temperature::Temperature()
+TemperatureDS18x20::TemperatureDS18x20()
   : Sensor("temperature", "T", "ºC", "%.2f") {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
@@ -11,13 +11,13 @@ Temperature::Temperature()
 }
 
 
-Temperature::Temperature(uint8_t pin)
-  : Temperature() {
+TemperatureDS18x20::TemperatureDS18x20(uint8_t pin)
+  : TemperatureDS18x20() {
   begin(pin);
 }
 
 
-void Temperature::begin(uint8_t pin) {
+void TemperatureDS18x20::begin(uint8_t pin) {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
@@ -66,24 +66,24 @@ void Temperature::begin(uint8_t pin) {
 }
 
 
-bool Temperature::available() {
+bool TemperatureDS18x20::available() {
   return (Type_s >= 0);
 }
 
 
-float Temperature::resolution() const {
+float TemperatureDS18x20::resolution() const {
   return 0.0625;  // 12 bit default resolution
 }
 
 
-void Temperature::report() {
+void TemperatureDS18x20::report() {
   if (available())
     Serial.printf("%s %s (%s): temperature device %s (ID: %s) at %.2f%s resolution.\n",
 		  name(), symbol(), unit(), Chip, AddrS, resolution(), unit());
 }
 
 
-void Temperature::request() {
+void TemperatureDS18x20::request() {
   if (Type_s < 0)
     return;
 
@@ -96,7 +96,7 @@ void Temperature::request() {
 }
 
 
-void Temperature::read() {
+void TemperatureDS18x20::read() {
   Celsius = NoValue;
   if (Type_s < 0)
     return;
@@ -140,12 +140,12 @@ void Temperature::read() {
 }
 
 
-float Temperature::value() const {
+float TemperatureDS18x20::value() const {
   return Fac*Celsius;
 }
 
 
-bool Temperature::configure(const char *key, const char *val) {
+bool TemperatureDS18x20::configure(const char *key, const char *val) {
   bool found = true;
   char pval[30];
   if (strcmp(key, "ds18x20-pin") == 0) {

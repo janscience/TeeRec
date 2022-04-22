@@ -1,6 +1,6 @@
 #include <Configurator.h>
 #include <Sensors.h>
-#include <Temperature.h>
+#include <TemperatureDS18x20.h>
 #include <SenseBME280.h>
 #include <SDWriter.h>
 #include <RTClock.h>
@@ -17,7 +17,7 @@ float sensorsInterval = 2.0; // interval between sensors readings in seconds
 
 Configurator config;
 RTClock rtclock;
-Temperature temp;
+TemperatureDS18x20 temp;
 SenseBME280 bme;
 TemperatureBME280 tempbme(&bme);
 HumidityBME280 hum(&bme);

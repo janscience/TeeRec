@@ -1,5 +1,5 @@
 /*
-  Temperature - read temperature from a 1-wire device.
+  TemperatureDS18x20 - read temperature from a DS18x20 1-wire device.
   Created by Jan Benda, November 27th, 2021.
   Based on https://github.com/PaulStoffregen/OneWire/blob/master/examples/DS18x20_Temperature/DS18x20_Temperature.pde
 
@@ -21,8 +21,8 @@
   sheet](https://datasheets.maximintegrated.com/en/ds/DS18B20.pdf).
 */
 
-#ifndef Temperature_h
-#define Temperature_h
+#ifndef TemperatureDS18x20_h
+#define TemperatureDS18x20_h
 
 
 #include <Arduino.h>
@@ -30,15 +30,15 @@
 #include <Sensor.h>
 
 
-class Temperature : public Sensor {
+class TemperatureDS18x20 : public Sensor {
 
  public:
 
   // Do not initialize temperature device yet.
-  Temperature();
+  TemperatureDS18x20();
   
   // Initialize temperature device with DATA on pin.
-  Temperature(uint8_t pin);
+  TemperatureDS18x20(uint8_t pin);
   
   // Initialize temperature device with DATA on pin.
   void begin(uint8_t pin);

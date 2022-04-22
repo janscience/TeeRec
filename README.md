@@ -51,7 +51,8 @@ defined in the following libraries:
 
 - [Sensors](src/Sensors.h): Manage environmental sensors.
 - [Sensor](src/Sensor.h): Virtual base class for environmental sensors.
-- [Temperature](src/Temperature.h): A Sensor that reads temperature from a 1-wire device.
+- [TemperatureDS18x20](src/TemperatureDS18x20.h): A Sensor that reads temperature from a DS18x20 1-wire device.
+- [SenseBME280](src/SenseBME280.h): The Bosch BME280 temperature, humidity, and pressure sensor with many derived measures.
 
 ### Configuration
 
