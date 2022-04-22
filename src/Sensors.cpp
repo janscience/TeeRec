@@ -119,20 +119,31 @@ void Sensors::print() {
 
 
 void Sensors::printHeader() {
+  int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
-      Serial.printf("%s/%s\t", Snsrs[k]->name(), Snsrs[k]->unit());
+    if (Snsrs[k]->available()) {
+      if (n > 0)
+	Serial.print('\t');
+      Serial.print(Snsrs[k]->name());
+      if (strlen(Snsrs[k]->unit()) > 0)
+	Serial.printf("/%s\t", Snsrs[k]->unit());
+      n++;
+    }
   }
   Serial.println();
 }
 
 
 void Sensors::printValues() {
+  int n = 0;
   char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
+      if (n > 0)
+	Serial.print('\t');
       Snsrs[k]->print(s);
-      Serial.printf("%s\t", s);
+      Serial.print(s);
+      n++;
     }
   }
   Serial.println();
@@ -166,8 +177,12 @@ bool Sensors::makeCSVHeader() {
   char *hp = Header;
   hp += sprintf(hp, "time,");
   for (uint8_t k=0; k<NSensors; k++) {
-    if (Snsrs[k]->available())
-      hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+    if (Snsrs[k]->available()) {
+      if (strlen(Snsrs[k]->unit()) == 0)
+	hp += sprintf(hp, "%s,", Snsrs[k]->name());
+      else
+	hp += sprintf(hp, "%s/%s,", Snsrs[k]->name(), Snsrs[k]->unit());
+    }
   }
   *(--hp) = '\n';
   return true;
@@ -193,7 +208,7 @@ bool Sensors::makeCSVData() {
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
       sp += Snsrs[k]->print(sp);
-      *(++sp) = ',';
+      *(sp++) = ',';
     }
   }
   *(--sp) = '\n';
