@@ -102,8 +102,8 @@ float TemperatureBME280::resolution() const {
 }
 
 
-float TemperatureBME280::value() const {
-  return Fac*BME->temperature();
+float TemperatureBME280::reading() const {
+  return BME->temperature();
 }
 
 
@@ -117,8 +117,8 @@ float HumidityBME280::resolution() const {
 }
 
 
-float HumidityBME280::value() const {
-  return Fac*BME->humidity();
+float HumidityBME280::reading() const {
+  return BME->humidity();
 }
 
 
@@ -133,14 +133,14 @@ float AbsoluteHumidityBME280::resolution() const {
 }
 
 
-float AbsoluteHumidityBME280::value() const {
+float AbsoluteHumidityBME280::reading() const {
   // from https://github.com/finitespace/BME280/blob/master/src/EnvironmentCalculations.cpp
   float temp = BME->temperature();
   float humidity = BME->humidity();
   const float mw = 18.01534; 	// molar mass of water g/mol
   const float R = 8.31447215; 	// universal gas constant J/mol/K
   temp = pow(2.718281828, (17.67 * temp) / (temp + 243.5));
-  return Fac * (6.112 * temp * humidity * mw)/((273.15 + temp) * R);
+  return (6.112 * temp * humidity * mw)/((273.15 + temp) * R);
 }
 
 
@@ -154,14 +154,14 @@ float DewPointBME280::resolution() const {
 }
 
 
-float DewPointBME280::value() const {
+float DewPointBME280::reading() const {
   // https://en.wikipedia.org/wiki/Dew_point
   float temp = BME->temperature();
   float humidity = BME->humidity();
   const float b = 17.62;
   const float c = 243.12;
   float gamma = log(0.01*humidity) + (b * temp)/(c + temp);
-  return Fac * c * gamma/(b - gamma);
+  return c * gamma/(b - gamma);
 }
 
 
@@ -225,8 +225,8 @@ float PressureBME280::resolution() const {
 }
 
 
-float PressureBME280::value() const {
-  return Fac*BME->pressure();
+float PressureBME280::reading() const {
+  return BME->pressure();
 }
 
 
@@ -247,10 +247,10 @@ SeaLevelPressureBME280::SeaLevelPressureBME280(SenseBME280 *bme,
 }
 
 
-float SeaLevelPressureBME280::value() const {
+float SeaLevelPressureBME280::reading() const {
   // see https://keisan.casio.com/exec/system/1224575267
   // derivation: https://keisan.casio.com/keisan/image/Convertpressure.pdf
   float pressure = BME->pressure();
   float temp = BME->temperature();
-  return Fac * pressure / pow(1.0 - ((0.0065 * Altitude) / (temp + (0.0065 * Altitude) + 273.15)), 5.257);
+  return pressure / pow(1.0 - ((0.0065 * Altitude) / (temp + (0.0065 * Altitude) + 273.15)), 5.257);
 }

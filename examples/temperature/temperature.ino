@@ -17,11 +17,10 @@ SeaLevelPressureBME280 slpres(&bme, &sensors, 460.0);
 void setup(void) {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  temp.setName("T");
   sensors.setInterval(0.1);
   bme.beginI2C(Wire, 0x77);
-  pres.setKiloPascal();
-  slpres.setKiloPascal();
+  pres.setHectoPascal();
+  slpres.setMilliBar();
   sensors.report();
   Serial.println();
   delay(500);

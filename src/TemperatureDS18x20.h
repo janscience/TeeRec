@@ -73,7 +73,7 @@ class TemperatureDS18x20 : public Sensor {
   // Before you can retrieve a temperature reading,
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
-  virtual float value() const;
+  virtual float reading() const;
 
   // Configure Temperature settings with the provided key-value pair.
   // Return true if key was used.

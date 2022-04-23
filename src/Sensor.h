@@ -22,15 +22,19 @@ class Sensor {
   // Initialize the sensor.
   Sensor();
 
-  // Initialize the sensor and set name, mathematical symbol, unit, and
+  // Initialize the sensor and set name, mathematical symbol, basic unit, and
   // format of sensor readings.
+  // The derived unit is also set to unit, and the conversion factor
+  // is set to one.
   Sensor(const char *name, const char *symbol, const char *unit,
-	 const char *format, float fac=1.0);
+	 const char *format);
 
   // Initialize the sensor, add it to sensors, and set name,
-  // mathematical symbol, unit, and format of sensor readings.
+  // mathematical symbol, basic unit, and format of sensor readings.
+  // The derived unit is also set to unit, and the conversion factor
+  // is set to one.
   Sensor(Sensors *sensors, const char *name, const char *symbol,
-	 const char *unit, const char *format, float fac=1.0);
+	 const char *unit, const char *format);
 
   // Return name of environmental sensor reading as character array.
   const char* name() const;
@@ -49,6 +53,9 @@ class Sensor {
   void setSymbol(const char *symbol);
 
   // Return unit of sensor readings as character array.
+  const char* basicUnit() const;
+
+  // Return unit of derived sensor values as character array.
   const char* unit() const;
 
   // Set unit of environmental sensor reading to unit.
@@ -97,14 +104,16 @@ class Sensor {
   // You need to call request() at least delay() before.
   virtual void read() = 0;
 
-  // The sensor reading.
+  // The sensor reading in the basic unit.
   // On error, return -INFINITY.
   // Before you can retrieve a sensor reading,
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
-  // Any implementation should multiply the sensor reading with Fac
-  // before returning the value.
-  virtual float value() const = 0;
+  virtual float reading() const = 0;
+
+  // The sensor reading in the current unit.
+  // This default implementation multiplies the sensor reading() with Fac.
+  virtual float value() const;
   
   // Print the sensor reading using format string into string s.
   // Return the number of printed characters.
@@ -125,6 +134,7 @@ protected:
 
   char Name[50];
   char Symbol[20];
+  char BasicUnit[20];
   char Unit[20];
   char Format[10];
   float Fac;

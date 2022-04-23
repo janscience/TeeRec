@@ -22,6 +22,7 @@ TemperatureDS18x20 temp(&sensors);
 SenseBME280 bme;
 TemperatureBME280 tempbme(&bme, &sensors);
 HumidityBME280 hum(&bme, &sensors);
+DewPointBME280 dp(&bme, &sensors);
 PressureBME280 pres(&bme, &sensors);
 SDCard sdcard;
 Blink blink(LED_BUILTIN);
@@ -37,7 +38,7 @@ void setup() {
   rtclock.check();
   rtclock.report();
   bme.beginI2C(Wire, 0x77);
-  pres.setKiloPascal();
+  pres.setHectoPascal();
   sensors.setInterval(sensorsInterval);
   sdcard.begin();
   config.setConfigFile("sensorlogger.cfg");

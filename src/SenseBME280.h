@@ -132,7 +132,7 @@ class TemperatureBME280 : public SensorBME280 {
 
   // The temperature in degrees celsius.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 };
 
 
@@ -147,7 +147,7 @@ class HumidityBME280 : public SensorBME280 {
 
   // The relative humidity in percent.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 };
 
 
@@ -162,7 +162,7 @@ class AbsoluteHumidityBME280 : public SensorBME280 {
 
   // The absolute humidity in g/m^3.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 };
 
 
@@ -177,7 +177,7 @@ class DewPointBME280 : public SensorBME280 {
 
   // The dew point in degrees celsius.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 };
 
 
@@ -222,7 +222,7 @@ class PressureBME280 : public SensorBME280 {
 
   // The pressure in Pascal.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 };
 
 
@@ -238,7 +238,7 @@ class SeaLevelPressureBME280 : public PressureBME280 {
   
   // The equivalent sea level pressure in Pascal.
   // On error, return -INFINITY.
-  virtual float value() const;
+  virtual float reading() const;
 
 protected:
 

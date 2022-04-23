@@ -4,6 +4,8 @@
 
 Sensor::Sensor() :
   Name(""),
+  Symbol(""),
+  BasicUnit(""),
   Unit(""),
   Format("%.2f"),
   Fac(1.0),
@@ -12,18 +14,19 @@ Sensor::Sensor() :
 
 
 Sensor::Sensor(const char *name, const char *symbol, const char *unit,
-	       const char *format, float fac) :
+	       const char *format) :
   Sensor() {
+  strcpy(BasicUnit, unit);
   setName(name);
   setSymbol(symbol);
-  setUnit(unit, fac);
+  setUnit(unit, 1.0);
   setFormat(format);
 }
 
 
 Sensor::Sensor(Sensors *sensors, const char *name, const char *symbol,
-	       const char *unit, const char *format, float fac) :
-  Sensor(name, symbol, unit, format, fac) {
+	       const char *unit, const char *format) :
+  Sensor(name, symbol, unit, format) {
   if (sensors != 0)
     sensors->addSensor(*this);
 }
@@ -52,6 +55,11 @@ const char* Sensor::symbol() const {
 
 void Sensor::setSymbol(const char *symbol) {
   strcpy(Symbol, symbol);
+}
+
+
+const char* Sensor::basicUnit() const {
+  return BasicUnit;
 }
 
 
@@ -109,6 +117,11 @@ void Sensor::report() {
 
 int Sensor::resolutionStr(char *s) const {
   return sprintf(s, Format, resolution());
+}
+
+
+float Sensor::value() const {
+  return Fac*reading();
 }
 
 

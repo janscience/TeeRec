@@ -139,8 +139,8 @@ void TemperatureDS18x20::read() {
 }
 
 
-float TemperatureDS18x20::value() const {
-  return Fac*Celsius;
+float TemperatureDS18x20::reading() const {
+  return Celsius;
 }
 
 
