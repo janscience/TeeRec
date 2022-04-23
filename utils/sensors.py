@@ -7,14 +7,15 @@ import matplotlib.pyplot as plt
 
 def sensors(path):
     data = pd.read_csv(path, sep=',')
-    data['time'] = pd.to_datetime(data['time'])
-    data['time'] = pd.Series(data['time'].dt.to_pydatetime(), dtype=object)
+    tc = data.columns[0]
+    data[tc] = pd.to_datetime(data[tc])
+    data[tc] = pd.Series(data[tc].dt.to_pydatetime(), dtype=object)
     header = list(data)[1:]
     # plot data:
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     fig, axs = plt.subplots(len(header), 1, squeeze=False, sharex=True);
     for k, hn in enumerate(header):
-        axs[k,0].plot(np.array(data['time']), np.array(data[hn]),
+        axs[k,0].plot(np.array(data[tc]), np.array(data[hn]),
                       '-', color=colors[k%len(colors)])
         name, unit = hn.split('/')
         if len(unit) > 0:

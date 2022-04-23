@@ -20,8 +20,8 @@ void setup(void) {
   temp.setName("T");
   sensors.setInterval(0.1);
   bme.beginI2C(Wire, 0x77);
-  pres.setUnit("kPa", 0.001, "%.2f");
-  slpres.setUnit("kPa", 0.001, "%.2f");
+  pres.setKiloPascal();
+  slpres.setKiloPascal();
   sensors.report();
   Serial.println();
   delay(500);

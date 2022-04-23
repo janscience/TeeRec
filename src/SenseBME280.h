@@ -187,6 +187,36 @@ class PressureBME280 : public SensorBME280 {
 
   PressureBME280(SenseBME280 *bme, Sensors *sensors=0);
 
+  // Set unit to hectopascal.
+  void setHectoPascal();
+
+  // Set unit to kilopascal.
+  void setKiloPascal();
+
+  // Set unit to megapascal.
+  void setMegaPascal();
+
+  // Set unit to bar.
+  void setBar();
+
+  // Set unit to mbar.
+  void setMilliBar();
+
+  // Set unit to at.
+  void setAt();
+
+  // Set unit to atm.
+  void setAtm();
+
+  // Set unit to mm Hg.
+  void setMMHg();
+
+  // Set unit to psi.
+  void setPSI();
+
+  // Set unit to torr.
+  void setTorr();
+
   // Return resolution of the pressure readings.
   virtual float resolution() const;
 

@@ -37,6 +37,7 @@ void setup() {
   rtclock.check();
   rtclock.report();
   bme.beginI2C(Wire, 0x77);
+  pres.setKiloPascal();
   sensors.setInterval(sensorsInterval);
   sdcard.begin();
   config.setConfigFile("sensorlogger.cfg");

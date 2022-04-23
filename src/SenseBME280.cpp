@@ -169,6 +169,56 @@ PressureBME280::PressureBME280(SenseBME280 *bme, Sensors *sensors)
   : SensorBME280(bme, sensors, "pressure", "P", "Pa", "%.0f") {
 }
 
+// https://www.beamex.com/resources/pressure-unit-converter/
+void PressureBME280::setHectoPascal() {
+  setUnit("hPa", 0.01, "%.2f");
+}
+
+
+void PressureBME280::setKiloPascal() {
+  setUnit("kPa", 0.001, "%.3f");
+}
+
+
+void PressureBME280::setMegaPascal() {
+  setUnit("MPa", 1e-6, "%.6f");
+}
+
+
+void PressureBME280::setBar() {
+  setUnit("bar", 1e-5, "%.5f");
+}
+
+
+void PressureBME280::setMilliBar() {
+  setUnit("mbar", 0.01, "%.2f");
+}
+
+
+void PressureBME280::setAt() {
+  setUnit("at", 0.0000101971621298, "%.5f");
+}
+
+
+void PressureBME280::setAtm() {
+  setUnit("atm", 0.00000986923266716, "%.5f");
+}
+
+
+void PressureBME280::setMMHg() {
+  setUnit("mmHg", 0.00750061575846, "%.2f");
+}
+
+
+void PressureBME280::setPSI() {
+  setUnit("psi", 0.00014503773773, "%.4f");
+}
+
+
+void PressureBME280::setTorr() {
+  setUnit("torr", 0.00750061682704, "%.2f");
+}
+
 
 float PressureBME280::resolution() const {
   return Fac*3.3;
