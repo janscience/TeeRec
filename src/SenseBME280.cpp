@@ -98,7 +98,7 @@ TemperatureBME280::TemperatureBME280(SenseBME280 *bme, Sensors *sensors)
 
 
 float TemperatureBME280::resolution() const {
-  return Fac*0.01;
+  return Factor*0.01;
 }
 
 
@@ -113,7 +113,7 @@ HumidityBME280::HumidityBME280(SenseBME280 *bme, Sensors *sensors)
 
 
 float HumidityBME280::resolution() const {
-  return Fac*0.07;
+  return Factor*0.07;
 }
 
 
@@ -129,7 +129,7 @@ AbsoluteHumidityBME280::AbsoluteHumidityBME280(SenseBME280 *bme,
 
 
 float AbsoluteHumidityBME280::resolution() const {
-  return Fac*0.1;
+  return Factor*0.1;
 }
 
 
@@ -150,7 +150,7 @@ DewPointBME280::DewPointBME280(SenseBME280 *bme, Sensors *sensors)
 
 
 float DewPointBME280::resolution() const {
-  return Fac*0.35;
+  return Factor*0.35;
 }
 
 
@@ -170,7 +170,7 @@ PressureBME280::PressureBME280(SenseBME280 *bme, Sensors *sensors)
 }
 
 float PressureBME280::resolution() const {
-  return Fac*3.3;
+  return Factor*3.3;
 }
 
 

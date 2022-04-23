@@ -78,7 +78,7 @@ bool TemperatureDS18x20::available() {
 
 
 float TemperatureDS18x20::resolution() const {
-  return Fac*0.0625;  // 12 bit default resolution
+  return Factor*0.0625;  // 12 bit default resolution
 }
 
 

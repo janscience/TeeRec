@@ -8,7 +8,8 @@ Sensor::Sensor() :
   BasicUnit(""),
   Unit(""),
   Format("%.2f"),
-  Fac(1.0),
+  Factor(1.0),
+  Offset(0.0),
   Configured(false) {
 }
 
@@ -19,7 +20,7 @@ Sensor::Sensor(const char *name, const char *symbol, const char *unit,
   strcpy(BasicUnit, unit);
   setName(name);
   setSymbol(symbol);
-  setUnit(unit, 1.0);
+  setUnit(unit, 1.0, 0.0);
   setFormat(format);
 }
 
@@ -68,15 +69,26 @@ const char* Sensor::unit() const {
 }
 
 
-void Sensor::setUnit(const char *unit, float fac) {
+void Sensor::setUnit(const char *unit, float factor, float offset) {
   strcpy(Unit, unit);
-  Fac = fac;
+  Factor = factor;
+  Offset = offset;
 }
 
 
-void Sensor::setUnit(const char *unit, float fac, const char *format) {
+void Sensor::setUnit(const char *unit, float factor, float offset,
+		     const char *format) {
   strcpy(Unit, unit);
-  Fac = fac;
+  Factor = factor;
+  Offset = offset;
+  strcpy(Format, format);
+}
+
+
+void Sensor::setUnit(const char *unit, float factor, const char *format) {
+  strcpy(Unit, unit);
+  Factor = factor;
+  Offset = 0.0;
   strcpy(Format, format);
 }
 
@@ -121,12 +133,22 @@ int Sensor::resolutionStr(char *s) const {
 
 
 float Sensor::value() const {
-  return Fac*reading();
+  return Factor*reading() + Offset;
 }
 
 
 int Sensor::valueStr(char *s) const {
   return sprintf(s, Format, value());
+}
+
+
+void Sensor::setKelvin() {
+  setUnit("K", 1.0, 273.15, "%.2f");
+}
+
+
+void Sensor::setFahrenheit() {
+  setUnit("F", 9.0/5.0, 32.0, "%.2f");
 }
 
 

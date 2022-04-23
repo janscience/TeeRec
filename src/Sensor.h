@@ -24,15 +24,15 @@ class Sensor {
 
   // Initialize the sensor and set name, mathematical symbol, basic unit, and
   // format of sensor readings.
-  // The derived unit is also set to unit, and the conversion factor
-  // is set to one.
+  // The derived unit is also set to unit, the conversion factor
+  // is set to one, the offset to zero.
   Sensor(const char *name, const char *symbol, const char *unit,
 	 const char *format);
 
   // Initialize the sensor, add it to sensors, and set name,
   // mathematical symbol, basic unit, and format of sensor readings.
-  // The derived unit is also set to unit, and the conversion factor
-  // is set to one.
+  // The derived unit is also set to unit, the conversion factor
+  // is set to one, the offset to zero.
   Sensor(Sensors *sensors, const char *name, const char *symbol,
 	 const char *unit, const char *format);
 
@@ -59,13 +59,19 @@ class Sensor {
   const char* unit() const;
 
   // Set unit of environmental sensor reading to unit.
-  // Optionally, the sensor reading can be mutliplied by fac to result
-  // in the desired unit.
-  void setUnit(const char *unit, float fac=1.0);
+  
+  // Optionally, the sensor reading can be mutliplied by factor and
+  // offsetted by offset to result in the desired unit.
+  void setUnit(const char *unit, float factor=1.0, float offset=0.0);
+
+  // Set unit, conversion factor, offset, and format string of environmental
+  // sensor reading.
+  void setUnit(const char *unit, float factor, float offset,
+	       const char *format);
 
   // Set unit, conversion factor, and format string of environmental
-  // sensor reading.
-  void setUnit(const char *unit, float fac, const char *format);
+  // sensor reading. The offset is set to zero.
+  void setUnit(const char *unit, float factor, const char *format);
 
   // Return format string for sensor readings as character array.
   const char* format() const;
@@ -80,7 +86,7 @@ class Sensor {
   virtual const char* identifier() const;
 
   // Return resolution of the sensor readings in the current unit.
-  // Any implementation should multiply the resolution with Fac
+  // Any implementation should multiply the resolution with Factor
   // before returning the value.
   virtual float resolution() const = 0;
   
@@ -112,7 +118,8 @@ class Sensor {
   virtual float reading() const = 0;
 
   // The sensor reading in the current unit.
-  // This default implementation multiplies the sensor reading() with Fac.
+  // This default implementation multiplies the sensor reading() with Factor
+  // and adds Offset.
   virtual float value() const;
   
   // Print the sensor reading using format string into string s.
@@ -129,8 +136,15 @@ class Sensor {
   // True if this Sensor was configured from a file, for example.
   bool configured() const { return Configured; };
 
+  // Special unit conversions for temperatures measured in degrees celsius:
+
+  // Set unit to Kelvin.
+  void setKelvin();
+
+  // Set unit to Fahrenheit.
+  void setFahrenheit();
   
-  // Some special unit conversions for pressures measured in Pascal:
+  // Special unit conversions for pressures measured in Pascal:
   // https://www.beamex.com/resources/pressure-unit-converter/
 
   // Set unit to hectopascal.
@@ -171,7 +185,8 @@ protected:
   char BasicUnit[20];
   char Unit[20];
   char Format[10];
-  float Fac;
+  float Factor;
+  float Offset;
   bool Configured;
   
 };
