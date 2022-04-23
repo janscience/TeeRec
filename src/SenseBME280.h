@@ -42,6 +42,9 @@ class SenseBME280 : protected BME280 {
   // Return name of chip as string.
   const char* chip() const { return Chip; };
 
+  // Return unique identifier of sensor chip as character array.
+  virtual const char* identifier() const { return ""; };
+
   // Return true if temperature sensor is available.
   bool available();
 
@@ -91,19 +94,22 @@ class SensorBME280 : public Sensor {
   SensorBME280(SenseBME280 *bme, const char *name, const char *symbol,
 	       const char *unit, const char *format);
 
-  // Return true if temperature sensor is available.
+  // Return true if BME280 sensor is available.
   virtual bool available() { return BME->available(); };
 
-  // Report temperature device on serial monitor.
-  virtual void report();
+  // Return name of sensor chip model as character array.
+  virtual const char* chip() const { return BME->chip(); };
 
-  // Request a temperature conversion.
+  // Return unique identifier of sensor chip as character array.
+  virtual const char* identifier() const { return BME->identifier(); };
+
+  // Request a sensor conversion.
   virtual void request() { BME->request(); };
 
   // Recommended delay between a request() and read() in milliseconds.
   virtual unsigned long delay() const { return BME->delay(); };
 
-  // Retrieve a temperature reading from the device.
+  // Retrieve a sensor reading from the device.
   virtual void read() { BME->read(); };
 
   
@@ -169,21 +175,6 @@ class DewPointBME280 : public SensorBME280 {
   virtual float resolution() const;
 
   // The dew point in degrees celsius.
-  // On error, return -INFINITY.
-  virtual float value() const;
-};
-
-
-class HeatIndexBME280 : public SensorBME280 {
-
- public:
-
-  HeatIndexBME280(SenseBME280 *bme);
-
-  // Return resolution of the heat index readings.
-  virtual float resolution() const;
-
-  // The heat index (apparent temperature) in degrees celsius.
   // On error, return -INFINITY.
   virtual float value() const;
 };

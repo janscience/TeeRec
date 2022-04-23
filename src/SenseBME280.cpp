@@ -92,20 +92,13 @@ SensorBME280::SensorBME280(SenseBME280 *bme, const char *name,
 }
 
 
-void SensorBME280::report() {
-  if (available())
-    Serial.printf("%s %s (%s): device %s at %.2f%s resolution.\n",
-		  name(), symbol(), unit(), BME->chip(), resolution(), unit());
-}
-
-
 TemperatureBME280::TemperatureBME280(SenseBME280 *bme)
   : SensorBME280(bme, "temperature", "T", "ºC", "%.2f") {
 }
 
 
 float TemperatureBME280::resolution() const {
-  return 0.01;
+  return Fac*0.01;
 }
 
 
@@ -120,7 +113,7 @@ HumidityBME280::HumidityBME280(SenseBME280 *bme)
 
 
 float HumidityBME280::resolution() const {
-  return 0.07;
+  return Fac*0.07;
 }
 
 
@@ -135,7 +128,7 @@ AbsoluteHumidityBME280::AbsoluteHumidityBME280(SenseBME280 *bme)
 
 
 float AbsoluteHumidityBME280::resolution() const {
-  return 0.1;
+  return Fac*0.1;
 }
 
 
@@ -156,7 +149,7 @@ DewPointBME280::DewPointBME280(SenseBME280 *bme)
 
 
 float DewPointBME280::resolution() const {
-  return 0.35;
+  return Fac*0.35;
 }
 
 
@@ -171,43 +164,13 @@ float DewPointBME280::value() const {
 }
 
 
-HeatIndexBME280::HeatIndexBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "heat index", "HI", "ºC", "%.0f") {
-}
-
-
-float HeatIndexBME280::resolution() const {
-  return 1.7;
-}
-
-
-float HeatIndexBME280::value() const {
-  // https://en.wikipedia.org/wiki/Heat_index
-  double T = BME->temperature();
-  double R = BME->humidity();
-  const double c1 = -8.78469475556;
-  const double c2 = 1.61139411;
-  const double c3 = 2.33854883889;
-  const double c4 = -0.14611605;
-  const double c5 = -0.012308094;
-  const double c6 = -0.0164248277778;
-  const double c7 = 2.211732e-3;
-  const double c8 = 7.2546e-4;
-  const double c9 = 3.582e-6;
-  float HI = c1 + c2*T + c3*R + c4*T*R + c5*T*T + c6*R*R + c7*T*T*R + c8*T*R*R + c9*T*T*R*R;
-  return Fac * HI;
-  // see also
-  // https://github.com/finitespace/BME280/blob/master/src/EnvironmentCalculations.cpp
-}
-
-
 PressureBME280::PressureBME280(SenseBME280 *bme)
   : SensorBME280(bme, "pressure", "P", "Pa", "%.0f") {
 }
 
 
 float PressureBME280::resolution() const {
-  return 3.3;
+  return Fac*3.3;
 }
 
 
@@ -219,11 +182,13 @@ float PressureBME280::value() const {
 SeaLevelPressureBME280::SeaLevelPressureBME280(SenseBME280 *bme, float altitude)
   : PressureBME280(bme),
     Altitude(altitude) {
-  setName("sea level pressure", "Psl");
+  setName("sea level pressure", "P0");
 }
 
 
 float SeaLevelPressureBME280::value() const {
+  // see https://keisan.casio.com/exec/system/1224575267
+  // derivation: https://keisan.casio.com/keisan/image/Convertpressure.pdf
   float pressure = BME->pressure();
   float temp = BME->temperature();
   return Fac * pressure / pow(1.0 - ((0.0065 * Altitude) / (temp + (0.0065 * Altitude) + 273.15)), 5.257);

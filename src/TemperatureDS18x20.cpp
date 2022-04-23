@@ -72,14 +72,7 @@ bool TemperatureDS18x20::available() {
 
 
 float TemperatureDS18x20::resolution() const {
-  return 0.0625;  // 12 bit default resolution
-}
-
-
-void TemperatureDS18x20::report() {
-  if (available())
-    Serial.printf("%s %s (%s): temperature device %s (ID: %s) at %.2f%s resolution.\n",
-		  name(), symbol(), unit(), Chip, AddrS, resolution(), unit());
+  return Fac*0.0625;  // 12 bit default resolution
 }
 
 

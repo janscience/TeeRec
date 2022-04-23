@@ -74,6 +74,35 @@ void Sensor::setFormat(const char *format) {
 }
 
 
+const char* Sensor::chip() const {
+  return "";
+}
+
+
+const char* Sensor::identifier() const {
+  return "";
+}
+
+
+void Sensor::report() {
+  if (available()) {
+    char rs[10];
+    printResolution(rs);
+    Serial.printf("%s %s (%s):", name(), symbol(), unit());
+    if (strlen(chip()) > 0)
+      Serial.printf("\t on %s device", chip());
+    if (strlen(identifier()) > 0)
+      Serial.printf(" (ID: %s)", identifier());
+    Serial.printf(" at %s%s resolution.\n", rs, unit());
+  }
+}
+
+
+int Sensor::printResolution(char *s) const {
+  return sprintf(s, Format, resolution());
+}
+
+
 int Sensor::print(char *s) const {
   return sprintf(s, Format, value());
 }

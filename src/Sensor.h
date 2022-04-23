@@ -58,14 +58,26 @@ class Sensor {
   // Set format string for environmental sensor reading to format.
   void setFormat(const char *format);
 
-  // Return resolution of the sensor readings.
+  // Return name of sensor chip model as character array.
+  virtual const char* chip() const;
+
+  // Return unique identifier of sensor chip as character array.
+  virtual const char* identifier() const;
+
+  // Return resolution of the sensor readings in the current unit.
+  // Any implementation should multiply the resolution with Fac
+  // before returning the value.
   virtual float resolution() const = 0;
+  
+  // Print the resolution using format string into string s.
+  // Return the number of printed characters.
+  int printResolution(char *s) const;
   
   // Return true if sensor is available.
   virtual bool available() = 0;
   
-  // Report sensor device on serial monitor.
-  virtual void report() {};
+  // Report properties of sensor on serial monitor.
+  virtual void report();
 
   // Request a sensor reading.
   virtual void request() {};

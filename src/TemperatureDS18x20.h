@@ -44,19 +44,16 @@ class TemperatureDS18x20 : public Sensor {
   void begin(uint8_t pin);
 
   // Return name of chip as string.
-  const char* chip() const { return Chip; };
+  virtual const char* chip() const { return Chip; };
 
   // Return ROM of temperature sensor (unique ID) as string.
-  const char* identifier() const { return AddrS; };
+  virtual const char* identifier() const { return AddrS; };
 
   // Return resolution of the temperature readings.
   virtual float resolution() const;
 
   // Return true if temperature sensor is available.
   virtual bool available();
-
-  // Report temperature device on serial monitor.
-  virtual void report();
 
   // Request a temperature conversion.
   virtual void request();

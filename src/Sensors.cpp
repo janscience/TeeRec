@@ -45,8 +45,8 @@ void Sensors::setInterval(float interval) {
 void Sensors::report() {
   char ds[2] = {'\0', '\0'};
   if (NSensors > 1)
-    ds[1] = 's';
-  Serial.printf("Sensors: %d device%s, read every %gs\n",
+    ds[0] = 's';
+  Serial.printf("%d sensor%s, read every %gs:\n",
 		NSensors, ds, 0.001*Interval);
   int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
