@@ -24,13 +24,13 @@ void setup(void) {
   bme.beginI2C(Wire, 0x77);
   sensors.addSensor(tempbme);
   sensors.addSensor(hum);
-  sensors.addSensor(abshum);
-  sensors.addSensor(dp);
-  sensors.addSensor(hi);
-  pres.setUnit("kPa", 0.001, "%.2f");
-  slpres.setUnit("kPa", 0.001, "%.2f");
-  sensors.addSensor(pres);
-  sensors.addSensor(slpres);
+  //sensors.addSensor(abshum);
+  //sensors.addSensor(dp);
+  //sensors.addSensor(hi);
+  //pres.setUnit("kPa", 0.001, "%.2f");
+  //slpres.setUnit("kPa", 0.001, "%.2f");
+  //sensors.addSensor(pres);
+  //sensors.addSensor(slpres);
   sensors.start();
   sensors.printHeader();
 }

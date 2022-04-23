@@ -134,6 +134,10 @@ TeeRec is based on the following libraries:
 - [SdFat version2](https://github.com/greiman/SdFat)
 - [Bounce2](https://github.com/thomasfredericks/Bounce2)
 
+The environmental sensors rely on:
+
+- [SparkFun BME280](https://github.com/sparkfun/SparkFun_BME280_Arduino_Library)
+
 The Display library currently uses:
 
 - [Adafruit-GFX](https://github.com/adafruit/Adafruit-GFX-Library)
@@ -154,9 +158,9 @@ installing Teensyduoino simply select all libraries for installation.
 Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
 they are now supplied by Teensyduoino.
 
-For installing the libraries for the TFT monitor, open in the Arduino
-IDE: Tools - Manage libraries. Search for the TFT libraries and
-install them.
+For installing the libraries for the environmental sensors and the TFT
+monitor, open in the Arduino IDE: Tools - Manage libraries. Search for
+the libraries and install them.
 
 
 ## Installation
