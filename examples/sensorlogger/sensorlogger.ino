@@ -17,12 +17,12 @@ float sensorsInterval = 2.0; // interval between sensors readings in seconds
 
 Configurator config;
 RTClock rtclock;
-TemperatureDS18x20 temp;
-SenseBME280 bme;
-TemperatureBME280 tempbme(&bme);
-HumidityBME280 hum(&bme);
-PressureBME280 pres(&bme);
 Sensors sensors(rtclock);
+TemperatureDS18x20 temp(&sensors);
+SenseBME280 bme;
+TemperatureBME280 tempbme(&bme, &sensors);
+HumidityBME280 hum(&bme, &sensors);
+PressureBME280 pres(&bme, &sensors);
 SDCard sdcard;
 Blink blink(LED_BUILTIN);
 bool symbols = false;
@@ -36,11 +36,7 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   rtclock.check();
   rtclock.report();
-  sensors.addSensor(temp);
   bme.beginI2C(Wire, 0x77);
-  sensors.addSensor(tempbme);
-  sensors.addSensor(hum);
-  sensors.addSensor(pres);
   sensors.setInterval(sensorsInterval);
   sdcard.begin();
   config.setConfigFile("sensorlogger.cfg");

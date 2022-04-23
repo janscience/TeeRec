@@ -35,10 +35,13 @@ class TemperatureDS18x20 : public Sensor {
  public:
 
   // Do not initialize temperature device yet.
-  TemperatureDS18x20();
+  TemperatureDS18x20(Sensors *sensors=0);
   
   // Initialize temperature device with DATA on pin.
   TemperatureDS18x20(uint8_t pin);
+  
+  // Initialize temperature device with DATA on pin.
+  TemperatureDS18x20(Sensors *sensors, uint8_t pin);
   
   // Initialize temperature device with DATA on pin.
   void begin(uint8_t pin);

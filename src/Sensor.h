@@ -10,6 +10,9 @@
 #include <Arduino.h>
 
 
+class Sensors;
+
+
 class Sensor {
 
  public:
@@ -19,10 +22,15 @@ class Sensor {
   // Initialize the sensor.
   Sensor();
 
-  // Initialize the sensor and set name, mthematical symbol, unit, and
+  // Initialize the sensor and set name, mathematical symbol, unit, and
   // format of sensor readings.
   Sensor(const char *name, const char *symbol, const char *unit,
 	 const char *format, float fac=1.0);
+
+  // Initialize the sensor, add it to sensors, and set name,
+  // mathematical symbol, unit, and format of sensor readings.
+  Sensor(Sensors *sensors, const char *name, const char *symbol,
+	 const char *unit, const char *format, float fac=1.0);
 
   // Return name of environmental sensor reading as character array.
   const char* name() const;

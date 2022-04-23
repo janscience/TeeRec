@@ -27,6 +27,9 @@ class Sensors : public Configurable {
   // Number of currently managed sensors.
   uint8_t size() const { return NSensors; };
 
+  // Number of available sensors.
+  uint8_t sensors() const;
+
   // The index-th sensor.
   Sensor &operator[](uint8_t index) { return *Snsrs[index]; };
 

@@ -1,8 +1,8 @@
 #include <TemperatureDS18x20.h>
 
 
-TemperatureDS18x20::TemperatureDS18x20()
-  : Sensor("temperature", "T", "ºC", "%.2f") {
+TemperatureDS18x20::TemperatureDS18x20(Sensors *sensors)
+  : Sensor(sensors, "temperature", "T", "ºC", "%.2f") {
   Type_s = -1;
   memset(Addr, 0, sizeof(Addr));
   memset(AddrS, 0, sizeof(AddrS));
@@ -13,6 +13,12 @@ TemperatureDS18x20::TemperatureDS18x20()
 
 TemperatureDS18x20::TemperatureDS18x20(uint8_t pin)
   : TemperatureDS18x20() {
+  begin(pin);
+}
+
+
+TemperatureDS18x20::TemperatureDS18x20(Sensors *sensors, uint8_t pin)
+  : TemperatureDS18x20(sensors) {
   begin(pin);
 }
 
@@ -28,7 +34,7 @@ void TemperatureDS18x20::begin(uint8_t pin) {
 
   OW.reset_search();
   if ( !OW.search(Addr)) {
-    Serial.println("No temperature sensor found.");
+    Serial.println("No DS18x20 temperature sensor found.");
     Serial.println();
     return;
   }

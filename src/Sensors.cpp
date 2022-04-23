@@ -32,6 +32,16 @@ void Sensors::addSensor(Sensor &sensor) {
 }
 
 
+uint8_t Sensors::sensors() const {
+  uint8_t n = 0;
+  for (uint8_t k=0; k<NSensors; k++) {
+    if (Snsrs[k]->available())
+      n++;
+  }
+  return n;
+}
+
+
 float Sensors::interval() const {
   return 0.001*Interval;
 }
@@ -46,8 +56,8 @@ void Sensors::report() {
   char ds[2] = {'\0', '\0'};
   if (NSensors > 1)
     ds[0] = 's';
-  Serial.printf("%d sensor%s, read every %gs:\n",
-		NSensors, ds, 0.001*Interval);
+  Serial.printf("%d of %d sensor%s available, read every %gs:\n",
+		sensors(), NSensors, ds, 0.001*Interval);
   int n = 0;
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {

@@ -84,16 +84,16 @@ void SenseBME280::init() {
 }
 
 
-SensorBME280::SensorBME280(SenseBME280 *bme, const char *name,
-			   const char *symbol, const char *unit,
-			   const char *format)
-  : Sensor(name, symbol, unit, format),
+SensorBME280::SensorBME280(SenseBME280 *bme, Sensors *sensors,
+			   const char *name, const char *symbol,
+			   const char *unit, const char *format)
+  : Sensor(sensors, name, symbol, unit, format),
     BME(bme) {
 }
 
 
-TemperatureBME280::TemperatureBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "temperature", "T", "ºC", "%.2f") {
+TemperatureBME280::TemperatureBME280(SenseBME280 *bme, Sensors *sensors)
+  : SensorBME280(bme, sensors, "temperature", "T", "ºC", "%.2f") {
 }
 
 
@@ -107,8 +107,8 @@ float TemperatureBME280::value() const {
 }
 
 
-HumidityBME280::HumidityBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "humidity", "RH", "%", "%.1f") {
+HumidityBME280::HumidityBME280(SenseBME280 *bme, Sensors *sensors)
+  : SensorBME280(bme, sensors, "humidity", "RH", "%", "%.1f") {
 }
 
 
@@ -122,8 +122,9 @@ float HumidityBME280::value() const {
 }
 
 
-AbsoluteHumidityBME280::AbsoluteHumidityBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "absolute humidity", "H", "g/m^3", "%.1f") {
+AbsoluteHumidityBME280::AbsoluteHumidityBME280(SenseBME280 *bme,
+					       Sensors *sensors)
+  : SensorBME280(bme, sensors, "absolute humidity", "H", "g/m^3", "%.1f") {
 }
 
 
@@ -143,8 +144,8 @@ float AbsoluteHumidityBME280::value() const {
 }
 
 
-DewPointBME280::DewPointBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "dew point", "Tdp", "ºC", "%.1f") {
+DewPointBME280::DewPointBME280(SenseBME280 *bme, Sensors *sensors)
+  : SensorBME280(bme, sensors, "dew point", "Tdp", "ºC", "%.1f") {
 }
 
 
@@ -164,8 +165,8 @@ float DewPointBME280::value() const {
 }
 
 
-PressureBME280::PressureBME280(SenseBME280 *bme)
-  : SensorBME280(bme, "pressure", "P", "Pa", "%.0f") {
+PressureBME280::PressureBME280(SenseBME280 *bme, Sensors *sensors)
+  : SensorBME280(bme, sensors, "pressure", "P", "Pa", "%.0f") {
 }
 
 
@@ -179,8 +180,18 @@ float PressureBME280::value() const {
 }
 
 
-SeaLevelPressureBME280::SeaLevelPressureBME280(SenseBME280 *bme, float altitude)
-  : PressureBME280(bme),
+SeaLevelPressureBME280::SeaLevelPressureBME280(SenseBME280 *bme,
+					       float altitude)
+  : PressureBME280(bme, 0),
+    Altitude(altitude) {
+  setName("sea level pressure", "P0");
+}
+
+
+SeaLevelPressureBME280::SeaLevelPressureBME280(SenseBME280 *bme,
+					       Sensors *sensors,
+					       float altitude)
+  : PressureBME280(bme, sensors),
     Altitude(altitude) {
   setName("sea level pressure", "P0");
 }

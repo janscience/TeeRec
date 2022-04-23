@@ -91,7 +91,8 @@ class SensorBME280 : public Sensor {
 
  public:
 
-  SensorBME280(SenseBME280 *bme, const char *name, const char *symbol,
+  SensorBME280(SenseBME280 *bme, Sensors *sensors,
+	       const char *name, const char *symbol,
 	       const char *unit, const char *format);
 
   // Return true if BME280 sensor is available.
@@ -124,7 +125,7 @@ class TemperatureBME280 : public SensorBME280 {
 
  public:
 
-  TemperatureBME280(SenseBME280 *bme);
+  TemperatureBME280(SenseBME280 *bme, Sensors *sensors=0);
 
   // Return resolution of the temperature readings.
   virtual float resolution() const;
@@ -139,7 +140,7 @@ class HumidityBME280 : public SensorBME280 {
 
  public:
 
-  HumidityBME280(SenseBME280 *bme);
+  HumidityBME280(SenseBME280 *bme, Sensors *sensors=0);
 
   // Return resolution of the humidity readings.
   virtual float resolution() const;
@@ -154,7 +155,7 @@ class AbsoluteHumidityBME280 : public SensorBME280 {
 
  public:
 
-  AbsoluteHumidityBME280(SenseBME280 *bme);
+  AbsoluteHumidityBME280(SenseBME280 *bme, Sensors *sensors=0);
 
   // Return resolution of the absolute humidity readings.
   virtual float resolution() const;
@@ -169,7 +170,7 @@ class DewPointBME280 : public SensorBME280 {
 
  public:
 
-  DewPointBME280(SenseBME280 *bme);
+  DewPointBME280(SenseBME280 *bme, Sensors *sensors=0);
 
   // Return resolution of the dew point readings.
   virtual float resolution() const;
@@ -184,7 +185,7 @@ class PressureBME280 : public SensorBME280 {
 
  public:
 
-  PressureBME280(SenseBME280 *bme);
+  PressureBME280(SenseBME280 *bme, Sensors *sensors=0);
 
   // Return resolution of the pressure readings.
   virtual float resolution() const;
@@ -201,6 +202,9 @@ class SeaLevelPressureBME280 : public PressureBME280 {
 
   // Provide altitude in meter.
   SeaLevelPressureBME280(SenseBME280 *bme, float altitude);
+
+  // Provide altitude in meter.
+  SeaLevelPressureBME280(SenseBME280 *bme, Sensors *sensors, float altitude);
   
   // The equivalent sea level pressure in Pascal.
   // On error, return -INFINITY.

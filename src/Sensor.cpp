@@ -1,3 +1,4 @@
+#include <Sensors.h>
 #include <Sensor.h>
 
 
@@ -17,6 +18,14 @@ Sensor::Sensor(const char *name, const char *symbol, const char *unit,
   setSymbol(symbol);
   setUnit(unit, fac);
   setFormat(format);
+}
+
+
+Sensor::Sensor(Sensors *sensors, const char *name, const char *symbol,
+	       const char *unit, const char *format, float fac) :
+  Sensor(name, symbol, unit, format, fac) {
+  if (sensors != 0)
+    sensors->addSensor(*this);
 }
 
 
