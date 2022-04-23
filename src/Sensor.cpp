@@ -87,7 +87,7 @@ const char* Sensor::identifier() const {
 void Sensor::report() {
   if (available()) {
     char rs[10];
-    printResolution(rs);
+    resolutionStr(rs);
     Serial.printf("%s %s (%s):", name(), symbol(), unit());
     if (strlen(chip()) > 0)
       Serial.printf("\t on %s device", chip());
@@ -98,12 +98,12 @@ void Sensor::report() {
 }
 
 
-int Sensor::printResolution(char *s) const {
+int Sensor::resolutionStr(char *s) const {
   return sprintf(s, Format, resolution());
 }
 
 
-int Sensor::print(char *s) const {
+int Sensor::valueStr(char *s) const {
   return sprintf(s, Format, value());
 }
 

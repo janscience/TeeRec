@@ -109,7 +109,7 @@ void Sensors::print(bool symbols) {
   char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      Snsrs[k]->print(s);
+      Snsrs[k]->valueStr(s);
       if (symbols)
 	Serial.printf("%s = %s%s\n", Snsrs[k]->symbol(), s, Snsrs[k]->unit());
       else
@@ -151,7 +151,7 @@ void Sensors::printValues() {
     if (Snsrs[k]->available()) {
       if (n > 0)
 	Serial.print('\t');
-      Snsrs[k]->print(s);
+      Snsrs[k]->valueStr(s);
       Serial.print(s);
       n++;
     }
@@ -227,7 +227,7 @@ bool Sensors::makeCSVData() {
   sp += sprintf(sp, "%s,", ts);
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      sp += Snsrs[k]->print(sp);
+      sp += Snsrs[k]->valueStr(sp);
       *(sp++) = ',';
     }
   }

@@ -71,7 +71,7 @@ class Sensor {
   
   // Print the resolution using format string into string s.
   // Return the number of printed characters.
-  int printResolution(char *s) const;
+  int resolutionStr(char *s) const;
   
   // Return true if sensor is available.
   virtual bool available() = 0;
@@ -100,7 +100,7 @@ class Sensor {
   
   // Print the sensor reading using format string into string s.
   // Return the number of printed characters.
-  int print(char *s) const;
+  int valueStr(char *s) const;
 
   // Configure Sensor settings with the provided key-value pair.
   // Return true if key was used.
