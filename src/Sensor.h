@@ -101,13 +101,20 @@ class Sensor {
   virtual void report();
 
   // Request a sensor reading.
-  virtual void request() {};
+  // An implementation should handle multiple concurrent calls to this function.
+  // See default implementation for a suggestion.
+  // If this is not needed, keep the default implementation.
+  virtual void request();
 
   // Recommended delay between a request() and read().
   virtual unsigned long delay() const { return 0; };
 
-  // Retrieve a sensor reading from the device.
+  // Retrieve a sensor reading from the device
+  // and store it in a variable.
   // You need to call request() at least delay() before.
+  // An implementation should return immediately if Measurement is
+  // false. Otherwise it should set Measurement to false when
+  // finished.
   virtual void read() = 0;
 
   // The sensor reading in the basic unit.
@@ -187,6 +194,7 @@ protected:
   char Format[10];
   float Factor;
   float Offset;
+  bool Measuring;
   bool Configured;
   
 };

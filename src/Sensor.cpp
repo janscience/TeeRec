@@ -10,6 +10,7 @@ Sensor::Sensor() :
   Format("%.2f"),
   Factor(1.0),
   Offset(0.0),
+  Measuring(false),
   Configured(false) {
 }
 
@@ -113,6 +114,11 @@ const char* Sensor::identifier() const {
 }
 
 
+int Sensor::resolutionStr(char *s) const {
+  return sprintf(s, Format, resolution());
+}
+
+
 void Sensor::report() {
   if (available()) {
     char rs[10];
@@ -127,8 +133,11 @@ void Sensor::report() {
 }
 
 
-int Sensor::resolutionStr(char *s) const {
-  return sprintf(s, Format, resolution());
+void Sensor::request() {
+  if (Measuring)
+    return;
+  // insert device specific code for initiating a measurement here.
+  Measuring = true;
 }
 
 

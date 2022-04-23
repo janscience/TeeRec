@@ -92,6 +92,22 @@ SensorBME280::SensorBME280(SenseBME280 *bme, Sensors *sensors,
 }
 
 
+void SensorBME280::request() {
+  if (Measuring)
+    return;
+  BME->request();
+  Measuring = true;
+}
+
+
+void SensorBME280::read() {
+  if (!Measuring)
+    return;
+  BME->read();
+  Measuring = false;
+}
+
+
 TemperatureBME280::TemperatureBME280(SenseBME280 *bme, Sensors *sensors)
   : SensorBME280(bme, sensors, "temperature", "T", "ºC", "%.2f") {
 }

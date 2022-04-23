@@ -105,13 +105,13 @@ class SensorBME280 : public Sensor {
   virtual const char* identifier() const { return BME->identifier(); };
 
   // Request a sensor conversion.
-  virtual void request() { BME->request(); };
+  virtual void request();
 
   // Recommended delay between a request() and read() in milliseconds.
   virtual unsigned long delay() const { return BME->delay(); };
 
   // Retrieve a sensor reading from the device.
-  virtual void read() { BME->read(); };
+  virtual void read();
 
   
  protected:
