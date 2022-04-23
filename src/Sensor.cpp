@@ -130,3 +130,52 @@ int Sensor::valueStr(char *s) const {
 }
 
 
+void Sensor::setHectoPascal() {
+  setUnit("hPa", 0.01, "%.2f");
+}
+
+
+void Sensor::setKiloPascal() {
+  setUnit("kPa", 0.001, "%.3f");
+}
+
+
+void Sensor::setMegaPascal() {
+  setUnit("MPa", 1e-6, "%.6f");
+}
+
+
+void Sensor::setBar() {
+  setUnit("bar", 1e-5, "%.5f");
+}
+
+
+void Sensor::setMilliBar() {
+  setUnit("mbar", 0.01, "%.2f");
+}
+
+
+void Sensor::setAt() {
+  setUnit("at", 0.0000101971621298, "%.5f");
+}
+
+
+void Sensor::setAtm() {
+  setUnit("atm", 0.00000986923266716, "%.5f");
+}
+
+
+void Sensor::setMMHg() {
+  setUnit("mmHg", 0.00750061575846, "%.2f");
+}
+
+
+void Sensor::setPSI() {
+  setUnit("psi", 0.00014503773773, "%.4f");
+}
+
+
+void Sensor::setTorr() {
+  setUnit("torr", 0.00750061682704, "%.2f");
+}
+

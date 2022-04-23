@@ -130,6 +130,40 @@ class Sensor {
   bool configured() const { return Configured; };
 
   
+  // Some special unit conversions for pressures measured in Pascal:
+  // https://www.beamex.com/resources/pressure-unit-converter/
+
+  // Set unit to hectopascal.
+  void setHectoPascal();
+
+  // Set unit to kilopascal.
+  void setKiloPascal();
+
+  // Set unit to megapascal.
+  void setMegaPascal();
+
+  // Set unit to bar.
+  void setBar();
+
+  // Set unit to mbar.
+  void setMilliBar();
+
+  // Set unit to at.
+  void setAt();
+
+  // Set unit to atm.
+  void setAtm();
+
+  // Set unit to mm Hg.
+  void setMMHg();
+
+  // Set unit to psi.
+  void setPSI();
+
+  // Set unit to torr.
+  void setTorr();
+
+  
 protected:
 
   char Name[50];
