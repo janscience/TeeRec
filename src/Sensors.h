@@ -8,8 +8,8 @@
 
 
 #include <Arduino.h>
+#include <SdFat.h>
 #include <Sensor.h>
-#include <SDWriter.h>
 
 
 class Sensors {
@@ -77,7 +77,7 @@ class Sensors {
   // If append and path already exists, then keep the file
   // and do not write the header.
   // Return true on success, false on failure or no available sensors.
-  bool openCSV(SDCard &sd, const char *path,
+  bool openCSV(SdFat &sd, const char *path,
 	       bool symbols=false, bool append=false);
 
   // Write current time and sensor readings to csv file.

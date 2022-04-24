@@ -70,6 +70,12 @@ class SDCard {
   // True if SD card is busy.
   bool isBusy();
 
+#ifdef SDCARD_USE_SDFAT
+  SdFs &sdcard() { return SD; };
+#else
+  SDClass &sdcard() { return SD; };
+#endif
+
   // Make directory if it does not exist and
   // make it the currrent working directory.
   // Return true on succes.
@@ -112,7 +118,7 @@ class SDCard {
  protected:
 
 #ifdef SDCARD_USE_SDFAT
-  SdFs SD;    // Lydia: SdFatSdio SD; // do not use SdFatSdioEX
+  SdFs SD;
 #else
   String CurrentPath;
 #endif

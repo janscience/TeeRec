@@ -236,7 +236,7 @@ bool Sensors::makeCSVData() {
 }
 
 
-bool Sensors::openCSV(SDCard &sd, const char *path,
+bool Sensors::openCSV(SdFat &sd, const char *path,
 		      bool symbols, bool append) {
   if (DF)
     closeCSV();
@@ -249,9 +249,9 @@ bool Sensors::openCSV(SDCard &sd, const char *path,
   strcpy(fpath, path);
   strcat(fpath, ".csv");
   if (append && sd.exists(fpath))
-    DF = sd.openAppend(fpath);
+    DF = sd.open(path, O_RDWR | O_APPEND);
   else
-    DF = sd.openWrite(fpath);
+    DF = sd.open(path, O_RDWR | O_CREAT);
   if (DF) {
     DF.write(Header, strlen(Header));
     DF.flush();

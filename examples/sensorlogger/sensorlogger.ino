@@ -1,7 +1,8 @@
+// requires TeeRec library
+#include <SdFat.h>
 #include <Sensors.h>
 #include <TemperatureDS18x20.h>
 #include <SenseBME280.h>
-#include <SDWriter.h>
 #include <RTClock.h>
 #include <Blink.h>
 
@@ -21,7 +22,7 @@ TemperatureBME280 tempbme(&bme, &sensors);
 HumidityBME280 hum(&bme, &sensors);
 DewPointBME280 dp(&bme, &sensors);
 PressureBME280 pres(&bme, &sensors);
-SDCard sdcard;
+SdFat sdcard;
 Blink blink(LED_BUILTIN);
 bool symbols = false;
 
@@ -38,7 +39,7 @@ void setup() {
   bme.beginI2C(Wire, 0x77);
   pres.setHectoPascal();
   sensors.setInterval(sensorsInterval);
-  sdcard.begin();
+  sdcard.begin(BUILTIN_SDCARD);
   sensors.report();
   bool success = sensors.openCSV(sdcard, "sensors", symbols);
   blink.switchOff();
