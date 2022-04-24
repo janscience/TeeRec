@@ -11,7 +11,6 @@
 #include <Configurable.h>
 #include <Sensor.h>
 #include <SDWriter.h>
-#include <RTClock.h>
 
 
 class Sensors : public Configurable {
@@ -19,7 +18,6 @@ class Sensors : public Configurable {
  public:
 
   Sensors();
-  Sensors(RTClock &rtc);
 
   // Add a sensor if available.
   void addSensor(Sensor &sensor);
@@ -65,9 +63,6 @@ class Sensors : public Configurable {
   // Report sensor readings separated by tabs on serial monitor.
   // Use printHeader() to annotate the printed columns.
   void printValues();
-
-  // Pass real-time clock to Sensors, needed to get time stamps.
-  void setRTClock(RTClock &rtc);
   
   // Create header line for CSV file.
   // Usually, this is automatically called by openCSV().
@@ -119,7 +114,6 @@ class Sensors : public Configurable {
   static const size_t NData = 2048;  // 2kB size of Data string
   char Data[NData];                  // data lines for CSV file
   size_t MData;                      // approximate size of single data line
-  RTClock *RTC;
 };
 
 

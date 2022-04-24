@@ -4,8 +4,8 @@
 #include <SDWriter.h>
 
 
-time_t getTeensy3Time() {
-  return Teensy3Clock.get();
+time_t getTeensyRTCTime() {
+  return rtc_get();
 }
 
 
@@ -14,7 +14,7 @@ RTClock::RTClock() {
   if (RTCSource == 1)
     setSyncProvider(RTC.get);
   else
-    setSyncProvider(getTeensy3Time);
+    setSyncProvider(getTeensyRTCTime);
 }
 
 

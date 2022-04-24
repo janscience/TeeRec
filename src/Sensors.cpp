@@ -1,3 +1,4 @@
+#include <TimeLib.h>
 #include <Sensors.h>
 
 
@@ -9,17 +10,10 @@ Sensors::Sensors() :
   Time(0),
   State(0),
   DF(),
-  MData(0),
-  RTC(0) {
+  MData(0) {
   UseInterval = Interval;
   Header[0] = '\0';
   Data[0] = '\0';
-}
-
-
-Sensors::Sensors(RTClock &rtc) :
-  Sensors() {
-  RTC = &rtc;
 }
 
 
@@ -136,18 +130,16 @@ void Sensors::print(bool symbols) {
 
 
 void Sensors::printHeader(bool symbols) {
-  int n = 0;
+  Serial.print("time/s");
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      if (n > 0)
-	Serial.print('\t');
+      Serial.print('\t');
       if (symbols)
 	Serial.print(Snsrs[k]->symbol());
       else
 	Serial.print(Snsrs[k]->name());
       if (strlen(Snsrs[k]->unit()) > 0)
-	Serial.printf("/%s\t", Snsrs[k]->unit());
-      n++;
+	Serial.printf("/%s", Snsrs[k]->unit());
     }
   }
   Serial.println();
@@ -155,23 +147,19 @@ void Sensors::printHeader(bool symbols) {
 
 
 void Sensors::printValues() {
-  int n = 0;
+  // print time:
+  time_t t = now();
+  Serial.printf("%04d-%02d-%02dT%02d:%02d:%02d",
+		year(t), month(t), day(t), hour(t), minute(t), second(t));
   char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
-      if (n > 0)
-	Serial.print('\t');
+      Serial.print('\t');
       Snsrs[k]->valueStr(s);
       Serial.print(s);
-      n++;
     }
   }
   Serial.println();
-}
-
-
-void Sensors::setRTClock(RTClock &rtc) {
-  RTC = &rtc;
 }
 
 
@@ -228,10 +216,9 @@ bool Sensors::makeCSVData() {
   }
   // get time:
   char ts[20];
-  if (RTC != 0)
-    RTC->dateTime(ts);
-  else
-    ts[0] = '\0';
+  time_t t = now();
+  sprintf(ts, "%04d-%02d-%02dT%02d:%02d:%02d",
+	  year(t), month(t), day(t), hour(t), minute(t), second(t));
   // compose data line:
   char *sp = Data + strlen(Data);
   sp += sprintf(sp, "%s,", ts);
