@@ -26,12 +26,14 @@ with contributions by
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
   version, and its unique MAC address..
-- Acquisition of environmental sensor readings into CSV files with time stamps.
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
 - Feedback by blinking the LED.
 - Configurable via config file on SD card.
+
+For slow acquisition of environmental sensor readings see [TeeSense
+library](https://github.com/janscience/TeeSense).
 
 
 ## Libraries
@@ -46,13 +48,6 @@ defined in the following libraries:
 - [ContinousADC](src/ContinuousADC.h): Sample from multiple pins into a DataBuffer.
 - [SDWrite](src/SDWrite.h): Write data from a DataWorker to SD card.
 - [WaveHeader](src/WaveHeader.h): Setting up wave file header with metadata.
-
-### Sensor readings
-
-- [Sensors](src/Sensors.h): Manage environmental sensors.
-- [Sensor](src/Sensor.h): Virtual base class for environmental sensors.
-- [TemperatureDS18x20](src/TemperatureDS18x20.h): A Sensor that reads temperature from a DS18x20 1-wire device.
-- [SenseBME280](src/SenseBME280.h): The Bosch BME280 temperature, humidity, and pressure sensor with many derived measures.
 
 ### Configuration
 
@@ -90,11 +85,6 @@ Useful sketches for checking out the performance of the data acquisition.
 - [maxrate](examples/maxrate): Test for maximum possible sampling rate.
 - [averaging](examples/averaging): Test various averaging settings for acquisition.
 
-### Environmental sensors
-
-- [temperature](examples/temperature): read temperature from DS18x20 one-wire temeprature sensor.
-- [sensorlogger](examples/sensorlogger): periodically write sensor readings with time stamp into a CSV file.
-
 ### Utilities
 
 Some useful utilities.
@@ -122,7 +112,6 @@ In [utils/](utils) you find some useful python scripts.
 - [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 - [noise](utils/noise): plot and analyse baseline noise levels from wave files.
 - [spectra](utils/spectra): power spectra of traces in wave files.
-- [sensors](utils/sensors): plot the content of the csv file written by the [Sensors](src/Sensors.h) library.
 
 
 ## Dependencies
@@ -133,10 +122,6 @@ TeeRec is based on the following libraries:
 - [ADC](https://github.com/pedvide/ADC)
 - [SdFat version2](https://github.com/greiman/SdFat)
 - [Bounce2](https://github.com/thomasfredericks/Bounce2)
-
-The environmental sensors rely on:
-
-- [SparkFun BME280](https://github.com/sparkfun/SparkFun_BME280_Arduino_Library)
 
 The Display library currently uses:
 
