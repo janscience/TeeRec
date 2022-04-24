@@ -8,6 +8,7 @@
 
 
 #include <Arduino.h>
+#include <TimeLib.h>
 
 
 class Sensors;
@@ -101,10 +102,7 @@ class Sensor {
   virtual void report();
 
   // Request a sensor reading.
-  // An implementation should handle multiple concurrent calls to this function.
-  // See default implementation for a suggestion.
-  // If this is not needed, keep the default implementation.
-  virtual void request();
+  void request();
 
   // Recommended delay between a request() and read().
   virtual unsigned long delay() const { return 0; };
@@ -112,10 +110,7 @@ class Sensor {
   // Retrieve a sensor reading from the device
   // and store it in a variable.
   // You need to call request() at least delay() before.
-  // An implementation should return immediately if Measurement is
-  // false. Otherwise it should set Measurement to false when
-  // finished.
-  virtual void read() = 0;
+  void read();
 
   // The sensor reading in the basic unit.
   // On error, return -INFINITY.
@@ -123,6 +118,9 @@ class Sensor {
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
   virtual float reading() const = 0;
+
+  // Time stamp of last sensor reading.
+  time_t timeStamp() const;
 
   // The sensor reading in the current unit.
   // This default implementation multiplies the sensor reading() with Factor
@@ -187,6 +185,15 @@ class Sensor {
   
 protected:
 
+  // Request a sensor reading.
+  // Reimplement this function, if the sensor device
+  // needs to be prepared for a sensor reading in advance.
+  virtual void requestData();
+
+  // Implement this function to retrieve a sensor reading from the
+  // device and store it in a variable.
+  virtual void readData() = 0;
+
   char Name[50];
   char Symbol[20];
   char BasicUnit[20];
@@ -195,6 +202,7 @@ protected:
   float Factor;
   float Offset;
   bool Measuring;
+  time_t TimeStamp;
   bool Configured;
   
 };

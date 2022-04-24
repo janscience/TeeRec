@@ -58,15 +58,8 @@ class TemperatureDS18x20 : public Sensor {
   // Return true if temperature sensor is available.
   virtual bool available();
 
-  // Request a temperature conversion.
-  virtual void request();
-
   // Recommended delay between a request() and read() in milliseconds.
   virtual unsigned long delay() const { return 1000; };
-
-  // Retrieve a temperature reading from the device.
-  // You need to call request() at least delay() milliseconds before.
-  virtual void read();
 
   // The temperature in degrees celsius.
   // On error, return -INFINITY.
@@ -83,6 +76,12 @@ class TemperatureDS18x20 : public Sensor {
   
   
  private:
+
+  // Request a temperature conversion.
+  virtual void requestData();
+
+  // Retrieve a temperature reading from the device.
+  virtual void readData();
 
   OneWire  OW;
   int Type_s;

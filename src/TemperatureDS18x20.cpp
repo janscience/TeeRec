@@ -82,10 +82,7 @@ float TemperatureDS18x20::resolution() const {
 }
 
 
-void TemperatureDS18x20::request() {
-  if (Measuring)
-    return;
-  
+void TemperatureDS18x20::requestData() {
   if (Type_s < 0)
     return;
 
@@ -95,14 +92,10 @@ void TemperatureDS18x20::request() {
   }
   OW.select(Addr);
   OW.write(0x44, 1); // start conversion, with parasite power on at the end
-  Measuring = true;
 }
 
 
-void TemperatureDS18x20::read() {
-  if (!Measuring)
-    return;
-  
+void TemperatureDS18x20::readData() {
   Celsius = NoValue;
   if (Type_s < 0)
     return;
@@ -143,7 +136,6 @@ void TemperatureDS18x20::read() {
   }
   Celsius = (float)raw / 16.0;
   OW.depower();
-  Measuring = false;
 }
 
 

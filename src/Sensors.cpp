@@ -8,6 +8,7 @@ Sensors::Sensors() :
   MaxDelay(0),
   Interval(10000),
   Time(0),
+  TimeStamp(0),
   State(0),
   DF(),
   MData(0) {
@@ -75,6 +76,7 @@ void Sensors::start() {
   if (UseInterval < 2*MaxDelay)
     UseInterval = 2*MaxDelay;
   Time = UseInterval - MaxDelay;
+  TimeStamp = 0;
   State = 0;
   Data[0] = '\0';
 }
@@ -89,6 +91,7 @@ bool Sensors::update() {
     }
     break;
   case 1: if (Time > UseInterval) {
+      TimeStamp = now();
       for (uint8_t k=0; k<NSensors; k++)
 	Snsrs[k]->read();
       makeCSVData();
@@ -148,9 +151,9 @@ void Sensors::printHeader(bool symbols) {
 
 void Sensors::printValues() {
   // print time:
-  time_t t = now();
   Serial.printf("%04d-%02d-%02dT%02d:%02d:%02d",
-		year(t), month(t), day(t), hour(t), minute(t), second(t));
+		year(TimeStamp), month(TimeStamp), day(TimeStamp),
+		hour(TimeStamp), minute(TimeStamp), second(TimeStamp));
   char s[20];
   for (uint8_t k=0; k<NSensors; k++) {
     if (Snsrs[k]->available()) {
@@ -216,9 +219,9 @@ bool Sensors::makeCSVData() {
   }
   // get time:
   char ts[20];
-  time_t t = now();
   sprintf(ts, "%04d-%02d-%02dT%02d:%02d:%02d",
-	  year(t), month(t), day(t), hour(t), minute(t), second(t));
+	  year(TimeStamp), month(TimeStamp), day(TimeStamp),
+	  hour(TimeStamp), minute(TimeStamp), second(TimeStamp));
   // compose data line:
   char *sp = Data + strlen(Data);
   sp += sprintf(sp, "%s,", ts);

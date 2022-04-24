@@ -11,6 +11,7 @@ Sensor::Sensor() :
   Factor(1.0),
   Offset(0.0),
   Measuring(false),
+  TimeStamp(0),
   Configured(false) {
 }
 
@@ -136,8 +137,26 @@ void Sensor::report() {
 void Sensor::request() {
   if (Measuring)
     return;
-  // insert device specific code for initiating a measurement here.
+  requestData();
   Measuring = true;
+}
+
+
+void Sensor::requestData() {
+}
+
+
+void Sensor::read() {
+  if (!Measuring)
+    return;
+  readData();
+  TimeStamp = now();
+  Measuring = false;
+}
+
+
+time_t Sensor::timeStamp() const {
+  return TimeStamp;
 }
 
 

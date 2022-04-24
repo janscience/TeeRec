@@ -92,19 +92,13 @@ SensorBME280::SensorBME280(SenseBME280 *bme, Sensors *sensors,
 }
 
 
-void SensorBME280::request() {
-  if (Measuring)
-    return;
+void SensorBME280::requestData() {
   BME->request();
-  Measuring = true;
 }
 
 
-void SensorBME280::read() {
-  if (!Measuring)
-    return;
+void SensorBME280::readData() {
   BME->read();
-  Measuring = false;
 }
 
 

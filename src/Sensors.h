@@ -107,6 +107,7 @@ class Sensors : public Configurable {
   unsigned long Interval;
   unsigned long UseInterval;
   elapsedMillis Time;
+  time_t TimeStamp;
   int State;
   FsFile DF;
   static const size_t NHeader = 256; // size of Header string
