@@ -3,7 +3,7 @@
 
 Settings::Settings(const char *path, const char *filename, float filetime,
 		   float pulsefrequency, float displaytime,
-		   float initialdelay) :
+		   float initialdelay, float sensorsinterval) :
   Configurable("Settings") {
   strncpy(Path, path, MaxStr);
   strncpy(FileName, filename, MaxStr);
@@ -11,6 +11,7 @@ Settings::Settings(const char *path, const char *filename, float filetime,
   PulseFrequency = pulsefrequency;
   DisplayTime = displaytime;
   InitialDelay = initialdelay;
+  SensorsInterval = sensorsinterval;
 }
 
 
@@ -42,6 +43,10 @@ void Settings::configure(const char *key, const char *val) {
   else if (strcmp(key, "initialdelay") == 0) {
     InitialDelay = parseTime(val);
     sprintf(pval, "%.1fs", InitialDelay);
+  }
+  else if (strcmp(key, "sensorsinterval") == 0) {
+    SensorsInterval = parseTime(val);
+    sprintf(pval, "%.1fs", SensorsInterval);
   }
   else {
     Serial.printf("  Settings key \"%s\" not found.\n", key);
