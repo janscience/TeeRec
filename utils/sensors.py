@@ -19,6 +19,8 @@ def sensors(path):
                       '-', color=colors[k%len(colors)])
         name, unit = hn.split('/')
         if len(unit) > 0:
+            if len(unit) > 2 and unit[-2] == '.':
+                unit = unit[:-2]
             axs[k,0].set_ylabel('%s [%s]' % (name, unit))
         else:
             axs[k,0].set_ylabel(hn)
