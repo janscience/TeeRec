@@ -3,7 +3,6 @@
 
 
 Sensors::Sensors() :
-  Configurable("Sensors"),
   NSensors(0),
   MaxDelay(0),
   Interval(10000),
@@ -287,25 +286,3 @@ bool Sensors::closeCSV() {
   return (!DF.close());
 }
 
-
-void Sensors::configure(const char *key, const char *val) {
-  bool found = true;
-  char pval[30];
-  if (strcmp(key, "writeinterval") == 0) {
-    setInterval(parseTime(val));
-    sprintf(pval, "%gs", 0.001*Interval);
-    Serial.printf("  set Sensors-%s to %s\n", key, pval);
-  }
-  else {
-    found = false;
-    for (uint8_t k=0; k<NSensors; k++) {
-      if (Snsrs[k]->configure(key, val)) {
-	Snsrs[k]->setConfigured();
-	found = true;
-	break;
-      }
-    }
-  }
-  if (!found)
-    Serial.printf("  Sensors key \"%s\" not found.\n", key);
-}

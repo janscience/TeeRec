@@ -11,8 +11,7 @@ Sensor::Sensor() :
   Factor(1.0),
   Offset(0.0),
   Measuring(false),
-  TimeStamp(0),
-  Configured(false) {
+  TimeStamp(0) {
 }
 
 

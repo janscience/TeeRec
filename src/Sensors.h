@@ -8,12 +8,11 @@
 
 
 #include <Arduino.h>
-#include <Configurable.h>
 #include <Sensor.h>
 #include <SDWriter.h>
 
 
-class Sensors : public Configurable {
+class Sensors {
 
  public:
 
@@ -89,9 +88,6 @@ class Sensors : public Configurable {
   // Close csv file.
   // Return true on success.
   bool closeCSV();
-
-  // Configure Sensor settings with the provided key-value pair.
-  virtual void configure(const char *key, const char *val);
 
   
  private:

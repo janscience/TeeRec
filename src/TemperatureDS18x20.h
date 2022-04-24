@@ -67,12 +67,6 @@ class TemperatureDS18x20 : public Sensor {
   // you need to call request(), wait for at least delay() milliseconds,
   // and then call read().
   virtual float reading() const;
-
-  // Configure Temperature settings with the provided key-value pair.
-  // Return true if key was used.
-  // If key equals "ds18x20-pin", initialize temperature device on
-  // specified pin. If value is negative or "none", do not initialize.
-  virtual bool configure(const char *key, const char *val);
   
   
  private:

@@ -131,16 +131,7 @@ class Sensor {
   // Return the number of printed characters.
   int valueStr(char *s) const;
 
-  // Configure Sensor settings with the provided key-value pair.
-  // Return true if key was used.
-  virtual bool configure(const char *key, const char *val) { return false; };
-
-  // Called from Sensors when this has been configured from a file, for example.
-  void setConfigured() { Configured = true; };
-
-  // True if this Sensor was configured from a file, for example.
-  bool configured() const { return Configured; };
-
+  
   // Special unit conversions for temperatures measured in degrees celsius:
 
   // Set unit to Kelvin.
@@ -203,7 +194,6 @@ protected:
   float Offset;
   bool Measuring;
   time_t TimeStamp;
-  bool Configured;
   
 };
 

@@ -1,4 +1,3 @@
-#include <Configurator.h>
 #include <Sensors.h>
 #include <TemperatureDS18x20.h>
 #include <SenseBME280.h>
@@ -8,16 +7,14 @@
 
 
 // Default settings: -----------------------------------------------------------------------
-// (may be overwritten by config file sensorlogger.cfg)
 
 uint8_t tempPin = 10;         // pin for DATA line of thermometer
 float sensorsInterval = 2.0; // interval between sensors readings in seconds
 
 // ------------------------------------------------------------------------------------------
 
-Configurator config;
 RTClock rtclock;
-Sensors sensors(rtclock);
+Sensors sensors;
 TemperatureDS18x20 temp(&sensors);
 SenseBME280 bme;
 TemperatureBME280 tempbme(&bme, &sensors);
@@ -37,14 +34,11 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   rtclock.check();
   rtclock.report();
+  temp.begin(tempPin);
   bme.beginI2C(Wire, 0x77);
   pres.setHectoPascal();
   sensors.setInterval(sensorsInterval);
   sdcard.begin();
-  config.setConfigFile("sensorlogger.cfg");
-  config.configure(sdcard);
-  if (!temp.available() && tempPin >= 0)
-    temp.begin(tempPin);
   sensors.report();
   bool success = sensors.openCSV(sdcard, "sensors", symbols);
   blink.switchOff();
