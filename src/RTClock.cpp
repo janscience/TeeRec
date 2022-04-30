@@ -5,12 +5,17 @@
 
 
 time_t getTeensyRTCTime() {
-  return rtc_get();
+  return Teensy3Clock.get();
 }
 
 
 RTClock::RTClock() {
   RTCSource = RTC.chipPresent() ? 1 : 0;
+  setSync();
+}
+
+
+void RTClock::setSync() {
   if (RTCSource == 1)
     setSyncProvider(RTC.get);
   else

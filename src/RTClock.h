@@ -30,6 +30,13 @@ class RTClock {
   // present, otherwise the Teensy on-board real time clock is used.
   RTClock();
 
+  // Set the real time clock (either DS1307 if available or on-board)
+  // via setSyncProvider() from TimeLib.h.
+  // This function is called by the constructor and you usually do not
+  // need to call it again.
+  // You need to call it when waking up from a deep sleep, though.
+  void setSync();
+
   // Check whether clock is available and set.
   // If not print message to serial.
   bool check();
