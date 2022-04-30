@@ -45,7 +45,7 @@ defined in the following libraries:
 
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
-- [ContinousADC](src/ContinuousADC.h): Sample from multiple pins into a DataBuffer.
+- [ContinuousADC](src/ContinuousADC.h): Sample from multiple pins into a DataBuffer.
 - [SDWrite](src/SDWrite.h): Write data from a DataWorker to SD card.
 - [WaveHeader](src/WaveHeader.h): Setting up wave file header with metadata.
 
