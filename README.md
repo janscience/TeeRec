@@ -32,8 +32,8 @@ with contributions by
 - Feedback by blinking the LED.
 - Configurable via config file on SD card.
 
-For slow acquisition of environmental sensor readings see [Sensors
-library](https://github.com/janscience/Sensors).
+For slow acquisition of environmental sensor readings see [ESensors
+library](https://github.com/janscience/ESensors).
 
 
 ## Libraries
