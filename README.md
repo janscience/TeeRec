@@ -1,3 +1,5 @@
+![arduino-lint](https://github.com/janscience/TeeRec/actions/workflows/arduino-lint.yml/badge.svg)
+
 # TeeRec - Teensy recorder
 
 Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6 microcontrollers.
