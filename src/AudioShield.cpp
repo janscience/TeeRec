@@ -20,10 +20,6 @@ void AudioPlayBuffer::update() {
   double interval = 1.0/AUDIO_SAMPLE_RATE_EXACT;
   if (Data->time(available()) < (AUDIO_BLOCK_SAMPLES+2)*interval)
     return;
-
-  size_t index = Producer->index();
-  if (index == 0)
-    return;
   
   // allocate audio blocks to transmit:
   block1 = allocate();
@@ -39,6 +35,7 @@ void AudioPlayBuffer::update() {
 
   int32_t nchannels = Data->nchannels();
   float rate = Data->rate();
+  // low-pass filter:
   double fac = 1.0/rate/(20.0*interval);  // make sure fac < 0.1
   if (fac > 0.05)
     fac = 0.0;
