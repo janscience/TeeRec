@@ -140,10 +140,10 @@ already included in
 [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
 installing Teensyduino make sure you selected them.
 
-_Note_: you need Arduino 1.8.19 and Teensyduoino 1.56 or higher! When
-installing Teensyduoino simply select all libraries for installation.
+_Note_: you need Arduino 1.8.19 and Teensyduino 1.56 or higher! When
+installing Teensyduino simply select all libraries for installation.
 Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
-they are now supplied by Teensyduoino.
+they are now supplied by Teensyduino.
 
 For installing the libraries for the environmental sensors and the TFT
 monitor, open in the Arduino IDE: Tools - Manage libraries. Search for
