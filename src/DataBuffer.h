@@ -61,7 +61,7 @@ public:
   size_t samples(float time) const;
 
   // Time in seconds corresponding to a given number of samples
-  // (not frames).
+  // (not frames, i.e. samples is divided by the number of channels).
   float time(size_t samples) const;
 
   // Return time corresponding to samples as a string displaying

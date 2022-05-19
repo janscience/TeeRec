@@ -21,6 +21,7 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
 
  private:
 
+  double Time;
   double LPVals[16];
   
 };

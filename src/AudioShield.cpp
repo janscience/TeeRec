@@ -5,7 +5,8 @@
 
 AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
-    AudioStream(0, NULL) {
+    AudioStream(0, NULL),
+    Time(0.0) {
   memset(LPVals, 0, sizeof(LPVals));
 }
 
@@ -17,8 +18,9 @@ void AudioPlayBuffer::update() {
   if (Data->nchannels() == 0 || Data->rate() == 0)
     return;
 
+  ssize_t navail = available();
   double interval = 1.0/AUDIO_SAMPLE_RATE_EXACT;
-  if (Data->time(available()) < (AUDIO_BLOCK_SAMPLES+2)*interval)
+  if (Data->time(navail) < AUDIO_BLOCK_SAMPLES*interval)
     return;
   
   // allocate audio blocks to transmit:
@@ -33,13 +35,14 @@ void AudioPlayBuffer::update() {
   }
   */
 
-  int32_t nchannels = Data->nchannels();
-  float rate = Data->rate();
   // low-pass filter:
-  double fac = 1.0/rate/(20.0*interval);  // make sure fac < 0.1
-  if (fac > 0.05)
+  const float tau = 0.1;             // low-pass filter time constant in seconds
+  double fac = 1.0/Data->rate()/tau; // fac = dt/tau = 1/rate/tau
+  if (fac > 0.05)                    // make sure fac < 0.1
     fac = 0.0;
-  double time = 0.0;
+  
+  // copy data into audio block buffer:
+  int32_t nchannels = Data->nchannels();
   ssize_t start = Index;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
@@ -47,14 +50,16 @@ void AudioPlayBuffer::update() {
     for (uint8_t c=0; c<Data->nchannels(); c++)
       sum += Data->buffer()[Index+c] - LPVals[c];
     block1->data[i++] = sum/nchannels;
-    time += interval;
-    while (Data->samples(time) > Index - start + nchannels) {
+    Time += interval;
+    while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
       for (uint8_t c=0; c<Data->nchannels(); c++)
 	LPVals[c] += (Data->buffer()[Index+c] - LPVals[c])*fac;
+      navail -= nchannels;
       if (increment(nchannels))
 	start -= Data->nbuffer();
     }
   }
+  Time -= Data->time(Index - start);
   
   /*
   if (Data->nchannels() == 1)
