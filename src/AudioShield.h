@@ -17,9 +17,17 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
  public:
   
   AudioPlayBuffer(const DataWorker &producer);
+  virtual ~AudioPlayBuffer();
+  
   virtual void update();
 
- private:
+ protected:
+
+  // Reimplement this function to map from all channels of the data
+  // producer to the left and right channel of audio output.
+  // This default implementation just takes the average of all channels
+  // and copies it to both the left and right channel.
+  virtual void mixer(int16_t &left, int16_t &right);
 
   double Time;
   double LPVals[16];
@@ -31,7 +39,13 @@ class AudioShield {
 
  public:
 
-  AudioShield(const DataWorker &producer);
+  // Constructor with defaul AudioPlayBuffer that simply averages all
+  // data channels.
+  AudioShield(const DataWorker *producer);
+
+  // Constructor that lets you also pass a derived AudioPlayBuffer.
+  AudioShield(AudioPlayBuffer *audiodata);
+
   ~AudioShield();
 
   void setup();
@@ -39,6 +53,7 @@ class AudioShield {
 
  protected:
 
+  bool Own;
   AudioPlayBuffer *AudioInput;
   AudioOutputI2S AudioOutput;
   AudioConnection *PatchCord1;

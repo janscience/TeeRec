@@ -37,7 +37,7 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
 elapsedMillis screenTime;
 
-AudioShield audio(aidata);
+AudioShield audio(&aidata);
 
 void setupADC() {
   aidata.setChannels(0, channels0);
@@ -111,7 +111,6 @@ void plotData() {   // 85ms
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  AudioMemory(8);
   setupADC();
   aidata.check();
   initScreen();

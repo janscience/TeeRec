@@ -11,6 +11,10 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
 }
 
 
+AudioPlayBuffer::~AudioPlayBuffer() {
+}
+
+
 void AudioPlayBuffer::update() {
   audio_block_t *block1 = NULL;
   audio_block_t *block2 = NULL;
@@ -38,19 +42,19 @@ void AudioPlayBuffer::update() {
     fac = 0.0;
   
   // copy data into audio block buffer:
-  int32_t nchannels = Data->nchannels();
+  uint8_t nchannels = Data->nchannels();
   ssize_t start = Index;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
-    int32_t sum = 0;
-    for (uint8_t c=0; c<Data->nchannels(); c++)
-      sum += Data->buffer()[Index+c] - LPVals[c];
-    block1->data[i] = sum/nchannels;
-    block2->data[i] = sum/nchannels;
+    int16_t left = 0;
+    int16_t right = 0;
+    mixer(left, right);
+    block1->data[i] = left;
+    block2->data[i] = right;
     i++;
     Time += interval;
     while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
-      for (uint8_t c=0; c<Data->nchannels(); c++)
+      for (uint8_t c=0; c<nchannels; c++)
 	LPVals[c] += (Data->buffer()[Index+c] - LPVals[c])*fac;
       navail -= nchannels;
       if (increment(nchannels))
@@ -66,15 +70,33 @@ void AudioPlayBuffer::update() {
 }
 
 
-AudioShield::AudioShield(const DataWorker &producer) {
-  AudioInput = new AudioPlayBuffer(producer);
+void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
+  uint8_t nchannels = Data->nchannels();
+  int16_t val = 0;
+  for (uint8_t c=0; c<nchannels; c++)
+    val += (Data->buffer()[Index+c] - LPVals[c])/nchannels;
+  left = val;
+  right = val;
+}
+
+
+AudioShield::AudioShield(AudioPlayBuffer *audiodata) :
+  Own(false),
+  AudioInput(audiodata) {
+}
+
+
+AudioShield::AudioShield(const DataWorker *producer) :
+  Own(true) {
+  AudioInput = new AudioPlayBuffer(*producer);
 }
 
 
 AudioShield::~AudioShield() {
   delete PatchCord1;
   delete PatchCord2;
-  // delete AudioInput; ????
+  if (Own)
+    delete AudioInput;
 }
 
 
