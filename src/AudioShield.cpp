@@ -13,7 +13,7 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
 
 void AudioPlayBuffer::update() {
   audio_block_t *block1 = NULL;
-  //audio_block_t *block2 = NULL;
+  audio_block_t *block2 = NULL;
 
   if (Data->nchannels() == 0 || Data->rate() == 0)
     return;
@@ -27,13 +27,9 @@ void AudioPlayBuffer::update() {
   block1 = allocate();
   if (block1 == NULL)
     return;
-  /*
-  if (Data->nchannels() > 1) {
-    block2 = allocate();
-    if (block2 == NULL)
-      return;
-  }
-  */
+  block2 = allocate();
+  if (block2 == NULL)
+    return;
 
   // low-pass filter:
   const float tau = 0.1;             // low-pass filter time constant in seconds
@@ -49,7 +45,9 @@ void AudioPlayBuffer::update() {
     int32_t sum = 0;
     for (uint8_t c=0; c<Data->nchannels(); c++)
       sum += Data->buffer()[Index+c] - LPVals[c];
-    block1->data[i++] = sum/nchannels;
+    block1->data[i] = sum/nchannels;
+    block2->data[i] = sum/nchannels;
+    i++;
     Time += interval;
     while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
       for (uint8_t c=0; c<Data->nchannels(); c++)
@@ -59,17 +57,12 @@ void AudioPlayBuffer::update() {
 	start -= Data->nbuffer();
     }
   }
-  Time -= Data->time(Index - start);
-  
-  /*
-  if (Data->nchannels() == 1)
-    memcpy(block2, block1, 2*AUDIO_BLOCK_SAMPLES);
-  */
+  Time -= Data->time(Index - start);  // keep time mismatch!
 
   transmit(block1, 0);
-  transmit(block1, 1);
+  transmit(block2, 1);
   release(block1);
-  //release(block2);
+  release(block2);
 }
 
 
@@ -86,7 +79,7 @@ AudioShield::~AudioShield() {
 
 
 void AudioShield::setup() {
-  AudioMemory(8);
+  AudioMemory(16);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
   Shield.enable();
