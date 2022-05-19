@@ -21,6 +21,9 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   
   virtual void update();
 
+  void setMute(bool mute=true);
+  
+
  protected:
 
   // Reimplement this function to map from all channels of the data
@@ -31,6 +34,7 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
 
   double Time;
   double LPVals[16];
+  bool Mute;
   
 };
 

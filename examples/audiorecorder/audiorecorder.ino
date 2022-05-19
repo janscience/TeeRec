@@ -44,6 +44,10 @@ void setup() {
   audio.setup();
   aidata.start();
   blink.setSingle();
+  delay(2000);
+  playdata.setMute(true);
+  delay(2000);
+  playdata.setMute(false);
 }
 
 

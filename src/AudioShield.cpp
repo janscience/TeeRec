@@ -6,7 +6,8 @@
 AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
-    Time(0.0) {
+    Time(0.0),
+    Mute(false) {
   memset(LPVals, 0, sizeof(LPVals));
 }
 
@@ -16,6 +17,9 @@ AudioPlayBuffer::~AudioPlayBuffer() {
 
 
 void AudioPlayBuffer::update() {
+  if (Mute)
+    return;
+  
   audio_block_t *block1 = NULL;
   audio_block_t *block2 = NULL;
 
@@ -77,6 +81,11 @@ void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
     val += (Data->buffer()[Index+c] - LPVals[c])/nchannels;
   left = val;
   right = val;
+}
+
+
+void AudioPlayBuffer::setMute(bool mute) {
+  Mute = mute;
 }
 
 
