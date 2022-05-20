@@ -110,10 +110,23 @@ AudioShield::~AudioShield() {
 
 
 void AudioShield::setup() {
-  AudioMemory(16);
+  AudioMemory(32);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
+
+  /*
+  AudioOutput.analogReference(EXTERNAL); // much louder!
+  delay(50);
+  */
+  int amp_pin = 32;
+  pinMode(amp_pin, OUTPUT);
+  digitalWrite(amp_pin, HIGH); // turn on the amplifier
+  delay(10);             // allow time to wake up
+
   Shield.enable();
   Shield.volume(0.5);
+  //Shield.muteHeadphone();
+  //Shield.muteLineout();
+  Shield.lineOutLevel(31);
 }
 

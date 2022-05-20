@@ -459,8 +459,6 @@ bool ContinuousADC::check() {
 
   
 void ContinuousADC::report() {
-  if (!Serial)
-    return;
   char chans0[50];
   char chans1[50];
   channels(0, chans0);

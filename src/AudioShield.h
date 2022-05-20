@@ -60,6 +60,7 @@ class AudioShield {
   bool Own;
   AudioPlayBuffer *AudioInput;
   AudioOutputI2S AudioOutput;
+  //AudioOutputAnalogStereo AudioOutput;
   AudioConnection *PatchCord1;
   AudioConnection *PatchCord2;
   AudioControlSGTL5000 Shield;
