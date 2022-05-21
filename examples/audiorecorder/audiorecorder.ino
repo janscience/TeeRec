@@ -54,6 +54,7 @@ void setupADC() {
 
 
 void setupAudio() {
+  playdata.setVolume(4);
   audio.setup(false, 32); // mono, amplifier enable on pin 32
   audioshield.enable();
   audioshield.volume(0.5);

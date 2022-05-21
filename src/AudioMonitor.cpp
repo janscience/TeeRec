@@ -7,6 +7,7 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
     Time(0.0),
+    VolShift(1),
     Mute(false) {
 }
 
@@ -38,24 +39,18 @@ void AudioPlayBuffer::update() {
     if (block2 == NULL)
       return;
   }
-
-  // low-pass filter:
-  const float tau = 0.1;             // low-pass filter time constant in seconds
-  double fac = interval/tau;         // fac = dt/tau
-  if (fac > 0.05)                    // make sure fac < 0.1
-    fac = 0.0;
   
   // copy data into audio block buffer:
   uint8_t nchannels = Data->nchannels();
   ssize_t start = Index;
+  int16_t left;
+  int16_t right;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
-    int16_t left = 0;
-    int16_t right = 0;
     mixer(left, right);
-    block1->data[i] = left;
+    block1->data[i] = left >> VolShift;
     if (numConnections > 1)
-      block2->data[i] = right;
+      block2->data[i] = right >> VolShift;
     i++;
     Time += interval;
     while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
@@ -82,6 +77,11 @@ void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
     val += Data->buffer()[Index+c]/nchannels;
   left = val;
   right = val;
+}
+
+
+void AudioPlayBuffer::setVolume(uint8_t shift) {
+  VolShift = shift;
 }
 
 
@@ -121,7 +121,6 @@ void AudioMonitor::setup(bool stereo, int enable_pin) {
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   if (stereo)
     PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
-  
   if ( enable_pin >= 0 ) {
     pinMode(enable_pin, OUTPUT);
     digitalWrite(enable_pin, HIGH); // turn on the amplifier
