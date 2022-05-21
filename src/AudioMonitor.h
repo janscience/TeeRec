@@ -21,10 +21,6 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   
   virtual void update();
 
-  // Set volume by shifting data values to the right,
-  // i.e. divide by powers of two.
-  void setVolume(uint8_t shift);
-
   void setMute(bool mute=true);
   
 
@@ -37,7 +33,6 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   virtual void mixer(int16_t &left, int16_t &right);
 
   float Time;
-  int16_t VolShift;
   bool Mute;
   
 };
