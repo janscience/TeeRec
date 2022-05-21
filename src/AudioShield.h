@@ -32,8 +32,9 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   // and copies it to both the left and right channel.
   virtual void mixer(int16_t &left, int16_t &right);
 
-  double Time;
-  double LPVals[16];
+  float Time;
+  float LPLeft;
+  float LPRight;
   bool Mute;
   
 };
@@ -52,7 +53,7 @@ class AudioShield {
 
   ~AudioShield();
 
-  void setup();
+  void setup(bool stereo=true);
 
 
  protected:
@@ -60,7 +61,6 @@ class AudioShield {
   bool Own;
   AudioPlayBuffer *AudioInput;
   AudioOutputI2S AudioOutput;
-  //AudioOutputAnalogStereo AudioOutput;
   AudioConnection *PatchCord1;
   AudioConnection *PatchCord2;
   AudioControlSGTL5000 Shield;
