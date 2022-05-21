@@ -5,7 +5,7 @@
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <Blink.h>
-  
+//#include "AudioSampleTomtom.h"  
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
@@ -27,8 +27,16 @@ Settings settings("recordings", fileName, fileSaveTime);
 ContinuousADC aidata;
 
 AudioPlayBuffer playdata(aidata);
-AudioMonitor audio(&playdata);
+AudioPlayMemory sound0;
+AudioMixer4 mix;
+AudioOutputI2S speaker;
+AudioConnection ac1(playdata, 0, mix, 0);
+AudioConnection ac2(sound0, 0, mix, 1);
+AudioConnection aco(mix, 0, speaker, 0);
+//AudioMonitor audio(&playdata);
 AudioControlSGTL5000 audioshield;
+int16_t *Beep;
+elapsedMillis BeepTime;
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
@@ -54,13 +62,34 @@ void setupADC() {
 
 
 void setupAudio() {
-  playdata.setVolume(4);
-  audio.setup(false, 32); // mono, amplifier enable on pin 32
+  //playdata.setVolume(4);
+  AudioMemory(32);
+  int enable_pin = 32;
+  if ( enable_pin >= 0 ) {
+    pinMode(enable_pin, OUTPUT);
+    digitalWrite(enable_pin, HIGH); // turn on the amplifier
+    delay(10);                      // allow time to wake up
+  }
   audioshield.enable();
   audioshield.volume(0.5);
   //audioshield.muteHeadphone();
   //audioshield.muteLineout();
   audioshield.lineOutLevel(31);
+  mix.gain(0, 0.1);
+  mix.gain(1, 0.1);
+  // make a beep:
+  float freq = 880.0;
+  size_t np = size_t(AUDIO_SAMPLE_RATE_EXACT/freq);
+  unsigned int n = (unsigned int)(0.1*AUDIO_SAMPLE_RATE_EXACT/np)*np;
+  Beep = new int16_t[2+n];
+  unsigned int format = 0x81;
+  format <<= 24;
+  format |= n;
+  Beep[0] = format & 0xFFFF;
+  Beep[1] = format >> 16;
+  uint16_t a = 1 << 15;
+  for (size_t i=0; i<n; i++)
+    Beep[2+i] = (int16_t)(a*sin(TWO_PI*i/np));
 }
 
 
@@ -201,10 +230,16 @@ void setup() {
   blink.setSingle();
   file.start();
   openNextFile(name);
+  BeepTime = 0;
 }
 
 
 void loop() {
   storeData();
   blink.update();
+  if (BeepTime > 1000) {
+    //sound0.play(AudioSampleTomtom);
+    sound0.play((const unsigned int *)Beep);
+    BeepTime = 0;
+  }
 }

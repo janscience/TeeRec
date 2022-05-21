@@ -152,7 +152,7 @@ void Waveform::start(int pin, float freq, float ampl) {
   ampl /= amplt;
   // one period of data:
   Data = new uint16_t[NData];
-  for ( size_t k=0; k<NData; k++) {
+  for (size_t k=0; k<NData; k++) {
     float x = sin(TWO_PI*k/NData);
     for (size_t j=0; j<NHarmonics; j++)
       x += Ampls[j]*sin(TWO_PI*k*(j+2)/NData + Phases[j]);
