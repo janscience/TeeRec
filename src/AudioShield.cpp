@@ -18,7 +18,7 @@ AudioPlayBuffer::~AudioPlayBuffer() {
 
 
 void AudioPlayBuffer::update() {
-  // this functions should be as fast as possible!
+  // this function should be as fast as possible!
   
   if (Mute)
     return;
@@ -121,16 +121,17 @@ AudioShield::~AudioShield() {
 }
 
 
-void AudioShield::setup(bool stereo) {
+void AudioShield::setup(bool stereo, int enable_pin) {
   AudioMemory(32);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   if (stereo)
     PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
   
-  int amp_pin = 32;
-  pinMode(amp_pin, OUTPUT);
-  digitalWrite(amp_pin, HIGH); // turn on the amplifier
-  delay(10);                   // allow time to wake up
+  if ( enable_pin >= 0 ) {
+    pinMode(enable_pin, OUTPUT);
+    digitalWrite(enable_pin, HIGH); // turn on the amplifier
+    delay(10);                      // allow time to wake up
+  }
 
   Shield.enable();
   Shield.volume(0.5);

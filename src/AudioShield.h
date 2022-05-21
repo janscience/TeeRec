@@ -53,7 +53,7 @@ class AudioShield {
 
   ~AudioShield();
 
-  void setup(bool stereo=true);
+  void setup(bool stereo=true, int enable_pin=-1);
 
 
  protected:

@@ -52,6 +52,11 @@ void setupADC() {
 }
 
 
+void setupAudio() {
+  audio.setup(false, 32); // mono, amplifier enable on pin 32
+}
+
+
 String makeFileName() {
   time_t t = now();
   String name = rtclock.makeStr(settings.FileName, t, true);
@@ -176,7 +181,7 @@ void setup() {
   config.configure(sdcard);
   setupStorage();
   aidata.check();
-  audio.setup(false);
+  setupAudio();
   aidata.start();
   aidata.report();
   blink.switchOff();
