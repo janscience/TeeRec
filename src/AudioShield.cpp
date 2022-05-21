@@ -132,11 +132,5 @@ void AudioShield::setup(bool stereo, int enable_pin) {
     digitalWrite(enable_pin, HIGH); // turn on the amplifier
     delay(10);                      // allow time to wake up
   }
-
-  Shield.enable();
-  Shield.volume(0.5);
-  //Shield.muteHeadphone();
-  //Shield.muteLineout();
-  Shield.lineOutLevel(31);
 }
 

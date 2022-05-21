@@ -28,6 +28,7 @@ ContinuousADC aidata;
 
 AudioPlayBuffer playdata(aidata);
 AudioShield audio(&playdata);
+AudioControlSGTL5000 audioshield;
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
@@ -54,6 +55,11 @@ void setupADC() {
 
 void setupAudio() {
   audio.setup(false, 32); // mono, amplifier enable on pin 32
+  audioshield.enable();
+  audioshield.volume(0.5);
+  //audioshield.muteHeadphone();
+  //audioshield.muteLineout();
+  audioshield.lineOutLevel(31);
 }
 
 
