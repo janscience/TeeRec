@@ -1,7 +1,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <ContinuousADC.h>
-#include <AudioShield.h>
+#include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <Blink.h>
@@ -27,7 +27,7 @@ Settings settings("recordings", fileName, fileSaveTime);
 ContinuousADC aidata;
 
 AudioPlayBuffer playdata(aidata);
-AudioShield audio(&playdata);
+AudioMonitor audio(&playdata);
 AudioControlSGTL5000 audioshield;
 
 SDCard sdcard;

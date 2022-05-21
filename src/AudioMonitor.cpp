@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <DataBuffer.h>
-#include "AudioShield.h"
+#include "AudioMonitor.h"
 
 
 AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
@@ -95,7 +95,7 @@ void AudioPlayBuffer::setMute(bool mute) {
 }
 
 
-AudioShield::AudioShield(AudioPlayBuffer *audiodata) :
+AudioMonitor::AudioMonitor(AudioPlayBuffer *audiodata) :
   Own(false),
   AudioInput(audiodata),
   PatchCord1(0),
@@ -103,7 +103,7 @@ AudioShield::AudioShield(AudioPlayBuffer *audiodata) :
 }
 
 
-AudioShield::AudioShield(const DataWorker *producer) :
+AudioMonitor::AudioMonitor(const DataWorker *producer) :
   Own(true),
   PatchCord1(0),
   PatchCord2(0) {
@@ -111,7 +111,7 @@ AudioShield::AudioShield(const DataWorker *producer) :
 }
 
 
-AudioShield::~AudioShield() {
+AudioMonitor::~AudioMonitor() {
   if (PatchCord1 != 0)
     delete PatchCord1;
   if (PatchCord2 != 0)
@@ -121,7 +121,7 @@ AudioShield::~AudioShield() {
 }
 
 
-void AudioShield::setup(bool stereo, int enable_pin) {
+void AudioMonitor::setup(bool stereo, int enable_pin) {
   AudioMemory(32);
   PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
   if (stereo)

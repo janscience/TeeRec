@@ -1,10 +1,10 @@
 /*
-  AudioShield - playing acquired data on audio shield.
+  AudioMonitor - play acquired data on audio I2S device.
   Created by Jan Benda, July 2nd, 2021.
 */
 
-#ifndef AudioShield_h
-#define AudioShield_h
+#ifndef AudioMonitor_h
+#define AudioMonitor_h
 
 
 #include <Arduino.h>
@@ -40,18 +40,18 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
 };
 
 
-class AudioShield {
+class AudioMonitor {
 
  public:
 
   // Constructor with defaul AudioPlayBuffer that simply averages all
   // data channels.
-  AudioShield(const DataWorker *producer);
+  AudioMonitor(const DataWorker *producer);
 
   // Constructor that lets you also pass a derived AudioPlayBuffer.
-  AudioShield(AudioPlayBuffer *audiodata);
+  AudioMonitor(AudioPlayBuffer *audiodata);
 
-  ~AudioShield();
+  ~AudioMonitor();
 
   void setup(bool stereo=true, int enable_pin=-1);
 
