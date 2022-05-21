@@ -18,7 +18,7 @@
 #include <DataWorker.h>
 #include <WaveHeader.h>
 
-// undefine if you want to use the Teensy SD library instead:
+// undefine if you want to use the SD library instead:
 #define SDCARD_USE_SDFAT
 
 
