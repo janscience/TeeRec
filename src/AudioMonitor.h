@@ -33,8 +33,6 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   virtual void mixer(int16_t &left, int16_t &right);
 
   float Time;
-  float LPLeft;
-  float LPRight;
   bool Mute;
   
 };

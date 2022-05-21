@@ -7,8 +7,6 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
     Time(0.0),
-    LPLeft(0.0),
-    LPRight(0.0),
     Mute(false) {
 }
 
@@ -55,12 +53,9 @@ void AudioPlayBuffer::update() {
     int16_t left = 0;
     int16_t right = 0;
     mixer(left, right);
-    LPLeft += (left - LPLeft)*fac;
-    block1->data[i] = left - LPLeft;
-    if (numConnections > 1) {
-      LPRight += (right - LPRight)*fac;
-      block2->data[i] = right - LPRight;
-    }
+    block1->data[i] = left;
+    if (numConnections > 1)
+      block2->data[i] = right;
     i++;
     Time += interval;
     while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
