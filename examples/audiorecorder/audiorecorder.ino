@@ -76,17 +76,20 @@ void setupAudio() {
   //audioshield.muteLineout();
   audioshield.lineOutLevel(31);
   mix.gain(0, 0.1);
-  mix.gain(1, 0.1);
+  mix.gain(1, 0.02);
   // make a beep:
-  float freq = 880.0;
+  float freq = 4*440.0;
+  float duration = 0.2;
   size_t np = size_t(AUDIO_SAMPLE_RATE_EXACT/freq);
-  unsigned int n = (unsigned int)(0.1*AUDIO_SAMPLE_RATE_EXACT/np)*np;
+  unsigned int n = (unsigned int)(duration*AUDIO_SAMPLE_RATE_EXACT/np)*np;
   Beep = new int16_t[2+n];
+  // first integer encodes format and size:
   unsigned int format = 0x81;
   format <<= 24;
   format |= n;
   Beep[0] = format & 0xFFFF;
   Beep[1] = format >> 16;
+  // sine tone:
   uint16_t a = 1 << 15;
   for (size_t i=0; i<n; i++)
     Beep[2+i] = (int16_t)(a*sin(TWO_PI*i/np));
