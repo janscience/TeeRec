@@ -4,6 +4,7 @@
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <PushButtons.h>
 #include <Blink.h>
 //#include "AudioSampleTomtom.h"  
 
@@ -18,6 +19,8 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 
 char fileName[] = "teerec-SDATETIME";  // may include DATE, SDATE, TIME, STIME,
 float fileSaveTime = 30;        // seconds
+
+int startPin = 24;
 
 // ----------------------------------------------------------------------------
 
@@ -45,6 +48,7 @@ RTClock rtclock;
 String prevname; // previous file name
 int restarts = 0;
 
+PushButtons buttons;
 Blink blink(LED_BUILTIN);
 
 
@@ -137,6 +141,33 @@ bool openNextFile(const String &name) {
 }
 
 
+void startWrite(int id) {
+  // on button press:
+  if (file.available()) {
+    if (!file.isOpen()) {
+      String name = makeFileName();
+      if (name.length() == 0) {
+        Serial.println("-> halt");
+        aidata.stop();
+        while (1) {};
+      }
+      file.setMaxFileSamples(0);
+      file.start();
+      openNextFile(name);
+    }
+    else {
+      file.closeWave();
+      blink.clear();
+      Serial.println("  stopped recording\n");
+    }
+  }
+}
+
+
+void stopWrite(int id) {
+}
+
+
 void setupStorage() {
   prevname = "";
   if (settings.FileTime > 30)
@@ -146,6 +177,11 @@ void setupStorage() {
   file.setWriteInterval();
   file.setMaxFileTime(settings.FileTime);
   file.setSoftware("TeeRec audiorecorder");
+}
+
+
+void setupButtons() {
+  buttons.add(startPin, INPUT_PULLUP, startWrite);
 }
 
 
@@ -184,24 +220,6 @@ void storeData() {
         mf.close();
       }
     }
-    if (file.endWrite() || samples < 0) {
-      file.close();  // file size was set by openWave()
-      String name = makeFileName();
-      if (samples < 0) {
-        restarts++;
-        if (restarts >= 5) {
-          Serial.println("ERROR: Too many file errors -> halt.");
-          aidata.stop();
-          while (1) {};
-        }
-      }
-      if (samples == -3) {
-        String sname = name + "-sensors";
-        aidata.start();
-        file.start();
-      }
-      openNextFile(name);
-    }
   }
 }
 
@@ -214,6 +232,7 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   rtclock.check();
   rtclock.report();
+  setupButtons();
   setupADC();
   sdcard.begin();
   config.setConfigFile("teerec.cfg");
@@ -224,25 +243,19 @@ void setup() {
   aidata.start();
   aidata.report();
   blink.switchOff();
-  String name = makeFileName();
-  if (name.length() == 0) {
-    Serial.println("-> halt");
-    aidata.stop();
-    while (1) {};
-  }
-  blink.setSingle();
-  file.start();
-  openNextFile(name);
   BeepTime = 0;
 }
 
 
 void loop() {
+  buttons.update();
   storeData();
   blink.update();
+  /*
   if (BeepTime > 1000) {
     //sound0.play(AudioSampleTomtom);
     sound0.play((const unsigned int *)Beep);
     BeepTime = 0;
   }
+  */
 }
