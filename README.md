@@ -191,10 +191,9 @@ TeeRec is used in:
   al. 2018](https://doi.org/10.1523/JNEUROSCI.0350-18.2018) and
   [Henninger et al. 2020](https://doi.org/10.1242/jeb.206342)).
 
-Further planed applications are:
-
-- Fishfinder: A replacement for the usual and horrible RadioShack/MP3
-  player combination for recording electric fish EODs in their natural
+- [FishFinder](https://github.com/janscience/FishFinder): A
+  replacement for the usual and horrible RadioShack/MP3 player
+  combination for recording electric fish EODs in their natural
   habitats with lot's of additional features (display, online
   analysis, environmental parameters).
 

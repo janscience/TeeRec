@@ -18,14 +18,13 @@ int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // i
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 char fileName[] = "teerec-SDATETIME";  // may include DATE, SDATE, TIME, STIME,
-float fileSaveTime = 30;        // seconds
 
 int startPin = 24;
 
 // ----------------------------------------------------------------------------
 
 Configurator config;
-Settings settings("recordings", fileName, fileSaveTime);
+Settings settings("recordings", fileName);
 
 ContinuousADC aidata;
 
