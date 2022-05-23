@@ -6,7 +6,6 @@
 #include <RTClock.h>
 #include <PushButtons.h>
 #include <Blink.h>
-//#include "AudioSampleTomtom.h"  
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
@@ -17,7 +16,7 @@ uint32_t samplingRate = 96000;       // samples per second and channel in Hertz
 int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-char fileName[] = "teerec-SDATETIME";  // may include DATE, SDATE, TIME, STIME,
+char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STIME,
 
 int startPin = 24;
 
@@ -33,12 +32,8 @@ AudioPlayMemory sound0;
 AudioMixer4 mix;
 AudioOutputI2S speaker;
 AudioConnection ac1(playdata, 0, mix, 0);
-AudioConnection ac2(sound0, 0, mix, 1);
 AudioConnection aco(mix, 0, speaker, 0);
-//AudioMonitor audio(&playdata);
 AudioControlSGTL5000 audioshield;
-int16_t *Beep;
-elapsedMillis BeepTime;
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
@@ -79,23 +74,6 @@ void setupAudio() {
   //audioshield.muteLineout();
   audioshield.lineOutLevel(31);
   mix.gain(0, 0.1);
-  mix.gain(1, 0.02);
-  // make a beep:
-  float freq = 4*440.0;
-  float duration = 0.2;
-  size_t np = size_t(AUDIO_SAMPLE_RATE_EXACT/freq);
-  unsigned int n = (unsigned int)(duration*AUDIO_SAMPLE_RATE_EXACT/np)*np;
-  Beep = new int16_t[2+n];
-  // first integer encodes format and size:
-  unsigned int format = 0x81;
-  format <<= 24;
-  format |= n;
-  Beep[0] = format & 0xFFFF;
-  Beep[1] = format >> 16;
-  // sine tone:
-  uint16_t a = 1 << 15;
-  for (size_t i=0; i<n; i++)
-    Beep[2+i] = (int16_t)(a*sin(TWO_PI*i/np));
 }
 
 
@@ -121,10 +99,9 @@ bool openNextFile(const String &name) {
   blink.clear();
   if (name.length() == 0)
     return false;
-  String fname = name + ".wav";
   char dts[20];
   rtclock.dateTime(dts);
-  if (! file.openWave(fname.c_str(), -1, dts)) {
+  if (! file.openWave(name.c_str(), -1, dts)) {
     Serial.println();
     Serial.println("WARNING: failed to open file on SD card.");
     Serial.println("SD card probably not inserted or full -> halt");
@@ -133,7 +110,7 @@ bool openNextFile(const String &name) {
     return false;
   }
   file.write();
-  Serial.println(fname);
+  Serial.println(name);
   blink.setSingle();
   blink.blinkSingle(0, 1000);
   return true;
@@ -163,7 +140,8 @@ void startWrite(int id) {
 }
 
 
-void stopWrite(int id) {
+void setupButtons() {
+  buttons.add(startPin, INPUT_PULLUP, startWrite);
 }
 
 
@@ -176,11 +154,6 @@ void setupStorage() {
   file.setWriteInterval();
   file.setMaxFileTime(settings.FileTime);
   file.setSoftware("TeeRec audiorecorder");
-}
-
-
-void setupButtons() {
-  buttons.add(startPin, INPUT_PULLUP, startWrite);
 }
 
 
@@ -242,7 +215,6 @@ void setup() {
   aidata.start();
   aidata.report();
   blink.switchOff();
-  BeepTime = 0;
 }
 
 
@@ -250,11 +222,4 @@ void loop() {
   buttons.update();
   storeData();
   blink.update();
-  /*
-  if (BeepTime > 1000) {
-    //sound0.play(AudioSampleTomtom);
-    sound0.play((const unsigned int *)Beep);
-    BeepTime = 0;
-  }
-  */
 }
