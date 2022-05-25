@@ -1,7 +1,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <ContinuousADC.h>
-#include <AudioInputBuffer.h>
+#include <AudioPlayBuffer.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <PushButtons.h>
@@ -27,11 +27,11 @@ Settings settings("recordings", fileName);
 
 ContinuousADC aidata;
 
-AudioInputBuffer audiodata(aidata);
+AudioPlayBuffer playdata(aidata);
 AudioPlayMemory sound0;
 AudioMixer4 mix;
 AudioOutputI2S speaker;
-AudioConnection ac1(audiodata, 0, mix, 0);
+AudioConnection ac1(playdata, 0, mix, 0);
 AudioConnection aco(mix, 0, speaker, 0);
 AudioControlSGTL5000 audioshield;
 

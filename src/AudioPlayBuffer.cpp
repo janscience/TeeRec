@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <DataBuffer.h>
-#include "AudioInputBuffer.h"
+#include "AudioPlayBuffer.h"
 
 
-AudioInputBuffer::AudioInputBuffer(const DataWorker &producer)
+AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
     Time(0.0),
@@ -11,11 +11,11 @@ AudioInputBuffer::AudioInputBuffer(const DataWorker &producer)
 }
 
 
-AudioInputBuffer::~AudioInputBuffer() {
+AudioPlayBuffer::~AudioPlayBuffer() {
 }
 
 
-void AudioInputBuffer::update() {
+void AudioPlayBuffer::update() {
   // this function should be as fast as possible!
   
   if (Mute)
@@ -69,7 +69,7 @@ void AudioInputBuffer::update() {
 }
 
 
-void AudioInputBuffer::mixer(int16_t &left, int16_t &right) {
+void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
   uint8_t nchannels = Data->nchannels();
   int16_t val = 0;
   for (uint8_t c=0; c<nchannels; c++)
@@ -79,6 +79,6 @@ void AudioInputBuffer::mixer(int16_t &left, int16_t &right) {
 }
 
 
-void AudioInputBuffer::setMute(bool mute) {
+void AudioPlayBuffer::setMute(bool mute) {
   Mute = mute;
 }

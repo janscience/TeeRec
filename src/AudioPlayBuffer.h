@@ -1,10 +1,10 @@
 /*
-  AudioInputBuffer - make the TeeRec data buffer available as an input for the Audio library
+  AudioPlayBuffer - make the TeeRec data buffer available as an input for the Audio library
   Created by Jan Benda, July 2nd, 2021.
 */
 
-#ifndef AudioInputBuffer_h
-#define AudioInputBuffer_h
+#ifndef AudioPlayBuffer_h
+#define AudioPlayBuffer_h
 
 
 #include <Arduino.h>
@@ -12,12 +12,12 @@
 #include <DataWorker.h>
 
 
-class AudioInputBuffer : public DataWorker, public AudioStream {
+class AudioPlayBuffer : public DataWorker, public AudioStream {
   
  public:
   
-  AudioInputBuffer(const DataWorker &producer);
-  virtual ~AudioInputBuffer();
+  AudioPlayBuffer(const DataWorker &producer);
+  virtual ~AudioPlayBuffer();
   
   virtual void update();
 
