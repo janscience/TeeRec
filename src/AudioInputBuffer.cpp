@@ -1,9 +1,9 @@
 #include <Arduino.h>
 #include <DataBuffer.h>
-#include "AudioMonitor.h"
+#include "AudioInputBuffer.h"
 
 
-AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
+AudioInputBuffer::AudioInputBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
     Time(0.0),
@@ -11,11 +11,11 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
 }
 
 
-AudioPlayBuffer::~AudioPlayBuffer() {
+AudioInputBuffer::~AudioInputBuffer() {
 }
 
 
-void AudioPlayBuffer::update() {
+void AudioInputBuffer::update() {
   // this function should be as fast as possible!
   
   if (Mute)
@@ -69,7 +69,7 @@ void AudioPlayBuffer::update() {
 }
 
 
-void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
+void AudioInputBuffer::mixer(int16_t &left, int16_t &right) {
   uint8_t nchannels = Data->nchannels();
   int16_t val = 0;
   for (uint8_t c=0; c<nchannels; c++)
@@ -79,46 +79,6 @@ void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
 }
 
 
-void AudioPlayBuffer::setMute(bool mute) {
+void AudioInputBuffer::setMute(bool mute) {
   Mute = mute;
 }
-
-
-AudioMonitor::AudioMonitor(AudioPlayBuffer *audiodata) :
-  Own(false),
-  AudioInput(audiodata),
-  PatchCord1(0),
-  PatchCord2(0) {
-}
-
-
-AudioMonitor::AudioMonitor(const DataWorker *producer) :
-  Own(true),
-  PatchCord1(0),
-  PatchCord2(0) {
-  AudioInput = new AudioPlayBuffer(*producer);
-}
-
-
-AudioMonitor::~AudioMonitor() {
-  if (PatchCord1 != 0)
-    delete PatchCord1;
-  if (PatchCord2 != 0)
-    delete PatchCord2;
-  if (Own)
-    delete AudioInput;
-}
-
-
-void AudioMonitor::setup(bool stereo, int enable_pin) {
-  AudioMemory(32);
-  PatchCord1 = new AudioConnection(*AudioInput, 0, AudioOutput, 0);
-  if (stereo)
-    PatchCord2 = new AudioConnection(*AudioInput, 1, AudioOutput, 1);
-  if ( enable_pin >= 0 ) {
-    pinMode(enable_pin, OUTPUT);
-    digitalWrite(enable_pin, HIGH); // turn on the amplifier
-    delay(10);                      // allow time to wake up
-  }
-}
-

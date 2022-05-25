@@ -1,5 +1,5 @@
 #include <ContinuousADC.h>
-#include <AudioMonitor.h>
+#include <AudioInputBuffer.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -37,7 +37,13 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
 elapsedMillis screenTime;
 
-AudioMonitor audio(&aidata);
+
+AudioInputBuffer audiodata(aidata);
+AudioPlayMemory sound0;
+AudioMixer4 mix;
+AudioOutputI2S speaker;
+AudioConnection ac1(audiodata, 0, mix, 0);
+AudioConnection aco(mix, 0, speaker, 0);
 AudioControlSGTL5000 audioshield;
 
 
@@ -55,12 +61,19 @@ void setupADC() {
 
 
 void setupAudio() {
-  audio.setup(false, 32); // mono, amplifier enable on pin 32
+  AudioMemory(32);
+  int enable_pin = 32;
+  if ( enable_pin >= 0 ) {
+    pinMode(enable_pin, OUTPUT);
+    digitalWrite(enable_pin, HIGH); // turn on the amplifier
+    delay(10);                      // allow time to wake up
+  }
   audioshield.enable();
   audioshield.volume(0.5);
   //audioshield.muteHeadphone();
   //audioshield.muteLineout();
   audioshield.lineOutLevel(31);
+  mix.gain(0, 0.1);
 }
 
 
