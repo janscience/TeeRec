@@ -3,6 +3,14 @@
 #include "AudioPlayBuffer.h"
 
 
+AudioPlayBuffer::AudioPlayBuffer()
+  : DataWorker(),
+    AudioStream(0, NULL),
+    Time(0.0),
+    Mute(false) {
+}
+
+
 AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
@@ -17,14 +25,15 @@ AudioPlayBuffer::~AudioPlayBuffer() {
 
 void AudioPlayBuffer::update() {
   // this function should be as fast as possible!
-  
-  if (Mute)
+
+  if (Producer == 0 || Mute)
     return;
   
   audio_block_t *block1 = NULL;
   audio_block_t *block2 = NULL;
 
   ssize_t navail = available();
+
   double interval = 1.0/AUDIO_SAMPLE_RATE_EXACT;
   if (Data->time(navail) < AUDIO_BLOCK_SAMPLES*interval)
     return;

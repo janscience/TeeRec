@@ -16,6 +16,7 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   
  public:
   
+  AudioPlayBuffer();
   AudioPlayBuffer(const DataWorker &producer);
   virtual ~AudioPlayBuffer();
   
