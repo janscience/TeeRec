@@ -1,5 +1,5 @@
 #include <ContinuousADC.h>
-#include <AudioPlayBuffer.h>
+#include <AudioMonitor.h>
 #include <Display.h>
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
@@ -27,6 +27,10 @@ uint updateScreen = 500;             // milliseconds
 float displayTime = 0.01;
 //float displayTime = 0.001*updateScreen;
 
+int ampl_enable_pin = 32;      // pin for enabling an audio amplifier
+int volume_up_pin = 25;        // pin for push button for increasing audio volume
+int volume_down_pin = 26;      // pin for push button for decreasing audio volume
+
 // ------------------------------------------------------------------------------------------
 
 ContinuousADC aidata;
@@ -37,14 +41,9 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
 elapsedMillis screenTime;
 
-
-AudioPlayBuffer playdata(aidata);
-AudioPlayMemory sound0;
-AudioMixer4 mix;
 AudioOutputI2S speaker;
-AudioConnection ac1(playdata, 0, mix, 0);
-AudioConnection aco(mix, 0, speaker, 0);
-AudioControlSGTL5000 audioshield;
+// AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield
+AudioMonitor audio(aidata, speaker);
 
 
 void setupADC() {
@@ -61,19 +60,13 @@ void setupADC() {
 
 
 void setupAudio() {
-  AudioMemory(32);
-  int enable_pin = 32;
-  if ( enable_pin >= 0 ) {
-    pinMode(enable_pin, OUTPUT);
-    digitalWrite(enable_pin, HIGH); // turn on the amplifier
-    delay(10);                      // allow time to wake up
-  }
-  audioshield.enable();
-  audioshield.volume(0.5);
+  audio.setup(ampl_enable_pin, 0.1, volume_up_pin, volume_down_pin);
+  // uncomment at least the first line if you use the Teensy audio shield
+  //audioshield.enable();
+  //audioshield.volume(0.5);
   //audioshield.muteHeadphone();
   //audioshield.muteLineout();
-  audioshield.lineOutLevel(31);
-  mix.gain(0, 0.1);
+  //audioshield.lineOutLevel(31);
 }
 
 
@@ -149,4 +142,5 @@ void setup() {
 
 void loop() {
   plotData();
+  audio.update();
 }

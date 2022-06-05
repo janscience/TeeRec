@@ -27,7 +27,8 @@ with contributions by
 - Continuous storing recorded data as wave files on SD cards.
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
-  version, and its unique MAC address..
+  version, and its unique MAC address.
+- Audio monitor.
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
@@ -59,8 +60,9 @@ defined in the following libraries:
 
 ### Utilities
 
-- [Display](src/Display.h): Display data on a monitor.
 - [AudioPlayBuffer](src/AudioPlayBuffer.h): Make the DataBuffer available as an input for the Audio library.
+- [AudioMonitor](src/AudioMonitor.h): Play recorded data with optional feedback signals on speaker.
+- [Display](src/Display.h): Display data on a monitor.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.

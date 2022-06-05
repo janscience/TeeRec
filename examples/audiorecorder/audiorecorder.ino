@@ -1,7 +1,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <ContinuousADC.h>
-#include <AudioPlayBuffer.h>
+#include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <PushButtons.h>
@@ -18,6 +18,9 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 
 char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STIME,
 
+int ampl_enable_pin = 32;      // pin for enabling an audio amplifier
+int volume_up_pin = 25;        // pin for push button for increasing audio volume
+int volume_down_pin = 26;      // pin for push button for decreasing audio volume
 int startPin = 24;
 
 // ----------------------------------------------------------------------------
@@ -27,13 +30,9 @@ Settings settings("recordings", fileName);
 
 ContinuousADC aidata;
 
-AudioPlayBuffer playdata(aidata);
-AudioPlayMemory sound0;
-AudioMixer4 mix;
 AudioOutputI2S speaker;
-AudioConnection ac1(playdata, 0, mix, 0);
-AudioConnection aco(mix, 0, speaker, 0);
-AudioControlSGTL5000 audioshield;
+// AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield
+AudioMonitor audio(aidata, speaker);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
@@ -60,19 +59,13 @@ void setupADC() {
 
 
 void setupAudio() {
-  AudioMemory(32);
-  int enable_pin = 32;
-  if ( enable_pin >= 0 ) {
-    pinMode(enable_pin, OUTPUT);
-    digitalWrite(enable_pin, HIGH); // turn on the amplifier
-    delay(10);                      // allow time to wake up
-  }
-  audioshield.enable();
-  audioshield.volume(0.5);
+  audio.setup(ampl_enable_pin, 0.1, volume_up_pin, volume_down_pin);
+  // uncomment at least the first line if you use the Teensy audio shield
+  //audioshield.enable();
+  //audioshield.volume(0.5);
   //audioshield.muteHeadphone();
   //audioshield.muteLineout();
-  audioshield.lineOutLevel(31);
-  mix.gain(0, 0.1);
+  //audioshield.lineOutLevel(31);
 }
 
 
@@ -220,5 +213,6 @@ void setup() {
 void loop() {
   buttons.update();
   storeData();
+  audio.update();
   blink.update();
 }
