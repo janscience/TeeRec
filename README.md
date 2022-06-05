@@ -86,6 +86,7 @@ These examples could be used as the basis for you data acquisition application.
 - [scope](examples/scope): Show acquired data on a display.
 - [logger](examples/logger): Continuously store data on SD card.
 - [recorder](examples/recorder): Show acquired data on a display and store data on SD card upon user request.
+- [audiorecorder](examples/audiorecorder): Play acquired data on speaker and store data on SD card upon user request.
 
 ### Testing data acquisition
 
@@ -121,6 +122,13 @@ In [utils/](utils) you find some useful python scripts.
 - [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 - [noise](utils/noise): plot and analyse baseline noise levels from wave files.
 - [spectra](utils/spectra): power spectra of traces in wave files.
+
+
+## Documentation
+
+Some background information.
+
+- [Audio output](docs/audioout.md): hardware for audio output.
 
 
 ## Dependencies
@@ -206,7 +214,7 @@ TeeRec is used in:
 
 ## Links
 
-- [Audio](https://github.com/PaulStoffregen/Audio) library
+- [Teensy Audio library](https://github.com/PaulStoffregen/Audio)
 - [microSoundRecorder](https://github.com/WMXZ-EU/microSoundRecorder) - Environmental Sound Recorder for Teensy 3.6:
   [[github]](https://github.com/WMXZ-EU/microSoundRecorder)
   [[wiki]](https://github.com/WMXZ-EU/microSoundRecorder/wiki/Hardware-setup)
