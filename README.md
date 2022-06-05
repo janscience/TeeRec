@@ -42,7 +42,8 @@ library](https://github.com/janscience/ESensors).
 ## Libraries
 
 The features provided by TeeRec are provided by many C++ classes,
-defined in the following libraries:
+defined in the following libraries. You can include them all at once
+via the `TeeRec.h` header.
 
 ### Data acquisition
 
@@ -58,10 +59,13 @@ defined in the following libraries:
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
 
-### Utilities
+### Audio monitor
 
 - [AudioPlayBuffer](src/AudioPlayBuffer.h): Make the DataBuffer available as an input for the Audio library.
 - [AudioMonitor](src/AudioMonitor.h): Play recorded data with optional feedback signals on speaker.
+
+### Utilities
+
 - [Display](src/Display.h): Display data on a monitor.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
