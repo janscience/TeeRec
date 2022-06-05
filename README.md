@@ -39,6 +39,12 @@ For slow acquisition of environmental sensor readings see [ESensors
 library](https://github.com/janscience/ESensors).
 
 
+## Documentation
+
+- [Installation instructions](docs/install.md)
+- [Audio output](docs/audioout.md): hardware for audio output.
+
+
 ## Libraries
 
 The features provided by TeeRec are provided by many C++ classes,
@@ -122,74 +128,6 @@ In [utils/](utils) you find some useful python scripts.
 - [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 - [noise](utils/noise): plot and analyse baseline noise levels from wave files.
 - [spectra](utils/spectra): power spectra of traces in wave files.
-
-
-## Documentation
-
-Some background information.
-
-- [Audio output](docs/audioout.md): hardware for audio output.
-
-
-## Dependencies
-
-TeeRec is based on the following libraries:
-
-- [Arduino Time Library](https://github.com/PaulStoffregen/Time)
-- [ADC](https://github.com/pedvide/ADC)
-- [SdFat version2](https://github.com/greiman/SdFat)
-- [Bounce2](https://github.com/thomasfredericks/Bounce2)
-
-The Display library currently uses:
-
-- [Adafruit-GFX](https://github.com/adafruit/Adafruit-GFX-Library)
-- [Adafruit-ST7735-Library](https://github.com/adafruit/Adafruit-ST7735-Library)
-- [Adafruit ILI9341 Arduino Library](https://github.com/adafruit/Adafruit_ILI9341)
-
-
-The [Arduino Time Library](https://github.com/PaulStoffregen/Time),
-[ADC](https://github.com/pedvide/ADC), [SdFat
-version2](https://github.com/greiman/SdFat), and
-[Bounce2](https://github.com/thomasfredericks/Bounce2) libraries are
-already included in
-[Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
-installing Teensyduino make sure you selected them.
-
-_Note_: you need Arduino 1.8.19 and Teensyduino 1.56 or higher! When
-installing Teensyduino simply select all libraries for installation.
-Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
-they are now supplied by Teensyduino.
-
-For installing the libraries for the environmental sensors and the TFT
-monitor, open in the Arduino IDE: Tools - Manage libraries. Search for
-the libraries and install them.
-
-
-## Installation
-
-Clone the [TeeRec](https://github.com/janscience/TeeRec) repository
-directly into 'Arduino/libraries':
-```sh
-cd Arduino/libraries
-git clone https://github.com/janscience/TeeRec.git
-```
-
-Alternatively, download the whole repository as a zip archive (open
-https://github.com/janscience/TeeRec in your browser and click on the
-green "Code" button). Unpack the zip file:
-```sh
-cd Arduino/libraries
-unzip ~/Downloads/TeeRec-main.zip
-```
-
-If you want to edit the TeeRec files, mark the library as developmental:
-```sh
-cd Arduino/libraries/TeeRec
-touch .development
-```
-
-Close the Arduino IDE and open it again. Then the Arduino IDE knows
-about the TeeRec library and its examples.
 
 
 ## Applications of the TeeRec libraries
