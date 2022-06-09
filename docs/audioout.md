@@ -18,6 +18,18 @@ available in stereo. Can be driven with the `AudioOutputI2S` class from the
 ![Adafruit MAX98357
  pinout](https://cdn-learn.adafruit.com/assets/assets/000/032/613/medium800/adafruit_products_pinouts.jpg?1464025812)
 
+Connections:
+
+| MAX98357 | Teensy                      | Function               |
+| -------- | --------------------------- | ---------------------- |
+| LRC      | 23                          | Audio Left/Right Clock |
+| BCLK     | 9                           | Audio Bit Clock        |
+| DIN      | 22                          | Audio Data In          |
+| GAIN     | GND                         | Ground                 |
+| SD       | 32 or any other digital pin | Shutdown Mode          |
+| GND      | GND                         | Ground                 |
+| Vin      | 3.3V                        | Input Power            |
+
 
 ## Teensy audio adaptor board
 
