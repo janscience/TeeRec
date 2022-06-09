@@ -195,6 +195,10 @@
   A20    0    1
   A21    1    0
   A22    0    1
+  A23    0    1
+  A24    0    1
+  A25    0    0
+  A26    0    0
 */
 
 #ifndef ContinuousADC_h
