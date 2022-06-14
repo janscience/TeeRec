@@ -83,7 +83,8 @@ int Display::numPlots() const {
 void Display::clearPlot(uint8_t area) {
   if (PlotW[area] == 0 )
     return;
-  Screen->fillRect(PlotX[area], PlotY[area], PlotW[area], PlotH[area]+1, PlotBackground);
+  Screen->fillRect(PlotX[area], PlotY[area], PlotW[area], PlotH[area]+1,
+		   PlotBackground);
   Screen->drawFastHLine(PlotX[area], dataY(area, 0), PlotW[area], PlotGrid);
 }
 

@@ -114,6 +114,36 @@
 #include <Arduino.h>
 #include <Adafruit_GFX.h>        // Core graphics library
 
+template <class T>
+class DisplayWrapper : public Adafruit_GFX {
+
+public:
+
+  DisplayWrapper(T *screen) :
+    Adafruit_GFX(screen->width(), screen->height()), Screen(screen) {};
+  int16_t width() const { return Screen->width(); };
+  int16_t height() const { return Screen->height(); };
+  void setRotation(uint8_t r) { Screen->setRotation(r); };
+  virtual void drawPixel(int16_t x, int16_t y, uint16_t color)
+    { Screen->drawPixel( x, y, color); };
+  void fillScreen(uint16_t color) { Screen->fillScreen(color); };
+  void drawFastVLine(int16_t x, int16_t y, int16_t h, uint16_t color)
+    { Screen->drawFastVLine(x, y, h, color); };
+  void drawFastHLine(int16_t x, int16_t y, int16_t w, uint16_t color)
+    { Screen->drawFastHLine(x, y, w, color); };
+  void fillRect(int16_t x, int16_t y, int16_t w, int16_t h, uint16_t color)
+    { Screen->fillRect(x, y, w, h, color); };
+  void drawBitmap(int16_t x, int16_t y, const uint8_t *bitmap,
+		  int16_t w, int16_t h, uint16_t color)
+    { Screen->drawBitmap(x, y, bitmap, w, h, color); };
+  void drawLine(int16_t x0, int16_t y0, int16_t x1, int16_t y1, uint16_t color)
+    { Screen->drawLine(x0, y0, x1, y1, color); };
+
+protected:
+
+  T *Screen;
+};
+
 
 class Display {
 
@@ -121,7 +151,7 @@ class Display {
 
   Display();
 
-  // Initialize with a specific monitor.
+  // Initialize the display.
   void init(Adafruit_GFX *screen, uint8_t rotation=0);
 
   // Clear the entire screen with the background color.
@@ -149,7 +179,8 @@ class Display {
   // By default center the text vertically into the area. If top is set to true,
   // align the text vertically at the top.
   // Returns the actually needed and used text height as fraction of screen height.
-  float setTextArea(uint8_t area, float x0, float y0, float x1, float y1, bool top=false);
+  float setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
+		    bool top=false);
 
   // Clear specified text area.
   void clearText(uint8_t area);
@@ -175,8 +206,6 @@ class Display {
   // Write previous text into text area.
   void popText(uint8_t area);
 
-  Adafruit_GFX *Screen;
-
 
  protected:
 
@@ -188,8 +217,7 @@ class Display {
   static const uint16_t TextBackground = 0x0000;   // black
   static const uint16_t TextColor = 0xffff;        // white
 
-  // Fonts:
-  const GFXfont *Font;
+  Adafruit_GFX *Screen;
 
   // Monitor dimensions:
   uint16_t Width;
@@ -210,6 +238,9 @@ class Display {
   // Translate y value (between -1 and 1) to y-coordinate.
   uint16_t dataY(uint8_t area, float y);
 
+  // Fonts:
+  const GFXfont *Font;
+
   // Text area position and extent:
   int16_t TextX[MaxAreas];
   int16_t TextY[MaxAreas];
@@ -229,6 +260,5 @@ class Display {
   void drawText(uint8_t area, const char *text);
 
 };
-
 
 #endif

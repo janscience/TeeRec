@@ -1,3 +1,22 @@
+// select a library for the TFT display:
+#define ST7735_T3
+//#define ST7789_T3
+//#define ILI9341_T3  // XXX does not compile yet
+//#define ILI9488_T3
+//#define ST7735_ADAFRUIT
+//#define ILI9341_ADAFRUIT
+
+// define pins to control TFT display:
+#define TFT_SCK   14 // 13
+#define TFT_MISO  12
+#define TFT_MOSI  7 // 11
+#define TFT_CS    2 // 10  
+#define TFT_RST   1 // 9
+#define TFT_DC    0 // 8 
+
+// select touch controller:
+//#define FT6206
+
 #include <Configurator.h>
 #include <ContinuousADC.h>
 #include <SDWriter.h>
@@ -5,12 +24,20 @@
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
 #include "fonts/FreeSans8pt7b.h"
-#define ST7735
-//#define ILI9341
-#if defined(ST7735)
-  #include <Adafruit_ST7735.h>       // 1.44""
-#elif defined(ILI9341)
-  #include "Adafruit_ILI9341.h"      // 2.8" with touch
+#if defined(ST7735_T3)
+  #include <ST7735_t3.h>
+#elif defined(ST7789_T3)
+  #include <ST7789_t3.h>
+#elif defined(ILI9341_T3)
+  #include <ILI9341_t3.h>
+#elif defined(ILI9488_T3)
+  #include <ILI9488_t3.h>
+#elif defined(ST7735_ADAFRUIT)
+  #include <Adafruit_ST7735.h>
+#elif defined(ILI9341_ADAFRUIT)
+  #include "Adafruit_ILI9341.h"
+#endif
+#if defined(FT6206)
   #include <Wire.h>
   #include <Adafruit_FT6206.h>
 #endif
@@ -54,7 +81,7 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Display screen;
-#if defined(ILI9341)
+#if defined(FT6206)
 Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
 bool freezePlots = false;
@@ -138,24 +165,44 @@ void stopWrite(int id) {
 
 
 void initScreen() {
-  #define TFT_SCK   14 // 13
-  #define TFT_MISO  12
-  #define TFT_MOSI  7 // 11
-  #define TFT_CS    2 // 10  
-  #define TFT_RST   1 // 9
-  #define TFT_DC    0 // 8 
-#if defined(ST7735)
+#if defined(ST7735_T3)
+  ST7735_t3 *tft = new ST7735_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
+  tft->initR(INITR_144GREENTAB);
+  DisplayWrapper<ST7735_t3> *tftscreen = new DisplayWrapper<ST7735_t3>(tft);
+  screen.init(tftscreen, 3);
+  screen.setDefaultFont(FreeSans7pt7b);
+#elif defined(ST7789_T3)
+  ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
+  tft->initR(INITR_144GREENTAB);
+  DisplayWrapper<ST7789_t3> *tftscreen = new DisplayWrapper<ST7789_t3>(tft);
+  screen.init(tftscreen, 3);
+  screen.setDefaultFont(FreeSans7pt7b);
+#elif defined(ILI9341_T3)
+  ILI9341_t3 *tft = new ILI9341_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
+  tft->begin();
+  DisplayWrapper<ILI9341_t3> *tftscreen = new DisplayWrapper<ILI9341_t3>(tft);
+  screen.init(tftscreen, 3);
+  screen.setDefaultFont(FreeSans7pt7b);
+#elif defined(ILI9488_T3)
+  ILI9488_t3 *tft = new ILI9488_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
+  tft->begin();
+  DisplayWrapper<ILI9488_t3> *tftscreen = new DisplayWrapper<ILI9488_t3>(tft);
+  screen.init(tftscreen, 3);
+  screen.setDefaultFont(FreeSans7pt7b);
+#elif defined(ST7735_ADAFRUIT)
   // Adafruit 1.44" TFT hardware specific initialization:
   //Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
   Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->initR(INITR_144GREENTAB);
   screen.init(tft, 3);
   screen.setDefaultFont(FreeSans7pt7b);
-#elif defined(ILI9341)
+#elif defined(ILI9341_ADAFRUIT)
   Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST, TFT_MISO);
   tft->begin();
   screen.init(tft, 1);
   screen.setDefaultFont(FreeSans8pt7b);
+#endif
+#if defined(FT6206)
   if (! touch.begin(128)) {  // pass in 'sensitivity' coefficient
     Serial.println("Couldn't start FT6206 touchscreen controller");
     while (1);
@@ -217,7 +264,7 @@ void setupButtons() {
 
 
 void plotData() {   // 85ms
-#if defined(ILI9341)
+#if defined(FT6206)
   freezePlots = touch.touched();
 #endif
   if (screenTime > updateScreen && ! freezePlots) {
