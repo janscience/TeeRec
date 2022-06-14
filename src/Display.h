@@ -113,8 +113,6 @@
 
 #include <Arduino.h>
 #include <Adafruit_GFX.h>        // Core graphics library
-#include <Adafruit_SPITFT.h>
-#include <SPI.h> 
 
 
 class Display {
@@ -124,7 +122,7 @@ class Display {
   Display();
 
   // Initialize with a specific monitor.
-  void init(Adafruit_SPITFT *screen, uint8_t rotation=0);
+  void init(Adafruit_GFX *screen, uint8_t rotation=0);
 
   // Clear the entire screen with the background color.
   void clear();
@@ -177,7 +175,7 @@ class Display {
   // Write previous text into text area.
   void popText(uint8_t area);
 
-  Adafruit_SPITFT *Screen;
+  Adafruit_GFX *Screen;
 
 
  protected:

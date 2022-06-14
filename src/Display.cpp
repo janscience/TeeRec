@@ -42,7 +42,7 @@ Display::Display() {
 }
 
 
-void Display::init(Adafruit_SPITFT *screen, uint8_t rotation) {
+void Display::init(Adafruit_GFX *screen, uint8_t rotation) {
   Screen = screen;
   Screen->setRotation(rotation);
   Width = Screen->width();
