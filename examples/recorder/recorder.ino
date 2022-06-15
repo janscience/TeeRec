@@ -7,12 +7,12 @@
 //#define ILI9341_ADAFRUIT
 
 // define pins to control TFT display:
-#define TFT_SCK   14 // 13
+#define TFT_SCK   13
 #define TFT_MISO  12
-#define TFT_MOSI  7 // 11
-#define TFT_CS    2 // 10  
-#define TFT_RST   1 // 9
-#define TFT_DC    0 // 8 
+#define TFT_MOSI  11
+#define TFT_CS    10  
+#define TFT_RST   8 // 9
+#define TFT_DC    7 // 8 
 
 // select touch controller:
 //#define FT6206
@@ -54,7 +54,7 @@ int bits = 12;                  // resolution: 10bit 12bit, or 16bit
 int averaging = 4;              // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
 uint32_t samplingRate = 100000; // samples per second and channel in Hertz
 int8_t channels0 [] =  {A4, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
-int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
+int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;        // milliseconds
 float displayTime = 0.005;
@@ -169,7 +169,7 @@ void initScreen() {
   ST7735_t3 *tft = new ST7735_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->initR(INITR_144GREENTAB);
   DisplayWrapper<ST7735_t3> *tftscreen = new DisplayWrapper<ST7735_t3>(tft);
-  screen.init(tftscreen, 3);
+  screen.init(tftscreen, 1);
   screen.setDefaultFont(FreeSans7pt7b);
 #elif defined(ST7789_T3)
   ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
