@@ -17,18 +17,22 @@ TeeRec is based on the following libraries:
 - [ADC](https://github.com/pedvide/ADC)
 - [SdFat version2](https://github.com/greiman/SdFat)
 - [Bounce2](https://github.com/thomasfredericks/Bounce2)
-
-The Display library currently uses:
-
 - [Adafruit-GFX](https://github.com/adafruit/Adafruit-GFX-Library)
-- [Adafruit-ST7735-Library](https://github.com/adafruit/Adafruit-ST7735-Library)
-- [Adafruit ILI9341 Arduino Library](https://github.com/adafruit/Adafruit_ILI9341)
+- A library for driving a TFT monitor. Either one of the optimized
+  [ST7735_t3](https://github.com/PaulStoffregen/ST7735_t3) or
+  [ILI9488_t3](https://github.com/PaulStoffregen/ILI9341_t3)
+  libraries, or the original but slow
+  [Adafruit-ST7735](https://github.com/adafruit/Adafruit-ST7735-Library)
+  or [Adafruit ILI9341 Arduino
+  Library](https://github.com/adafruit/Adafruit_ILI9341).
 
 The [Arduino Time Library](https://github.com/PaulStoffregen/Time),
 [ADC](https://github.com/pedvide/ADC), [SdFat
-version2](https://github.com/greiman/SdFat), and
-[Bounce2](https://github.com/thomasfredericks/Bounce2) libraries are
-already included in
+version2](https://github.com/greiman/SdFat),
+[Bounce2](https://github.com/thomasfredericks/Bounce2), and
+[ST7735_t3](https://github.com/PaulStoffregen/ST7735_t3), or
+[ILI9488_t3](https://github.com/PaulStoffregen/ILI9341_t3) libraries
+are already included in
 [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
 installing Teensyduino make sure you selected them.
 
@@ -37,9 +41,12 @@ installing Teensyduino simply select all libraries for installation.
 Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
 they are now supplied by Teensyduino.
 
-For installing the libraries for the TFT monitor, open in the Arduino
-IDE: Tools - Manage libraries. Search for the libraries and install
-them.
+For installing the
+[Adafruit-ST7735](https://github.com/adafruit/Adafruit-ST7735-Library)
+or [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341)
+libraries for the TFT monitor (not needed and not recommended), open
+in the Arduino IDE: Tools - Manage libraries. Search for the libraries
+and install them.
 
 
 ## Installation

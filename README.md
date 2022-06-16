@@ -56,6 +56,9 @@ via the `TeeRec.h` header.
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
 - [ContinuousADC](src/ContinuousADC.h): Sample from multiple pins into a DataBuffer.
+
+### Storage on SD card
+
 - [SDWrite](src/SDWrite.h): Write data from a DataWorker to SD card.
 - [WaveHeader](src/WaveHeader.h): Setting up wave file header with metadata.
 
@@ -72,7 +75,7 @@ via the `TeeRec.h` header.
 
 ### Utilities
 
-- [Display](src/Display.h): Display data on a monitor.
+- [Display](src/Display.h): Display data on a TFT monitor.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
@@ -92,6 +95,7 @@ These examples could be used as the basis for you data acquisition application.
 - [scope](examples/scope): Show acquired data on a display.
 - [logger](examples/logger): Continuously store data on SD card.
 - [recorder](examples/recorder): Show acquired data on a display and store data on SD card upon user request.
+- [audioscope](examples/audioscope): Play acquired data on speaker and display them on a monitor.
 - [audiorecorder](examples/audiorecorder): Play acquired data on speaker and store data on SD card upon user request.
 
 ### Testing data acquisition
@@ -124,7 +128,7 @@ Demonstrate the usage of some of the provided libraries.
 In [utils/](utils) you find some useful python scripts.
 
 - [viewwave](utils/viewwave): display the traces in a wave file.
-- [continuity](utils/continuity): check whether pulse signals recorded into wave file have consistent periods overmany wave files.
+- [continuity](utils/continuity): check whether pulse signals recorded into wave file have consistent periods over many wave files.
 - [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 - [noise](utils/noise): plot and analyse baseline noise levels from wave files.
 - [spectra](utils/spectra): power spectra of traces in wave files.
