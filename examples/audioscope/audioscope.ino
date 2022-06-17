@@ -1,6 +1,6 @@
 // select a library for the TFT display:
-#define ST7735_T3
-//#define ST7789_T3
+//#define ST7735_T3
+#define ST7789_T3
 //#define ILI9341_T3  // XXX does not compile yet
 //#define ILI9488_T3
 //#define ST7735_ADAFRUIT
@@ -20,6 +20,7 @@
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
 #include "fonts/FreeSans8pt7b.h"
+#include "fonts/FreeSans10pt7b.h"
 #if defined(ST7735_T3)
   #include <ST7735_t3.h>
 #elif defined(ST7789_T3)
@@ -96,10 +97,10 @@ void initScreen() {
   screen.setDefaultFont(FreeSans7pt7b);
 #elif defined(ST7789_T3)
   ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->initR(INITR_144GREENTAB);
+  tft->init(240, 320);
   DisplayWrapper<ST7789_t3> *tftscreen = new DisplayWrapper<ST7789_t3>(tft);
-  screen.init(tftscreen, 3);
-  screen.setDefaultFont(FreeSans7pt7b);
+  screen.init(tftscreen, 1, true);
+  screen.setDefaultFont(FreeSans10pt7b);
 #elif defined(ILI9341_T3)
   ILI9341_t3 *tft = new ILI9341_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->begin();

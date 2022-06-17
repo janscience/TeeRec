@@ -42,11 +42,17 @@ Display::Display() {
 }
 
 
-void Display::init(Adafruit_GFX *screen, uint8_t rotation) {
+void Display::init(Adafruit_GFX *screen, uint8_t rotation, bool flip) {
   Screen = screen;
   Screen->setRotation(rotation);
-  Width = Screen->width();
-  Height = Screen->height();
+  if (flip) {
+    Height = Screen->width();
+    Width = Screen->height();
+  }
+  else {
+    Width = Screen->width();
+    Height = Screen->height();
+  }
   clear();
 }
 

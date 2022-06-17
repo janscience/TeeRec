@@ -152,7 +152,8 @@ class Display {
   Display();
 
   // Initialize the display.
-  void init(Adafruit_GFX *screen, uint8_t rotation=0);
+  // If flip is true, flip width and heigh for odd rotations.
+  void init(Adafruit_GFX *screen, uint8_t rotation=0, bool flip=false);
 
   // Clear the entire screen with the background color.
   void clear();

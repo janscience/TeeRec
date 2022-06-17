@@ -1,6 +1,6 @@
 // select a library for the TFT display:
-#define ST7735_T3
-//#define ST7789_T3
+//#define ST7735_T3
+#define ST7789_T3
 //#define ILI9341_T3  // XXX does not compile yet
 //#define ILI9488_T3
 //#define ST7735_ADAFRUIT
@@ -24,6 +24,7 @@
 #include "fonts/FreeSans6pt7b.h"
 #include "fonts/FreeSans7pt7b.h"
 #include "fonts/FreeSans8pt7b.h"
+#include "fonts/FreeSans10pt7b.h"
 #if defined(ST7735_T3)
   #include <ST7735_t3.h>
 #elif defined(ST7789_T3)
@@ -52,9 +53,9 @@
 
 int bits = 12;                  // resolution: 10bit 12bit, or 16bit 
 int averaging = 4;              // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
-uint32_t samplingRate = 100000; // samples per second and channel in Hertz
-int8_t channels0 [] =  {A4, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
-int8_t channels1 [] =  {A16, -1, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
+uint32_t samplingRate = 44000; // samples per second and channel in Hertz
+int8_t channels0 [] =  {A4, A15, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;        // milliseconds
 float displayTime = 0.005;
@@ -173,10 +174,10 @@ void initScreen() {
   screen.setDefaultFont(FreeSans7pt7b);
 #elif defined(ST7789_T3)
   ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->initR(INITR_144GREENTAB);
+  tft->init(240, 320);
   DisplayWrapper<ST7789_t3> *tftscreen = new DisplayWrapper<ST7789_t3>(tft);
-  screen.init(tftscreen, 3);
-  screen.setDefaultFont(FreeSans7pt7b);
+  screen.init(tftscreen, 1, true);
+  screen.setDefaultFont(FreeSans10pt7b);
 #elif defined(ILI9341_T3)
   ILI9341_t3 *tft = new ILI9341_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->begin();
