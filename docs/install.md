@@ -29,8 +29,8 @@ TeeRec is based on the following libraries:
 The [Arduino Time Library](https://github.com/PaulStoffregen/Time),
 [ADC](https://github.com/pedvide/ADC), [SdFat
 version2](https://github.com/greiman/SdFat),
-[Bounce2](https://github.com/thomasfredericks/Bounce2), and
-[ST7735_t3](https://github.com/PaulStoffregen/ST7735_t3), or
+[Bounce2](https://github.com/thomasfredericks/Bounce2),
+[ST7735_t3](https://github.com/PaulStoffregen/ST7735_t3), and
 [ILI9488_t3](https://github.com/PaulStoffregen/ILI9341_t3) libraries
 are already included in
 [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html). When
