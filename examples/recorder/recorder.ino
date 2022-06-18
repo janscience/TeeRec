@@ -1,15 +1,16 @@
-// select a library for the TFT display:
+// select one library for the TFT display:
 //#define ST7735_T3
 #define ST7789_T3
 //#define ILI9341_T3  // XXX does not compile yet
 //#define ILI9488_T3
 //#define ST7735_ADAFRUIT
+//#define ST7789_ADAFRUIT
 //#define ILI9341_ADAFRUIT
 
 // define pins to control TFT display:
-#define TFT_SCK   13
-#define TFT_MISO  12
-#define TFT_MOSI  11
+#define TFT_SCK   13   // default SPI0 bus
+#define TFT_MISO  12   // default SPI0 bus
+#define TFT_MOSI  11   // default SPI0 bus
 #define TFT_CS    10  
 #define TFT_RST   8 // 9
 #define TFT_DC    7 // 8 
@@ -21,22 +22,39 @@
 #include <ContinuousADC.h>
 #include <SDWriter.h>
 #include <Display.h>
-#include "fonts/FreeSans6pt7b.h"
-#include "fonts/FreeSans7pt7b.h"
-#include "fonts/FreeSans8pt7b.h"
-#include "fonts/FreeSans10pt7b.h"
 #if defined(ST7735_T3)
   #include <ST7735_t3.h>
+  #include "fonts/FreeSans7pt7b.h"
+  #include "fonts/FreeSans8pt7b.h"
+  #include "fonts/FreeSans6pt7b.h"
 #elif defined(ST7789_T3)
   #include <ST7789_t3.h>
+  #include "fonts/FreeSans10pt7b.h"
+  #include "fonts/FreeSans12pt7b.h"
 #elif defined(ILI9341_T3)
   #include <ILI9341_t3.h>
+  #include "fonts/FreeSans7pt7b.h"
+  #include "fonts/FreeSans8pt7b.h"
+  #include "fonts/FreeSans6pt7b.h"
 #elif defined(ILI9488_T3)
   #include <ILI9488_t3.h>
+  #include "fonts/FreeSans7pt7b.h"
+  #include "fonts/FreeSans8pt7b.h"
+  #include "fonts/FreeSans6pt7b.h"
 #elif defined(ST7735_ADAFRUIT)
   #include <Adafruit_ST7735.h>
+  #include "fonts/FreeSans7pt7b.h"
+  #include "fonts/FreeSans8pt7b.h"
+  #include "fonts/FreeSans6pt7b.h"
+#elif defined(ST7789_ADAFRUIT)
+  #include <Adafruit_ST7789.h>
+  #include "fonts/FreeSans10pt7b.h"
+  #include "fonts/FreeSans12pt7b.h"
 #elif defined(ILI9341_ADAFRUIT)
   #include "Adafruit_ILI9341.h"
+  #include "fonts/FreeSans8pt7b.h"
+  #include "fonts/FreeSans10pt7b.h"
+  #include "fonts/FreeSans7pt7b.h"
 #endif
 #if defined(FT6206)
   #include <Wire.h>
@@ -54,7 +72,7 @@
 int bits = 12;                  // resolution: 10bit 12bit, or 16bit 
 int averaging = 4;              // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
 uint32_t samplingRate = 44000; // samples per second and channel in Hertz
-int8_t channels0 [] =  {A4, A15, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+int8_t channels0 [] =  {A15, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;        // milliseconds
@@ -82,6 +100,8 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Display screen;
+const GFXfont *SplashTitleFont;
+const GFXfont *SplashTextFont;
 #if defined(FT6206)
 Adafruit_FT6206 touch = Adafruit_FT6206();
 #endif
@@ -172,36 +192,55 @@ void initScreen() {
   DisplayWrapper<ST7735_t3> *tftscreen = new DisplayWrapper<ST7735_t3>(tft);
   screen.init(tftscreen, 1);
   screen.setDefaultFont(FreeSans7pt7b);
+  SplashTitleFont = &FreeSans8pt7b;
+  SplashTextFont = &FreeSans6pt7b;
 #elif defined(ST7789_T3)
   ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->init(240, 320);
   DisplayWrapper<ST7789_t3> *tftscreen = new DisplayWrapper<ST7789_t3>(tft);
   screen.init(tftscreen, 1, true);
   screen.setDefaultFont(FreeSans10pt7b);
+  SplashTitleFont = &FreeSans12pt7b;
+  SplashTextFont = &FreeSans10pt7b;
 #elif defined(ILI9341_T3)
   ILI9341_t3 *tft = new ILI9341_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->begin();
   DisplayWrapper<ILI9341_t3> *tftscreen = new DisplayWrapper<ILI9341_t3>(tft);
   screen.init(tftscreen, 3);
   screen.setDefaultFont(FreeSans7pt7b);
+  SplashTitleFont = &FreeSans8pt7b;
+  SplashTextFont = &FreeSans6pt7b;
 #elif defined(ILI9488_T3)
   ILI9488_t3 *tft = new ILI9488_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->begin();
   DisplayWrapper<ILI9488_t3> *tftscreen = new DisplayWrapper<ILI9488_t3>(tft);
   screen.init(tftscreen, 3);
   screen.setDefaultFont(FreeSans7pt7b);
+  SplashTitleFont = &FreeSans8pt7b;
+  SplashTextFont = &FreeSans6pt7b;
 #elif defined(ST7735_ADAFRUIT)
   // Adafruit 1.44" TFT hardware specific initialization:
-  //Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
   Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
   tft->initR(INITR_144GREENTAB);
   screen.init(tft, 3);
   screen.setDefaultFont(FreeSans7pt7b);
+  SplashTitleFont = &FreeSans8pt7b;
+  SplashTextFont = &FreeSans6pt7b;
+#elif defined(ST7789_ADAFRUIT)
+  Adafruit_ST7789 *tft = new Adafruit_ST7789(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
+  tft->init(240, 320);
+  DisplayWrapper<Adafruit_ST7789> *tftscreen = new DisplayWrapper<Adafruit_ST7789>(tft);
+  screen.init(tftscreen, 1, true);
+  screen.setDefaultFont(FreeSans10pt7b);
+  SplashTitleFont = &FreeSans12pt7b;
+  SplashTextFont = &FreeSans10pt7b;
 #elif defined(ILI9341_ADAFRUIT)
   Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST, TFT_MISO);
   tft->begin();
   screen.init(tft, 1);
   screen.setDefaultFont(FreeSans8pt7b);
+  SplashTitleFont = &FreeSans10pt7b;
+  SplashTextFont = &FreeSans7pt7b;
 #endif
 #if defined(FT6206)
   if (! touch.begin(128)) {  // pass in 'sensitivity' coefficient
@@ -209,18 +248,11 @@ void initScreen() {
     while (1);
   }
 #endif
+  screen.clear();
 }
 
 
 void splashScreen() {
-  screen.setTextArea(0, 0.0, 0.75, 1.0, 0.95);
-  screen.setFont(0, FreeSans8pt7b);
-  screen.setTextArea(1, 0.0, 0.0, 0.4, 0.7, true);
-  screen.setFont(1, FreeSans6pt7b);
-  screen.setTextArea(2, 0.4, 0.0, 1.0, 0.7, true);
-  screen.setFont(2, FreeSans6pt7b);
-  screen.writeText(0, "TeeRec recorder");
-  screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   char msg[100];
   String convspeed = aidata.conversionSpeedShortStr();
   String samplspeed = aidata.samplingSpeedShortStr();
@@ -241,6 +273,14 @@ void splashScreen() {
   sprintf(msg, "%.0fkHz\n%dbit\n%d,%s,%s\n%s\n%s\n%s",
           0.001*aidata.rate(), aidata.resolution(), aidata.averaging(),
           convspeed.c_str(), samplspeed.c_str(), chans0, chans1, bts);
+  screen.setTextArea(0, 0.0, 0.75, 1.0, 0.95);
+  screen.setFont(0, *SplashTitleFont);
+  screen.setTextArea(1, 0.0, 0.0, 0.4, 0.7, true);
+  screen.setFont(1, *SplashTextFont);
+  screen.setTextArea(2, 0.4, 0.0, 1.0, 0.7, true);
+  screen.setFont(2, *SplashTextFont);
+  screen.writeText(0, "TeeRec recorder");
+  screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   screen.writeText(2, msg);
   delay(1500);
   screen.clearText();
