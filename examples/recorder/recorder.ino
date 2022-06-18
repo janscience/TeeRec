@@ -14,6 +14,7 @@
 #define TFT_CS    10  
 #define TFT_RST   8 // 9
 #define TFT_DC    7 // 8 
+#define TFT_BL   30 // backlight PWM, -1 to not use it
 
 // select touch controller:
 //#define FT6206
@@ -248,6 +249,7 @@ void initScreen() {
     while (1);
   }
 #endif
+  screen.setBacklightPin(TFT_BL);
   screen.clear();
 }
 
@@ -282,8 +284,12 @@ void splashScreen() {
   screen.writeText(0, "TeeRec recorder");
   screen.writeText(1, "rate:\nres.:\nspeed:\nADC0:\nADC1\nbuffer:");
   screen.writeText(2, msg);
-  delay(1500);
+  screen.fadeBacklightOn();
+  delay(3000);
+  screen.fadeBacklightOff();
+  screen.clear();
   screen.clearText();
+  screen.setBacklightOn();
 }
 
 

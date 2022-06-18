@@ -207,6 +207,24 @@ class Display {
   // Write previous text into text area.
   void popText(uint8_t area);
 
+  // Set the PWN pin used for controlling backlight:
+  void setBacklightPin(int backlightpin);
+
+  // Set backlight to 0 (off) - 1 (on).
+  void setBacklight(float backlight);
+
+  // Set backlight on.
+  void setBacklightOn();
+
+  // Set backlight off.
+  void setBacklightOff();
+
+  // Fade backlight on.
+  void fadeBacklightOn(int speed=2);
+
+  // Fade backlight off.
+  void fadeBacklightOff(int speed=2);
+
 
  protected:
 
@@ -259,6 +277,10 @@ class Display {
   PROGMEM GFXcanvas1 *TextCanvas[MaxAreas];
 
   void drawText(uint8_t area, const char *text);
+
+  // backlight:
+  int BacklightPin;
+  const int MaxBacklight = 256;
 
 };
 

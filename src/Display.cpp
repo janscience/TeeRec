@@ -39,6 +39,7 @@ Display::Display() {
   memset(Text, 0, sizeof(Text));
   Font = 0;
   Screen = 0;
+  BacklightPin = -1;
 }
 
 
@@ -273,4 +274,58 @@ void Display::popText(uint8_t area) {
   }
   else
     clearText(area);
+}
+
+
+void Display::setBacklightPin(int backlightpin) {
+  BacklightPin = backlightpin;
+  if (BacklightPin >= 0 ) {
+    pinMode(BacklightPin, OUTPUT);
+    analogWrite(BacklightPin, 0); // backlight off!
+  }
+}
+
+
+void Display::setBacklight(float backlight) {
+  if (BacklightPin >= 0 ) {
+    analogWrite(BacklightPin, int(backlight*MaxBacklight));
+  }
+}
+
+
+void Display::setBacklightOn() {
+  if (BacklightPin >= 0 ) {
+    analogWrite(BacklightPin, MaxBacklight);
+  }
+}
+
+
+void Display::setBacklightOff() {
+  if (BacklightPin >= 0 ) {
+    analogWrite(BacklightPin, 0);
+  }
+}
+
+
+void Display::fadeBacklightOn(int speed) {
+  if (BacklightPin >= 0 ) {
+    Serial.println("OFF");
+    for (int i=0; i<=MaxBacklight; i++) {
+      analogWrite(BacklightPin, i);
+      delay(speed);
+    }
+    Serial.println("ON");
+  }
+}
+
+
+void Display::fadeBacklightOff(int speed) {
+  if (BacklightPin >= 0 ) {
+    Serial.println("ON");
+    for (int i=MaxBacklight-1; i>=0; i--) {
+      analogWrite(BacklightPin, i);
+      delay(speed);
+    }
+    Serial.println("OFF");
+  }
 }
