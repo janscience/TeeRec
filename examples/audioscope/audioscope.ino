@@ -4,6 +4,7 @@
 //#define ILI9341_T3  // XXX does not compile yet
 //#define ILI9488_T3
 //#define ST7735_ADAFRUIT
+//#define ST7789_ADAFRUIT
 //#define ILI9341_ADAFRUIT
 
 // define pins to control TFT display:
@@ -13,30 +14,15 @@
 #define TFT_CS    10  
 #define TFT_RST   8 // 9
 #define TFT_DC    7 // 8 
+#define TFT_BL   30 // backlight PWM, -1 to not use it
 
 #include <ContinuousADC.h>
 #include <AudioMonitor.h>
 #include <Display.h>
-#include "fonts/FreeSans6pt7b.h"
-#include "fonts/FreeSans7pt7b.h"
-#include "fonts/FreeSans8pt7b.h"
-#include "fonts/FreeSans10pt7b.h"
-#if defined(ST7735_T3)
-  #include <ST7735_t3.h>
-#elif defined(ST7789_T3)
-  #include <ST7789_t3.h>
-#elif defined(ILI9341_T3)
-  #include <ILI9341_t3.h>
-#elif defined(ILI9488_T3)
-  #include <ILI9488_t3.h>
-#elif defined(ST7735_ADAFRUIT)
-  #include <Adafruit_ST7735.h>
-#elif defined(ILI9341_ADAFRUIT)
-  #include "Adafruit_ILI9341.h"
-#endif
+#include <AllDisplays.h>       // edit this file for your TFT monitor
   
 
-// Default settings: -----------------------------------------------------------------------
+// Default settings: --------------------------------------------------
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
 int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
@@ -52,7 +38,7 @@ int ampl_enable_pin = 32;      // pin for enabling an audio amplifier
 int volume_up_pin = 25;        // pin for push button for increasing audio volume
 int volume_down_pin = 26;      // pin for push button for decreasing audio volume
 
-// ------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------
 
 ContinuousADC aidata;
 
@@ -88,56 +74,13 @@ void setupAudio() {
 }
 
 
-void initScreen() {
-#if defined(ST7735_T3)
-  ST7735_t3 *tft = new ST7735_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->initR(INITR_144GREENTAB);
-  DisplayWrapper<ST7735_t3> *tftscreen = new DisplayWrapper<ST7735_t3>(tft);
-  screen.init(tftscreen, 1);
-  screen.setDefaultFont(FreeSans7pt7b);
-#elif defined(ST7789_T3)
-  ST7789_t3 *tft = new ST7789_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->init(240, 320);
-  DisplayWrapper<ST7789_t3> *tftscreen = new DisplayWrapper<ST7789_t3>(tft);
-  screen.init(tftscreen, 1, true);
-  screen.setDefaultFont(FreeSans10pt7b);
-#elif defined(ILI9341_T3)
-  ILI9341_t3 *tft = new ILI9341_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->begin();
-  DisplayWrapper<ILI9341_t3> *tftscreen = new DisplayWrapper<ILI9341_t3>(tft);
-  screen.init(tftscreen, 3);
-  screen.setDefaultFont(FreeSans7pt7b);
-#elif defined(ILI9488_T3)
-  ILI9488_t3 *tft = new ILI9488_t3(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->begin();
-  DisplayWrapper<ILI9488_t3> *tftscreen = new DisplayWrapper<ILI9488_t3>(tft);
-  screen.init(tftscreen, 3);
-  screen.setDefaultFont(FreeSans7pt7b);
-#elif defined(ST7735_ADAFRUIT)
-  // Adafruit 1.44" TFT hardware specific initialization:
-  //Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_RST);
-  Adafruit_ST7735 *tft = new Adafruit_ST7735(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST);
-  tft->initR(INITR_144GREENTAB);
-  screen.init(tft, 3);
-  screen.setDefaultFont(FreeSans7pt7b);
-#elif defined(ILI9341_ADAFRUIT)
-  Adafruit_ILI9341 *tft = new Adafruit_ILI9341(TFT_CS, TFT_DC, TFT_MOSI, TFT_SCK, TFT_RST, TFT_MISO);
-  tft->begin();
-  screen.init(tft, 1);
-  screen.setDefaultFont(FreeSans8pt7b);
-#endif
-}
-
-
 void setupScreen() {
-  screen.setTextArea(0, 0.0, 0.8, 1.0, 1.0);
-  screen.setTextArea(1, 0.0, 0.8, 0.65, 1.0);
-  screen.setTextArea(2, 0.71, 0.8, 1.0, 1.0);
   int nplots = aidata.nchannels();
   if (nplots > 8)
     nplots = 8;
-  screen.setPlotAreas(nplots, 0.0, 0.0, 1.0, 0.8);
+  screen.setPlotAreas(nplots, 0.0, 0.0, 1.0, 1.0);
   screenTime = 0;
+  screen.setBacklightOn();
 }
 
 
@@ -156,14 +99,14 @@ void plotData() {   // 85ms
 }
 
 
-// ------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------
 
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   setupADC();
   aidata.check();
-  initScreen();
+  initScreen(screen);
   setupScreen();
   setupAudio();
   screenTime = 0;

@@ -38,6 +38,8 @@ Display::Display() {
   }
   memset(Text, 0, sizeof(Text));
   Font = 0;
+  TitleFont = 0;
+  SmallFont = 0;
   Screen = 0;
   BacklightPin = -1;
 }
@@ -214,9 +216,31 @@ void Display::setDefaultFont(const GFXfont &font) {
 }
 
 
+void Display::setTitleFont(const GFXfont &titlefont) {
+  TitleFont = &titlefont;
+}
+
+
+void Display::setSmallFont(const GFXfont &smallfont) {
+  SmallFont = &smallfont;
+}
+
+
 void Display::setFont(uint8_t area, const GFXfont &font) {
-  if ( TextCanvas[area] != NULL )
+  if ( TextCanvas[area] != NULL)
     TextCanvas[area]->setFont(&font);
+}
+
+
+void Display::setTitleFont(uint8_t area) {
+  if ( TextCanvas[area] != NULL && TitleFont != NULL)
+    TextCanvas[area]->setFont(TitleFont);
+}
+
+
+void Display::setSmallFont(uint8_t area) {
+  if ( TextCanvas[area] != NULL && SmallFont != NULL)
+    TextCanvas[area]->setFont(SmallFont);
 }
 
 
@@ -309,23 +333,19 @@ void Display::setBacklightOff() {
 
 void Display::fadeBacklightOn(int speed) {
   if (BacklightPin >= 0 ) {
-    Serial.println("OFF");
     for (int i=0; i<=MaxBacklight; i++) {
       analogWrite(BacklightPin, i);
       delay(speed);
     }
-    Serial.println("ON");
   }
 }
 
 
 void Display::fadeBacklightOff(int speed) {
   if (BacklightPin >= 0 ) {
-    Serial.println("ON");
     for (int i=MaxBacklight-1; i>=0; i--) {
       analogWrite(BacklightPin, i);
       delay(speed);
     }
-    Serial.println("OFF");
   }
 }

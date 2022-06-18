@@ -192,8 +192,20 @@ class Display {
   // Set default font for text areas.
   void setDefaultFont(const GFXfont &font);
 
+  // Set font for titles.
+  void setTitleFont(const GFXfont &titlefont);
+
+  // Set font smaller than the default font.
+  void setSmallFont(const GFXfont &smallfont);
+
   // Set font for specified text area.
   void setFont(uint8_t area, const GFXfont &font);
+
+  // Set font for specified text area to the title font.
+  void setTitleFont(uint8_t area);
+
+  // Set font for specified text area to the small font.
+  void setSmallFont(uint8_t area);
 
   // Write into text area.
   void writeText(uint8_t area, const char *text);
@@ -207,7 +219,8 @@ class Display {
   // Write previous text into text area.
   void popText(uint8_t area);
 
-  // Set the PWN pin used for controlling backlight:
+  // Set the PWN pin used for controlling backlight
+  // and switch backlight off.
   void setBacklightPin(int backlightpin);
 
   // Set backlight to 0 (off) - 1 (on).
@@ -220,9 +233,11 @@ class Display {
   void setBacklightOff();
 
   // Fade backlight on.
+  // Speed is the delay between increasing backlight values in ms.
   void fadeBacklightOn(int speed=2);
 
   // Fade backlight off.
+  // Speed is the delay between decreasing backlight values in ms.
   void fadeBacklightOff(int speed=2);
 
 
@@ -259,6 +274,8 @@ class Display {
 
   // Fonts:
   const GFXfont *Font;
+  const GFXfont *TitleFont;
+  const GFXfont *SmallFont;
 
   // Text area position and extent:
   int16_t TextX[MaxAreas];

@@ -76,6 +76,7 @@ via the `TeeRec.h` header.
 ### Utilities
 
 - [Display](src/Display.h): Display data on a TFT monitor.
+- [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
