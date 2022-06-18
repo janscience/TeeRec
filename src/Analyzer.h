@@ -11,6 +11,8 @@
 #include <DataBuffer.h>
 
 
+// Signalture of an analysis function.
+// Note that the function is allowed to modify the data in place.
 typedef void AnalysisFunc(float **data, int nchannels, int nsamples,
 			  float rate);
 
@@ -19,14 +21,21 @@ class Analyzer {
 
  public:
 
+  // Construct analyzer working on data.
   Analyzer(const DataBuffer *data);
+  ~Analyzer();
 
+  // Add a function for analysis.
   void addAnalyzer(AnalysisFunc *func);
 
+  // Initialize analysis. Needs to be called before update() is used.
   void start();
 
+  // Clean up analysis. After this update() will ot do anything.
   void stop();
 
+  // Call the analysis functions at appropriate times.
+  // Call this functions as often as possible in loop().
   void update();
   
   

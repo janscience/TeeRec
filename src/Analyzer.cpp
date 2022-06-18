@@ -16,12 +16,18 @@ Analyzer::Analyzer(const DataBuffer *data)
 }
 
 
+Analyzer::~Analyzer() {
+  stop();
+}
+
+
 void Analyzer::addAnalyzer(AnalysisFunc *func) {
   Analyze[NFuncs++] = func;
 }
 
 
 void Analyzer::start() {
+  stop();
   Time = 0;
   NChannels = Data->nchannels();
   NSamples = Data->frames(Window);
@@ -33,9 +39,12 @@ void Analyzer::start() {
 
 
 void Analyzer::stop() {
-  for(uint8_t i=0; i<Data->nchannels(); ++i)
-    delete [] Buffer[i];
-  delete [] Buffer;
+  if (Buffer != 0) {
+    for(uint8_t i=0; i<Data->nchannels(); ++i)
+      delete [] Buffer[i];
+    delete [] Buffer;
+    Buffer = 0;
+  }
   NChannels = 0;
   NSamples = 0;
 }
