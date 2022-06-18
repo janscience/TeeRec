@@ -13,7 +13,7 @@
 
 // Signalture of an analysis function.
 // Note that the function is allowed to modify the data in place.
-typedef void AnalysisFunc(float **data, int nchannels, int nsamples,
+typedef void AnalysisFunc(float **data, uint8_t nchannels, size_t nframes,
 			  float rate);
 
 
@@ -22,14 +22,16 @@ class Analyzer {
  public:
 
   // Construct analyzer working on data.
-  Analyzer(const DataBuffer *data);
+  Analyzer(const DataBuffer &data);
   ~Analyzer();
 
   // Add a function for analysis.
-  void addAnalyzer(AnalysisFunc *func);
+  void add(AnalysisFunc *func);
 
   // Initialize analysis. Needs to be called before update() is used.
-  void start();
+  // Analysis functions will be called every interval seconds on a data window
+  // of window seconds length.
+  void start(float interval, float window);
 
   // Clean up analysis. After this update() will ot do anything.
   void stop();
@@ -52,9 +54,9 @@ class Analyzer {
   elapsedMillis Time;
   int Counter;
 
-  float **Buffer;
+  float *Buffer[16];
   uint8_t NChannels;
-  size_t NSamples;
+  size_t NFrames;
   float Rate;
   
 };
