@@ -69,7 +69,7 @@ float DataBuffer::sampledTime() const {
 }
 
 
-size_t DataBuffer::currentSample(size_t decr) {
+size_t DataBuffer::currentSample(size_t decr) const {
   size_t idx = index();
   if (decr > 0) {
     idx += NBuffer - decr*NChannels;
@@ -80,7 +80,7 @@ size_t DataBuffer::currentSample(size_t decr) {
 }
 
 
-size_t DataBuffer::decrementSample(size_t idx, size_t decr) {
+size_t DataBuffer::decrementSample(size_t idx, size_t decr) const {
   idx += NBuffer - decr*NChannels;
   while (idx > NBuffer)
     idx -= NBuffer;
@@ -88,7 +88,7 @@ size_t DataBuffer::decrementSample(size_t idx, size_t decr) {
 }
 
 
-size_t DataBuffer::incrementSample(size_t idx, size_t incr) {
+size_t DataBuffer::incrementSample(size_t idx, size_t incr) const {
   idx += incr*NChannels;
   while (idx > NBuffer)
     idx -= NBuffer;
@@ -96,7 +96,8 @@ size_t DataBuffer::incrementSample(size_t idx, size_t incr) {
 }
 
 
-void DataBuffer::getData(uint8_t channel, size_t start, sample_t *buffer, size_t nbuffer) {
+void DataBuffer::getData(uint8_t channel, size_t start,
+			 sample_t *buffer, size_t nbuffer) const {
   if ( Rate == 0 || NChannels == 0 ) {
     memset(buffer, 0, sizeof(sample_t)*nbuffer);
     return;
@@ -117,7 +118,8 @@ void DataBuffer::getData(uint8_t channel, size_t start, sample_t *buffer, size_t
 }
 
 
-void DataBuffer::getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) {
+void DataBuffer::getData(uint8_t channel, size_t start,
+			 float *buffer, size_t nbuffer) const {
   if ( Rate == 0 || NChannels == 0 ) {
     memset(buffer, 0, sizeof(float)*nbuffer);
     return;
@@ -139,7 +141,7 @@ void DataBuffer::getData(uint8_t channel, size_t start, float *buffer, size_t nb
 }
 
 
-void DataBuffer::checkData(int32_t min, int32_t max) {
+void DataBuffer::checkData(int32_t min, int32_t max) const {
   for (unsigned int k=0; k<NBuffer; k++) {
     sample_t data = Buffer[k];
     if (data < min)

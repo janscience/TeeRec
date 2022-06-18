@@ -75,23 +75,23 @@ public:
 
   // Return sample right after most current data value in data buffer
   // optionally decremented by decr frames.
-  size_t currentSample(size_t decr=0);
+  size_t currentSample(size_t decr=0) const;
 
   // Decrement sample index into data buffer by decr frames.
-  size_t decrementSample(size_t idx, size_t decr);
+  size_t decrementSample(size_t idx, size_t decr) const;
 
   // Increment sample index into data buffer by decr frames.
-  size_t incrementSample(size_t idx, size_t incr);
+  size_t incrementSample(size_t idx, size_t incr) const;
 
   // Get the nbuffer most recent data from a channel.
-  void getData(uint8_t channel, size_t start, sample_t *buffer, size_t nbuffer);
+  void getData(uint8_t channel, size_t start, sample_t *buffer, size_t nbuffer) const;
 
   // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
-  void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer);
+  void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) const;
 
   // Check whether data in the whole buffer are within the specified range
   // (for debugging).
-  void checkData(int32_t min, int32_t max);
+  void checkData(int32_t min, int32_t max) const;
 
   
 protected:

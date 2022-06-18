@@ -75,6 +75,7 @@ via the `TeeRec.h` header.
 
 ### Utilities
 
+- [Analyzer](src/Analyzer.h): Coordinate analysis of data snippets.
 - [Display](src/Display.h): Display data on a TFT monitor.
 - [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
