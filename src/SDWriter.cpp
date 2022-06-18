@@ -482,8 +482,11 @@ ssize_t SDWriter::write() {
 void SDWriter::start(size_t decr) {
   if (!synchronize())
     Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
-  if (decr > 0)
+  WriteTime = 0;
+  if (decr > 0) {
     decrement(decr);
+    WriteTime += int(1000.0*Data->time(decr));
+  }
 }
 
 

@@ -30,7 +30,7 @@
 #include <TestSignals.h>
   
 
-// Default settings: ----------------------------------------------------------
+// Default settings: ---------------------------------------------------
 // (may be overwritten by config file recorder.cfg)
 
 int bits = 12;                  // resolution: 10bit 12bit, or 16bit 
@@ -56,7 +56,7 @@ int signalPins[] = {3, 4, -1};  // pins where to put out test signals
 int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 #endif
 
-// ----------------------------------------------------------------------------
+// ---------------------------------------------------------------------
 
 Configurator config;
 ContinuousADC aidata;
@@ -235,7 +235,7 @@ void storeData() {
 }
 
 
-// ----------------------------------------------------------------------------
+// --------------------------------------------------------------------
 
 void setup() {
   Serial.begin(9600);

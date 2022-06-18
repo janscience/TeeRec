@@ -100,8 +100,8 @@ void AudioMonitor::volumeUp() {
 
 void AudioMonitor::volumeDown() {
   Volume /= 1.414213;
-  if (Volume < 0.00625)
-    Volume = 0.00625;
+  if (Volume < 1/1024)
+    Volume = 1/1024;
   setVolume();
 }
 

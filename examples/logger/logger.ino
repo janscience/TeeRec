@@ -7,7 +7,7 @@
 #include <TestSignals.h>
 
 
-// Default settings: -----------------------------------------------------------------------
+// Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
 
 uint32_t samplingRate = 44000; // samples per second and channel in Hertz
@@ -27,7 +27,7 @@ int pulseFrequency = 230;      // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
-// ------------------------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 
 Configurator config;
 ContinuousADC aidata;
@@ -158,7 +158,7 @@ void storeData() {
 }
 
 
-// ------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------
 
 void setup() {
   blink.switchOn();
