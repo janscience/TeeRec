@@ -174,7 +174,7 @@ class Display {
   void clearPlots();
 
   // Plot data trace from buffer in plot area with some color (index into PlotLines).
-  void plot(uint8_t area, float *buffer, int nbuffer, int color=0);
+  void plot(uint8_t area, const float *buffer, int nbuffer, int color=0);
 
   // Define text area. 
   // By default center the text vertically into the area. If top is set to true,

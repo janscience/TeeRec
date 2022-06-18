@@ -104,7 +104,7 @@ void Display::clearPlots() {
 }
 
 
-void Display::plot(uint8_t area, float *buffer, int nbuffer, int color) {
+void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
   if (PlotW[area] == 0 )
     return;
   color %= 8;
