@@ -73,9 +73,13 @@ via the `TeeRec.h` header.
 - [AudioPlayBuffer](src/AudioPlayBuffer.h): Make the DataBuffer available as an input for the Audio library.
 - [AudioMonitor](src/AudioMonitor.h): Play recorded data with optional feedback signals on speaker.
 
+### Online analysis
+
+- [AnalysisChain](src/AnalysisChain.h): Coordinate analysis of data snippets via Analyzer.
+- [Analyzer](src/Analyzer.h): Base class for analyzer called by AnalysisChain.
+
 ### Utilities
 
-- [AnalysisChain](src/AnalysisChain.h): Coordinate analysis of data snippets.
 - [Display](src/Display.h): Display data on a TFT monitor.
 - [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.

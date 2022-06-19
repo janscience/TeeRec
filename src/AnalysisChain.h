@@ -1,5 +1,5 @@
 /*
-  AnalysisChain - Coordinate analysis of data snippets.
+  AnalysisChain - Coordinate analysis of data snippets via Analyzer.
   Created by Jan Benda, June 18th, 2022.
 */
 
@@ -11,22 +11,19 @@
 #include <DataBuffer.h>
 
 
-// Signalture of an analysis function.
-// Note that the function is allowed to modify the data in place.
-typedef void AnalysisFunc(float **data, uint8_t nchannels, size_t nframes,
-			  float rate);
+class Analyzer;
 
 
 class AnalysisChain {
 
  public:
 
-  // Construct analyzer working on data.
+  // Construct analysis chain working on data.
   AnalysisChain(const DataBuffer &data);
   ~AnalysisChain();
 
-  // Add a function for analysis.
-  void add(AnalysisFunc *func);
+  // Add an analyzer to analysis chain.
+  void add(Analyzer &analyzer);
 
   // Initialize analysis. Needs to be called before update() is used.
   // Analysis functions will be called every interval seconds on a data window
@@ -45,9 +42,9 @@ class AnalysisChain {
 
   const DataBuffer *Data;    // XXX shouldn't that be a DataWorker?!!
   
-  static const int MaxFuncs = 10;
-  int NFuncs;
-  AnalysisFunc *Analyze[MaxFuncs];
+  static const int MaxAnalyzer = 10;
+  int NAnalyzer;
+  Analyzer *Analyzers[MaxAnalyzer];
 
   uint Interval;
   float Window;
@@ -57,7 +54,6 @@ class AnalysisChain {
   float *Buffer[16];
   uint8_t NChannels;
   size_t NFrames;
-  float Rate;
   
 };
 
