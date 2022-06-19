@@ -3,6 +3,7 @@
 
 
 Analyzer::Analyzer(AnalysisChain *chain) :
+  Enabled(true),
   Rate(0) {
   if (chain != 0)
     chain->add(*this);
@@ -11,6 +12,21 @@ Analyzer::Analyzer(AnalysisChain *chain) :
 
 void Analyzer::setRate(float rate) {
   Rate = rate;
+}
+
+
+bool Analyzer::enabled() const {
+  return Enabled;
+}
+
+
+void Analyzer::enable() {
+  Enabled = true;
+}
+
+
+void Analyzer::disable() {
+  Enabled = false;
 }
 
 

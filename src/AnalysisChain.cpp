@@ -40,15 +40,19 @@ void AnalysisChain::start(float interval, float window) {
     }
   }
   for (int i=0; i<NAnalyzer; i++) {
-    Analyzers[i]->setRate(Data->rate());
-    Analyzers[i]->start();
+    if (Analyzers[i]->enabled()) {
+      Analyzers[i]->setRate(Data->rate());
+      Analyzers[i]->start();
+    }
   }
 }
 
 
 void AnalysisChain::stop() {
-  for (int i=0; i<NAnalyzer; i++)
-    Analyzers[i]->stop();
+  for (int i=0; i<NAnalyzer; i++) {
+    if (Analyzers[i]->enabled())
+      Analyzers[i]->stop();
+  }
   for(uint8_t c=0; c<NChannels; ++c)
     free(Buffer[c]);
   NChannels = 0;
@@ -65,8 +69,12 @@ void AnalysisChain::update() {
 	Data->getData(c, start, Buffer[c], NFrames);
       Counter++;
     }
-    else if (Counter < NAnalyzer)
-      Analyzers[Counter++]->analyze(Buffer, NChannels, NFrames);
+    else {
+      while ((Counter < NAnalyzer) && !Analyzers[Counter]->enabled())
+	Counter++;
+      if (Counter < NAnalyzer)
+	Analyzers[Counter++]->analyze(Buffer, NChannels, NFrames);
+    }
     if (Counter >= NAnalyzer) {
       Counter = -1;
       Time -= Interval;

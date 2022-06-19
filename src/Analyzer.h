@@ -20,6 +20,15 @@ class Analyzer {
   // Construct analyzer and add it to an AnalysisChain.
   Analyzer(AnalysisChain *chain=0);
 
+  // True if this analyzer is enabled.
+  bool enabled() const;
+
+  // Enable this analyzer.
+  void enable();
+
+  // Disable this analyzer.
+  void disable();
+
   // Set sampling rate of data. This is done by AnalysisChain::start().
   void setRate(float rate);
 
@@ -36,6 +45,7 @@ class Analyzer {
   
  protected:
 
+  bool Enabled;
   float Rate;
   
 };
