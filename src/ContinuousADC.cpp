@@ -13,7 +13,8 @@ ContinuousADC *ContinuousADC::ADCC = 0;
 DMASetting ContinuousADC::DMASettings[2][NMajors];
 
 
-ContinuousADC::ContinuousADC() :
+ContinuousADC::ContinuousADC(volatile sample_t *buffer, size_t nbuffer) :
+  DataBuffer(buffer, nbuffer),
   Configurable("ADC") {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;

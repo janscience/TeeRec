@@ -28,7 +28,8 @@ int startPin = 24;
 Configurator config;
 Settings settings("recordings", fileName);
 
-ContinuousADC aidata;
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+ContinuousADC aidata(AIBuffer, NAIBuffer);
 
 AudioOutputI2S speaker;
 // AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield

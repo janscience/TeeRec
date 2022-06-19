@@ -40,7 +40,8 @@ int volume_down_pin = 26;      // pin for push button for decreasing audio volum
 
 // ---------------------------------------------------------------------
 
-ContinuousADC aidata;
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+ContinuousADC aidata(AIBuffer, NAIBuffer);
 
 Display screen;
 elapsedMillis screenTime;

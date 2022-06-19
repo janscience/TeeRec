@@ -257,8 +257,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   
   static const size_t MaxChannels = 8;
 
-  // Initialize.
-  ContinuousADC();
+  // Initialize and pass a buffer that has been created with the
+  // DATA_BUFFER macro.
+  ContinuousADC(volatile sample_t *buffer, size_t nbuffer);
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.
@@ -445,8 +446,6 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
   ADC ADConv;
 
-  // Data buffer:
-  DataBuffer Data;    // large buffer holding converted and multiplexed data from both ADCs
   size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
   uint8_t DataShift;  // number of bits ADC data need to be shifted to make them 16 bit.
   uint16_t DataOffs;  // offset to be added to ADC data to convert them to signed integers.
@@ -467,7 +466,7 @@ private:
   // Set used resolution of data buffer in bits per sample based on
   // requested resolution and scaling.
   void setDataResolution();
-
+  
 };
 
 

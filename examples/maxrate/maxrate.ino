@@ -30,7 +30,9 @@ DMAMEM uint8_t nchannels1;
 DMAMEM uint16_t results[8][5];  // nchans0, nchans1, 10bit, 12bit, 16bit
 DMAMEM uint16_t counter;
  
-ContinuousADC aidata;
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+ContinuousADC aidata(AIBuffer, NAIBuffer);
+
 Watchdog watchdog;
 
 

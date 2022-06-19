@@ -47,7 +47,7 @@ bool logging = false;           // keep saving to files
 char fileName[] = "SDATELNUM";  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;        // seconds
 
-int startPin = 16;
+int startPin = 24;
 
 int pulseFrequency = 500;       // Hertz
 #ifdef TEENSY32
@@ -59,7 +59,10 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 // ---------------------------------------------------------------------
 
 Configurator config;
-ContinuousADC aidata;
+
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+ContinuousADC aidata(AIBuffer, NAIBuffer);
+
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 

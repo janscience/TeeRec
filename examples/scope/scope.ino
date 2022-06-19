@@ -39,8 +39,10 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
 // ----------------------------------------------------------------------------
- 
-ContinuousADC aidata;
+
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+
+ContinuousADC aidata(AIBuffer, NAIBuffer);
 
 Display screen;
 elapsedMillis screenTime;

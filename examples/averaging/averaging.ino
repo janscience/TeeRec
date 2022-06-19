@@ -86,7 +86,9 @@ DMAMEM size_t counter;
 
 // ------------------------------------------------------------------------------------------
  
-ContinuousADC aidata;
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+ContinuousADC aidata(AIBuffer, NAIBuffer);
+
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 Blink blink(LED_BUILTIN);

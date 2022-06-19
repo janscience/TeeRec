@@ -15,11 +15,24 @@
 typedef int16_t sample_t;
 
 
+// Macro for defining the one and only data buffer.
+// buffer and nbuffer are the variable names for the buffer and its size.
+// n defines the number of samples the buffer can hold.
+// DANGER: The buffer size must be a multiple of ContinuousADC::MajorSize (256)
+// and the maximum number of channels per ADC (8)!
+// For Teensy 3.2 use n = 256*32 (16kB).
+// For Teensy 3.5/3.6 use n = 256*256 (128kB) or less.
+#define DATA_BUFFER(buffer, nbuffer, n) \
+  const size_t nbuffer = n; \
+  volatile sample_t __attribute__((aligned(32))) buffer[n];
+
+
 class DataBuffer : public DataWorker {
   
 public:
 
-  DataBuffer();
+  // Pass a buffer that has been created with the DATA_BUFFER macro.
+  DataBuffer(volatile sample_t *buffer, size_t nbuffer);
   
   // Return total number of samples the buffer holds.
   size_t nbuffer() const { return NBuffer; };
@@ -96,17 +109,13 @@ public:
   
 protected:
 
-  // DANGER: Buffer size must be a multiple of ContinuousADC::MajorSize and the maximum number of channels per ADC (16)!
-#ifdef TEENSY32
-  static const size_t NBuffer = 256*32;     // buffer size: 16kB
-#else
-  static const size_t NBuffer = 256*256;    // buffer size: 128kB
-#endif
-  volatile static sample_t __attribute__((aligned(32))) Buffer[NBuffer]; // the one and only buffer
+  size_t NBuffer;            // Number of samples the buffer can hold.
+  volatile sample_t *Buffer; // Pointer to the one and only buffer
   uint8_t Bits;
   uint32_t Rate;             // sampling rate per channel
   uint8_t NChannels;         // number of channels multiplexed into the buffer
   uint8_t DataBits;
+  
 };
 
 

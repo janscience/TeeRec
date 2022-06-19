@@ -2,11 +2,10 @@
 #include <DataBuffer.h>
 
 
-volatile sample_t __attribute__((aligned(32))) DataBuffer::Buffer[NBuffer];
-
-
-DataBuffer::DataBuffer()
+DataBuffer::DataBuffer(volatile sample_t *buffer, size_t nbuffer)
   : DataWorker() {
+  NBuffer = nbuffer;
+  Buffer = buffer;
   DataBits = 16;
   Bits = DataBits;
   Rate = 0;
