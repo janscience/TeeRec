@@ -1,7 +1,7 @@
-#include <Analyzer.h>
+#include <AnalysisChain.h>
 
 
-Analyzer::Analyzer(const DataBuffer &data)
+AnalysisChain::AnalysisChain(const DataBuffer &data)
   : Data(&data),
     NFuncs(0),
     Interval(1000),
@@ -15,17 +15,17 @@ Analyzer::Analyzer(const DataBuffer &data)
 }
 
 
-Analyzer::~Analyzer() {
+AnalysisChain::~AnalysisChain() {
   stop();
 }
 
 
-void Analyzer::add(AnalysisFunc *func) {
+void AnalysisChain::add(AnalysisFunc *func) {
   Analyze[NFuncs++] = func;
 }
 
 
-void Analyzer::start(float interval, float window) {
+void AnalysisChain::start(float interval, float window) {
   stop();
   Interval = 1000*interval;
   Window = window;
@@ -43,7 +43,7 @@ void Analyzer::start(float interval, float window) {
 }
 
 
-void Analyzer::stop() {
+void AnalysisChain::stop() {
   for(uint8_t c=0; c<NChannels; ++c)
     free(Buffer[c]);
   NChannels = 0;
@@ -51,7 +51,7 @@ void Analyzer::stop() {
 }
 
 
-void Analyzer::update() {
+void AnalysisChain::update() {
   if (NChannels > 0 && NFrames > 0 && Time > Interval) {
     if (Counter < 0) {
       // get data:

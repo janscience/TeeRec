@@ -1,10 +1,10 @@
 /*
-  Analyzer - Coordinate analysis of data snippets.
+  AnalysisChain - Coordinate analysis of data snippets.
   Created by Jan Benda, June 18th, 2022.
 */
 
-#ifndef Analyzer_h
-#define Analyzer_h
+#ifndef AnalysisChain_h
+#define AnalysisChain_h
 
 
 #include <Arduino.h>
@@ -17,13 +17,13 @@ typedef void AnalysisFunc(float **data, uint8_t nchannels, size_t nframes,
 			  float rate);
 
 
-class Analyzer {
+class AnalysisChain {
 
  public:
 
   // Construct analyzer working on data.
-  Analyzer(const DataBuffer &data);
-  ~Analyzer();
+  AnalysisChain(const DataBuffer &data);
+  ~AnalysisChain();
 
   // Add a function for analysis.
   void add(AnalysisFunc *func);
