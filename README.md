@@ -43,6 +43,7 @@ library](https://github.com/janscience/ESensors).
 
 - [Installation instructions](docs/install.md)
 - [Audio output](docs/audioout.md): hardware for audio output.
+- [Audio input](docs/audioin.md): hardware for audio input (microphones).
 
 
 ## Libraries
