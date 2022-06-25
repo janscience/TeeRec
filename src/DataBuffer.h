@@ -20,11 +20,11 @@ typedef int16_t sample_t;
 // n defines the number of samples the buffer can hold.
 // DANGER: The buffer size must be a multiple of ContinuousADC::MajorSize (256)
 // and the maximum number of channels per ADC (8)!
-// For Teensy 3.2 use n = 256*32 (16kB).
-// For Teensy 3.5/3.6 use n = 256*256 (128kB) or less.
+// For Teensy 3.2 use n = 256*32 (16kB),
+// for Teensy 3.5/3.6 use n = 256*256 (128kB) or less.
 #define DATA_BUFFER(buffer, nbuffer, n) \
-  const size_t nbuffer = n; \
-  volatile sample_t __attribute__((aligned(32))) buffer[n];
+  static const size_t nbuffer = n;				   \
+  static volatile sample_t __attribute__((aligned(32))) buffer[n]; \
 
 
 class DataBuffer : public DataWorker {

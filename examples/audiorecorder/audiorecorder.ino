@@ -18,17 +18,19 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 
 char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STIME,
 
-int ampl_enable_pin = 32;      // pin for enabling an audio amplifier
-int volume_up_pin = 25;        // pin for push button for increasing audio volume
-int volume_down_pin = 26;      // pin for push button for decreasing audio volume
-int startPin = 24;
+// Pin assignment: ----------------------------------------------------
+
+#define AMPL_ENABLE_PIN 32   // pin for enabling an audio amplifier
+#define VOLUME_UP_PIN 25     // pin for push button for increasing audio volume
+#define VOLUME_DOWN_PIN 26   // pin for push button for decreasing audio volume
+#define START_PIN 24         // pin for starting a recording
 
 // ----------------------------------------------------------------------------
 
 Configurator config;
 Settings settings("recordings", fileName);
 
-DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
 ContinuousADC aidata(AIBuffer, NAIBuffer);
 
 AudioOutputI2S speaker;
@@ -60,7 +62,9 @@ void setupADC() {
 
 
 void setupAudio() {
-  audio.setup(ampl_enable_pin, 0.1, volume_up_pin, volume_down_pin);
+  AudioMemory(16);
+  audio.setupAmp(AMPL_ENABLE_PIN);
+  audio.setupVolume(0.1, VOLUME_UP_PIN, VOLUME_DOWN_PIN);
   // uncomment at least the first line if you use the Teensy audio shield
   //audioshield.enable();
   //audioshield.volume(0.5);
@@ -134,7 +138,7 @@ void startWrite(int id) {
 
 
 void setupButtons() {
-  buttons.add(startPin, INPUT_PULLUP, startWrite);
+  buttons.add(START_PIN, INPUT_PULLUP, startWrite);
 }
 
 

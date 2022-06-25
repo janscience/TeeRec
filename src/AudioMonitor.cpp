@@ -20,9 +20,19 @@ AudioMonitor::AudioMonitor(DataWorker &data, AudioStream &speaker) :
 }
 
 
-void AudioMonitor::setup(int amplifier_pin, float volume,
-			 int volume_up_pin, int volume_down_pin, int mode) {
-  AudioMemory(16);
+void AudioMonitor::setupAmp(int amplifier_pin, int mode) {
+  Play = true;
+  if ( amplifier_pin >= 0 ) {
+    AmplifierPin = amplifier_pin;
+    pinMode(AmplifierPin, OUTPUT);
+    digitalWrite(AmplifierPin, HIGH); // turn on the amplifier
+    delay(10);                        // allow time to wake up
+  }
+}
+
+
+void AudioMonitor::setupVolume(float volume, int volume_up_pin,
+			       int volume_down_pin, int mode) {
   Play = true;
   Volume = volume;
   setVolume();
@@ -34,12 +44,6 @@ void AudioMonitor::setup(int amplifier_pin, float volume,
     VolumeDownButton.setPressedState(mode==INPUT_PULLUP?LOW:HIGH);
     VolumeDownButton.interval(20);
     VolumeButtons = true;
-  }
-  if ( amplifier_pin >= 0 ) {
-    AmplifierPin = amplifier_pin;
-    pinMode(AmplifierPin, OUTPUT);
-    digitalWrite(AmplifierPin, HIGH); // turn on the amplifier
-    delay(10);                        // allow time to wake up
   }
 }
 

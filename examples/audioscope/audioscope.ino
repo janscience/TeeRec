@@ -7,19 +7,9 @@
 //#define ST7789_ADAFRUIT
 //#define ILI9341_ADAFRUIT
 
-// define pins to control TFT display:
-#define TFT_SCK   13
-#define TFT_MISO  12
-#define TFT_MOSI  11
-#define TFT_CS    10  
-#define TFT_RST   8 // 9
-#define TFT_DC    7 // 8 
-#define TFT_BL   30 // backlight PWM, -1 to not use it
-
 #include <ContinuousADC.h>
 #include <AudioMonitor.h>
 #include <Display.h>
-#include <AllDisplays.h>       // edit this file for your TFT monitor
   
 
 // Default settings: --------------------------------------------------
@@ -34,13 +24,25 @@ uint updateScreen = 500;             // milliseconds
 float displayTime = 0.01;
 //float displayTime = 0.001*updateScreen;
 
-int ampl_enable_pin = 32;      // pin for enabling an audio amplifier
-int volume_up_pin = 25;        // pin for push button for increasing audio volume
-int volume_down_pin = 26;      // pin for push button for decreasing audio volume
+// Pin assignment: ----------------------------------------------------
+
+#define AMPL_ENABLE_PIN 32   // pin for enabling an audio amplifier
+#define VOLUME_UP_PIN 25     // pin for push button for increasing audio volume
+#define VOLUME_DOWN_PIN 26   // pin for push button for decreasing audio volume
+
+// pins to control TFT display:
+#define TFT_SCK   13
+#define TFT_MISO  12
+#define TFT_MOSI  11
+#define TFT_CS    10  
+#define TFT_RST   8 // 9
+#define TFT_DC    7 // 8 
+#define TFT_BL   30 // backlight PWM, -1 to not use it
+#include <AllDisplays.h>     // edit this file for your TFT monitor
 
 // ---------------------------------------------------------------------
 
-DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
 ContinuousADC aidata(AIBuffer, NAIBuffer);
 
 Display screen;
@@ -65,7 +67,9 @@ void setupADC() {
 
 
 void setupAudio() {
-  audio.setup(ampl_enable_pin, 0.1, volume_up_pin, volume_down_pin);
+  AudioMemory(16);
+  audio.setupAmp(AMPL_ENABLE_PIN);
+  audio.setupVolume(0.1, VOLUME_UP_PIN, VOLUME_DOWN_PIN);
   // uncomment at least the first line if you use the Teensy audio shield
   //audioshield.enable();
   //audioshield.volume(0.5);

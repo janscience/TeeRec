@@ -21,17 +21,22 @@ class AudioMonitor {
   // Construct and AudioMonitor. It plays the data from `data` on the
   // `speaker`. Up to three optional audio feddback signals are mixed
   // in as set up via `addFeddback()`.
+  // Note: you need to allocate AudioMemory() for the Audio library yourself.
   AudioMonitor(DataWorker &data, AudioStream &speaker);
 
-  // Setup the audio monitor.
+  // Setup an amplifier for the audio monitor.
   // If `amplifier_pin` is positive, it is configured for output and
-  // set to high to switch on/enable and amplifier chip.
+  // set to high to switch on/enable an amplifier chip.
+  // The amplifier pin is configured to `mode`.
+  void setupAmp(int amplifier_pin, int mode=INPUT_PULLUP);
+
+  // Setup volume control for the audio monitor.
   // The general volume is set to `volume` (between 0 and 1).
   // If both `volume_up_pin` and `volume_down_pin` are positive these
   // pins are configured to `mode` and are monitored for button
   // presses to regulate the volume.
-  void setup(int amplifier_pin=-1, float volume=1.0, int volume_up_pin=-1,
-	     int volume_down_pin=-1, int mode=INPUT_PULLUP);
+  void setupVolume(float volume, int volume_up_pin=-1,
+		   int volume_down_pin=-1, int mode=INPUT_PULLUP);
 
   // Pause playing data and feedbacks on speaker.
   void pause();
