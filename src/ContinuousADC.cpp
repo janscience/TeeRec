@@ -50,6 +50,15 @@ void ContinuousADC::setChannel(uint8_t adc, uint8_t channel) {
 }
 
 
+void ContinuousADC::addChannel(uint8_t adc, uint8_t channel) {
+  Channels[adc][NChans[adc]++] = channel;
+  NChannels = 0;
+  for (uint8_t adc=0; adc<2; adc++)
+    NChannels += NChans[adc];
+  ADCUse |= (1 << adc);
+}
+
+
 void ContinuousADC::setChannels(uint8_t adc, const int8_t *channels) {
   NChans[adc] = 0;
   for (uint8_t k=0; k<MaxChannels && channels[k]>0; k++)

@@ -266,6 +266,12 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Use pinAssignment() to see which pins are available for each ADC.
   // Use check() to ensure a valid channel configuration.
   void setChannel(uint8_t adc, uint8_t channel);
+  
+  // Add a channel to the configuration for acquisition on ADC adc.
+  // channel is a pin specifier like A6, A19.
+  // Use pinAssignment() to see which pins are available for each ADC.
+  // Use check() to ensure a valid channel configuration.
+  void addChannel(uint8_t adc, uint8_t channel);
 
   // Configure for acquisition from several channels on a single ADC.
   // channels is an array with pin specifications like A6, A19,
