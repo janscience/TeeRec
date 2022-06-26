@@ -565,8 +565,8 @@ void ContinuousADC::start() {
 void ContinuousADC::stop() {
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) > 0 ) {
-      ADConv.adc[adc]->stopTimer();
       ADConv.adc[adc]->disableDMA();
+      ADConv.adc[adc]->stopTimer();
       if ( NChans[adc] > 1 )
 	DMASwitch[adc].disable();
       DMABuffer[adc].disable();

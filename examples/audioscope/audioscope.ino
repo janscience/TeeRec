@@ -16,8 +16,8 @@
 
 int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
 int averaging = 4;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
-uint32_t samplingRate = 44000;       // samples per second and channel in Hertz
-int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
+uint32_t samplingRate = 44100;       // samples per second and channel in Hertz
+int8_t channels0 [] =  {A2, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 uint updateScreen = 500;             // milliseconds
@@ -27,7 +27,7 @@ float displayTime = 0.01;
 // Pin assignment: ----------------------------------------------------
 
 #define AMPL_ENABLE_PIN 32   // pin for enabling an audio amplifier
-#define VOLUME_UP_PIN 25     // pin for push button for increasing audio volume
+#define VOLUME_UP_PIN   25   // pin for push button for increasing audio volume
 #define VOLUME_DOWN_PIN 26   // pin for push button for decreasing audio volume
 
 // pins to control TFT display:
@@ -35,9 +35,9 @@ float displayTime = 0.01;
 #define TFT_MISO  12
 #define TFT_MOSI  11
 #define TFT_CS    10  
-#define TFT_RST   8 // 9
-#define TFT_DC    7 // 8 
-#define TFT_BL   30 // backlight PWM, -1 to not use it
+#define TFT_RST    8 // 9
+#define TFT_DC     7 // 8 
+#define TFT_BL    30 // backlight PWM, -1 to not use it
 #include <AllDisplays.h>     // edit this file for your TFT monitor
 
 // ---------------------------------------------------------------------

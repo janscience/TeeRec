@@ -12,9 +12,9 @@
 #define TFT_MISO  12
 #define TFT_MOSI  11
 #define TFT_CS    10  
-#define TFT_RST   8 // 9
-#define TFT_DC    7 // 8 
-#define TFT_BL   30 // backlight PWM, -1 to not use it
+#define TFT_RST    8 // 9
+#define TFT_DC     7 // 8 
+#define TFT_BL    30 // backlight PWM, -1 to not use it
 
 #include <ContinuousADC.h>
 #include <Display.h>
