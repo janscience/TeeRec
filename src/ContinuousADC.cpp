@@ -71,6 +71,21 @@ void ContinuousADC::setChannels(uint8_t adc, const int8_t *channels) {
 }
 
 
+void ContinuousADC::clearChannels(uint8_t adc) {
+  NChans[adc] = 0;
+  NChannels = 0;
+  for (uint8_t adc=0; adc<2; adc++)
+    NChannels += NChans[adc];
+}
+
+
+void ContinuousADC::clearChannels() {
+  for (uint8_t adc=0; adc<2; adc++)
+    NChans[adc] = 0;
+  NChannels = 0;
+}
+
+
 uint8_t ContinuousADC::nchannels(uint8_t adc) const {
   if ( (ADCUse & (adc+1)) == adc+1 )
     return NChans[adc];

@@ -30,7 +30,7 @@ class AnalysisChain {
   // of window seconds length.
   void start(float interval, float window);
 
-  // Clean up analysis. After this update() will ot do anything.
+  // Clean up analysis. After this update() will not do anything.
   void stop();
 
   // Call the analysis functions at appropriate times.

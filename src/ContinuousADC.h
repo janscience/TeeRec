@@ -283,6 +283,12 @@ class ContinuousADC : public DataBuffer, public Configurable {
   // Use pinAssignment() to see which pins are available for each ADC.
   // Use check() to ensure a valid channel configuration.
   void setChannels(uint8_t adc, const int8_t *channels);
+  
+  // Clear the channel configuration for a given ADC.
+  void clearChannels(uint8_t adc);
+  
+  // Clear the channel configuration of both ADCs.
+  void clearChannels();
 
   // Return number of channels on specified ADC.
   uint8_t nchannels(uint8_t adc) const;
