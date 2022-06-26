@@ -38,8 +38,8 @@ class Analyzer {
   // Set sampling rate of data. This is done by AnalysisChain::start().
   void setRate(float rate);
 
-  // Start analyzer. Default implementation does nothing.
-  virtual void start();
+  // Start and initialize analyzer. Default implementation does nothing.
+  virtual void start(uint8_t nchannels, size_t nframes);
 
   // Stop analyzer. Default implementation does nothing.
   virtual void stop();

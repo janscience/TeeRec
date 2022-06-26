@@ -48,7 +48,7 @@ void AnalysisChain::start(float interval, float window) {
     if (Analyzers[i]->enabled()) {
       Analyzers[i]->setContinuous(Continuous);
       Analyzers[i]->setRate(Data->rate());
-      Analyzers[i]->start();
+      Analyzers[i]->start(NChannels, NFrames);
     }
   }
 }

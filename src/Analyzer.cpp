@@ -41,7 +41,7 @@ void Analyzer::setRate(float rate) {
 }
 
 
-void Analyzer::start() {
+void Analyzer::start(uint8_t nchannels, size_t nframes) {
 }
 
 
