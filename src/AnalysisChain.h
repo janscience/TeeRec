@@ -8,18 +8,18 @@
 
 
 #include <Arduino.h>
-#include <DataBuffer.h>
+#include <DataWorker.h>
 
 
 class Analyzer;
 
 
-class AnalysisChain {
+class AnalysisChain : DataWorker {
 
  public:
 
   // Construct analysis chain working on data.
-  AnalysisChain(const DataBuffer &data);
+  AnalysisChain(const DataWorker &data);
   ~AnalysisChain();
 
   // Add an analyzer to analysis chain.
@@ -39,8 +39,6 @@ class AnalysisChain {
   
   
  protected:
-
-  const DataBuffer *Data;    // XXX shouldn't that be a DataWorker?!!
   
   static const int MaxAnalyzer = 10;
   int NAnalyzer;
@@ -49,6 +47,7 @@ class AnalysisChain {
   uint Interval;
   float Window;
   elapsedMillis Time;
+  bool Continuous;
   int Counter;
 
   float *Buffer[16];

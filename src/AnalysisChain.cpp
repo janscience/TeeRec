@@ -1,12 +1,14 @@
+#include <DataBuffer.h>
 #include <Analyzer.h>
 #include <AnalysisChain.h>
 
 
-AnalysisChain::AnalysisChain(const DataBuffer &data)
-  : Data(&data),
+AnalysisChain::AnalysisChain(const DataWorker &data)
+  : DataWorker(&data),
     NAnalyzer(0),
     Interval(1000),
     Window(0.1),
+    Continuous(false),
     Counter(-1),
     NChannels(0),
     NFrames(0)
@@ -30,6 +32,8 @@ void AnalysisChain::start(float interval, float window) {
   Interval = 1000*interval;
   Window = window;
   Time = 0;
+  Counter = -1;
+  Continuous = (fabs(interval - window) < 1e-8);
   NChannels = Data->nchannels();
   NFrames = Data->frames(Window);
   for(uint8_t c=0; c<NChannels; ++c) {
@@ -39,8 +43,10 @@ void AnalysisChain::start(float interval, float window) {
       while (1) {};
     }
   }
+  synchronize();
   for (int i=0; i<NAnalyzer; i++) {
     if (Analyzers[i]->enabled()) {
+      Analyzers[i]->setContinuous(Continuous);
       Analyzers[i]->setRate(Data->rate());
       Analyzers[i]->start();
     }
@@ -61,23 +67,38 @@ void AnalysisChain::stop() {
 
 
 void AnalysisChain::update() {
-  if (NChannels > 0 && NFrames > 0 && Time > Interval) {
-    if (Counter < 0) {
-      // get data:
-      size_t start = Data->currentSample(NFrames);
-      for (uint8_t c=0; c<NChannels; c++)
-	Data->getData(c, start, Buffer[c], NFrames);
+  if (NChannels == 0 || NFrames == 0)
+    return;
+  if (Counter >= 0 ) {
+    while ((Counter < NAnalyzer) && !Analyzers[Counter]->enabled())
       Counter++;
+    if (Counter < NAnalyzer)
+      Analyzers[Counter++]->analyze(Buffer, NChannels, NFrames);
+    if (Counter >= NAnalyzer)
+      Counter = -1;
+  }
+  else {
+    if (Continuous) {
+      if (available() < NChannels*NFrames)
+	return;
     }
     else {
-      while ((Counter < NAnalyzer) && !Analyzers[Counter]->enabled())
-	Counter++;
-      if (Counter < NAnalyzer)
-	Analyzers[Counter++]->analyze(Buffer, NChannels, NFrames);
-    }
-    if (Counter >= NAnalyzer) {
-      Counter = -1;
+      if (Time <= Interval)
+	return;
       Time -= Interval;
     }
+    // get data:
+    size_t start;
+    if (Continuous)
+      start = index();
+    else
+      start = Data->currentSample(NFrames);
+    for (uint8_t c=0; c<NChannels; c++)
+      Data->getData(c, start, Buffer[c], NFrames);
+    if (Continuous)
+      increment(NChannels * NFrames);
+    else
+      synchronize();
+    Counter = 0;
   }
 }

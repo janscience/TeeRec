@@ -4,14 +4,10 @@
 
 Analyzer::Analyzer(AnalysisChain *chain) :
   Enabled(true),
+  Continuous(false),
   Rate(0) {
   if (chain != 0)
     chain->add(*this);
-}
-
-
-void Analyzer::setRate(float rate) {
-  Rate = rate;
 }
 
 
@@ -27,6 +23,21 @@ void Analyzer::enable() {
 
 void Analyzer::disable() {
   Enabled = false;
+}
+
+
+bool Analyzer::continuous() const {
+  return Continuous;
+}
+
+
+void Analyzer::setContinuous(bool continuous) {
+  Continuous = continuous;
+}
+
+
+void Analyzer::setRate(float rate) {
+  Rate = rate;
 }
 
 

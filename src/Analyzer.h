@@ -29,6 +29,12 @@ class Analyzer {
   // Disable this analyzer.
   void disable();
 
+  // True if the data provided to analyze() are continuous.
+  bool continuous() const;
+
+  // Set sampling rate of data. This is done by AnalysisChain::start().
+  void setContinuous(bool continuous);
+
   // Set sampling rate of data. This is done by AnalysisChain::start().
   void setRate(float rate);
 
@@ -46,6 +52,7 @@ class Analyzer {
  protected:
 
   bool Enabled;
+  bool Continuous;
   float Rate;
   
 };

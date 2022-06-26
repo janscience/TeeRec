@@ -58,15 +58,16 @@ protected:
   // If no producer is available yet return false.
   bool synchronize();
 
-  // Decrement current index by indices. Wrap around the buffer and
-  // decrement cycle counterif necessary.  Return true if the index
-  // was wrapped back.  The index is decremented by the buffer size at
-  // maximum and no further than to the beginning of sampling.
+  // Decrement current index by indices samples. Wrap around the
+  // buffer and decrement cycle counter if necessary.  Return true if
+  // the index was wrapped back.  The index is decremented by the
+  // buffer size at maximum and no further than to the beginning of
+  // sampling.
   bool decrement(size_t indices);
   
-  // Increment current index by indices. Wrap around the buffer and
-  // increment cycle counter if necessary.  Return true if the index
-  // was wrapped around.
+  // Increment current index by indices samples. Wrap around the
+  // buffer and increment cycle counter if necessary.  Return true if
+  // the index was wrapped around.
   bool increment(size_t indices);
   
   volatile size_t Index;      // index into the buffer.
