@@ -38,6 +38,8 @@
 // Install Watchdog library from Peter Polidoro via Library Manager.
 // https://github.com/janelia-arduino/Watchdog
 
+// Settings: --------------------------------------------------------
+
 bool markdown = true;   // report as markdown table or plain text
 
 int bits = 12;                   // resolution: 10bit 12bit, or 16bit
@@ -76,7 +78,7 @@ ADC_SAMPLING_SPEED samplingSpeeds[maxSamplingSpeeds] = {
 const uint8_t maxAverages = 5;
 uint8_t averages_list[maxAverages] = {1, 4, 8, 16, 32};
 
-// ----------------------------------------------------------------------------
+// ------------------------------------------------------------------------------------------
 
 uint8_t nchannels;
 DMAMEM uint8_t convindex;

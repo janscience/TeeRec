@@ -158,7 +158,7 @@ TeeRec is used in:
   replacement for the usual and horrible RadioShack/MP3 player
   combination for recording electric fish EODs in their natural
   habitats with lot's of additional features (display, online
-  analysis, acoustiv feedabck, environmental parameters).
+  analysis, acoustiv feedback, environmental parameters).
 
 
 ## Links
