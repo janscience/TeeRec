@@ -1,5 +1,5 @@
 import os
-import sys
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
@@ -102,21 +102,26 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
 
     
 if __name__ == '__main__':
+    # command line arguments:
+    parser = argparse.ArgumentParser(add_help=True,
+        description='Analyse noisyness of recorded zero-signals.')
+    parser.add_argument('-m', dest='subtract_mean', action='store_true',
+                        help='subtract mean from data traces')
+    parser.add_argument('-p', dest='plot', action='store_true',
+                        help='plot distribution of samples')
+    parser.add_argument('-s', dest='save', action='store_true',
+                        help='save plot to file "-noise.png"')
+    parser.add_argument('file', nargs='+', type=str,
+                        help='wave files from the averaging sketch')
+    args = parser.parse_args()
+    # options:
+    plot = args.plot
+    save = args.save
+    subtract_mean = args.subtract_mean
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
-    plot = False
-    save = False
-    subtract_mean = False
+    # analyse:
     header = True
-    for path in sys.argv[1:]:
-        if path == '-m':
-            subtract_mean = True
-            continue
-        elif path == '-p':
-            plot = True
-            continue
-        elif path == '-s':
-            save = True
-            continue
+    for path in args.files:
         plot_hist(path, header, subtract_mean, plot, save)
         header = False

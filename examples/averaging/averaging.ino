@@ -44,9 +44,17 @@ bool markdown = true;   // report as markdown table or plain text
 
 int bits = 12;                   // resolution: 10bit 12bit, or 16bit
 uint32_t samplingRate = 44100;   // samples per second and channel in Hertz
-int8_t channels0 [] =  {A2, -1, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};  // input pins for ADC0
+int8_t channels0 [] =  {A5, -1, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};  // input pins for ADC0
 int8_t channels1 [] =  {A10, -1, A16, A17, A18, A19, A20, A22, A10, A11};  // input pins for ADC1
 
+const uint8_t maxConversionSpeeds = 3;
+ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
+  ADC_CONVERSION_SPEED::VERY_HIGH_SPEED,
+  ADC_CONVERSION_SPEED::HIGH_SPEED,
+  ADC_CONVERSION_SPEED::MED_SPEED
+};
+
+/*
 const uint8_t maxConversionSpeeds = 5;
 ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
   ADC_CONVERSION_SPEED::VERY_HIGH_SPEED,
@@ -55,6 +63,7 @@ ADC_CONVERSION_SPEED conversionSpeeds[maxConversionSpeeds] = {
   ADC_CONVERSION_SPEED::LOW_SPEED,
   ADC_CONVERSION_SPEED::VERY_LOW_SPEED
 };
+*/
 
 /*
 const uint8_t maxConversionSpeeds = 4;
