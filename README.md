@@ -109,6 +109,7 @@ These examples could be used as the basis for you data acquisition application.
 
 Useful sketches for checking out the performance of the data acquisition.
 
+- [zero](examples/zero): Report mean and standard deviation of recorded signal.
 - [maxrate](examples/maxrate): Test for maximum possible sampling rate.
 - [averaging](examples/averaging): Test various averaging settings for acquisition.
 

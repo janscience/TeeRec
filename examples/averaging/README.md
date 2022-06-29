@@ -42,5 +42,5 @@ a few times to get an idea of the variability.
 If an SD card was inserted, the sketch records for each combination of
 averaging, conversion and sampling speed one data buffer to files,
 stored in the `tests/` directory of the SD card. You may run the
-[`extras/noise.py`](../../utils/noise.py) script on these files to
+[`utils/noise.py`](../../utils/noise.py) script on these files to
 display histograms and to evaluate the noise levels in more detail.
