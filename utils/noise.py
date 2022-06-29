@@ -69,6 +69,7 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
     else:
         fig, ax = plt.subplots()
         axs = [ax]
+    fig.set_size_inches(8, 6)
     fig.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.96, hspace=0.3)
     fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)
     for c in range(nchannels):
@@ -122,6 +123,6 @@ if __name__ == '__main__':
     plt.rcParams['axes.ymargin'] = 0
     # analyse:
     header = True
-    for path in args.files:
+    for path in args.file:
         plot_hist(path, header, subtract_mean, plot, save)
         header = False
