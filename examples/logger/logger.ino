@@ -12,11 +12,11 @@
 
 uint32_t samplingRate = 44100; // samples per second and channel in Hertz
 int bits = 12;                 // resolution: 10bit 12bit, or 16bit
-int averaging = 4;             // number of averages per sample: 0, 4, 8, 16, 32
-ADC_CONVERSION_SPEED convs = ADC_CONVERSION_SPEED::HIGH_SPEED;
-ADC_SAMPLING_SPEED sampls = ADC_SAMPLING_SPEED::HIGH_SPEED;
-int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
-int8_t channels1 [] =  {-1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
+int averaging = 16;            // number of averages per sample: 0, 4, 8, 16, 32
+ADC_CONVERSION_SPEED convs = ADC_CONVERSION_SPEED::VERY_HIGH_SPEED;
+ADC_SAMPLING_SPEED sampls = ADC_SAMPLING_SPEED::MED_SPEED;
+int8_t channels0 [] =  {A5, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
+int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
 
 char fileName[] = "SDATELNUM"; // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 float fileSaveTime = 10;       // seconds
