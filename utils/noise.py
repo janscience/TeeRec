@@ -43,11 +43,11 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
     nchannels = data.shape[1]
     basename = os.path.basename(path)
     parts = basename.split('-')
-    rate = 1000*float(parts[1][:3])
-    bits = int(parts[2][:2])
-    convs = parts[3][4:]
-    sampls = parts[4][5:]
-    avrgs = int(parts[5][4:6])
+    rate = 1000*float(parts[-5][:3])
+    bits = int(parts[-4][:2])
+    convs = parts[-3][4:]
+    sampls = parts[-2][5:]
+    avrgs = int(parts[-1][4:6])
     if header:
         print(f'rate bits convers  sampling avrg', end='')
         for c in range(nchannels):
