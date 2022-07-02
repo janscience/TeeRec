@@ -21,6 +21,11 @@ AudioMonitor::AudioMonitor(DataWorker &data, AudioStream &speaker) :
 }
 
 
+void AudioMonitor::setMixer(AudioPlayBuffer::MixerFunc mixer) {
+  Data.mixer = mixer;
+}
+
+
 void AudioMonitor::setupAmp(int amplifier_pin, int mode) {
   Play = true;
   if ( amplifier_pin >= 0 ) {

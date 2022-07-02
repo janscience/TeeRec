@@ -11,6 +11,7 @@ AudioPlayBuffer::AudioPlayBuffer()
     LeftVal(0),
     RightVal(0),
     LowpassN(10) {
+  mixer = &AudioPlayBuffer::average;
 }
 
 
@@ -22,6 +23,7 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
     LeftVal(0),
     RightVal(0),
     LowpassN(10) {
+  mixer = &AudioPlayBuffer::average;
 }
 
 
@@ -61,7 +63,7 @@ void AudioPlayBuffer::update() {
   int16_t right;
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
-    mixer(left, right);
+    (this->*mixer)(left, right);
     LeftVal += (left - LeftVal)/LowpassN;
     block1->data[i] = LeftVal;
     if (numConnections > 1) {
@@ -87,13 +89,35 @@ void AudioPlayBuffer::update() {
 }
 
 
-void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
+void AudioPlayBuffer::average(int16_t &left, int16_t &right) {
   uint8_t nchannels = Data->nchannels();
   int16_t val = 0;
   for (uint8_t c=0; c<nchannels; c++)
     val += Data->buffer()[Index+c]/nchannels;
   left = val;
   right = val;
+}
+
+
+void AudioPlayBuffer::difference(int16_t &left, int16_t &right) {
+  if (Data->nchannels() > 1) { 
+    int16_t diff = Data->buffer()[Index]/2 - Data->buffer()[Index+1]/2;
+    left = diff;
+    right = -diff;
+  }
+  else {
+    left = Data->buffer()[Index];
+    right = left;
+  }
+}
+
+
+void AudioPlayBuffer::assign(int16_t &left, int16_t &right) {
+  left = Data->buffer()[Index];
+  if (Data->nchannels() > 1)
+    right = Data->buffer()[Index+1];
+  else
+    right = left;
 }
 
 

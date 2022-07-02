@@ -24,6 +24,10 @@ class AudioMonitor {
   // Note: you need to allocate AudioMemory() for the Audio library yourself.
   AudioMonitor(DataWorker &data, AudioStream &speaker);
 
+  // Set the mixer function that maps the data buffer to the audio
+  // stream. See AudioPlayBuffer for details.
+  void setMixer(AudioPlayBuffer::MixerFunc mixer);
+
   // Setup an amplifier for the audio monitor.
   // If `amplifier_pin` is positive, it is configured for output and
   // set to high to switch on/enable an amplifier chip.

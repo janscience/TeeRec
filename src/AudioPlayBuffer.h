@@ -27,15 +27,29 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   void setLowpass(int16_t n);
 
   void setMute(bool mute=true);
+
+  typedef void (AudioPlayBuffer::*MixerFunc)(int16_t &left, int16_t &right);
   
+  // Compute the average of all channels at the current index of the
+  // data buffer and copy it to both the left and right channel.
+  void average(int16_t &left, int16_t &right);
+  
+  // Subtract the second data channel at the current Index from the
+  // first.  Divide by two and assign this to the left audio channel
+  // and the negative to the right one.
+  void difference(int16_t &left, int16_t &right);
+  
+  // Assign the first channel at the current index of the data buffer
+  // to left, and the second one to the right audio channel.
+  void assign(int16_t &left, int16_t &right);
+  
+  // Assign one of the above functions to mixer for mapping all
+  // channels of the data producer to the left and right channel of
+  // audio output.  By default the average() function is assigned..
+  MixerFunc mixer;
 
+  
  protected:
-
-  // Reimplement this function to map from all channels of the data
-  // producer to the left and right channel of audio output.
-  // This default implementation just takes the average of all channels
-  // and copies it to both the left and right channel.
-  virtual void mixer(int16_t &left, int16_t &right);
 
   float Time;
   bool Mute;
