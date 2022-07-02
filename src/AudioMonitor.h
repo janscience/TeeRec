@@ -37,6 +37,10 @@ class AudioMonitor {
   // presses to regulate the volume.
   void setupVolume(float volume, int volume_up_pin=-1,
 		   int volume_down_pin=-1, int mode=INPUT_PULLUP);
+  
+  // Set low-pass filter time-constant for audio output to n/44.1kHz,
+  // default is 10. Must be larger or equal to one.
+  void setLowpass(int16_t n);
 
   // Pause playing data and feedbacks on speaker.
   void pause();

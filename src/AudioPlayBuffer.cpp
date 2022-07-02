@@ -7,7 +7,10 @@ AudioPlayBuffer::AudioPlayBuffer()
   : DataWorker(),
     AudioStream(0, NULL),
     Time(0.0),
-    Mute(false) {
+    Mute(false),
+    LeftVal(0),
+    RightVal(0),
+    LowpassN(10) {
 }
 
 
@@ -15,7 +18,10 @@ AudioPlayBuffer::AudioPlayBuffer(const DataWorker &producer)
   : DataWorker(&producer),
     AudioStream(0, NULL),
     Time(0.0),
-    Mute(false) {
+    Mute(false),
+    LeftVal(0),
+    RightVal(0),
+    LowpassN(10) {
 }
 
 
@@ -56,9 +62,12 @@ void AudioPlayBuffer::update() {
   unsigned int i = 0;
   while (i<AUDIO_BLOCK_SAMPLES) {
     mixer(left, right);
-    block1->data[i] = left;
-    if (numConnections > 1)
-      block2->data[i] = right;
+    LeftVal += (left - LeftVal)/LowpassN;
+    block1->data[i] = LeftVal;
+    if (numConnections > 1) {
+      RightVal += (right - RightVal)/LowpassN;
+      block2->data[i] = RightVal;
+    }
     i++;
     Time += interval;
     while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
@@ -85,6 +94,11 @@ void AudioPlayBuffer::mixer(int16_t &left, int16_t &right) {
     val += Data->buffer()[Index+c]/nchannels;
   left = val;
   right = val;
+}
+
+
+void AudioPlayBuffer::setLowpass(int16_t n) {
+  LowpassN = n;
 }
 
 

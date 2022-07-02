@@ -49,6 +49,11 @@ void AudioMonitor::setupVolume(float volume, int volume_up_pin,
 }
 
 
+void AudioMonitor::setLowpass(int16_t n) {
+  Data.setLowpass(n);
+}
+
+
 void AudioMonitor::pause() {
   Play = false;
   Data.setMute(true);

@@ -22,6 +22,10 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
   
   virtual void update();
 
+  // Set low-pass filter time-constant to n/44.1kHz, default is 10.
+  // Must be larger or equal to one.
+  void setLowpass(int16_t n);
+
   void setMute(bool mute=true);
   
 
@@ -35,6 +39,9 @@ class AudioPlayBuffer : public DataWorker, public AudioStream {
 
   float Time;
   bool Mute;
+  int16_t LeftVal;
+  int16_t RightVal;
+  int16_t LowpassN;
   
 };
 
