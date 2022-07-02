@@ -52,9 +52,17 @@ class AudioMonitor {
   // is reduced by `gain`.
   void addFeedback(float gain, float freq, float duration);
 
-  // Set intervall between audio feedback of feedback channel
+  // Set interval between audio feedback of feedback channel
   // `soundix` to `interval` milliseonds.
   void setFeedbackInterval(uint interval, uint8_t soundidx=0);
+
+  // Set interval between audio feedback of feedback channel
+  // `soundix` according to frac.
+  // For frac equal to or larger than one, a feedback signal is played
+  // with the smallest interval (5Hz).
+  // The smaller frac, the larger the interval between the feedback signals.
+  // If frac is les or equal to zero, no feedback signal is played.
+  void setFeedback(float frac, uint8_t soundidx=0);
 
   // Call as often as possible in loop().
   // Checks volume buttons and calls volumeUp() and volumeDown() accordingly.
@@ -90,6 +98,7 @@ class AudioMonitor {
   Button VolumeUpButton;
   Button VolumeDownButton;
   int16_t *Beep[3];
+  int BeepDuration[3];
   uint BeepInterval[3];
   elapsedMillis BeepTime[3];
 

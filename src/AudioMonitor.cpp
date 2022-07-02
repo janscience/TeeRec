@@ -13,6 +13,7 @@ AudioMonitor::AudioMonitor(DataWorker &data, AudioStream &speaker) :
   for (size_t i=0; i<3; i++) {
     Gains[i+1] = 0.0;
     Beep[i] = 0;
+    BeepDuration[i] = 0;
     BeepInterval[i] = 0;
   }
   Play = false;
@@ -61,6 +62,10 @@ void AudioMonitor::play() {
 
 
 void AudioMonitor::addFeedback(float gain, float freq, float duration) {
+  if (NSounds >= 3) {
+    Serial.println("No more than 3 audio feedbacks!");
+    while (1) {};
+  }
   Sound[NSounds] = new AudioPlayMemory;
   ACS[NSounds] = new AudioConnection(*Sound[NSounds], 0, *Mixer, NSounds+1);
   Gains[0] -= gain;
@@ -68,9 +73,9 @@ void AudioMonitor::addFeedback(float gain, float freq, float duration) {
     Gains[0] = 0.1;
   Gains[NSounds+1] = gain;
   // generate beep waveform:
+  BeepDuration[NSounds] = 1000.0*duration;
   size_t np = size_t(AUDIO_SAMPLE_RATE_EXACT/freq);
-  unsigned int n = (unsigned int)(duration*AUDIO_SAMPLE_RATE_EXACT);
-  //  unsigned int n = (unsigned int)(duration*AUDIO_SAMPLE_RATE_EXACT/np)*np;
+  size_t n = (size_t)(duration*AUDIO_SAMPLE_RATE_EXACT);
   Beep[NSounds] = new int16_t[2+n];
   // first integer encodes format and size:
   unsigned int format = 0x81;
@@ -79,11 +84,18 @@ void AudioMonitor::addFeedback(float gain, float freq, float duration) {
   Beep[NSounds][0] = format & 0xFFFF;
   Beep[NSounds][1] = format >> 16;
   // Gabor sine tone:
-  uint16_t a = 1 << 15;
-  for (size_t i=0; i<n; i++)
-    Beep[NSounds][2+i] = (int16_t)(a*0.5*(1.0-cos(TWO_PI*i/n))*sin(TWO_PI*i/np));
+  float a = 1 << 15;
+  float b = -(4.0/n)/n;
+  for (size_t i=0; i<n; i++) {
+    // Rect:
+    //Beep[NSounds][2+i] = (int16_t)(a*sin(TWO_PI*i/np));
+    // 1 - cosine:
+    //Beep[NSounds][2+i] = (int16_t)(a*0.5*(1.0-cos(TWO_PI*i/n))*sin(TWO_PI*i/np));
+    // Parabola:
+    Beep[NSounds][2+i] = (int16_t)(a*b*i*(float(i)-n)*(0.6*sin(TWO_PI*i/np)+0.4*sin(TWO_PI*2*i/np)));
+    // Gaussian:
     // Beep[NSounds][2+i] = (int16_t)(a*exp(-0.5*pow((i-n/2)/(n/4), 2))*sin(TWO_PI*i/np));
-  
+  }
   NSounds++;
   setVolume();  
 }
@@ -91,6 +103,21 @@ void AudioMonitor::addFeedback(float gain, float freq, float duration) {
 
 void AudioMonitor::setFeedbackInterval(uint interval, uint8_t soundidx) {
   BeepInterval[soundidx] = interval;
+}
+
+
+void AudioMonitor::setFeedback(float frac, uint8_t soundidx) {
+  const int max_interval = 500;
+  int min_interval = 100;
+  if (min_interval < BeepDuration[soundidx])
+    min_interval = BeepDuration[soundidx];
+  if (frac > 0.0001) {
+    if (frac > 1.0)
+      frac = 1.0;
+    BeepInterval[soundidx] = max_interval - frac*(max_interval - min_interval);
+  }
+  else
+    BeepInterval[soundidx] = 0;
 }
 
 
