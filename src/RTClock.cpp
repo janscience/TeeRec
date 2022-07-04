@@ -9,8 +9,14 @@ time_t getTeensyRTCTime() {
 }
 
 
-RTClock::RTClock() {
-  RTCSource = RTC.chipPresent() ? 1 : 0;
+RTClock::RTClock() :
+  RTCSource(0) {
+}
+
+
+void RTClock::init() {
+  tmElements_t tm;
+  RTCSource = RTC.read(tm) && RTC.chipPresent() ? 1 : 0;
   setSync();
 }
 
