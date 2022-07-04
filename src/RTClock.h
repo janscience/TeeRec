@@ -26,19 +26,18 @@ class RTClock {
 
  public:
 
-  // Initialize.  Set the source for real time clock to DS1307 chip if
-  // present, otherwise the Teensy on-board real time clock is used.
+  // Initialize the Teensy on-board real time clock.
   RTClock();
 
   // Set the source for real time clock to DS1307 chip if
   // present, otherwise the Teensy on-board real time clock is used.
-  // Call this early on in setup().
+  // Call this early on in setup() if you intend to use an DS1307 clock.
   void init();
 
   // Set the real time clock (either DS1307 if available or on-board)
   // via setSyncProvider() from TimeLib.h.
-  // This function is called by init() and you usually do not
-  // need to call it again.
+  // This function is called by the constructor or by init()
+  // and you usually do not need to call it again.
   // You need to call it when waking up from a deep sleep, though.
   void setSync();
 

@@ -11,6 +11,7 @@ time_t getTeensyRTCTime() {
 
 RTClock::RTClock() :
   RTCSource(0) {
+  setSync();
 }
 
 
