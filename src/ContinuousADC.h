@@ -343,6 +343,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   //   as possible to the selected resolution.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
+  // The conversion speed.
+  ADC_CONVERSION_SPEED conversionSpeed() const;
+
   // Return string describing a conversion speed.
   const char *conversionSpeedStr(ADC_CONVERSION_SPEED speed) const;
 
@@ -370,6 +373,9 @@ class ContinuousADC : public DataBuffer, public Configurable {
   //   Conversion: Convert that voltage into a digital representation that is as close
   //   as possible to the selected resolution.
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
+
+  // The sampling speed.
+  ADC_SAMPLING_SPEED samplingSpeed() const;
 
   // Return string describing a sampling speed.
   const char *samplingSpeedStr(ADC_SAMPLING_SPEED speed) const;

@@ -188,6 +188,11 @@ void ContinuousADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
 }
 
 
+ADC_CONVERSION_SPEED ContinuousADC::conversionSpeed() const {
+  return ConversionSpeed;
+}
+
+
 const char *ContinuousADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) const {
   return getConversionEnumStr(speed);
 }
@@ -284,6 +289,11 @@ ADC_CONVERSION_SPEED ContinuousADC::conversionSpeedEnum(const char *conversion) 
 
 void ContinuousADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
   SamplingSpeed = speed;
+}
+
+
+ADC_SAMPLING_SPEED ContinuousADC::samplingSpeed() const {
+  return SamplingSpeed;
 }
 
 
