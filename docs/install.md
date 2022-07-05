@@ -42,11 +42,9 @@ Remove `SdFat` and `Bounce2` from your `Arduino/libraries` folder,
 they are now supplied by Teensyduino.
 
 For installing the
-[Adafruit-ST7735](https://github.com/adafruit/Adafruit-ST7735-Library)
-or [Adafruit ILI9341](https://github.com/adafruit/Adafruit_ILI9341)
-libraries for the TFT monitor (not needed and not recommended), open
-in the Arduino IDE: Tools - Manage libraries. Search for the libraries
-and install them.
+[Adafruit-GFX](https://github.com/adafruit/Adafruit-GFX-Library)
+library for the TFT monitor, open in the Arduino IDE: Tools - Manage
+libraries. Search for the library and install it.
 
 
 ## Installation
