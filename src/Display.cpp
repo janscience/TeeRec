@@ -94,13 +94,60 @@ void Display::clearPlot(uint8_t area) {
     return;
   Screen->fillRect(PlotX[area], PlotY[area], PlotW[area], PlotH[area]+1,
 		   PlotBackground);
-  Screen->drawFastHLine(PlotX[area], dataY(area, 0), PlotW[area], PlotGrid);
+  Screen->drawFastHLine(PlotX[area], dataY(area, int16_t(0)),
+			PlotW[area], PlotGrid);
 }
 
 
 void Display::clearPlots() {
   for (int k=0; k<MaxAreas; k++)
     clearPlot(k);
+}
+
+
+void Display::plot(uint8_t area, const int16_t *buffer, int nbuffer,
+		   int color) {
+  if (PlotW[area] == 0 )
+    return;
+  color %= 8;
+  if (nbuffer < 2*PlotW[area]) {
+    uint16_t x0 = dataX(area, 0, nbuffer);
+    uint16_t y0 = dataY(area, buffer[0]);
+    for (uint16_t k=1; k<nbuffer; k++) {
+      uint16_t x = dataX(area, k, nbuffer);
+      uint16_t y = dataY(area, buffer[k]);
+      Screen->drawLine(x0, y0, x, y, PlotLines[color]);
+      x0 = x;
+      y0 = y;
+    }
+  }
+  else {
+    uint16_t pymin = 0xffff;
+    uint16_t pymax = 0xffff;
+    uint16_t py1 = 0xffff;
+    for (uint16_t k=0; k<nbuffer; ) {
+      uint16_t x = dataX(area, k, nbuffer);
+      uint16_t y0 = dataY(area, buffer[k]);
+      uint16_t ymin = y0;
+      uint16_t ymax = y0;
+      uint16_t y1 = y0;
+      k++;
+      while (dataX(area, k, nbuffer) == x) {
+	uint16_t y1 = dataY(area, buffer[k]);
+	if (y1 < ymin)
+	  ymin = y1;
+	else if (y1 > ymax)
+	  ymax = y1;
+	k++;
+      }
+      if (pymin < 0xffff && (ymax < pymin || ymin > pymax))
+	Screen->drawLine(x-1, py1, x, y0, PlotLines[color]);
+      Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
+      py1 = y1;
+      pymin = ymin;
+      pymax = ymax;
+    }
+  }
 }
 
 
@@ -156,6 +203,11 @@ uint16_t Display::dataX(uint8_t area, float x, float maxx) {
 
 uint16_t Display::dataY(uint8_t area, float y) {
   return uint16_t(PlotYOffs[area] - PlotYScale[area]*y);
+}
+
+
+uint16_t Display::dataY(uint8_t area, int16_t y) {
+  return uint16_t(PlotYOffs[area] - PlotYScale[area]*y/(1 << 15));
 }
 
 

@@ -9,6 +9,7 @@
 
 #include <Arduino.h>
 #include <DataWorker.h>
+#include <DataBuffer.h>
 
 
 class Analyzer;
@@ -50,7 +51,8 @@ class AnalysisChain : DataWorker {
   bool Continuous;
   int Counter;
 
-  float *Buffer[16];
+  static const int MaxChannels = 4;
+  sample_t *Buffer[MaxChannels];
   uint8_t NChannels;
   size_t NFrames;
   

@@ -173,7 +173,12 @@ class Display {
   // Clear all plot areas.
   void clearPlots();
 
-  // Plot data trace from buffer in plot area with some color (index into PlotLines).
+  // Plot data trace from buffer in plot area with some color
+  // (index into PlotLines).
+  void plot(uint8_t area, const int16_t *buffer, int nbuffer, int color=0);
+
+  // Plot data trace from buffer (-1 to 1) in plot area with some
+  // color (index into PlotLines).
   void plot(uint8_t area, const float *buffer, int nbuffer, int color=0);
 
   // Define text area. 
@@ -271,6 +276,8 @@ class Display {
   uint16_t dataX(uint8_t area, float x, float maxx);
   // Translate y value (between -1 and 1) to y-coordinate.
   uint16_t dataY(uint8_t area, float y);
+  // Translate y value to y-coordinate.
+  uint16_t dataY(uint8_t area, int16_t y);
 
   // Fonts:
   const GFXfont *Font;

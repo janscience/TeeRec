@@ -97,7 +97,7 @@ size_t DataBuffer::incrementSample(size_t idx, size_t incr) const {
 
 void DataBuffer::getData(uint8_t channel, size_t start,
 			 sample_t *buffer, size_t nbuffer) const {
-  if ( Rate == 0 || NChannels == 0 ) {
+  if (Rate == 0 || NChannels == 0) {
     memset(buffer, 0, sizeof(sample_t)*nbuffer);
     return;
   }
@@ -108,7 +108,7 @@ void DataBuffer::getData(uint8_t channel, size_t start,
   }
   // copy:
   start += channel;
-  for (size_t k=0; k<nbuffer; k++ ) {
+  for (size_t k=0; k<nbuffer; k++) {
     if (start >= NBuffer)
       start -= NBuffer;
     buffer[k] = Buffer[start];
@@ -119,7 +119,7 @@ void DataBuffer::getData(uint8_t channel, size_t start,
 
 void DataBuffer::getData(uint8_t channel, size_t start,
 			 float *buffer, size_t nbuffer) const {
-  if ( Rate == 0 || NChannels == 0 ) {
+  if (Rate == 0 || NChannels == 0) {
     memset(buffer, 0, sizeof(float)*nbuffer);
     return;
   }
@@ -131,7 +131,7 @@ void DataBuffer::getData(uint8_t channel, size_t start,
   // copy:
   start += channel;
   float scale = 1.0/(1 << (DataBits-1));
-  for (size_t k=0; k<nbuffer; k++ ) {
+  for (size_t k=0; k<nbuffer; k++) {
     if (start >= NBuffer)
       start -= NBuffer;
     buffer[k] = scale*Buffer[start];

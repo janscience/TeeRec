@@ -5,7 +5,7 @@ Waveform wave;
 Blink blink(LED_BUILTIN);
 
 float freq = 500.0;
-float ampl = 0.1;
+float ampl = 0.9;
 float ampls[] = {0.4, -1.0};
 float phases[] = {0.0, -1.0};
 

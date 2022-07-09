@@ -8,6 +8,7 @@
 
 
 #include <Arduino.h>
+#include <DataBuffer.h>
 
 
 class AnalysisChain;
@@ -46,7 +47,7 @@ class Analyzer {
 
   // Analyze data of nchannels channels each holding nframes frames of data.
   // Note that this function is allowed to modify the data in place.
-  virtual void analyze(float **data, uint8_t nchannels, size_t nframes) = 0;
+  virtual void analyze(sample_t **data, uint8_t nchannels, size_t nframes) = 0;
   
   
  protected:

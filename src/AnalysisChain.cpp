@@ -35,9 +35,11 @@ void AnalysisChain::start(float interval, float window) {
   Counter = -1;
   Continuous = (fabs(interval - window) < 1e-8);
   NChannels = Data->nchannels();
+  if (NChannels > MaxChannels)
+    NChannels = MaxChannels;
   NFrames = Data->frames(Window);
   for(uint8_t c=0; c<NChannels; ++c) {
-    Buffer[c] = (float*)malloc(NFrames*sizeof(float));
+    Buffer[c] = (sample_t*)malloc(NFrames*sizeof(sample_t));
     if (Buffer[c] == 0) {
       Serial.println("Not enough memory to allocate analysis buffer!");
       while (1) {};
