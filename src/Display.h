@@ -298,7 +298,7 @@ class Display {
   static const size_t MaxChars = 100;
   char Text[MaxAreas][MaxTexts][MaxChars];
   int TextHead[MaxAreas];
-  PROGMEM GFXcanvas1 *TextCanvas[MaxAreas];
+  GFXcanvas1 *TextCanvas[MaxAreas];
 
   void drawText(uint8_t area, const char *text);
 
