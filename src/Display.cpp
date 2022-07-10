@@ -35,12 +35,14 @@ Display::Display() {
     TextS[k] = false;
     TextHead[k] = 0;
     TextCanvas[k] = NULL;
+    TextColor[k] = DefaultTextColor;
+    TextBackground[k] = DefaultTextBackground;
   }
   memset(Text, 0, sizeof(Text));
-  Font = 0;
-  TitleFont = 0;
-  SmallFont = 0;
-  Screen = 0;
+  Font = NULL;
+  TitleFont = NULL;
+  SmallFont = NULL;
+  Screen = NULL;
   BacklightPin = -1;
 }
 
@@ -243,7 +245,26 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
   Text[area][0][0] = '\0';
   return float(h)/float(Height);
 }
-  
+
+
+void Display::setTextColors(uint8_t area, uint16_t color, uint16_t background) {
+  TextColor[area] = color;
+  TextBackground[area] = background;
+}
+
+
+void Display::setDefaultTextColors(uint8_t area) {
+  TextColor[area] = DefaultTextColor;
+  TextBackground[area] = DefaultTextBackground;
+}
+
+
+void Display::swapTextColors(uint8_t area) {
+  uint16_t tmp = TextColor[area];
+  TextColor[area] = TextBackground[area];
+  TextBackground[area] = tmp;
+}
+
 
 void Display::clearText(uint8_t area) {
   if (TextW[area] == 0 || TextCanvas[area] == NULL)
@@ -251,7 +272,8 @@ void Display::clearText(uint8_t area) {
   Text[area][TextHead[area]][0] = '\0';
   TextCanvas[area]->fillScreen(0x0000);
   Screen->drawBitmap(TextX[area], TextY[area], TextCanvas[area]->getBuffer(),
-		     TextW[area], TextH[area], TextColor, TextBackground);
+		     TextW[area], TextH[area],
+		     TextColor[area], TextBackground[area]);
   TextS[area] = 0;
   TextI[area] = 0;
 }
@@ -303,7 +325,8 @@ void Display::drawText(uint8_t area, const char *text) {
   TextCanvas[area]->setCursor(0, TextB[area]);
   TextCanvas[area]->print(text);
   Screen->drawBitmap(TextX[area], TextY[area], TextCanvas[area]->getBuffer(),
-		     TextW[area], TextH[area], TextColor, TextBackground);
+		     TextW[area], TextH[area],
+		     TextColor[area], TextBackground[area]);
 }
 
 
@@ -314,6 +337,13 @@ void Display::writeText(uint8_t area, const char *text) {
   strncpy(Text[area][TextHead[area]], text, MaxChars);
   TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
   TextI[area] = 0;
+}
+
+
+void Display::rewriteText(uint8_t area) {
+  if (TextW[area] == 0 || TextCanvas[area] == NULL)
+    return;
+  drawText(area, Text[area][TextHead[area]]);
 }
 
 

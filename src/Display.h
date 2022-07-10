@@ -188,6 +188,16 @@ class Display {
   float setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
 		    bool top=false);
 
+  // Set foreground and background color for text in specified area.
+  void setTextColors(uint8_t area, uint16_t color, uint16_t background);
+
+  // Set foreground and background color for text in specified area to
+  // default colors.
+  void setDefaultTextColors(uint8_t area);
+
+  // Swap foreground and background colors for specified text area.
+  void swapTextColors(uint8_t area);
+
   // Clear specified text area.
   void clearText(uint8_t area);
 
@@ -214,6 +224,9 @@ class Display {
 
   // Write into text area.
   void writeText(uint8_t area, const char *text);
+
+  // Rewrite previously written text into specified text area.
+  void rewriteText(uint8_t area);
 
   // Scroll text in area.
   void scrollText(uint8_t area);
@@ -253,8 +266,8 @@ class Display {
   static const uint16_t PlotBackground = 0x0000;   // black
   static const uint16_t PlotGrid = 0x7BEF;         // gray
   static const uint16_t PlotLines[8];
-  static const uint16_t TextBackground = 0x0000;   // black
-  static const uint16_t TextColor = 0xffff;        // white
+  static const uint16_t DefaultTextBackground = 0x0000; // black
+  static const uint16_t DefaultTextColor = 0xffff;      // white
 
   Adafruit_GFX *Screen;
 
@@ -293,9 +306,11 @@ class Display {
   uint16_t TextC[MaxAreas];          // max number of characters
   uint16_t TextI[MaxAreas];          // character offset
   bool TextS[MaxAreas];              // scroll it
+  uint16_t TextBackground[MaxAreas];
+  uint16_t TextColor[MaxAreas];
   // Text stack:
-  static const uint8_t MaxTexts = 8;
-  static const size_t MaxChars = 100;
+  static const uint8_t MaxTexts = 4;
+  static const size_t MaxChars = 50;
   char Text[MaxAreas][MaxTexts][MaxChars];
   int TextHead[MaxAreas];
   GFXcanvas1 *TextCanvas[MaxAreas];
