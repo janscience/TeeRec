@@ -17,7 +17,7 @@ class PushButtons {
 public:
 
   // Maximum number of buttons that can be managed.
-  static const int MaxButtons = 20;
+  static const int MaxButtons = 8;
 
 
   // Function type for on-press and on-release callbacks.
@@ -27,7 +27,7 @@ public:
   PushButtons();
   ~PushButtons();
 
-  // Add a button at a pin (if pin >= 0) and mode (INPUT or INPUT_PULLUP.
+  // Add a button at a pin (if pin >= 0) and mode (INPUT or INPUT_PULLUP).
   // Optionally install callbacks that are called on press and release events. 
   // Returns the id of the button.
   int add(int pin, int mode=INPUT, Callback onpress=0, Callback onrelease=0);
