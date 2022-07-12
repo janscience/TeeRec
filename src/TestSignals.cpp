@@ -74,17 +74,18 @@ void setupTestSignals(int pin0, int pin1, int frequency) {
 
 
 Waveform *Waveform::WF = NULL;
+uint16_t Waveform::MaxValue = 1 << 11;
+float Waveform::Amplitude = 1.0;
 
 
-Waveform::Waveform() {
+Waveform::Waveform() :
+  Rate(0.0),
+  Pin(-1),
+  NData(0),
+  Data(NULL),
+  Index(0),
+  NHarmonics(0) {
   WF = this;
-  Pin = -1;
-  Rate = 0.0;
-  MaxValue = 1 << 11;
-  NHarmonics = 0;
-  NData = 0;
-  Data = NULL;
-  Index = 0;
   setup(100000.0);
 }
 
@@ -98,6 +99,7 @@ void Waveform::setup(float rate) {
   analogWriteResolution(12);
   MaxValue = 1 << 11;
   Rate = rate;
+  Amplitude = 1.0;
 }
 
 
@@ -112,7 +114,7 @@ void Waveform::setHarmonics(float *ampls, float *phases) {
 
 
 void Waveform::start(int pin, float freq, float ampl) {
-  if ( Rate <= 0.0 ) {
+  if (Rate <= 0.0) {
     Serial.println("ERROR in Waveform::start(): no sampling rate specified.");
     return;
   }
@@ -138,12 +140,12 @@ void Waveform::start(int pin, float freq, float ampl) {
   Pin = pin;
   pinMode(Pin, OUTPUT);
   NData = round(Rate/freq);
-  if ( NData < 4 ) {
+  if (NData < 4) {
     Serial.println("ERROR in Waveform::start(): requested fundamental frequency to high.");
     return;
   }
   freq = Rate/NData;
-  if ( Data != NULL )
+  if (Data != NULL)
     stop();
   // total amplitude:
   float amplt = 1.0;
@@ -158,8 +160,9 @@ void Waveform::start(int pin, float freq, float ampl) {
       x += Ampls[j]*sin(TWO_PI*k*(j+2)/NData + Phases[j]);
     Data[k] = uint16_t((MaxValue-1)*ampl*x + MaxValue);
   }
+  Amplitude = 1.0;
   Index = 0;
-  if ( !Timer.begin(write, 1.0e6/Rate) )
+  if (!Timer.begin(write, 1.0e6/Rate))
     Serial.printf("ERROR in Waveform::start(): failed to start timer at frequency %.1kHz\n", 0.001*Rate);
   else {
     char pins[4];
@@ -179,8 +182,26 @@ void Waveform::stop() {
 }
 
 
+void Waveform::restart(float rate) {
+  Timer.end();
+  Rate = rate;
+  if (!Timer.begin(write, 1.0e6/Rate))
+    Serial.printf("ERROR in Waveform::start(): failed to start timer at frequency %.1kHz\n", 0.001*Rate);
+  else
+    Serial.printf("Sampled with %.1fkHz.\n", 0.001*Rate);
+}
+
+
+void Waveform::setAmplitude(float ampl) {
+  Amplitude = ampl;
+  Serial.printf("Amplitude %g.\n", Amplitude);
+}
+
+
 void Waveform::write() {
   if (WF->Index >= WF->NData)
     WF->Index = 0;
-  analogWrite(WF->Pin, WF->Data[WF->Index++]);
+  float v = WF->Data[WF->Index++] - MaxValue;
+  uint16_t uv = (v * Amplitude) + MaxValue;
+  analogWrite(WF->Pin, uv);
 }

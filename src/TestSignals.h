@@ -45,13 +45,19 @@ class Waveform {
   void setHarmonics(float *ampls, float *phases);
 
   // Start generating a signal on the specified DAC pin,
-  // fundamental frequency and amplitude (0-1).
+  // fundamental frequency and maximum amplitude (0-1).
   // The signal is generated between pin and GND right next to it.
   void start(int pin, float freq, float ampl=1.0);
 
   // Stop generating a signal.
   void stop();
 
+  // Restart playing the signal with new sampling rate.
+  void restart(float rate);
+
+  // Set amplitude factor (<=1). */
+  void setAmplitude(float ampl);
+  
 
  protected:
 
@@ -62,13 +68,14 @@ class Waveform {
   IntervalTimer Timer;
 
   float Rate;
-  uint16_t MaxValue;
+  static uint16_t MaxValue;
+  static float Amplitude;
   volatile int Pin;
   volatile size_t NData;
   volatile uint16_t *Data;
   volatile size_t Index;
 
-  static const size_t MaxHarmonics = 20;
+  static const size_t MaxHarmonics = 10;
   size_t NHarmonics;
   float Ampls[MaxHarmonics];
   float Phases[MaxHarmonics];
