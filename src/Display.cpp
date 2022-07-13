@@ -70,8 +70,10 @@ void Display::clear() {
 void Display::setPlotArea(uint8_t area, float x0, float y0, float x1, float y1) {
   PlotX[area] = uint16_t(x0*Width);
   PlotY[area] = uint16_t((1.0-y1)*Height);
-  PlotW[area] = uint16_t((x1-x0)*Width);
-  PlotH[area] = uint16_t((y1-y0)*Height);
+  uint16_t xp1 = uint16_t(x1*Width);
+  uint16_t yp1 = uint16_t((1.0-y0)*Height);
+  PlotW[area] = xp1 - PlotX[area] + 1;
+  PlotH[area] = yp1 - PlotY[area] + 1;
   PlotYOffs[area] = PlotY[area] + 0.5*PlotH[area];
   PlotYScale[area] = 0.5*PlotH[area];
   NPlots = area + 1;
@@ -216,8 +218,10 @@ uint16_t Display::dataY(uint8_t area, int16_t y) {
 float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1, bool top) {
   TextX[area] = uint16_t(x0*Width);
   TextY[area] = uint16_t((1.0-y1)*Height);
-  TextW[area] = uint16_t((x1-x0)*Width);
-  TextH[area] = uint16_t((y1-y0)*Height);
+  uint16_t xp1 = uint16_t(x1*Width);
+  uint16_t yp1 = uint16_t((1.0-y0)*Height);
+  TextW[area] = xp1 - TextX[area] + 1;
+  TextH[area] = yp1 - TextY[area] + 1;
   /*
   if (TextCanvas[area] != 0)
     delete TextCanvas[area];
