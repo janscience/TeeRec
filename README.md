@@ -24,10 +24,11 @@ with contributions by
 - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
 - Highspeed timed acquisition up to 500kHz.
 - Conversion of data to signed 16bit for direct storage into wave files.
-- Continuous storing recorded data as wave files on SD cards.
+- Continuous storing of recorded data as wave files on SD cards.
 - Detailed metadata in wave file header: sampling rate, number of
   channels and pin IDs, bit resolution, date and time, Teensy board
   version, and its unique MAC address.
+- Analysis chain on top of data buffer.
 - Audio monitor.
 - Display recorded data on a monitor.
 - Generate test signals.
@@ -77,7 +78,7 @@ via the `TeeRec.h` header.
 ### Online analysis
 
 - [AnalysisChain](src/AnalysisChain.h): Coordinate analysis of data snippets via Analyzer.
-- [Analyzer](src/Analyzer.h): Base class for analyzer called by AnalysisChain.
+- [Analyzer](src/Analyzer.h): Base class for analyzers called by AnalysisChain.
 
 ### Utilities
 
@@ -126,7 +127,6 @@ Some useful utilities.
 
 Demonstrate the usage of some of the provided libraries.
 
-- [temperature](examples/temperature): Read temperature from 1-wire device.
 - [blink](examples/blink): Demonstrate usage of Blink class.
 - [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
 
@@ -137,15 +137,9 @@ In [utils/](utils) you find some useful python scripts.
 
 - [viewwave](utils/viewwave): display the traces in a wave file.
 - [continuity](utils/continuity): check whether pulse signals recorded into wave file have consistent periods over many wave files.
-- [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 - [noise](utils/noise): plot and analyse baseline noise levels from wave files.
 - [spectra](utils/spectra): power spectra of traces in wave files.
-
-
-## TODO
-
-- Add more sensors.
-- Extend interface to allow for checking whether a sensor reading is available. 
+- [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 
 
 ## Applications of the TeeRec libraries
