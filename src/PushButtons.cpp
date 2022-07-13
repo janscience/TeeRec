@@ -58,3 +58,9 @@ void PushButtons::setInterval(uint16_t interval) {
   Interval = interval;
 }
 
+
+Button *PushButtons::button(int id) {
+  if (id >= 0 && id < NButtons)
+    return &Buttons[id];
+  return NULL;
+}

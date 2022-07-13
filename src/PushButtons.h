@@ -49,6 +49,9 @@ public:
   // Set the debouncing interval. Default is 20ms.
   void setInterval(uint16_t interval);
 
+  // Returns the Button object of button id.
+  Button *button(int id);
+
 
 protected:
 
