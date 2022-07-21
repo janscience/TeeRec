@@ -42,10 +42,12 @@ class SDCard {
   // End usage of SD card.
   ~SDCard();
 
+#ifdef BUILTIN_SDCARD
   // Initialize built in SD card.
   // Return true on success.
   bool begin();
-
+#endif
+  
   // Initialize SD card on specified SPI chip select pin.
   // Return true on success.
   bool begin(uint8_t csPin);

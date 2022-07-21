@@ -16,9 +16,11 @@ SDCard::~SDCard() {
 }
 
 
+#ifdef BUILTIN_SDCARD
 bool SDCard::begin() {
   return begin(BUILTIN_SDCARD);
 }
+#endif
 
 
 bool SDCard::begin(uint8_t csPin) {
