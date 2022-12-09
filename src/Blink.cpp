@@ -28,8 +28,10 @@ Blink::~Blink() {
 
 void Blink::setPin(int pin) {
   Pin = pin;
-  pinMode(Pin, OUTPUT);
-  digitalWrite(Pin, LOW);
+  if (Pin >= 0) {
+    pinMode(Pin, OUTPUT);
+    digitalWrite(Pin, LOW);
+  }
 }
 
 
