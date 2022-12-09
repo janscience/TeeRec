@@ -98,9 +98,9 @@ if __name__ == '__main__':
                         metavar='STEP')
     parser.add_argument('-g', dest='gain', default=None, type=float,
                         help='Gain of an amplifier (default no gain, i.e. raw integer recordings)',
-                        metavar='TMAX')
+                        metavar='GAIN')
     parser.add_argument('-r', dest='raw', action='store_true',
-                        help='raw voltage readings from 0 to 3.3V')
+                        help='raw voltage readings without offset from 0 to 3.3V')
     parser.add_argument('-a', dest='autoy', action='store_true',
                         help='auto scale y-axis')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -119,4 +119,6 @@ if __name__ == '__main__':
     save = args.save
     path = args.file[0]
     # load and plot:
+    plt.rcParams['axes.xmargin'] = 0
+    plt.rcParams['axes.ymargin'] = 0.02
     plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save)
