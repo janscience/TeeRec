@@ -181,6 +181,9 @@ class Display {
   // color (index into PlotLines).
   void plot(uint8_t area, const float *buffer, int nbuffer, int color=0);
 
+  // Set amplitude zoom factor of plot area to fac.
+  void setPlotZoom(uint8_t area, float fac);
+
   // Define text area. 
   // By default center the text vertically into the area. If top is set to true,
   // align the text vertically at the top.
@@ -284,6 +287,7 @@ class Display {
   int16_t PlotH[MaxAreas];
   float PlotYOffs[MaxAreas];
   float PlotYScale[MaxAreas];
+  float PlotYZoom[MaxAreas];
 
   // Translate x value to x-coordinate.
   uint16_t dataX(uint8_t area, float x, float maxx);

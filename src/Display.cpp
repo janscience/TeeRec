@@ -25,6 +25,7 @@ Display::Display() {
     PlotH[k] = 0;
     PlotYOffs[k] = 0;
     PlotYScale[k] = 0;
+    PlotYZoom[k] = 0;
     TextX[k] = 0;
     TextY[k] = 0;
     TextW[k] = 0;
@@ -76,6 +77,7 @@ void Display::setPlotArea(uint8_t area, float x0, float y0, float x1, float y1) 
   PlotH[area] = yp1 - PlotY[area] + 1;
   PlotYOffs[area] = PlotY[area] + 0.5*PlotH[area];
   PlotYScale[area] = 0.5*PlotH[area];
+  PlotYZoom[area] = 1.0;
   NPlots = area + 1;
 }
 
@@ -200,18 +202,23 @@ void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
 }
 
 
+void Display::setPlotZoom(uint8_t area, float fac) {
+  PlotYZoom[area] = fac;
+}
+
+
 uint16_t Display::dataX(uint8_t area, float x, float maxx) {
   return PlotX[area] + uint16_t(x/maxx*PlotW[area]);
 }
 
 
 uint16_t Display::dataY(uint8_t area, float y) {
-  return uint16_t(PlotYOffs[area] - PlotYScale[area]*y);
+  return uint16_t(PlotYOffs[area] - PlotYZoom[area]*PlotYScale[area]*y);
 }
 
 
 uint16_t Display::dataY(uint8_t area, int16_t y) {
-  return uint16_t(PlotYOffs[area] - PlotYScale[area]*y/(1 << 15));
+  return uint16_t(PlotYOffs[area] - PlotYZoom[area]*PlotYScale[area]*y/(1 << 15));
 }
 
 
