@@ -207,6 +207,11 @@ void Display::setPlotZoom(uint8_t area, float fac) {
 }
 
 
+float Display::plotZoom(uint8_t area) {
+  return PlotYZoom[area];
+}
+
+
 uint16_t Display::dataX(uint8_t area, float x, float maxx) {
   return PlotX[area] + uint16_t(x/maxx*PlotW[area]);
 }

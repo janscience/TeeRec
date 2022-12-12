@@ -184,6 +184,9 @@ class Display {
   // Set amplitude zoom factor of plot area to fac.
   void setPlotZoom(uint8_t area, float fac);
 
+  // The zoom factor for the amplitude of plot area.
+  float plotZoom(uint8_t area);
+
   // Define text area. 
   // By default center the text vertically into the area. If top is set to true,
   // align the text vertically at the top.
