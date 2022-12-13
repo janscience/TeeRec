@@ -75,6 +75,8 @@ void Display::setPlotArea(uint8_t area, float x0, float y0, float x1, float y1) 
   uint16_t yp1 = uint16_t((1.0-y0)*Height);
   PlotW[area] = xp1 - PlotX[area] + 1;
   PlotH[area] = yp1 - PlotY[area] + 1;
+  if (PlotY[area] + PlotH[area] > Height)
+    PlotH[area] = Height - PlotY[area];
   PlotYOffs[area] = PlotY[area] + 0.5*PlotH[area];
   PlotYScale[area] = 0.5*PlotH[area];
   PlotYZoom[area] = 1.0;
@@ -122,8 +124,7 @@ void Display::plot(uint8_t area, const int16_t *buffer, int nbuffer,
     for (uint16_t k=1; k<nbuffer; k++) {
       uint16_t x = dataX(area, k, nbuffer);
       uint16_t y = dataY(area, buffer[k]);
-      if (y0 < 0xffff && y < 0xffff)
-	Screen->drawLine(x0, y0, x, y, PlotLines[color]);
+      Screen->drawLine(x0, y0, x, y, PlotLines[color]);
       x0 = x;
       y0 = y;
     }
@@ -147,10 +148,9 @@ void Display::plot(uint8_t area, const int16_t *buffer, int nbuffer,
 	  ymax = y1;
 	k++;
       }
-      if (pymin < 0xffff && py1 < 0xffff && y0 < 0xffff && (ymax < pymin || ymin > pymax))
+      if (pymin < 0xffff && (ymax < pymin || ymin > pymax))
 	Screen->drawLine(x-1, py1, x, y0, PlotLines[color]);
-      if (ymin < 0xffff && ymax < 0xffff)
-	Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
+      Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
       py1 = y1;
       pymin = ymin;
       pymax = ymax;
@@ -169,8 +169,7 @@ void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
     for (uint16_t k=1; k<nbuffer; k++) {
       uint16_t x = dataX(area, k, nbuffer);
       uint16_t y = dataY(area, buffer[k]);
-      if (y0 < 0xffff && y < 0xffff)
-	Screen->drawLine(x0, y0, x, y, PlotLines[color]);
+      Screen->drawLine(x0, y0, x, y, PlotLines[color]);
       x0 = x;
       y0 = y;
     }
@@ -194,25 +193,14 @@ void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
 	  ymax = y1;
 	k++;
       }
-      if (pymin < 0xffff && py1 < 0xffff && y0 < 0xffff && (ymax < pymin || ymin > pymax))
+      if (pymin < 0xffff && (ymax < pymin || ymin > pymax))
 	Screen->drawLine(x-1, py1, x, y0, PlotLines[color]);
-      if (ymin < 0xffff && ymax < 0xffff)
-	Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
+      Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
       py1 = y1;
       pymin = ymin;
       pymax = ymax;
     }
   }
-}
-
-
-void Display::setPlotZoom(uint8_t area, float fac) {
-  PlotYZoom[area] = fac;
-}
-
-
-float Display::plotZoom(uint8_t area) {
-  return PlotYZoom[area];
 }
 
 
@@ -223,14 +211,26 @@ uint16_t Display::dataX(uint8_t area, float x, float maxx) {
 
 uint16_t Display::dataY(uint8_t area, float y) {
   float yp = PlotYZoom[area]*y;
-  if (yp > 1.0 || yp < -1.0)
-    return 0xffff;
+  if (yp >= 1.0)
+    return PlotY[area];
+  if (yp <= -1.0)
+    return PlotY[area] + PlotH[area] - 1;
   return uint16_t(PlotYOffs[area] - PlotYScale[area]*yp);
 }
 
 
 uint16_t Display::dataY(uint8_t area, int16_t y) {
   return dataY(area, float(y)/(1 << 15));
+}
+
+
+void Display::setPlotZoom(uint8_t area, float fac) {
+  PlotYZoom[area] = fac;
+}
+
+
+float Display::plotZoom(uint8_t area) {
+  return PlotYZoom[area];
 }
 
 
