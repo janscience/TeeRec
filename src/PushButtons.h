@@ -61,6 +61,7 @@ protected:
   Button Buttons[MaxButtons];  // The buttons.
   Callback OnPress[MaxButtons];
   Callback OnRelease[MaxButtons];
+  bool Pressed[MaxButtons];
 
 };
 
