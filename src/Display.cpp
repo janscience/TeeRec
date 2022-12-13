@@ -122,7 +122,8 @@ void Display::plot(uint8_t area, const int16_t *buffer, int nbuffer,
     for (uint16_t k=1; k<nbuffer; k++) {
       uint16_t x = dataX(area, k, nbuffer);
       uint16_t y = dataY(area, buffer[k]);
-      Screen->drawLine(x0, y0, x, y, PlotLines[color]);
+      if (y0 < 0xffff && y < 0xffff)
+	Screen->drawLine(x0, y0, x, y, PlotLines[color]);
       x0 = x;
       y0 = y;
     }
@@ -146,9 +147,10 @@ void Display::plot(uint8_t area, const int16_t *buffer, int nbuffer,
 	  ymax = y1;
 	k++;
       }
-      if (pymin < 0xffff && (ymax < pymin || ymin > pymax))
+      if (pymin < 0xffff && py1 < 0xffff && y0 < 0xffff && (ymax < pymin || ymin > pymax))
 	Screen->drawLine(x-1, py1, x, y0, PlotLines[color]);
-      Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
+      if (ymin < 0xffff && ymax < 0xffff)
+	Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
       py1 = y1;
       pymin = ymin;
       pymax = ymax;
@@ -167,7 +169,8 @@ void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
     for (uint16_t k=1; k<nbuffer; k++) {
       uint16_t x = dataX(area, k, nbuffer);
       uint16_t y = dataY(area, buffer[k]);
-      Screen->drawLine(x0, y0, x, y, PlotLines[color]);
+      if (y0 < 0xffff && y < 0xffff)
+	Screen->drawLine(x0, y0, x, y, PlotLines[color]);
       x0 = x;
       y0 = y;
     }
@@ -191,9 +194,10 @@ void Display::plot(uint8_t area, const float *buffer, int nbuffer, int color) {
 	  ymax = y1;
 	k++;
       }
-      if (pymin < 0xffff && (ymax < pymin || ymin > pymax))
+      if (pymin < 0xffff && py1 < 0xffff && y0 < 0xffff && (ymax < pymin || ymin > pymax))
 	Screen->drawLine(x-1, py1, x, y0, PlotLines[color]);
-      Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
+      if (ymin < 0xffff && ymax < 0xffff)
+	Screen->drawFastVLine(x, ymin, ymax-ymin+1, PlotLines[color]);
       py1 = y1;
       pymin = ymin;
       pymax = ymax;
@@ -218,12 +222,15 @@ uint16_t Display::dataX(uint8_t area, float x, float maxx) {
 
 
 uint16_t Display::dataY(uint8_t area, float y) {
-  return uint16_t(PlotYOffs[area] - PlotYZoom[area]*PlotYScale[area]*y);
+  float yp = PlotYZoom[area]*y;
+  if (yp > 1.0 || yp < -1.0)
+    return 0xffff;
+  return uint16_t(PlotYOffs[area] - PlotYScale[area]*yp);
 }
 
 
 uint16_t Display::dataY(uint8_t area, int16_t y) {
-  return uint16_t(PlotYOffs[area] - PlotYZoom[area]*PlotYScale[area]*y/(1 << 15));
+  return dataY(area, float(y)/(1 << 15));
 }
 
 
