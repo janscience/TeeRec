@@ -3,6 +3,7 @@
 
 PushButtons::PushButtons() {
   Interval = 20;
+  memset(Pins, 0, sizeof(Pins));
   memset(OnPress, 0, sizeof(OnPress));
   memset(OnRelease, 0, sizeof(OnRelease));
   memset(Pressed, 0, sizeof(Pressed));
@@ -15,10 +16,12 @@ PushButtons::~PushButtons() {
 }
 
 
-int PushButtons::add(int pin, int mode, Callback onpress, Callback onrelease) {
+int PushButtons::add(int pin, int mode,
+		     Callback onpress, Callback onrelease) {
   if (pin < 0)
     return -1;
   int id = NButtons;
+  Pins[id] = pin;
   Buttons[id].attach(pin, mode);
   Buttons[id].setPressedState(mode==INPUT_PULLUP?LOW:HIGH);
   Buttons[id].interval(Interval);
@@ -44,6 +47,26 @@ void PushButtons::update() {
 	OnRelease[k](k);
     }
   }
+}
+
+
+int PushButtons::id(int pin) {
+  for (int k=0; k<NButtons; k++)
+    if (Pins[k] == pin)
+      return k;
+  return -1;
+}
+
+    
+void PushButtons::clear(int id) {
+  OnPress[id] = 0;
+  OnRelease[id] = 0;
+}
+
+
+void PushButtons::set(int id, Callback onpress, Callback onrelease) {
+  OnPress[id] = onpress;
+  OnRelease[id] = onrelease;
 }
 
 

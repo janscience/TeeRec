@@ -35,6 +35,16 @@ public:
   // Update state of all buttons. Call this as frequently as possible in loop().
   void update();
 
+  // Get id of button on pin.
+  int id(int pin);
+
+  // Uninstall the callback functions for button of specified id.
+  void clear(int id);
+
+  // Install callbacks that are called on press and release events for
+  // button id.
+  void set(int id, Callback onpress=0, Callback onrelease=0);
+
   // True if the specified button is currently pressed down.
   bool isPressed(int id);
 
@@ -57,8 +67,9 @@ protected:
 
   uint16_t Interval;
 
-  int NButtons = 0;                     // Number of buttons.
-  Button Buttons[MaxButtons];  // The buttons.
+  int NButtons = 0;            // number of buttons.
+  Button Buttons[MaxButtons];  // buttons ...
+  int Pins[MaxButtons];        // and their pins.
   Callback OnPress[MaxButtons];
   Callback OnRelease[MaxButtons];
   bool Pressed[MaxButtons];
