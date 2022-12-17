@@ -1,5 +1,5 @@
 /*
-  Menu - Select some action from a menu.
+  Menu - Select actions from a menu.
   Created by Jan Benda, December 17th, 2022.
 */
 

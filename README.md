@@ -33,6 +33,7 @@ with contributions by
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
+- Simple menu for selecting actions.
 - Feedback by blinking the LED.
 - Configurable via config file on SD card.
 
@@ -87,6 +88,7 @@ via the `TeeRec.h` header.
 - [RTClock](src/RTClock.h): Time and date strings from the real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
+- [Menu](src/Menu.h): Select actions from a menu.
 - [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
 - [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
 
@@ -129,6 +131,7 @@ Demonstrate the usage of some of the provided libraries.
 
 - [blink](examples/blink): Demonstrate usage of Blink class.
 - [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
+- [menu](examples/menu): Demonstrate usage of Menu class.
 
 
 ## Utilities
