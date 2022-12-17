@@ -119,6 +119,10 @@ int Menu::exec() {
       delay(200);
       drawAction(Index, true);
       delay(200);
+      while (!Buttons->released(SelectID)) {
+	Buttons->update();
+	yield();
+      }
       if (Actions[Index] != 0) {
 	Actions[Index](Index);
 	draw();
@@ -129,6 +133,10 @@ int Menu::exec() {
       }
     }
     else if (BackID >= 0 && Buttons->pressed(BackID)) {
+      while (!Buttons->released(SelectID)) {
+	Buttons->update();
+	yield();
+      }
       break;
     }
     yield();
