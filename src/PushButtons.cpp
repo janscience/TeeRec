@@ -102,6 +102,26 @@ bool PushButtons::released(int id) {
 }
 
 
+void PushButtons::waitPressed(int id) {
+  if (!Pressed[id]) {
+    while (!pressed(id)) {
+      Buttons->update();
+      yield();
+    }
+  }
+}
+
+
+void PushButtons::waitReleased(int id) {
+  if (Pressed[id]) {
+    while (!released(id)) {
+      Buttons->update();
+      yield();
+    }
+  }
+}
+
+
 void PushButtons::setInterval(uint16_t interval) {
   Interval = interval;
 }

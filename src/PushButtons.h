@@ -65,6 +65,12 @@ public:
   // Do not use this function if you have a callback installed.
   bool released(int id);
 
+  // Loop until the released specified button is pressed.
+  void waitPressed(int id);
+
+  // Loop until the pressed specified button is released.
+  void waitReleased(int id);
+
   // Set the debouncing interval. Default is 20ms.
   void setInterval(uint16_t interval);
 
