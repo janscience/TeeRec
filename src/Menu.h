@@ -39,6 +39,9 @@ public:
   void setButtons(int up_id, int down_id,
 		  int select_id, int back_id=-1);
 
+  // Set a title for the menu.
+  void setTitle(const char *title);
+
   // Add menu entry with text.
   // If it is selected, action is called.
   // The optional identifier id is returned and passed on to the action.
@@ -74,6 +77,7 @@ protected:
   Action Actions[MaxActions];
   int IDs[MaxActions];
   uint16_t YPos[MaxActions];
+  char Title[MaxText];
   GFXcanvas1 *Canvas;
   uint16_t Baseline;
   uint16_t ActionHeight;

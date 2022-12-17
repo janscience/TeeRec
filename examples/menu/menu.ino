@@ -68,13 +68,15 @@ void submenuAction(int id) {
 
 
 void initMenu() {
+  menu.setTitle("Main menu");
   menu.add("Action A");
   menu.add("Action B");
   menu.add("Action C", menuAction);
   menu.add("Submenu", menuAction);
-  submenu.add("Submenu 0", submenuAction);
-  submenu.add("Submenu 1", submenuAction);
-  submenu.add("Submenu 2", submenuAction);
+  submenu.setTitle("Sub menu");
+  submenu.add("Subaction 0", submenuAction);
+  submenu.add("Subaction 1", submenuAction);
+  submenu.add("Subaction 2", submenuAction);
 }
 
 
@@ -86,8 +88,10 @@ void setup() {
   initButtons();
   initMenu();
   screen.setBacklightOn();
+  Serial.println("Menu");
   int selected = menu.exec();
   Serial.printf("Menu selected %d\n", selected);
+  Serial.println("STOP");
 }
 
 

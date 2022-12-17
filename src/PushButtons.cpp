@@ -38,12 +38,12 @@ int PushButtons::add(int pin, int mode,
 void PushButtons::update() {
   for (int k=0; k<NButtons; k++) {
     Buttons[k].update();
-    if (Buttons[k].pressed()) {
+    if (! Pressed[k] && Buttons[k].pressed()) {
       Pressed[k] = true;
       if (Enabled && OnPress[k] != 0)
 	OnPress[k](k);
     }
-    if (Pressed[k] && Buttons[k].released()) {
+    else if (Pressed[k] && Buttons[k].released()) {
       Pressed[k] = false;
       if (Enabled && OnRelease[k] != 0)
 	OnRelease[k](k);
@@ -103,21 +103,17 @@ bool PushButtons::released(int id) {
 
 
 void PushButtons::waitPressed(int id) {
-  if (!Pressed[id]) {
-    while (!pressed(id)) {
-      Buttons->update();
-      yield();
-    }
+  while (!Pressed[id]) {
+    update();
+    yield();
   }
 }
 
 
 void PushButtons::waitReleased(int id) {
-  if (Pressed[id]) {
-    while (!released(id)) {
-      Buttons->update();
-      yield();
-    }
+  while (Pressed[id]) {
+    update();
+    yield();
   }
 }
 

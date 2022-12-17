@@ -13,6 +13,7 @@ Menu::Menu(Display *screen, PushButtons *buttons) :
   BackID(-1),
   Screen(screen),
   NActions(0),
+  Title(""),
   Canvas(0),
   Baseline(0),
   ActionHeight(0),
@@ -48,6 +49,11 @@ void Menu::setDisplay(Display *screen) {
 }
 
 
+void Menu::setTitle(const char *title) {
+  strncpy(Title, title, MaxText);
+}
+
+
 int Menu::add(const char *text, Action action, int id) {
   if (id < 0)
     id = NActions;
@@ -79,11 +85,15 @@ void Menu::drawAction(int index, bool active) {
 
 
 void Menu::draw() {
+  int n = NActions;
+  if (strlen(Title) > 0)
+    n++;
   Screen->clear();
   uint16_t height = Screen->height();
   uint16_t width = Screen->width();
-  ActionHeight = height/NActions;
-  Baseline = 4*ActionHeight/5;
+  ActionHeight = height/n;
+  uint16_t font_height = Screen->defaultFont()->yAdvance;
+  Baseline = (ActionHeight - font_height)/2 + 4*font_height/5;
   if (Canvas == 0)
     Canvas = new GFXcanvas1(width, ActionHeight);
   Canvas->setRotation(0);
@@ -92,6 +102,14 @@ void Menu::draw() {
   Canvas->setTextSize(1);
   Canvas->setTextWrap(false);
   uint16_t ypos = 0;
+  if (strlen(Title) > 0) {
+    Canvas->fillScreen(0x0000);
+    Canvas->setCursor(0, Baseline);
+    Canvas->print(Title);
+    Screen->screen()->drawBitmap(0, ypos, Canvas->getBuffer(),
+				 Screen->width(), ActionHeight, WHITE, BLACK);
+    ypos += ActionHeight;
+  }
   for (int k=0; k<NActions; k++) {
     YPos[k] = ypos;
     drawAction(k, k == Index);
@@ -137,7 +155,7 @@ int Menu::exec() {
 	break;
     }
     else if (BackID >= 0 && Buttons->pressed(BackID)) {
-      Buttons->waitReleased(SelectID);
+      Buttons->waitReleased(BackID);
       index = -1;
       break;
     }
