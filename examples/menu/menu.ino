@@ -85,7 +85,6 @@ void setup() {
   screen.screen()->setRotation(TFT_ROTATION);
   initButtons();
   initMenu();
-  menu.draw();
   screen.setBacklightOn();
   int selected = menu.exec();
   Serial.printf("Menu selected %d\n", selected);
