@@ -155,6 +155,15 @@ class Display {
   // If flip is true, flip width and heigh for odd rotations.
   void init(Adafruit_GFX *screen, uint8_t rotation=0, bool flip=false);
 
+  // The Adafruit_GFX screen object.
+  Adafruit_GFX *screen() { return Screen; };
+
+  // Width of the display in pixels.
+  uint16_t width() const { return Width; };
+
+  // Height of the display in pixels.
+  uint16_t height() const { return Height; };
+
   // Clear the entire screen with the background color.
   void clear();
 
@@ -210,11 +219,20 @@ class Display {
   // Clear all text areas.
   void clearText();
 
+  // Return default font used for text areas.
+  const GFXfont *defaultFont() const { return Font; };
+
   // Set default font for text areas.
   void setDefaultFont(const GFXfont &font);
+  
+  // Return title font used for text areas.
+  const GFXfont *titleFont() const { return TitleFont; };
 
   // Set font for titles.
   void setTitleFont(const GFXfont &titlefont);
+  
+  // Return small font used for text areas.
+  const GFXfont *smallFont() const { return SmallFont; };
 
   // Set font smaller than the default font.
   void setSmallFont(const GFXfont &smallfont);

@@ -50,6 +50,9 @@ public:
 
   // Disable callbacks of all buttons.
   void disable();
+
+  // True if callbacks are enabled.
+  bool enabled() const;
   
   // True if the specified button is currently pressed down.
   bool isPressed(int id);
@@ -73,7 +76,7 @@ protected:
 
   uint16_t Interval;
 
-  int NButtons = 0;            // number of buttons.
+  int NButtons;                // number of buttons.
   Button Buttons[MaxButtons];  // buttons ...
   int Pins[MaxButtons];        // and their pins.
   bool Enabled;

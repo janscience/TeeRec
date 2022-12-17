@@ -82,6 +82,11 @@ void PushButtons::disable() {
 }
 
 
+bool PushButtons::enabled() const {
+  return Enabled;
+}
+
+
 bool PushButtons::isPressed(int id) {
   return Buttons[id].isPressed();
 }
