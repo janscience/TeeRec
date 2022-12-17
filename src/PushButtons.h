@@ -65,6 +65,12 @@ public:
   // Do not use this function if you have a callback installed.
   bool released(int id);
 
+  // Loop until any button is pressed and released.
+  void waitPressAny();
+
+  // Loop until the specified button is pressed and released.
+  void waitPress(int id);
+
   // Loop until the released specified button is pressed.
   void waitPressed(int id);
 

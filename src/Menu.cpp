@@ -115,6 +115,7 @@ void Menu::draw() {
     drawAction(k, k == Index);
     ypos += ActionHeight;
   }
+  Screen->setBacklightOn();
 }
 
 

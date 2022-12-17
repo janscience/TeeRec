@@ -102,6 +102,25 @@ bool PushButtons::released(int id) {
 }
 
 
+void PushButtons::waitPressAny() {
+  int id = -1;
+  while (id < 0) {
+    update();
+    yield();
+    for (int k=0; k<NButtons; k++)
+      if (Pressed[k])
+	id = k;
+  }
+  waitReleased(id);
+}
+
+
+void PushButtons::waitPress(int id) {
+  waitPressed(id);
+  waitReleased(id);
+}
+
+
 void PushButtons::waitPressed(int id) {
   while (!Pressed[id]) {
     update();
