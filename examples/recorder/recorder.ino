@@ -16,6 +16,8 @@
 #define TFT_DC    7 // 8 
 #define TFT_BL   30 // backlight PWM, -1 to not use it
 
+#define AI_SPLASH_SCREEN
+
 // select touch controller:
 //#define FT6206
 

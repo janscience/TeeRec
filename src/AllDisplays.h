@@ -120,6 +120,7 @@ void initScreen(Display &screen) {
 }
 
 
+#ifdef AI_SPLASH_SCREEN
 void AIsplashScreen(Display &screen,
 		    const ContinuousADC &aidata, const char *title) {
   char msg[100];
@@ -157,6 +158,6 @@ void AIsplashScreen(Display &screen,
   screen.clear();
   screen.clearText();
 }
-
+#endif
 
 #endif
