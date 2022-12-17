@@ -36,7 +36,7 @@ public:
   void update();
 
   // Get id of button on pin.
-  int id(int pin);
+  int id(int pin) const;
 
   // Uninstall the callback functions for button of specified id.
   void clear(int id);
@@ -45,6 +45,12 @@ public:
   // button id.
   void set(int id, Callback onpress=0, Callback onrelease=0);
 
+  // Enable callbacks of all buttons.
+  void enable();
+
+  // Disable callbacks of all buttons.
+  void disable();
+  
   // True if the specified button is currently pressed down.
   bool isPressed(int id);
 
@@ -70,6 +76,7 @@ protected:
   int NButtons = 0;            // number of buttons.
   Button Buttons[MaxButtons];  // buttons ...
   int Pins[MaxButtons];        // and their pins.
+  bool Enabled;
   Callback OnPress[MaxButtons];
   Callback OnRelease[MaxButtons];
   bool Pressed[MaxButtons];

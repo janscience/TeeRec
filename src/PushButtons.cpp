@@ -1,13 +1,15 @@
 #include <PushButtons.h>
 
 
-PushButtons::PushButtons() {
-  Interval = 20;
+PushButtons::PushButtons() :
+  Interval(20),
+  NButtons(0),
+  Enabled(true)
+{
   memset(Pins, 0, sizeof(Pins));
   memset(OnPress, 0, sizeof(OnPress));
   memset(OnRelease, 0, sizeof(OnRelease));
   memset(Pressed, 0, sizeof(Pressed));
-  NButtons = 0;
 }
 
 
@@ -38,19 +40,19 @@ void PushButtons::update() {
     Buttons[k].update();
     if (Buttons[k].pressed()) {
       Pressed[k] = true;
-      if (OnPress[k] != 0)
+      if (Enabled && OnPress[k] != 0)
 	OnPress[k](k);
     }
     if (Pressed[k] && Buttons[k].released()) {
       Pressed[k] = false;
-      if (OnRelease[k] != 0)
+      if (Enabled && OnRelease[k] != 0)
 	OnRelease[k](k);
     }
   }
 }
 
 
-int PushButtons::id(int pin) {
+int PushButtons::id(int pin) const {
   for (int k=0; k<NButtons; k++)
     if (Pins[k] == pin)
       return k;
@@ -67,6 +69,16 @@ void PushButtons::clear(int id) {
 void PushButtons::set(int id, Callback onpress, Callback onrelease) {
   OnPress[id] = onpress;
   OnRelease[id] = onrelease;
+}
+
+
+void PushButtons::enable() {
+  Enabled = true;
+}
+
+
+void PushButtons::disable() {
+  Enabled = false;
 }
 
 
