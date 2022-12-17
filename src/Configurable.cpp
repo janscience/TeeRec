@@ -3,10 +3,7 @@
 
 
 Configurable::Configurable(const char *name) {
-  size_t k=0;
-  for (; k<strlen(name) && k+1<MaxName; k++)
-    ConfigName[k] = tolower(name[k]);
-  ConfigName[k] = '\0';
+  setName(name);
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
   Configured = false;
@@ -16,6 +13,14 @@ Configurable::Configurable(const char *name) {
 void Configurable::configure(const char *key, const char *val) {
   Serial.printf("Requested configuration for \"%s\": %s: %s\n",
 		ConfigName, key, val);
+}
+
+
+void Configurable::setName(const char *name) {
+  size_t k=0;
+  for (; k<strlen(name) && k+1<MaxName; k++)
+    ConfigName[k] = tolower(name[k]);
+  ConfigName[k] = '\0';
 }
 
 

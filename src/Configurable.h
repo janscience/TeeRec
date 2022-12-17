@@ -20,6 +20,9 @@ class Configurable {
   // All lower case name of the configurable.
   const char *name() const { return ConfigName; };
 
+  // Set name of the configurable to name.
+  void setName(const char *name);
+
   // Configure the class with the provided key-value pair.
   virtual void configure(const char *key, const char *val);
 
