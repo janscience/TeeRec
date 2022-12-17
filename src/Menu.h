@@ -39,12 +39,19 @@ public:
   void setButtons(int up_id, int down_id,
 		  int select_id, int back_id=-1);
 
-  // Add manu entry with text.
+  // Add menu entry with text.
   // If it is selected, action is called.
-  int add(const char *text, Action action=0);
+  // The optional identifier id is returned and passed on to the action.
+  // If the id is negative it is set to the index of the new menu action. 
+  int add(const char *text, Action action, int id=-1);
+  
+  // Add menu entry with text.
+  // The optional identifier id is returned and passed on to the action.
+  // If the id is negative it is set to the index of the new menu action. 
+  int add(const char *text, int id=-1);
 
   // Draw and execute the menu.
-  // Returns index of selected menu entry.
+  // Returns ID of selected menu entry.
   int exec();
 
   // Draw the menu.
@@ -65,6 +72,7 @@ protected:
   int NActions;
   char Texts[MaxActions][MaxText];
   Action Actions[MaxActions];
+  int IDs[MaxActions];
   uint16_t YPos[MaxActions];
   GFXcanvas1 *Canvas;
   uint16_t Baseline;

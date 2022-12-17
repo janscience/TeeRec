@@ -19,6 +19,7 @@ Menu::Menu(Display *screen, PushButtons *buttons) :
   Index(0) {
   memset(Texts, 0, sizeof(Texts));
   memset(Actions, 0, sizeof(Actions));
+  memset(IDs, 0, sizeof(IDs));
   memset(YPos, 0, sizeof(YPos));
 }
 
@@ -47,12 +48,19 @@ void Menu::setDisplay(Display *screen) {
 }
 
 
-int Menu::add(const char *text, Action action) {
-  int id = NActions;
+int Menu::add(const char *text, Action action, int id) {
+  if (id < 0)
+    id = NActions;
   strncpy(Texts[NActions], text, MaxText);
   Actions[NActions] = action;
+  IDs[NActions] = id;
   NActions++;
   return id;
+}
+
+
+int Menu::add(const char *text, int id) {
+  return add(text, 0, id);
 }
 
 
@@ -120,17 +128,17 @@ int Menu::exec() {
       drawAction(Index, true);
       delay(200);
       Buttons->waitReleased(SelectID);
+      index = IDs[Index];
       if (Actions[Index] != 0) {
-	Actions[Index](Index);
+	Actions[Index](index);
 	draw();
       }
-      else {
-	index = Index;
+      else
 	break;
-      }
     }
     else if (BackID >= 0 && Buttons->pressed(BackID)) {
       Buttons->waitReleased(SelectID);
+      index = -1;
       break;
     }
     yield();
