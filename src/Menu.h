@@ -53,6 +53,9 @@ public:
   // If the id is negative it is set to the index of the new menu action. 
   int add(const char *text, int id=-1);
 
+  // Return the number of actions in the menu.
+  int nActions() const { return NActions; };
+
   // Draw and execute the menu.
   // Returns ID of selected menu entry.
   int exec();
