@@ -20,6 +20,8 @@ Menu::Menu(Display *screen, PushButtons *buttons) :
   Index(0) {
   memset(Texts, 0, sizeof(Texts));
   memset(Actions, 0, sizeof(Actions));
+  memset(Checked, 0, sizeof(Checked));
+  memset(Menus, 0, sizeof(Menus));
   memset(IDs, 0, sizeof(IDs));
   memset(YPos, 0, sizeof(YPos));
 }
@@ -59,6 +61,8 @@ int Menu::add(const char *text, Action action, int id) {
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
   Actions[NActions] = action;
+  Checked[NActions] = -1;
+  Menus[NActions] = 0;
   IDs[NActions] = id;
   NActions++;
   return id;
@@ -66,7 +70,39 @@ int Menu::add(const char *text, Action action, int id) {
 
 
 int Menu::add(const char *text, int id) {
-  return add(text, 0, id);
+  return add(text, (Action)0, id);
+}
+
+
+int Menu::add(const char *text, bool checked, int id) {
+  if (id < 0)
+    id = NActions;
+  strncpy(Texts[NActions], text, MaxText);
+  Actions[NActions] = 0;
+  Checked[NActions] = checked ? 1 : 0;
+  Menus[NActions] = 0;
+  IDs[NActions] = id;
+  NActions++;
+  return id;
+}
+
+
+void Menu::add(const char *text, Menu &menu) {
+  strncpy(Texts[NActions], text, MaxText);
+  Actions[NActions] = 0;
+  Checked[NActions] = -1;
+  Menus[NActions] = &menu;
+  IDs[NActions] = -1;
+  NActions++;
+}
+
+
+bool Menu::checked(int id) const {
+  for (int k=0; k<NActions; k++) {
+    if (IDs[k] == id)
+      return (Checked[k] > 0);
+  }
+  return false;
 }
 
 
@@ -74,6 +110,15 @@ void Menu::drawAction(int index, bool active) {
   uint16_t xoffs = Screen->defaultFont()->yAdvance;
   Canvas->fillScreen(0x0000);
   Canvas->setCursor(xoffs, Baseline);
+  if (Checked[index] > 0)
+    Canvas->print("[X] ");
+  else if (Checked[index] == 0) {
+    Canvas->print("[");
+    Canvas->setTextColor(0x0000);
+    Canvas->print("X");
+    Canvas->setTextColor(0xffff);
+    Canvas->print("] ");
+  }
   Canvas->print(Texts[index]);
   if (active)
     Screen->screen()->drawBitmap(0, YPos[index], Canvas->getBuffer(),
@@ -151,6 +196,14 @@ int Menu::exec() {
       if (Actions[Index] != 0) {
 	Actions[Index](index);
 	draw();
+      }
+      else if (Menus[Index] != 0) {
+	Menus[Index]->exec();
+	draw();
+      }
+      else if (Checked[Index] >= 0) {
+	Checked[Index] = Checked[Index] > 0 ? 0 : 1;
+	drawAction(Index, true);
       }
       else
 	break;

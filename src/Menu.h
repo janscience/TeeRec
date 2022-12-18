@@ -53,8 +53,21 @@ public:
   // If the id is negative it is set to the index of the new menu action. 
   int add(const char *text, int id=-1);
 
+  // Add a checkable menu entry with text.
+  // If it is selected, its checked state is toggled.
+  // The optional identifier id is returned and passed on to the action.
+  // If the id is negative it is set to the index of the new menu action. 
+  int add(const char *text, bool checked, int id=-1);
+
+  // Add submenu entry with text.
+  // If it is selected, the menu is executed.
+  void add(const char *text, Menu &menu);
+
   // Return the number of actions in the menu.
   int nActions() const { return NActions; };
+
+  // Check whether menu entry id is checked.
+  bool checked(int id) const;
 
   // Draw and execute the menu.
   // Returns ID of selected menu entry.
@@ -78,6 +91,8 @@ protected:
   int NActions;
   char Texts[MaxActions][MaxText];
   Action Actions[MaxActions];
+  int8_t Checked[MaxActions];
+  Menu *Menus[MaxActions];
   int IDs[MaxActions];
   uint16_t YPos[MaxActions];
   char Title[MaxText];

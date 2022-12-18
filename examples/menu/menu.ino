@@ -56,27 +56,25 @@ void initButtons() {
 
 
 void menuAction(int id) {
-  Serial.printf("Selected %d\n", id);
-  if (id == 3)
-    submenu.exec();
+  Serial.printf("Selected menu %d\n", id);
 }
 
 
 void submenuAction(int id) {
-  Serial.printf("Submenu selected %d\n", id);
+  Serial.printf("Selected submenu %d\n", id);
 }
 
 
 void initMenu() {
-  menu.setTitle("Main menu");
-  menu.add("Action A");
-  menu.add("Action B");
-  menu.add("Action C", menuAction);
-  menu.add("Submenu", menuAction);
   submenu.setTitle("Sub menu");
   submenu.add("Subaction 0", submenuAction);
-  submenu.add("Subaction 1", submenuAction);
+  submenu.add("Subaction 1", true);
   submenu.add("Subaction 2", submenuAction);
+  menu.setTitle("Main menu");
+  menu.add("Action A");
+  menu.add("Action B", false);
+  menu.add("Action C", menuAction);
+  menu.add("Submenu", submenu);
 }
 
 
