@@ -46,7 +46,7 @@ public:
   // If it is selected, action is called.
   // The optional identifier id is returned and passed on to the action.
   // If the id is negative it is set to the index of the new menu action. 
-  int add(const char *text, Action action, int id=-1);
+  int addAction(const char *text, Action action, int id=-1);
   
   // Add menu entry with text.
   // The optional identifier id is returned and passed on to the action.
@@ -57,17 +57,27 @@ public:
   // If it is selected, its checked state is toggled.
   // The optional identifier id is returned and passed on to the action.
   // If the id is negative it is set to the index of the new menu action. 
-  int add(const char *text, bool checked, int id=-1);
+  int addCheckable(const char *text, bool checked, int id=-1);
+
+  // Add a radio button with text.
+  // If it is selected, its checked state is set
+  // and all other radio buttons are unchecked.
+  // The optional identifier id is returned and passed on to the action.
+  // If the id is negative it is set to the index of the new menu action. 
+  int addRadioButton(const char *text, bool checked=false, int id=-1);
 
   // Add submenu entry with text.
   // If it is selected, the menu is executed.
-  void add(const char *text, Menu &menu);
+  void addMenu(const char *text, Menu &menu);
 
   // Return the number of actions in the menu.
   int nActions() const { return NActions; };
 
   // Check whether menu entry id is checked.
   bool checked(int id) const;
+
+  // Return id of checked radio button.
+  int checked() const;
 
   // Draw and execute the menu.
   // Returns ID of selected menu entry.
@@ -92,6 +102,7 @@ protected:
   char Texts[MaxActions][MaxText];
   Action Actions[MaxActions];
   int8_t Checked[MaxActions];
+  bool RadioButton[MaxActions];
   Menu *Menus[MaxActions];
   int IDs[MaxActions];
   uint16_t YPos[MaxActions];

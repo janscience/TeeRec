@@ -41,8 +41,9 @@
 
 Display screen;
 PushButtons buttons;
-Menu menu(&screen, &buttons);
-Menu submenu(&screen, &buttons);
+Menu menu;
+Menu radiomenu;
+Menu submenu;
 
 
 void initButtons() {
@@ -50,8 +51,8 @@ void initButtons() {
   int back = buttons.add(BACK_PIN, INPUT_PULLUP);
   int up = buttons.add(UP_PIN, INPUT_PULLUP);
   int down = buttons.add(DOWN_PIN, INPUT_PULLUP);
-  menu.setButtons(up, down, select, back);
-  submenu.setButtons(up, down, select, back);
+  menu.setButtons(&buttons, up, down, select, back);
+  menu.setDisplay(&screen);
 }
 
 
@@ -67,14 +68,19 @@ void submenuAction(int id) {
 
 void initMenu() {
   submenu.setTitle("Sub menu");
-  submenu.add("Subaction 0", submenuAction);
-  submenu.add("Subaction 1", true);
-  submenu.add("Subaction 2", submenuAction);
+  submenu.addAction("Subaction 0", submenuAction);
+  submenu.addCheckable("Subaction 1", true);
+  submenu.addAction("Subaction 2", submenuAction);
+  radiomenu.setTitle("Select one");
+  radiomenu.addRadioButton("Subaction 00", true);
+  radiomenu.addRadioButton("Subaction 11");
+  radiomenu.addRadioButton("Subaction 22");
   menu.setTitle("Main menu");
   menu.add("Action A");
-  menu.add("Action B", false);
-  menu.add("Action C", menuAction);
-  menu.add("Submenu", submenu);
+  menu.addCheckable("Action B", false);
+  menu.addAction("Action C", menuAction);
+  menu.addMenu("Select", radiomenu);
+  menu.addMenu("Submenu", submenu);
 }
 
 
@@ -83,8 +89,8 @@ void setup() {
   while (!Serial && millis() < 200) {};
   initScreen(screen);
   screen.screen()->setRotation(TFT_ROTATION);
-  initButtons();
   initMenu();
+  initButtons();
   screen.setBacklightOn();
   Serial.println("Menu");
   int selected = menu.exec();

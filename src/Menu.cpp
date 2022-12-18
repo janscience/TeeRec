@@ -21,6 +21,7 @@ Menu::Menu(Display *screen, PushButtons *buttons) :
   memset(Texts, 0, sizeof(Texts));
   memset(Actions, 0, sizeof(Actions));
   memset(Checked, 0, sizeof(Checked));
+  memset(RadioButton, 0, sizeof(RadioButton));
   memset(Menus, 0, sizeof(Menus));
   memset(IDs, 0, sizeof(IDs));
   memset(YPos, 0, sizeof(YPos));
@@ -34,6 +35,10 @@ void Menu::setButtons(PushButtons *buttons, int up_id, int down_id,
   DownID = down_id;
   SelectID = select_id;
   BackID = back_id;
+  for (int k=0; k<NActions; k++) {
+    if (Menus[k] != 0)
+      Menus[k]->setButtons(buttons, up_id, down_id, select_id, back_id);
+  }
 }
 
 
@@ -43,11 +48,19 @@ void Menu::setButtons(int up_id, int down_id,
   DownID = down_id;
   SelectID = select_id;
   BackID = back_id;
+  for (int k=0; k<NActions; k++) {
+    if (Menus[k] != 0)
+      Menus[k]->setButtons(up_id, down_id, select_id, back_id);
+  }
 }
 
 
 void Menu::setDisplay(Display *screen) {
   Screen = screen;
+  for (int k=0; k<NActions; k++) {
+    if (Menus[k] != 0)
+      Menus[k]->setDisplay(screen);
+  }
 }
 
 
@@ -56,12 +69,13 @@ void Menu::setTitle(const char *title) {
 }
 
 
-int Menu::add(const char *text, Action action, int id) {
+int Menu::addAction(const char *text, Action action, int id) {
   if (id < 0)
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
   Actions[NActions] = action;
   Checked[NActions] = -1;
+  RadioButton[NActions] = false;
   Menus[NActions] = 0;
   IDs[NActions] = id;
   NActions++;
@@ -70,16 +84,17 @@ int Menu::add(const char *text, Action action, int id) {
 
 
 int Menu::add(const char *text, int id) {
-  return add(text, (Action)0, id);
+  return addAction(text, (Action)0, id);
 }
 
 
-int Menu::add(const char *text, bool checked, int id) {
+int Menu::addCheckable(const char *text, bool checked, int id) {
   if (id < 0)
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
   Actions[NActions] = 0;
   Checked[NActions] = checked ? 1 : 0;
+  RadioButton[NActions] = false;
   Menus[NActions] = 0;
   IDs[NActions] = id;
   NActions++;
@@ -87,10 +102,31 @@ int Menu::add(const char *text, bool checked, int id) {
 }
 
 
-void Menu::add(const char *text, Menu &menu) {
+int Menu::addRadioButton(const char *text, bool checked, int id) {
+  if (id < 0)
+    id = NActions;
+  strncpy(Texts[NActions], text, MaxText);
+  Actions[NActions] = 0;
+  Checked[NActions] = checked ? 1 : 0;
+  RadioButton[NActions] = true;
+  Menus[NActions] = 0;
+  IDs[NActions] = id;
+  if (checked) {
+    for (int k=0; k<NActions; k++) {
+      if (RadioButton[Index] && Checked[Index] > 0)
+	Checked[k] = 0;
+    }
+  }
+  NActions++;
+  return id;
+}
+
+
+void Menu::addMenu(const char *text, Menu &menu) {
   strncpy(Texts[NActions], text, MaxText);
   Actions[NActions] = 0;
   Checked[NActions] = -1;
+  RadioButton[NActions] = false;
   Menus[NActions] = &menu;
   IDs[NActions] = -1;
   NActions++;
@@ -106,18 +142,37 @@ bool Menu::checked(int id) const {
 }
 
 
+int Menu::checked() const {
+  for (int k=0; k<NActions; k++) {
+    if (RadioButton[k] && Checked[k] > 0)
+      return IDs[k];
+  }
+  return -1;
+}
+
+
 void Menu::drawAction(int index, bool active) {
   uint16_t xoffs = Screen->defaultFont()->yAdvance;
   Canvas->fillScreen(0x0000);
   Canvas->setCursor(xoffs, Baseline);
-  if (Checked[index] > 0)
-    Canvas->print("[X] ");
+  if (Checked[index] > 0) {
+    if (RadioButton[index])
+      Canvas->print("(X) ");
+    else
+      Canvas->print("[X] ");
+  }
   else if (Checked[index] == 0) {
-    Canvas->print("[");
+    if (RadioButton[index])
+      Canvas->print("(");
+    else
+      Canvas->print("[");
     Canvas->setTextColor(0x0000);
     Canvas->print("X");
     Canvas->setTextColor(0xffff);
-    Canvas->print("] ");
+    if (RadioButton[index])
+      Canvas->print(") ");
+    else
+      Canvas->print("] ");
   }
   Canvas->print(Texts[index]);
   if (active)
@@ -202,8 +257,23 @@ int Menu::exec() {
 	draw();
       }
       else if (Checked[Index] >= 0) {
-	Checked[Index] = Checked[Index] > 0 ? 0 : 1;
-	drawAction(Index, true);
+	if (RadioButton[Index]) {
+	  if (Checked[Index] == 0) {
+	    Checked[Index] = 1;
+	    drawAction(Index, true);
+	    for (int k=0; k<NActions; k++) {
+	      if (k != Index && RadioButton[k] && Checked[k] > 0) {
+		Checked[k] = 0;
+		drawAction(k, false);
+		break;
+	      }
+	    }
+	  }
+	}
+	else {
+	  Checked[Index] = Checked[Index] > 0 ? 0 : 1;
+	  drawAction(Index, true);
+	}
       }
       else
 	break;
