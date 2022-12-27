@@ -1,19 +1,19 @@
 #include <Arduino.h>
 #include <ADC_util.h>
 #include <TeensyBoard.h>
-#include <ContinuousADC.h>
+#include <TeensyADC.h>
 
 
-volatile DMAMEM uint16_t ContinuousADC::ADCBuffer[2][NMajors*MajorSize];
+volatile DMAMEM uint16_t TeensyADC::ADCBuffer[2][NMajors*MajorSize];
 
-DMAMEM uint8_t ContinuousADC::SC1AChannels[2][MaxChannels] __attribute__((aligned(ContinuousADC::MaxChannels)));
+DMAMEM uint8_t TeensyADC::SC1AChannels[2][MaxChannels] __attribute__((aligned(TeensyADC::MaxChannels)));
 
-ContinuousADC *ContinuousADC::ADCC = 0;
+TeensyADC *TeensyADC::ADCC = 0;
 
-DMASetting ContinuousADC::DMASettings[2][NMajors];
+DMASetting TeensyADC::DMASettings[2][NMajors];
 
 
-ContinuousADC::ContinuousADC(volatile sample_t *buffer, size_t nbuffer) :
+TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer) :
   DataBuffer(buffer, nbuffer),
   Configurable("ADC") {
   for (uint8_t adc=0; adc<2; adc++) {
@@ -40,7 +40,7 @@ ContinuousADC::ContinuousADC(volatile sample_t *buffer, size_t nbuffer) :
 }
 
 
-void ContinuousADC::setChannel(uint8_t adc, uint8_t channel) {
+void TeensyADC::setChannel(uint8_t adc, uint8_t channel) {
   Channels[adc][0] = channel;
   NChans[adc] = 1;
   NChannels = 0;
@@ -50,7 +50,7 @@ void ContinuousADC::setChannel(uint8_t adc, uint8_t channel) {
 }
 
 
-void ContinuousADC::addChannel(uint8_t adc, uint8_t channel) {
+void TeensyADC::addChannel(uint8_t adc, uint8_t channel) {
   Channels[adc][NChans[adc]++] = channel;
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
@@ -59,7 +59,7 @@ void ContinuousADC::addChannel(uint8_t adc, uint8_t channel) {
 }
 
 
-void ContinuousADC::setChannels(uint8_t adc, const int8_t *channels) {
+void TeensyADC::setChannels(uint8_t adc, const int8_t *channels) {
   NChans[adc] = 0;
   for (uint8_t k=0; k<MaxChannels && channels[k]>0; k++)
     Channels[adc][NChans[adc]++] = channels[k];
@@ -71,7 +71,7 @@ void ContinuousADC::setChannels(uint8_t adc, const int8_t *channels) {
 }
 
 
-void ContinuousADC::clearChannels(uint8_t adc) {
+void TeensyADC::clearChannels(uint8_t adc) {
   NChans[adc] = 0;
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
@@ -79,31 +79,31 @@ void ContinuousADC::clearChannels(uint8_t adc) {
 }
 
 
-void ContinuousADC::clearChannels() {
+void TeensyADC::clearChannels() {
   for (uint8_t adc=0; adc<2; adc++)
     NChans[adc] = 0;
   NChannels = 0;
 }
 
 
-uint8_t ContinuousADC::nchannels(uint8_t adc) const {
+uint8_t TeensyADC::nchannels(uint8_t adc) const {
   if ( (ADCUse & (adc+1)) == adc+1 )
     return NChans[adc];
   return 0;
 }
 
 
-uint8_t ContinuousADC::nchannels() const {
+uint8_t TeensyADC::nchannels() const {
   return NChannels;
 }
 
 
-void ContinuousADC::channelStr(int8_t pin, char *chan) const {
+void TeensyADC::channelStr(int8_t pin, char *chan) const {
   analogPin(pin, chan);
 }
 
 
-void ContinuousADC::channels(uint8_t adc, char *chans) const
+void TeensyADC::channels(uint8_t adc, char *chans) const
 {
   bool first = true;
   for (uint8_t k=0; k<NChans[adc]; k++) {
@@ -116,7 +116,7 @@ void ContinuousADC::channels(uint8_t adc, char *chans) const
 }
 
 
-void ContinuousADC::channels(char *chans) const
+void TeensyADC::channels(char *chans) const
 {
   bool first = true;
   int nchan = NChans[0]>=NChans[1]?NChans[0]:NChans[1];
@@ -132,34 +132,34 @@ void ContinuousADC::channels(char *chans) const
 }
 
 
-void ContinuousADC::setRate(uint32_t rate) {
+void TeensyADC::setRate(uint32_t rate) {
   DataBuffer::setRate(rate);
 }
 
 
-void ContinuousADC::setScaling(bool scale) {
+void TeensyADC::setScaling(bool scale) {
   DataScaling = scale;
 }
 
 
-void ContinuousADC::unsetScaling() {
+void TeensyADC::unsetScaling() {
   DataScaling = false;
 }
 
 
-uint8_t ContinuousADC::resolution() const {
+uint8_t TeensyADC::resolution() const {
   return ADCUse>0?Bits:0;
 }
 
 
-void ContinuousADC::setResolution(uint8_t bits) {
+void TeensyADC::setResolution(uint8_t bits) {
   ADConv.adc[0]->setResolution(bits);
   DataBuffer::setResolution(ADConv.adc[0]->getResolution());
   setDataResolution();
 }
 
 
-void ContinuousADC::setDataResolution() {
+void TeensyADC::setDataResolution() {
   if (DataScaling) {
     DataBits = 16;
     DataShift = DataBits - Bits;
@@ -173,37 +173,37 @@ void ContinuousADC::setDataResolution() {
 }
 
 
-void ContinuousADC::setAveraging(uint8_t num) {
+void TeensyADC::setAveraging(uint8_t num) {
   Averaging = num;
 }
 
 
-uint8_t ContinuousADC::averaging(void) const {
+uint8_t TeensyADC::averaging(void) const {
   return Averaging;
 }
 
 
-void ContinuousADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
+void TeensyADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
   ConversionSpeed = speed;
 }
 
 
-ADC_CONVERSION_SPEED ContinuousADC::conversionSpeed() const {
+ADC_CONVERSION_SPEED TeensyADC::conversionSpeed() const {
   return ConversionSpeed;
 }
 
 
-const char *ContinuousADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) const {
+const char *TeensyADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) const {
   return getConversionEnumStr(speed);
 }
 
 
-const char *ContinuousADC::conversionSpeedStr() const {
+const char *TeensyADC::conversionSpeedStr() const {
   return conversionSpeedStr(ConversionSpeed);
 }
 
 
-const char *ContinuousADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const {
+const char *TeensyADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const {
   switch (speed) {
 #if defined(ADC_TEENSY_4)
 #else
@@ -243,12 +243,12 @@ const char *ContinuousADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) c
 }
 
 
-const char *ContinuousADC::conversionSpeedShortStr() const {
+const char *TeensyADC::conversionSpeedShortStr() const {
   return conversionSpeedShortStr(ConversionSpeed);
 }
 
 
-ADC_CONVERSION_SPEED ContinuousADC::conversionSpeedEnum(const char *conversion) const {
+ADC_CONVERSION_SPEED TeensyADC::conversionSpeedEnum(const char *conversion) const {
   char str[strlen(conversion)+1];
   for (size_t k=0; k<strlen(conversion)+1; k++)
     str[k] = tolower(conversion[k]);
@@ -287,27 +287,27 @@ ADC_CONVERSION_SPEED ContinuousADC::conversionSpeedEnum(const char *conversion) 
 }
 
 
-void ContinuousADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
+void TeensyADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
   SamplingSpeed = speed;
 }
 
 
-ADC_SAMPLING_SPEED ContinuousADC::samplingSpeed() const {
+ADC_SAMPLING_SPEED TeensyADC::samplingSpeed() const {
   return SamplingSpeed;
 }
 
 
-const char *ContinuousADC::samplingSpeedStr(ADC_SAMPLING_SPEED speed) const {
+const char *TeensyADC::samplingSpeedStr(ADC_SAMPLING_SPEED speed) const {
   return getSamplingEnumStr(speed);
 }
 
 
-const char *ContinuousADC::samplingSpeedStr() const {
+const char *TeensyADC::samplingSpeedStr() const {
   return samplingSpeedStr(SamplingSpeed);
 }
 
 
-const char *ContinuousADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const {
+const char *TeensyADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const {
   switch (speed) {
   case ADC_SAMPLING_SPEED::VERY_LOW_SPEED:
     return (const char *)"verylow";
@@ -332,12 +332,12 @@ const char *ContinuousADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const
 }
 
 
-const char *ContinuousADC::samplingSpeedShortStr() const {
+const char *TeensyADC::samplingSpeedShortStr() const {
   return samplingSpeedShortStr(SamplingSpeed);
 }
 
 
-ADC_SAMPLING_SPEED ContinuousADC::samplingSpeedEnum(const char *sampling) const {
+ADC_SAMPLING_SPEED TeensyADC::samplingSpeedEnum(const char *sampling) const {
   char str[strlen(sampling)+1];
   for (size_t k=0; k<strlen(sampling)+1; k++)
     str[k] = tolower(sampling[k]);
@@ -364,12 +364,12 @@ ADC_SAMPLING_SPEED ContinuousADC::samplingSpeedEnum(const char *sampling) const 
 }
 
 
-void ContinuousADC::setReference(ADC_REFERENCE ref) {
+void TeensyADC::setReference(ADC_REFERENCE ref) {
   Reference = ref;
 }
 
 
-const char *ContinuousADC::referenceStr() const {
+const char *TeensyADC::referenceStr() const {
   if (Reference == ADC_REFERENCE::REF_3V3)
     return (const char *)"3.3V";
   else if (Reference == ADC_REFERENCE::REF_1V2)
@@ -381,7 +381,7 @@ const char *ContinuousADC::referenceStr() const {
 }
 
 
-ADC_REFERENCE ContinuousADC::referenceEnum(const char *reference) const {
+ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) const {
   char str[strlen(reference)+1];
   for (size_t k=0; k<strlen(reference)+1; k++)
     str[k] = tolower(reference[k]);
@@ -396,7 +396,7 @@ ADC_REFERENCE ContinuousADC::referenceEnum(const char *reference) const {
 }
 
 
-void ContinuousADC::configure(const char *key, const char *val) {
+void TeensyADC::configure(const char *key, const char *val) {
   char pval[30];
   if (strcmp(key, "samplingrate") == 0) {
     setRate(uint32_t(parseFrequency(val)));
@@ -430,12 +430,12 @@ void ContinuousADC::configure(const char *key, const char *val) {
 }
 
 
-size_t ContinuousADC::counter(uint8_t adc) const {
+size_t TeensyADC::counter(uint8_t adc) const {
   return DMACounter[adc];
 }
 
 
-void ContinuousADC::pinAssignment() {
+void TeensyADC::pinAssignment() {
   Serial.println("pin ADC0 ADC1");
   for (int k=0; k<NAPins; k++) {
     Serial.printf("A%-2d    %d    %d\n", k, ADConv.adc[0]->checkPin(APins[k]),
@@ -444,7 +444,7 @@ void ContinuousADC::pinAssignment() {
 }
 
   
-bool ContinuousADC::check() {
+bool TeensyADC::check() {
   if ( Rate < 1 ) {
     Serial.println("ERROR: no sampling rate specfied.");
     ADCUse = 0;
@@ -493,7 +493,7 @@ bool ContinuousADC::check() {
 }
 
   
-void ContinuousADC::report() {
+void TeensyADC::report() {
   char chans0[50];
   char chans1[50];
   channels(0, chans0);
@@ -522,7 +522,7 @@ void ContinuousADC::report() {
 }
 
 
-void ContinuousADC::setWaveHeader(WaveHeader &wave) const {
+void TeensyADC::setWaveHeader(WaveHeader &wave) const {
   DataWorker::setWaveHeader(wave);
   char cs[100];
   channels(cs);
@@ -534,7 +534,7 @@ void ContinuousADC::setWaveHeader(WaveHeader &wave) const {
 }
 
   
-void ContinuousADC::start() {
+void TeensyADC::start() {
   // setup acquisition:
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
@@ -572,7 +572,7 @@ void ContinuousADC::start() {
 }
 
 
-void ContinuousADC::stop() {
+void TeensyADC::stop() {
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) > 0 ) {
       ADConv.adc[adc]->disableDMA();
@@ -586,12 +586,12 @@ void ContinuousADC::stop() {
 }
 
 
-uint8_t ContinuousADC::adcs() const {
+uint8_t TeensyADC::adcs() const {
   return (ADCUse+1)/2;
 }
 
 
-void ContinuousADC::setupChannels(uint8_t adc) {
+void TeensyADC::setupChannels(uint8_t adc) {
   // translate to SC1A code:
   for(uint8_t i=0; i<NChans[adc]; i++) {
     uint8_t sc1a_pin = 0;
@@ -614,7 +614,7 @@ void ContinuousADC::setupChannels(uint8_t adc) {
 }
 
 
-void ContinuousADC::setupADC(uint8_t adc) {
+void TeensyADC::setupADC(uint8_t adc) {
   ADConv.adc[adc]->setReference(Reference);
   ADConv.adc[adc]->setResolution(Bits);
   Bits = ADConv.adc[adc]->getResolution();
@@ -629,7 +629,7 @@ void ContinuousADC::setupADC(uint8_t adc) {
 }
 
     
-void ContinuousADC::setupDMA(uint8_t adc) {
+void TeensyADC::setupDMA(uint8_t adc) {
   // From the K64 manual:
   // (https://www.mouser.com/datasheet/2/813/K64P144M120SF5RM-1074828.pdf, page 516)
   // CITER and BITER field:
@@ -666,7 +666,7 @@ void ContinuousADC::setupDMA(uint8_t adc) {
 }
 
 
-void ContinuousADC::isr(uint8_t adc) {
+void TeensyADC::isr(uint8_t adc) {
   // takes 31us! (=32kHz) for 256 samples
   size_t dmai = DMAIndex[adc]*MajorSize;
   DMAIndex[adc]++;
@@ -703,7 +703,7 @@ void ContinuousADC::isr(uint8_t adc) {
 
 #if defined(ADC_USE_PDB)
 
-void ContinuousADC::startPDB(uint32_t freq) {
+void TeensyADC::startPDB(uint32_t freq) {
   if (!(SIM_SCGC6 & SIM_SCGC6_PDB)) // setup PDB
     SIM_SCGC6 |= SIM_SCGC6_PDB;     // enable PDB clock
 
@@ -802,11 +802,11 @@ void ContinuousADC::startPDB(uint32_t freq) {
 
 
 void DMAISR0() {
-  ContinuousADC::ADCC->isr(0);
+  TeensyADC::ADCC->isr(0);
 }
 
 
 void DMAISR1() {
-  ContinuousADC::ADCC->isr(1);
+  TeensyADC::ADCC->isr(1);
 }
 

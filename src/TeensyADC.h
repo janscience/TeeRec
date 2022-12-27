@@ -1,5 +1,5 @@
 /*
-  ContinuousADC - library for sampling from multiple pins into a single cyclic buffer.
+  TeensyADC - library for sampling from multiple analog pins of the Teensy into a single cyclic buffer.
   Created by Jan Benda, May 25th, 2021.
   Based on https://github.com/pedvide/ADC
   and on contributions from Stefan Mucha, Lydia Federman, and Sebastian Volkmer.
@@ -7,6 +7,7 @@
   Features
   --------
   
+  - Use the two ADCs of the Teensy for reading analog inputs.
   - Continuous DMA-based data acquisition into a single multiplexed circular buffer.
   - Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
   - Highspeed timed acquisition up to 500kHz.
@@ -16,13 +17,13 @@
   Setup
   -----
   ```
-  #include <ContinuousADC.h>
+  #include <TeensyADC.h>
 
   uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
   uint8_t channels0[] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0, terminate with -1
   uint8_t channels1[] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1, terminate with -1
 
-  ContinuousADC aidata;
+  TeensyADC aidata;
 
   void setup() {
     aidata.setChannels(0, channels0);
@@ -236,8 +237,8 @@
   A26    0    0
 */
 
-#ifndef ContinuousADC_h
-#define ContinuousADC_h
+#ifndef TeensyADC_h
+#define TeensyADC_h
 
 
 #include <Arduino.h>
@@ -247,11 +248,11 @@
 #include <Configurable.h>
 
 
-class ContinuousADC : public DataBuffer, public Configurable {
+class TeensyADC : public DataBuffer, public Configurable {
 
  public:
 
-  static ContinuousADC *ADCC;
+  static TeensyADC *ADCC;
   
   static const size_t MajorSize = 256;
   
@@ -259,7 +260,7 @@ class ContinuousADC : public DataBuffer, public Configurable {
 
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
-  ContinuousADC(volatile sample_t *buffer, size_t nbuffer);
+  TeensyADC(volatile sample_t *buffer, size_t nbuffer);
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.

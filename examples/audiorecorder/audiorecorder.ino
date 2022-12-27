@@ -1,6 +1,6 @@
 #include <Configurator.h>
 #include <Settings.h>
-#include <ContinuousADC.h>
+#include <TeensyADC.h>
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
@@ -31,7 +31,7 @@ Configurator config;
 Settings settings("recordings", fileName);
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
-ContinuousADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer);
 
 AudioOutputI2S speaker;
 // AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield

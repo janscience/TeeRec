@@ -122,7 +122,7 @@ void initScreen(Display &screen) {
 
 #ifdef AI_SPLASH_SCREEN
 void AIsplashScreen(Display &screen,
-		    const ContinuousADC &aidata, const char *title) {
+		    const TeensyADC &aidata, const char *title) {
   char msg[100];
   String convspeed = aidata.conversionSpeedShortStr();
   String samplspeed = aidata.samplingSpeedShortStr();

@@ -31,7 +31,7 @@
  * evaluate the noise levels in more detail.
  */ 
 
-#include <ContinuousADC.h>
+#include <TeensyADC.h>
 #include <SDWriter.h>
 #include <Blink.h>
 #include <Watchdog.h>
@@ -89,7 +89,7 @@ DMAMEM double results_stdevs[maxConversionSpeeds*maxSamplingSpeeds*maxAverages][
 DMAMEM size_t counter;
  
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-ContinuousADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);

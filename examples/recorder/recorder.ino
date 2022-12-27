@@ -22,7 +22,7 @@
 //#define FT6206
 
 #include <Configurator.h>
-#include <ContinuousADC.h>
+#include <TeensyADC.h>
 #include <SDWriter.h>
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
@@ -63,7 +63,7 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 Configurator config;
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-ContinuousADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);

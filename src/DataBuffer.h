@@ -18,7 +18,7 @@ typedef int16_t sample_t;
 // Macro for defining the one and only data buffer.
 // buffer and nbuffer are the variable names for the buffer and its size.
 // n defines the number of samples the buffer can hold.
-// DANGER: The buffer size must be a multiple of ContinuousADC::MajorSize (256)
+// DANGER: The buffer size must be a multiple of TeensyADC::MajorSize (256)
 // and the maximum number of channels per ADC (8)!
 // For Teensy 3.2 use n = 256*32 (16kB),
 // for Teensy 3.5/3.6 use n = 256*256 (128kB) or less.
