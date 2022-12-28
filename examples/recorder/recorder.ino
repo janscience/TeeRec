@@ -21,13 +21,14 @@
 // select touch controller:
 //#define FT6206
 
-#include <Configurator.h>
 #include <TeensyADC.h>
 #include <SDWriter.h>
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
 #include <RTClock.h>
+#include <Configurator.h>
 #include <Settings.h>
+#include <TeensyADCSettings.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
   
@@ -60,8 +61,6 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 // ---------------------------------------------------------------------
 
-Configurator config;
-
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 TeensyADC aidata(AIBuffer, NAIBuffer);
 
@@ -75,6 +74,8 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 bool freezePlots = false;
 elapsedMillis screenTime;
 
+Configurator config;
+TeensyADCSettings aisettings;
 Settings settings("recordings", fileName, fileSaveTime,
 		  pulseFrequency, displayTime);
 RTClock rtclock;
@@ -253,6 +254,7 @@ void setup() {
   //config.setConfigFile("recorder.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
+  aidata.configure(aisettings);
   aidata.check();
   initScreen(screen);
   AIsplashScreen(screen, aidata, "TeeRec recorder");

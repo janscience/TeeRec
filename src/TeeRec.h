@@ -7,6 +7,7 @@
 #include <Configurable.h>
 #include <Configurator.h>
 #include <Settings.h>
+#include <TeensyADCSettings.h>
 
 #include <TestSignals.h>
 

@@ -1,11 +1,12 @@
-#include <Configurator.h>
-#include <Settings.h>
 #include <TeensyADC.h>
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <PushButtons.h>
 #include <Blink.h>
+#include <Configurator.h>
+#include <Settings.h>
+#include <TeensyADCSettings.h>
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
@@ -27,9 +28,6 @@ char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STI
 
 // ----------------------------------------------------------------------------
 
-Configurator config;
-Settings settings("recordings", fileName);
-
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
 TeensyADC aidata(AIBuffer, NAIBuffer);
 
@@ -39,6 +37,10 @@ AudioMonitor audio(aidata, speaker);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
+
+Configurator config;
+TeensyADCSettings aisettings;
+Settings settings("recordings", fileName);
 
 RTClock rtclock;
 String prevname; // previous file name
@@ -207,6 +209,7 @@ void setup() {
   config.setConfigFile("teerec.cfg");
   config.configure(sdcard);
   setupStorage();
+  aidata.configure(aisettings);
   aidata.check();
   setupAudio();
   aidata.start();

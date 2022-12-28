@@ -68,6 +68,7 @@ via the `TeeRec.h` header.
 ### Configuration
 
 - [Configurable](src/Configurable.h): Base class for all configurable classes.
+- [TeensyADCSettings](src/TeensyADCSettings.h): Configuration settings for TeensyADC.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
 
