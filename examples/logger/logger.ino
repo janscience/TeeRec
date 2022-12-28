@@ -1,10 +1,11 @@
-#include <Configurator.h>
 #include <TeensyADC.h>
 #include <SDWriter.h>
 #include <RTClock.h>
-#include <Settings.h>
 #include <Blink.h>
 #include <TestSignals.h>
+#include <Configurator.h>
+#include <Settings.h>
+#include <TeensyADCSettings.h>
 
 
 // Default settings: ----------------------------------------------------------
@@ -29,13 +30,14 @@ int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test s
 
 // ----------------------------------------------------------------------------
 
-Configurator config;
-
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 TeensyADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
+
+Configurator config;
+TeensyADCSettings aisettings;
 Settings settings("recordings", fileName, fileSaveTime, pulseFrequency,
                   0.0, initialDelay);
 RTClock rtclock;
@@ -49,7 +51,6 @@ void setupADC() {
   aidata.setChannels(0, channels0);
   aidata.setChannels(1, channels1);
   aidata.setRate(samplingRate);
-  //aidata.unsetScaling();
   aidata.setResolution(bits);
   aidata.setAveraging(averaging);
   aidata.setConversionSpeed(convs);
@@ -176,6 +177,7 @@ void setup() {
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
+  aidata.configure(aisettings);
   aidata.check();
   aidata.start();
   aidata.report();

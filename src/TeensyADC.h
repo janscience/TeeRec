@@ -245,10 +245,10 @@
 #include <ADC.h>
 #include <DMAChannel.h>
 #include <DataBuffer.h>
-#include <Configurable.h>
+#include <TeensyADCSettings.h>
 
 
-class TeensyADC : public DataBuffer, public Configurable {
+class TeensyADC : public DataBuffer {
 
  public:
 
@@ -345,22 +345,22 @@ class TeensyADC : public DataBuffer, public Configurable {
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // The conversion speed.
-  ADC_CONVERSION_SPEED conversionSpeed() const;
+  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed; };
 
   // Return string describing a conversion speed.
-  const char *conversionSpeedStr(ADC_CONVERSION_SPEED speed) const;
+  static const char *conversionSpeedStr(ADC_CONVERSION_SPEED speed);
 
   // Return string describing the selected conversion speed.
   const char *conversionSpeedStr() const;
 
   // Return a short string describing a conversion speed.
-  const char *conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const;
+  static const char *conversionSpeedShortStr(ADC_CONVERSION_SPEED speed);
 
   // Return a short string describing the selected conversion speed.
   const char *conversionSpeedShortStr() const;
 
   // Translate conversion speed short string to conversion speed enum.
-  ADC_CONVERSION_SPEED conversionSpeedEnum(const char *conversion) const;
+  static ADC_CONVERSION_SPEED conversionSpeedEnum(const char *conversion);
 
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
@@ -376,33 +376,39 @@ class TeensyADC : public DataBuffer, public Configurable {
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
   // The sampling speed.
-  ADC_SAMPLING_SPEED samplingSpeed() const;
+  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed; };
 
   // Return string describing a sampling speed.
-  const char *samplingSpeedStr(ADC_SAMPLING_SPEED speed) const;
+  static const char *samplingSpeedStr(ADC_SAMPLING_SPEED speed);
   
   // Return string describing the selected sampling speed.
   const char *samplingSpeedStr() const;
 
   // Return a short string describing the sampling speed.
-  const char *samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const;
+  static const char *samplingSpeedShortStr(ADC_SAMPLING_SPEED speed);
 
   // Return a short string describing the selected sampling speed.
   const char *samplingSpeedShortStr() const;
 
   // Translate sampling speed short string to sampling speed enum.
-  ADC_SAMPLING_SPEED samplingSpeedEnum(const char *sampling) const;
+  static ADC_SAMPLING_SPEED samplingSpeedEnum(const char *sampling);
 
   // Set the voltage preference.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
   // Teensy 4.x has only 3V3, on Teensy 3.x EXT equals 3V3.
   void setReference(ADC_REFERENCE ref);
 
+  // The voltage reference.
+  ADC_REFERENCE reference() const { return Reference; };
+
+  // Return string describing voltage reference.
+  static const char *referenceStr(ADC_REFERENCE ref);
+
   // Return string describing the selected voltage reference.
   const char *referenceStr() const;
 
   // Translate voltage reference string to reference enum.
-  ADC_REFERENCE referenceEnum(const char *reference) const;
+  static ADC_REFERENCE referenceEnum(const char *reference);
 
   // Return DMA counter for specified adc.
   size_t counter(uint8_t adc) const;
@@ -432,8 +438,11 @@ class TeensyADC : public DataBuffer, public Configurable {
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
 
-  // Configure ADC settings with the provided key-value pair.
-  virtual void configure(const char *key, const char *val);
+  // Configure ADC settings from TeensyADCSettings instance.
+  void configure(const TeensyADCSettings &settings);
+
+  // Transfer current ADC settings to a TeensyADCSettings instance.
+  void setConfiguration(TeensyADCSettings &settings);
 
   // Interrupt service routine. For internal usage.
   void isr(uint8_t adc);

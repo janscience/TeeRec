@@ -14,8 +14,7 @@ DMASetting TeensyADC::DMASettings[2][NMajors];
 
 
 TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer) :
-  DataBuffer(buffer, nbuffer),
-  Configurable("ADC") {
+  DataBuffer(buffer, nbuffer) {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;
@@ -188,12 +187,7 @@ void TeensyADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
 }
 
 
-ADC_CONVERSION_SPEED TeensyADC::conversionSpeed() const {
-  return ConversionSpeed;
-}
-
-
-const char *TeensyADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) const {
+const char *TeensyADC::conversionSpeedStr(ADC_CONVERSION_SPEED speed) {
   return getConversionEnumStr(speed);
 }
 
@@ -203,7 +197,7 @@ const char *TeensyADC::conversionSpeedStr() const {
 }
 
 
-const char *TeensyADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) const {
+const char *TeensyADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) {
   switch (speed) {
 #if defined(ADC_TEENSY_4)
 #else
@@ -248,7 +242,7 @@ const char *TeensyADC::conversionSpeedShortStr() const {
 }
 
 
-ADC_CONVERSION_SPEED TeensyADC::conversionSpeedEnum(const char *conversion) const {
+ADC_CONVERSION_SPEED TeensyADC::conversionSpeedEnum(const char *conversion) {
   char str[strlen(conversion)+1];
   for (size_t k=0; k<strlen(conversion)+1; k++)
     str[k] = tolower(conversion[k]);
@@ -292,12 +286,7 @@ void TeensyADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
 }
 
 
-ADC_SAMPLING_SPEED TeensyADC::samplingSpeed() const {
-  return SamplingSpeed;
-}
-
-
-const char *TeensyADC::samplingSpeedStr(ADC_SAMPLING_SPEED speed) const {
+const char *TeensyADC::samplingSpeedStr(ADC_SAMPLING_SPEED speed) {
   return getSamplingEnumStr(speed);
 }
 
@@ -307,7 +296,7 @@ const char *TeensyADC::samplingSpeedStr() const {
 }
 
 
-const char *TeensyADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) const {
+const char *TeensyADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) {
   switch (speed) {
   case ADC_SAMPLING_SPEED::VERY_LOW_SPEED:
     return (const char *)"verylow";
@@ -337,7 +326,7 @@ const char *TeensyADC::samplingSpeedShortStr() const {
 }
 
 
-ADC_SAMPLING_SPEED TeensyADC::samplingSpeedEnum(const char *sampling) const {
+ADC_SAMPLING_SPEED TeensyADC::samplingSpeedEnum(const char *sampling) {
   char str[strlen(sampling)+1];
   for (size_t k=0; k<strlen(sampling)+1; k++)
     str[k] = tolower(sampling[k]);
@@ -369,19 +358,24 @@ void TeensyADC::setReference(ADC_REFERENCE ref) {
 }
 
 
-const char *TeensyADC::referenceStr() const {
-  if (Reference == ADC_REFERENCE::REF_3V3)
+const char *TeensyADC::referenceStr(ADC_REFERENCE ref) {
+  if (ref == ADC_REFERENCE::REF_3V3)
     return (const char *)"3.3V";
-  else if (Reference == ADC_REFERENCE::REF_1V2)
+  else if (ref == ADC_REFERENCE::REF_1V2)
     return (const char *)"1.2V";
-  else if (Reference == ADC_REFERENCE::REF_EXT)
+  else if (ref == ADC_REFERENCE::REF_EXT)
     return (const char *)"EXT";
   else
     return (const char *)"NONE";
 }
 
 
-ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) const {
+const char *TeensyADC::referenceStr() const {
+  return referenceStr(Reference);
+}
+
+
+ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) {
   char str[strlen(reference)+1];
   for (size_t k=0; k<strlen(reference)+1; k++)
     str[k] = tolower(reference[k]);
@@ -396,37 +390,23 @@ ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) const {
 }
 
 
-void TeensyADC::configure(const char *key, const char *val) {
-  char pval[30];
-  if (strcmp(key, "samplingrate") == 0) {
-    setRate(uint32_t(parseFrequency(val)));
-    sprintf(pval, "%luHz", Rate);
-  }
-  else if (strcmp(key, "resolution") == 0) {
-    setResolution(atoi(val));
-    sprintf(pval, "%hubits", Bits);
-  }
-  else if (strcmp(key, "averaging") == 0) {
-    setAveraging(atoi(val));
-    sprintf(pval, "%hu", Averaging);
-  }
-  else if (strcmp(key, "conversion") == 0) {
-    setConversionSpeed(conversionSpeedEnum(val));
-    strcpy(pval, conversionSpeedStr());
-  }
-  else if (strcmp(key, "sampling") == 0) {
-    setSamplingSpeed(samplingSpeedEnum(val));
-    strcpy(pval, samplingSpeedStr());
-  }
-  else if (strcmp(key, "reference") == 0) {
-    setReference(referenceEnum(val));
-    strcpy(pval, referenceStr());
-  }
-  else {
-    Serial.printf("  ADC key \"%s\" not found.\n", key);
-    return;
-  }
-  Serial.printf("  set ADC-%s to %s\n", key, pval);
+void TeensyADC::configure(const TeensyADCSettings &settings) {
+  setRate(settings.rate());
+  setResolution(settings.resolution());
+  setAveraging(settings.averaging());
+  setConversionSpeed(settings.conversionSpeed());
+  setSamplingSpeed(settings.samplingSpeed());
+  setReference(settings.reference());
+}
+
+
+void TeensyADC::setConfiguration(TeensyADCSettings &settings) {
+  settings.setRate(rate());
+  settings.setResolution(resolution());
+  settings.setAveraging(averaging());
+  settings.setConversionSpeed(conversionSpeed());
+  settings.setSamplingSpeed(samplingSpeed());
+  settings.setReference(reference());
 }
 
 
@@ -778,7 +758,7 @@ void TeensyADC::startPDB(uint32_t freq) {
   ADConv.adc0->setHardwareTrigger();
   ADConv.adc1->setHardwareTrigger();
 
-  //                                   software trigger    enable PDB     PDB interrupt  continuous mode load immediately
+  //                                  software trigger    enable PDB     PDB interrupt  continuous mode load immediately
   constexpr uint32_t ADC_PDB_CONFIG = PDB_SC_TRGSEL(15) | PDB_SC_PDBEN | PDB_SC_PDBIE | PDB_SC_CONT | PDB_SC_LDMOD(0);
 
   constexpr uint32_t PDB_CHnC1_TOS_1 = 0x0100;
