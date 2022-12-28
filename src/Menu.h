@@ -20,7 +20,7 @@ public:
   static const int MaxActions = 8;
   
   // Maximum characters of a menu entry.
-  static const int MaxText = 20;
+  static const int MaxText = 30;
 
   // Function type for menu actions.
   typedef void (*Action)(int);
@@ -79,6 +79,12 @@ public:
   // Return id of checked radio button.
   int checked() const;
 
+  // Provide a callback function that is called when a menu entry is checked.
+  void setCheckedAction(Action action);
+
+  // If a menu entry is checked, return from the menu immediately.
+  void setCheckedReturns(bool returns=true);
+
   // Draw and execute the menu.
   // Returns ID of selected menu entry.
   int exec();
@@ -98,6 +104,8 @@ protected:
   int SelectID;
   int BackID;
   Display *Screen;
+  Action CheckedAction;
+  bool CheckedReturns;
   int NActions;
   char Texts[MaxActions][MaxText];
   Action Actions[MaxActions];

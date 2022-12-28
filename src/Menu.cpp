@@ -12,6 +12,8 @@ Menu::Menu(Display *screen, PushButtons *buttons) :
   SelectID(-1),
   BackID(-1),
   Screen(screen),
+  CheckedAction(0),
+  CheckedReturns(false),
   NActions(0),
   Title(""),
   Canvas(0),
@@ -219,6 +221,16 @@ void Menu::draw() {
 }
 
 
+void Menu::setCheckedAction(Action action) {
+  CheckedAction = action;
+}
+
+
+void Menu::setCheckedReturns(bool returns) {
+  CheckedReturns = returns;
+}
+
+
 int Menu::exec() {
   int index = -1;
   bool enabled = Buttons->enabled();
@@ -260,6 +272,8 @@ int Menu::exec() {
 	if (RadioButton[Index]) {
 	  if (Checked[Index] == 0) {
 	    Checked[Index] = 1;
+	    if (Checked[Index] && CheckedAction != 0)
+	      CheckedAction(IDs[Index]);
 	    drawAction(Index, true);
 	    for (int k=0; k<NActions; k++) {
 	      if (k != Index && RadioButton[k] && Checked[k] > 0) {
@@ -268,11 +282,21 @@ int Menu::exec() {
 		break;
 	      }
 	    }
+	    if (Checked[Index] && CheckedReturns) {
+	      index = -1;
+	      break;
+	    }
 	  }
 	}
 	else {
 	  Checked[Index] = Checked[Index] > 0 ? 0 : 1;
+	  if (Checked[Index] && CheckedAction != 0)
+	    CheckedAction(IDs[Index]);
 	  drawAction(Index, true);
+	  if (Checked[Index] && CheckedReturns) {
+	    index = -1;
+	    break;
+	  }
 	}
       }
       else
