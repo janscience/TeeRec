@@ -17,6 +17,21 @@ TeensyADCSettings::TeensyADCSettings(uint32_t rate, uint8_t bits,
 }
 
 
+TeensyADCSettings::TeensyADCSettings(const char *name, uint32_t rate,
+				     uint8_t bits, uint8_t averaging,
+				     ADC_CONVERSION_SPEED conversion_speed,
+				     ADC_SAMPLING_SPEED sampling_speed,
+				     ADC_REFERENCE reference) :
+  Configurable(name),
+  Rate(rate),
+  Bits(bits),
+  Averaging(averaging),
+  ConversionSpeed(conversion_speed),
+  SamplingSpeed(sampling_speed),
+  Reference(reference) {
+}
+
+
 void TeensyADCSettings::setRate(uint32_t rate) {
   Rate = rate;
 }
@@ -74,10 +89,10 @@ void TeensyADCSettings::configure(const char *key, const char *val) {
     strcpy(pval, TeensyADC::referenceStr(Reference));
   }
   else {
-    Serial.printf("  ADC key \"%s\" not found.\n", key);
+    Serial.printf("  %s key \"%s\" not found.\n", name(), key);
     return;
   }
-  Serial.printf("  set ADC-%s to %s\n", key, pval);
+  Serial.printf("  set %s-%s to %s\n", name(), key, pval);
 }
 
 

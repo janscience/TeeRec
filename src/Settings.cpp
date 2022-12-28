@@ -49,8 +49,8 @@ void Settings::configure(const char *key, const char *val) {
     sprintf(pval, "%.1fs", SensorsInterval);
   }
   else {
-    Serial.printf("  Settings key \"%s\" not found.\n", key);
+    Serial.printf("  %s key \"%s\" not found.\n", name(), key);
     return;
   }
-  Serial.printf("  set Settings-%s to %s\n", key, pval);
+  Serial.printf("  set %s-%s to %s\n", name(), key, pval);
 }
