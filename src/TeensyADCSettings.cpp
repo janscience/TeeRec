@@ -2,20 +2,18 @@
 #include <TeensyADCSettings.h>
 
 
-TeensyADCSettings::TeensyADCSettings() :
+TeensyADCSettings::TeensyADCSettings(uint32_t rate, uint8_t bits,
+				     uint8_t averaging,
+				     ADC_CONVERSION_SPEED conversion_speed,
+				     ADC_SAMPLING_SPEED sampling_speed,
+				     ADC_REFERENCE reference) :
   Configurable("ADC"),
-  Rate(0),
-  Bits(16),
-  Averaging(1),
-  ConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED),
-  SamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED),
-  Reference(ADC_REFERENCE::REF_3V3) {
-}
-
-
-TeensyADCSettings::TeensyADCSettings(const char *name) :
-  TeensyADCSettings() {
-  setName(name);
+  Rate(rate),
+  Bits(bits),
+  Averaging(averaging),
+  ConversionSpeed(conversion_speed),
+  SamplingSpeed(sampling_speed),
+  Reference(reference) {
 }
 
 

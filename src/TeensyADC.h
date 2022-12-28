@@ -260,7 +260,15 @@ class TeensyADC : public DataBuffer {
 
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
-  TeensyADC(volatile sample_t *buffer, size_t nbuffer);
+  // Use channel0 on ADC0 and channel1 on ADC (see setChannel()).
+  TeensyADC(volatile sample_t *buffer, size_t nbuffer,
+	    int8_t channel0=-1, int8_t channel1=-1);
+
+  // Initialize and pass a buffer that has been created with the
+  // DATA_BUFFER macro.
+  // Use channels0 on ADC0 and channels1 on ADC (see setChannels()).
+  TeensyADC(volatile sample_t *buffer, size_t nbuffer,
+	    const int8_t *channels0, const int8_t *channels1);
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.

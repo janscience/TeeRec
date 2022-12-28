@@ -18,10 +18,10 @@ class TeensyADCSettings : public Configurable {
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  TeensyADCSettings();
-  
-  // Constructor setting configuration name.
-  TeensyADCSettings(const char *name);
+  TeensyADCSettings(uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
+		    ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
+		    ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
+		    ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };

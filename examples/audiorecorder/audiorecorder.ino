@@ -11,13 +11,16 @@
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
 
-int bits = 12;                       // resolution: 10bit 12bit, or 16bit 
-int averaging = 1;                   // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
-uint32_t samplingRate = 96000;       // samples per second and channel in Hertz
+#define SAMPLING_RATE 96000 // samples per second and channel in Hertz
+#define BITS             12 // resolution: 10bit 12bit, or 16bit
+#define AVERAGING         1 // number of averages per sample: 0, 4, 8, 16, 32
+#define CONVERSION    ADC_CONVERSION_SPEED::VERY_HIGH_SPEED
+#define SAMPLING      ADC_SAMPLING_SPEED::MED_SPEED
+#define REFERENCE     ADC_REFERENCE::REF_3V3
 int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STIME,
+#define FILENAME      "teerec-SDATETIME.wav"  // may include DATE, SDATE, TIME, STIME,
 
 // Pin assignment: ----------------------------------------------------
 
@@ -29,7 +32,7 @@ char fileName[] = "teerec-SDATETIME.wav";  // may include DATE, SDATE, TIME, STI
 // ----------------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
-TeensyADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 
 AudioOutputI2S speaker;
 // AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield
@@ -39,8 +42,9 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-TeensyADCSettings aisettings;
-Settings settings("recordings", fileName);
+TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+			     CONVERSION, SAMPLING, REFERENCE);
+Settings settings("recordings", FILENAME);
 
 RTClock rtclock;
 String prevname; // previous file name
@@ -48,19 +52,6 @@ int restarts = 0;
 
 PushButtons buttons;
 Blink blink(LED_BUILTIN);
-
-
-void setupADC() {
-  aidata.setChannels(0, channels0);
-  aidata.setChannels(1, channels1);
-  aidata.setRate(samplingRate);
-  aidata.setResolution(bits);
-  aidata.setAveraging(averaging);
-  aidata.setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);
-  aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
-  aidata.setReference(ADC_REFERENCE::REF_3V3);
-  aidata.check();
-}
 
 
 void setupAudio() {
@@ -204,7 +195,6 @@ void setup() {
   rtclock.check();
   rtclock.report();
   setupButtons();
-  setupADC();
   sdcard.begin();
   config.setConfigFile("teerec.cfg");
   config.configure(sdcard);

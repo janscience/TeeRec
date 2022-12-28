@@ -13,7 +13,8 @@ TeensyADC *TeensyADC::ADCC = 0;
 DMASetting TeensyADC::DMASettings[2][NMajors];
 
 
-TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer) :
+TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer,
+		     int8_t channel0, int8_t channel1) :
   DataBuffer(buffer, nbuffer) {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
@@ -36,6 +37,18 @@ TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer) :
   NChannels = 0;
   ADCUse = 0;
   ADCC = this;
+  if (channel0 >= 0)
+    setChannel(0, channel0);
+  if (channel1 >= 0)
+    setChannel(1, channel1);
+}
+
+
+TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer,
+		     const int8_t *channels0, const int8_t *channels1) :
+  TeensyADC(buffer, nbuffer) {
+  setChannels(0, channels0);
+  setChannels(1, channels1);
 }
 
 
@@ -60,6 +73,8 @@ void TeensyADC::addChannel(uint8_t adc, uint8_t channel) {
 
 void TeensyADC::setChannels(uint8_t adc, const int8_t *channels) {
   NChans[adc] = 0;
+  if (channels == 0)
+    return;
   for (uint8_t k=0; k<MaxChannels && channels[k]>0; k++)
     Channels[adc][NChans[adc]++] = channels[k];
   NChannels = 0;

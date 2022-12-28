@@ -36,23 +36,25 @@
 // Default settings: ---------------------------------------------------
 // (may be overwritten by config file recorder.cfg)
 
-int bits = 12;                  // resolution: 10bit 12bit, or 16bit 
-int averaging = 4;              // number of averages per sample: 0, 4, 8, 16, 32 - the higher the better, but the slowe
-uint32_t samplingRate = 44000; // samples per second and channel in Hertz
+#define SAMPLING_RATE 44100 // samples per second and channel in Hertz
+#define BITS             12 // resolution: 10bit 12bit, or 16bit
+#define AVERAGING         4 // number of averages per sample: 0, 4, 8, 16, 32
+#define CONVERSION    ADC_CONVERSION_SPEED::VERY_HIGH_SPEED
+#define SAMPLING      ADC_SAMPLING_SPEED::MED_SPEED
+#define REFERENCE     ADC_REFERENCE::REF_3V3
 int8_t channels0 [] =  {A15, -1, A4, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-uint updateScreen = 500;        // milliseconds
-float displayTime = 0.005;
-//float displayTime = 0.001*updateScreen;
+#define UPDATE_SCREEN 500   // milliseconds
+#define DISPLAY_TIME  0.005 // seconds
 
 bool logging = false;           // keep saving to files
-char fileName[] = "SDATELNUM";  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-float fileSaveTime = 10;        // seconds
+#define FILENAME      "SDATELNUM" // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILE_SAVE_TIME 10   // seconds
 
-int startPin = 24;
+#define START_PIN 24
 
-int pulseFrequency = 500;       // Hertz
+#define PULSE_FREQUENCY 500 // Hertz
 #ifdef TEENSY32
 int signalPins[] = {3, 4, -1};  // pins where to put out test signals
 #else
@@ -62,7 +64,7 @@ int signalPins[] = {7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 // ---------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-TeensyADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
@@ -75,25 +77,13 @@ bool freezePlots = false;
 elapsedMillis screenTime;
 
 Configurator config;
-TeensyADCSettings aisettings;
-Settings settings("recordings", fileName, fileSaveTime,
-		  pulseFrequency, displayTime);
+TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+			     CONVERSION, SAMPLING, REFERENCE);
+Settings settings("recordings", FILENAME, FILE_SAVE_TIME,
+		  PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name
 PushButtons buttons;
-
-
-void setupADC() {
-  aidata.setChannels(0, channels0);
-  aidata.setChannels(1, channels1);
-  aidata.setRate(samplingRate);
-  aidata.setResolution(bits);
-  aidata.setAveraging(averaging);
-  aidata.setConversionSpeed(ADC_CONVERSION_SPEED::HIGH_SPEED);
-  aidata.setSamplingSpeed(ADC_SAMPLING_SPEED::HIGH_SPEED);
-  aidata.setReference(ADC_REFERENCE::REF_3V3);
-  aidata.check();
-}
 
 
 bool openNextFile() {
@@ -167,7 +157,7 @@ void setupScreen() {
 
 
 void setupButtons() {
-  buttons.add(startPin, INPUT_PULLUP, startWrite, stopWrite);
+  buttons.add(START_PIN, INPUT_PULLUP, startWrite, stopWrite);
 }
 
 
@@ -175,8 +165,8 @@ void plotData() {   // 85ms
 #if defined(FT6206)
   freezePlots = touch.touched();
 #endif
-  if (screenTime > updateScreen && ! freezePlots) {
-    screenTime -= updateScreen;
+  if (screenTime > UPDATE_SCREEN && ! freezePlots) {
+    screenTime -= UPDATE_SCREEN;
     // text: 36ms
     if (file.isOpen())
       screen.scrollText(1);
@@ -249,9 +239,8 @@ void setup() {
   rtclock.check();
   prevname = "";
   setupButtons();
-  setupADC();
   sdcard.begin();
-  //config.setConfigFile("recorder.cfg");
+  config.setConfigFile("recorder.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
   aidata.configure(aisettings);

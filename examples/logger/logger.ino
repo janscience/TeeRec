@@ -11,52 +11,42 @@
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
 
-uint32_t samplingRate = 44100; // samples per second and channel in Hertz
-int bits = 12;                 // resolution: 10bit 12bit, or 16bit
-int averaging = 16;            // number of averages per sample: 0, 4, 8, 16, 32
-ADC_CONVERSION_SPEED convs = ADC_CONVERSION_SPEED::VERY_HIGH_SPEED;
-ADC_SAMPLING_SPEED sampls = ADC_SAMPLING_SPEED::MED_SPEED;
+#define SAMPLING_RATE 44100 // samples per second and channel in Hertz
+#define BITS             12 // resolution: 10bit 12bit, or 16bit
+#define AVERAGING        16 // number of averages per sample: 0, 4, 8, 16, 32
+#define CONVERSION    ADC_CONVERSION_SPEED::VERY_HIGH_SPEED
+#define SAMPLING      ADC_SAMPLING_SPEED::MED_SPEED
+#define REFERENCE     ADC_REFERENCE::REF_3V3
 int8_t channels0 [] =  {A5, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
 int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
 
-char fileName[] = "SDATELNUM"; // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-float fileSaveTime = 10;       // seconds
+#define FILENAME      "SDATELNUM" // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILE_SAVE_TIME 10   // seconds
 
-float initialDelay = 2.0;      // seconds
+#define INITIAL_DELAY  2.0  // seconds
 
-int pulseFrequency = 230;      // Hertz
+#define PULSE_FREQUENCY 230 // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
 
 
 // ----------------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-TeensyADC aidata(AIBuffer, NAIBuffer);
+TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-TeensyADCSettings aisettings;
-Settings settings("recordings", fileName, fileSaveTime, pulseFrequency,
-                  0.0, initialDelay);
+TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+			     CONVERSION, SAMPLING, REFERENCE);
+Settings settings("recordings", FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
+                  0.0, INITIAL_DELAY);
 RTClock rtclock;
 String prevname; // previous file name
 Blink blink(LED_BUILTIN);
 
 int restarts = 0;
-
-
-void setupADC() {
-  aidata.setChannels(0, channels0);
-  aidata.setChannels(1, channels1);
-  aidata.setRate(samplingRate);
-  aidata.setResolution(bits);
-  aidata.setAveraging(averaging);
-  aidata.setConversionSpeed(convs);
-  aidata.setSamplingSpeed(sampls);
-  aidata.check();
-}
 
 
 bool openNextFile() {
@@ -170,7 +160,6 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   rtclock.check();
   prevname = "";
-  setupADC();
   sdcard.begin();
   rtclock.setFromFile(sdcard);
   rtclock.report();
