@@ -331,6 +331,7 @@ class Display {
   uint16_t TextC[MaxAreas];          // max number of characters
   uint16_t TextI[MaxAreas];          // character offset
   bool TextS[MaxAreas];              // scroll it
+  bool TextColorsSwapped[MaxAreas];
   uint16_t TextBackground[MaxAreas];
   uint16_t TextColor[MaxAreas];
   // Text stack:

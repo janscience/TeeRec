@@ -260,7 +260,10 @@ int Menu::exec() {
       Buttons->waitReleased(SelectID);
       index = IDs[Index];
       if (Actions[Index] != 0) {
+	if (enabled)
+	  Buttons->enable();
 	Actions[Index](index);
+	Buttons->disable();
 	draw();
       }
       else if (Menus[Index] != 0) {

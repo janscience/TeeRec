@@ -34,6 +34,7 @@ Display::Display() {
     TextC[k] = 0;
     TextI[k] = 0;
     TextS[k] = false;
+    TextColorsSwapped[k] = false;
     TextHead[k] = 0;
     TextCanvas[k] = NULL;
     TextColor[k] = DefaultTextColor;
@@ -65,6 +66,10 @@ void Display::init(Adafruit_GFX *screen, uint8_t rotation, bool flip) {
 
 void Display::clear() {
   Screen->fillScreen(Background);
+  for (int k=0; k<MaxAreas; k++) {
+    if (TextColorsSwapped[k])
+      swapTextColors(k);
+  }
 }
 
 
@@ -249,7 +254,7 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
   TextCanvas[area]->setRotation(0);
   if ( Font != 0 )
     TextCanvas[area]->setFont(Font);
-  TextCanvas[area]->setTextColor(0xffff);
+  setDefaultTextColors(area);
   TextCanvas[area]->setTextSize(1);
   TextCanvas[area]->setTextWrap(false);
   int16_t  x, y;
@@ -273,12 +278,14 @@ float Display::setTextArea(uint8_t area, float x0, float y0, float x1, float y1,
 void Display::setTextColors(uint8_t area, uint16_t color, uint16_t background) {
   TextColor[area] = color;
   TextBackground[area] = background;
+  TextColorsSwapped[area] = false;
 }
 
 
 void Display::setDefaultTextColors(uint8_t area) {
   TextColor[area] = DefaultTextColor;
   TextBackground[area] = DefaultTextBackground;
+  TextColorsSwapped[area] = false;
 }
 
 
@@ -286,6 +293,7 @@ void Display::swapTextColors(uint8_t area) {
   uint16_t tmp = TextColor[area];
   TextColor[area] = TextBackground[area];
   TextBackground[area] = tmp;
+  TextColorsSwapped[area] = ! TextColorsSwapped[area];
 }
 
 
@@ -293,6 +301,8 @@ void Display::clearText(uint8_t area) {
   if (TextW[area] == 0 || TextCanvas[area] == NULL)
     return;
   Text[area][TextHead[area]][0] = '\0';
+  if (TextColorsSwapped[area])
+    swapTextColors(area);
   TextCanvas[area]->fillScreen(0x0000);
   Screen->drawBitmap(TextX[area], TextY[area], TextCanvas[area]->getBuffer(),
 		     TextW[area], TextH[area],
