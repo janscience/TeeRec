@@ -236,7 +236,6 @@ int Menu::exec() {
   bool enabled = Buttons->enabled();
   Buttons->disable();
   draw();
-  Index = 0;
   while (1) {
     Buttons->update();
     if (UpID >= 0 && Buttons->pressed(UpID)) {
@@ -286,6 +285,10 @@ int Menu::exec() {
 	      index = -1;
 	      break;
 	    }
+	  }
+	  else if (Checked[Index] && CheckedReturns) {
+	    index = -1;
+	    break;
 	  }
 	}
 	else {
