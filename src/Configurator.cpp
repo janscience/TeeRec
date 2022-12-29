@@ -28,7 +28,10 @@ Configurable *Configurator::configurable(const char *name) {
   for (size_t k=0; k<strlen(name)+1; k++)
     lname[k] = tolower(name[k]);
   for (size_t k=0; k<NConfigs; k++) {
-    if (strcmp(Configs[k]->name(), lname) == 0)
+    char cname[strlen(Configs[k]->name())+1];
+    for (size_t k=0; k<strlen(Configs[k]->name())+1; k++)
+      cname[k] = tolower(Configs[k]->name()[k]);
+    if (strcmp(cname, lname) == 0)
       return Configs[k];
   }
   return NULL;

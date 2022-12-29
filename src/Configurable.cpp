@@ -17,10 +17,7 @@ void Configurable::configure(const char *key, const char *val) {
 
 
 void Configurable::setName(const char *name) {
-  size_t k=0;
-  for (; k<strlen(name) && k+1<MaxName; k++)
-    ConfigName[k] = tolower(name[k]);
-  ConfigName[k] = '\0';
+  strncpy(ConfigName, name, MaxName);
 }
 
 
