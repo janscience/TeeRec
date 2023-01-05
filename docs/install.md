@@ -7,7 +7,8 @@ it!
 
 ## Requirements
 
-Update your Arduino IDE to version 2 and install Teensy support.
+Update your [Arduino IDE](https://www.arduino.cc/en/software) to
+version 2 and install Teensy support.
 
 Follow the instructions for [Arduino IDE 2.0.0 Teensy
 Support](https://www.pjrc.com/arduino-ide-2-0-0-teensy-support/):
@@ -18,7 +19,8 @@ Support](https://www.pjrc.com/arduino-ide-2-0-0-teensy-support/):
    For Linux, download the AppImage file, make it executable, and run
    it. You may provide a link to this file in `/usr/local/bin`.
 
-2. Run the Arduino IDE. Go to File > Preferences and add
+2. Run the [Arduino IDE](https://docs.arduino.cc/software/ide-v2). Go
+   to File > Preferences and add
    `https://www.pjrc.com/teensy/package_teensy_index.json` to
    "Additional boards manager URLs".
 
@@ -63,7 +65,7 @@ Install it from the library manager of the Arduino IDE (Tools > Manage
 libraries). Search for the library and install it.
 
 
-## TeRec installation from github
+## TeeRec installation from github
 
 Clone the [TeeRec](https://github.com/janscience/TeeRec) repository
 directly into 'Arduino/libraries':
