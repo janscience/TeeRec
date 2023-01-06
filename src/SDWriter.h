@@ -14,6 +14,7 @@
 #include <WaveHeader.h>
 
 
+// Add a bit of functionality to SDClass.
 class SDCard : public SDClass {
 
  public:
@@ -64,6 +65,9 @@ class SDCard : public SDClass {
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 
+  // Format the SD card, but keep the specified (small) file.
+  void format(const char *path=0);
+
   // Open file on SD card for reading.
   File openRead(const char *path);
 
@@ -82,6 +86,7 @@ class SDCard : public SDClass {
 };
 
 
+// Write data from buffer into wave files.
 class SDWriter : public DataWorker {
 
  public:

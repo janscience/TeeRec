@@ -84,6 +84,33 @@ void SDCard::removeFiles(const char *path) {
 }
 
 
+void SDCard::format(const char *path) {
+  File file;
+  size_t n = 10;
+  // read file:
+  if (path != 0) {
+    rootDir();
+    file = openRead(path);
+    n = file.available();
+  }
+  char buffer[n];
+  if (path != 0) {
+    file.read(buffer, n);
+    file.close();
+  }
+  // format SD card:
+  Serial.println("Format SD card:");
+  SDClass::format(0, '.', Serial);
+  Serial.println();
+  // write file:
+  if (path != 0) {
+    file = openWrite(path);
+    file.write(buffer, n);
+    file.close();
+  }
+}
+
+
 String SDCard::incrementFileName(const String &fname) {
   if (! Available)
     return "";
@@ -130,17 +157,17 @@ void SDCard::resetFileCounter() {
 
 
 File SDCard::openRead(const char *path) {
-  return SD.open(path, FILE_READ);
+  return open(path, FILE_READ);
 }
 
 
 File SDCard::openWrite(const char *path) {
-  return SD.open(path, FILE_WRITE_BEGIN);
+  return open(path, FILE_WRITE_BEGIN);
 }
 
 
 File SDCard::openAppend(const char *path) {
-  return SD.open(path, FILE_WRITE);
+  return open(path, FILE_WRITE);
 }
 
 
@@ -237,7 +264,7 @@ bool SDWriter::open(const char *fname) {
 
 
 bool SDWriter::isOpen() const {
-  return (DataFile) ? true : false;
+  return bool(DataFile);
 }
 
 
