@@ -144,7 +144,7 @@ void setupStorage() {
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval();
   file.setMaxFileTime(settings.FileTime);
-  file.setSoftware("TeeRec audiorecorder");
+  file.header().setSoftware("TeeRec audiorecorder");
 }
 
 

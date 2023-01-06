@@ -12,7 +12,7 @@
 #include <WaveHeader.h>
 
 // undefine if you want to use the SD library instead:
-#define SDCARD_USE_SDFAT
+//#define SDCARD_USE_SDFAT
 
 
 #ifdef SDCARD_USE_SDFAT
@@ -147,9 +147,6 @@ class SDWriter : public DataWorker {
   // End usage of SD card if it was created by SDWriter.
   void end();
 
-  // Set name of software to be saved in wave header by openWave().
-  void setSoftware(const char *software);
-
   // Return write interval in seconds.
   float writeInterval() const;
 
@@ -184,21 +181,23 @@ class SDWriter : public DataWorker {
   // then need to close the file with closeWave() and provide the
   // number of samples there.
   // If no file extension is provided, ".wav" is added.
-  // Returns true if the file was successfully opened.
+  // Return true if the file was successfully opened.
   bool openWave(const char *fname, int32_t samples=-1,
                 const char *datetime=0);
 
   // Update wave header with proper file size and close file.
-  // Returns true if the file was not open or the file was sucessfully
+  // Return true if the file was not open or the file was sucessfully
   // closed, including an update of the wave header with the actual
   // file size.
   bool closeWave();
 
-  
+  // Return wave header. 
+  WaveHeader &header() { return Wave; };
+
   // Write available data to file (if the file is open).
   // If maxFileSamples() is set (>0), then stop writing after that
   // many samples.
-  // Returns number of written samples or a negative number on error:
+  // Return number of written samples or a negative number on error:
   // -1: file is not open.
   // -2: file is already full according to maxFileSamples().
   // -3: no data are available.

@@ -58,9 +58,7 @@ void Configurator::configure(SDCard &sd) {
 #ifdef SDCARD_USE_SDFAT
     file.fgets(line, nline);
 #else
-    #warning Reading text files not supported by Teensy SD library. Use SdFat instead.
-    file.close();
-    return;
+    file.readBytesUntil('\n', line, nline);
 #endif
     char *key = NULL;
     char *val = NULL;

@@ -289,11 +289,6 @@ void SDWriter::end() {
 }
 
 
-void SDWriter::setSoftware(const char *software) {
-  Wave.setSoftware(software);
-}
-
-
 float SDWriter::writeInterval() const {
   return 0.001*WriteInterval;
 }
