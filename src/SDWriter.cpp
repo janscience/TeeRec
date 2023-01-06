@@ -100,7 +100,7 @@ bool SDCard::exists(const char *path) {
 }
 
 
-bool SDCard::removeFile(const char *path) {
+bool SDCard::remove(const char *path) {
   return SDFS.remove(path);
 }
 

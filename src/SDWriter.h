@@ -66,7 +66,7 @@ class SDCard {
   // True if SD card is busy.
   bool isBusy();
 
-  SdFs &sdcard() { return SDFS; };
+  SdFs &sdfs() { return SDFS; };
 
   // Make directory if it does not exist and
   // make it the currrent working directory.
@@ -92,7 +92,7 @@ class SDCard {
 
   // Remove the specified file from the current working directory.
   // Return true on success.
-  bool removeFile(const char *path);
+  bool remove(const char *path);
 
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);

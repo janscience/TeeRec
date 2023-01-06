@@ -109,7 +109,7 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
     RTC.set(t);
   else
     Teensy3Clock.set(t);
-  sdcard.removeFile(path);
+  sdcard.remove(path);
   // get time:
   char times[20];
   dateTime(times);
