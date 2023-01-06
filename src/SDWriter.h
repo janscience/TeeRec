@@ -115,8 +115,6 @@ class SDCard {
 
 #ifdef SDCARD_USE_SDFAT
   SdFs SD;
-#else
-  String CurrentPath;
 #endif
   
   bool Available;

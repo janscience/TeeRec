@@ -5,9 +5,6 @@
 SDCard::SDCard() {
   Available = false;
   NameCounter = 0;
-#ifndef SDCARD_USE_SDFAT
-  CurrentPath = "/";
-#endif
 }
 
 
@@ -30,7 +27,7 @@ bool SDCard::begin(uint8_t csPin) {
 #ifdef SDCARD_USE_SDFAT
   SD.chvol();
 #else
-  CurrentPath = "/";
+  SD.sdfs.chvol();
 #endif
   return true;
 }
@@ -79,7 +76,7 @@ bool SDCard::isBusy() {
 #ifdef SDCARD_USE_SDFAT
   return SD.isBusy();
 #else
-  return false;
+  return SD.sdfs.isBusy();
 #endif
 }
 
@@ -93,9 +90,7 @@ bool SDCard::dataDir(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.chdir(path);
 #else
-  CurrentPath = path;
-  CurrentPath += "/";
-  return true;
+  return SD.sdfs.chdir(path);
 #endif
 }
 
@@ -106,8 +101,7 @@ bool SDCard::rootDir() {
 #ifdef SDCARD_USE_SDFAT
   return SD.chdir("/");
 #else
-  CurrentPath = "/";
-  return true;
+  return SD.sdfs.chdir("/");
 #endif
 }
 
@@ -116,7 +110,7 @@ bool SDCard::exists(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.exists(path);
 #else
-  return SD.exists((CurrentPath + path).c_str());
+  return SD.sdfs.exists(path);
 #endif
 }
 
@@ -125,7 +119,7 @@ bool SDCard::removeFile(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.remove(path);
 #else
-  return SD.remove((CurrentPath + path).c_str());
+  return SD.sdfs.remove(path);
 #endif
 }
 
@@ -222,7 +216,7 @@ SDFILE SDCard::openRead(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_READ);
 #else
-  return SD.open((CurrentPath + path).c_str(), FILE_READ);
+  return SD.open(path, FILE_READ);
 #endif
 }
 
@@ -231,7 +225,7 @@ SDFILE SDCard::openWrite(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_RDWR | O_CREAT);
 #else
-  return SD.open((CurrentPath + path).c_str(), FILE_WRITE_BEGIN);
+  return SD.open(path, FILE_WRITE_BEGIN);
 #endif
 }
 
@@ -240,7 +234,7 @@ SDFILE SDCard::openAppend(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_RDWR | O_APPEND);
 #else
-  return SD.open((CurrentPath + path).c_str(), FILE_WRITE);
+  return SD.open(path, FILE_WRITE);
 #endif
 }
 
