@@ -12,7 +12,7 @@
 #include <WaveHeader.h>
 
 // undefine if you want to use the SD library instead:
-//#define SDCARD_USE_SDFAT
+#define SDCARD_USE_SDFAT
 
 
 #ifdef SDCARD_USE_SDFAT
@@ -66,11 +66,7 @@ class SDCard {
   // True if SD card is busy.
   bool isBusy();
 
-#ifdef SDCARD_USE_SDFAT
-  SdFs &sdcard() { return SD; };
-#else
-  SDClass &sdcard() { return SD; };
-#endif
+  SdFs &sdcard() { return SDFS; };
 
   // Make directory if it does not exist and
   // make it the currrent working directory.
@@ -114,7 +110,9 @@ class SDCard {
  protected:
 
 #ifdef SDCARD_USE_SDFAT
-  SdFs SD;
+  SdFs SDFS;
+#else
+  SdFs &SDFS;
 #endif
   
   bool Available;
