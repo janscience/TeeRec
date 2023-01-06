@@ -47,7 +47,7 @@ void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   const size_t nline = 100;
   char line[nline];
-  FsFile file = sd.openRead(ConfigFile);
+  SDFILE file = sd.openRead(ConfigFile);
   if (!file || file.available() < 10) {
     Serial.printf("Configuration file \"%s\" not found or empty.\n\n", ConfigFile);
     Configured = false;

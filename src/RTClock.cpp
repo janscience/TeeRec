@@ -43,7 +43,7 @@ bool RTClock::check() {
 
 
 bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
-  FsFile file = sdcard.openRead(path);
+  SDFILE file = sdcard.openRead(path);
   if (!file)
     return false;
   char datetime[20];

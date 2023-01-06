@@ -18,11 +18,12 @@
 #ifdef SDCARD_USE_SDFAT
   // Use SdFat library:
   #include <SdFat.h>
+  #define SDFILE FsFile
 #else
   // Use Teensy SD library:
   #include <SD.h>
   #include <SPI.h>
-  #define FsFile File
+  #define SDFILE File
 #endif
 
 
@@ -101,13 +102,13 @@ class SDCard {
   void removeFiles(const char *path);
 
   // Open file on SD card for reading.
-  FsFile openRead(const char *path);
+  SDFILE openRead(const char *path);
 
   // Open file on SD card for writing (not appending).
-  FsFile openWrite(const char *path);
+  SDFILE openWrite(const char *path);
 
   // Open file on SD card for appending to existing file.
-  FsFile openAppend(const char *path);
+  SDFILE openAppend(const char *path);
 
   
  protected:
@@ -172,11 +173,10 @@ class SDWriter : public DataWorker {
   bool isOpen() const;
 
   // Close file.
-  // Return true if file was not open or file was successfully closed.
-  bool close();
+  void close();
 
   // Return file object.
-  FsFile &file();
+  SDFILE &file();
 
 
   // Open new file for writing and write wave header with metadata
@@ -243,7 +243,7 @@ class SDWriter : public DataWorker {
 
   SDCard *SDC;
   bool SDOwn;
-  mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
+  mutable SDFILE DataFile;   // mutable because File from FS.h has non-constant bool() function
 
   WaveHeader Wave;
 

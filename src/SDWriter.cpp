@@ -116,13 +116,12 @@ bool SDCard::exists(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.exists(path);
 #else
-  return SD.exists((CurrentPath + name).c_str());
+  return SD.exists((CurrentPath + path).c_str());
 #endif
 }
 
 
 bool SDCard::removeFile(const char *path) {
-  FsFile file;
 #ifdef SDCARD_USE_SDFAT
   return SD.remove(path);
 #else
@@ -132,15 +131,15 @@ bool SDCard::removeFile(const char *path) {
 
 
 void SDCard::removeFiles(const char *path) {
-  FsFile file;
+  SDFILE file;
   if (! Available)
     return;
 #ifdef SDCARD_USE_SDFAT
-  FsFile dir;
+  SDFILE dir;
   if (!dir.open(path))
     return;
 #else
-  FsFile dir = SD.open(path);
+  SDFILE dir = SD.open(path);
   if (!dir)
     return;
 #endif
@@ -206,11 +205,7 @@ String SDCard::incrementFileName(const String &fname) {
 	sprintf(nn, "%02d", NameCounter);
 	name.replace("NUM", nn);
       }
-#ifdef SDCARD_USE_SDFAT
-    } while (SD.exists(name.c_str()));
-#else
-    } while (SD.exists((CurrentPath + name).c_str()));
-#endif
+    } while (exists(name.c_str()));
     return name;
   }
   else
@@ -223,7 +218,7 @@ void SDCard::resetFileCounter() {
 }
 
 
-FsFile SDCard::openRead(const char *path) {
+SDFILE SDCard::openRead(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_READ);
 #else
@@ -232,7 +227,7 @@ FsFile SDCard::openRead(const char *path) {
 }
 
 
-FsFile SDCard::openWrite(const char *path) {
+SDFILE SDCard::openWrite(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_RDWR | O_CREAT);
 #else
@@ -241,7 +236,7 @@ FsFile SDCard::openWrite(const char *path) {
 }
 
 
-FsFile SDCard::openAppend(const char *path) {
+SDFILE SDCard::openAppend(const char *path) {
 #ifdef SDCARD_USE_SDFAT
   return SD.open(path, O_RDWR | O_APPEND);
 #else
@@ -343,23 +338,21 @@ bool SDWriter::open(const char *fname) {
   DataFile = SDC->openWrite(fname);
   FileSamples = 0;
   WriteTime = 0;
-  return DataFile ? true : false;
+  return isOpen();
 }
 
 
 bool SDWriter::isOpen() const {
-  return DataFile ? true : false;
+  return (DataFile) ? true : false;
 }
 
 
-bool SDWriter::close() {
-  if (! DataFile)
-    return true;
-  return DataFile.close();
+void SDWriter::close() {
+  DataFile.close();
 }
 
 
-FsFile &SDWriter::file() {
+SDFILE &SDWriter::file() {
   return DataFile;
 }
 
@@ -386,12 +379,12 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     Serial.println("ERROR: initial writing of wave header");
     return false;
   }
-  return DataFile ? true : false;
+  return (DataFile) ? true : false;
 }
 
 
 bool SDWriter::closeWave() {
-  if (! DataFile)
+  if (! (DataFile))
     return true;
   bool success = true;
   if (FileSamples > 0) {
@@ -403,8 +396,7 @@ bool SDWriter::closeWave() {
       success = false;
     }
   }
-  if (! close())
-    success = false;
+  close();
   return success;
 }
 
@@ -413,7 +405,7 @@ ssize_t SDWriter::write() {
   size_t nbytes = 0;
   size_t samples0 = 0;
   size_t samples1 = 0;
-  if (! DataFile)
+  if (! (DataFile))
     return -1;
   if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
     return -2;
