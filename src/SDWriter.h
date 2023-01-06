@@ -8,33 +8,20 @@
 
 
 #include <Arduino.h>
+#include <SD.h>
+#include <SPI.h>
 #include <DataWorker.h>
 #include <WaveHeader.h>
 
-// undefine if you want to use the SD library instead:
-#define SDCARD_USE_SDFAT
 
-
-#ifdef SDCARD_USE_SDFAT
-  // Use SdFat library:
-  #include <SdFat.h>
-  #define SDFILE FsFile
-#else
-  // Use Teensy SD library:
-  #include <SD.h>
-  #include <SPI.h>
-  #define SDFILE File
-#endif
-
-
-class SDCard {
+class SDCard : public SDClass {
 
  public:
 
   // Initialize. You need to call begin() for accessing the SD card.
   SDCard();
   // End usage of SD card.
-  ~SDCard();
+  virtual ~SDCard();
 
 #ifdef BUILTIN_SDCARD
   // Initialize built in SD card.
@@ -45,17 +32,6 @@ class SDCard {
   // Initialize SD card on specified SPI chip select pin.
   // Return true on success.
   bool begin(uint8_t csPin);
-
-#ifdef SDCARD_USE_SDFAT
-  // Initialize SD card with clock speed.
-  bool begin(SdCsPin_t csPin, uint32_t maxSck);
-
-  // Initialize SD card via SdioConfig.
-  bool begin(SdioConfig sdioConfig);
-  
-  // Initialize SD card via SdSpiConfig.
-  bool begin(SdSpiConfig spiConfig);
-#endif
   
   // End usage of SD card.
   void end();
@@ -66,8 +42,6 @@ class SDCard {
   // True if SD card is busy.
   bool isBusy();
 
-  SdFs &sdfs() { return SDFS; };
-
   // Make directory if it does not exist and
   // make it the currrent working directory.
   // Return true on succes.
@@ -76,9 +50,6 @@ class SDCard {
   // Reset current working directory to root.
   // Return true on succes.
   bool rootDir();
-
-  // Return true if path exists.
-  bool exists(const char *path);
 
   // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
   // such that it specifies a non existing file. 
@@ -90,31 +61,21 @@ class SDCard {
   // Call it, whenever the filename changes, for example, because of a new date.
   void resetFileCounter();
 
-  // Remove the specified file from the current working directory.
-  // Return true on success.
-  bool remove(const char *path);
-
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 
   // Open file on SD card for reading.
-  SDFILE openRead(const char *path);
+  File openRead(const char *path);
 
   // Open file on SD card for writing (not appending).
-  SDFILE openWrite(const char *path);
+  File openWrite(const char *path);
 
   // Open file on SD card for appending to existing file.
-  SDFILE openAppend(const char *path);
+  File openAppend(const char *path);
 
   
  protected:
 
-#ifdef SDCARD_USE_SDFAT
-  SdFs SDFS;
-#else
-  SdFs &SDFS;
-#endif
-  
   bool Available;
 
   uint16_t NameCounter;
@@ -169,8 +130,7 @@ class SDWriter : public DataWorker {
   void close();
 
   // Return file object.
-  SDFILE &file();
-
+  File &file() { return DataFile; };
 
   // Open new file for writing and write wave header with metadata
   // from all data producers.
@@ -238,7 +198,7 @@ class SDWriter : public DataWorker {
 
   SDCard *SDC;
   bool SDOwn;
-  mutable SDFILE DataFile;   // mutable because File from FS.h has non-constant bool() function
+  mutable File DataFile;   // mutable because File from FS.h has non-constant bool() function
 
   WaveHeader Wave;
 

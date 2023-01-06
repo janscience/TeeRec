@@ -47,7 +47,7 @@ void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   const size_t nline = 100;
   char line[nline];
-  SDFILE file = sd.openRead(ConfigFile);
+  File file = sd.openRead(ConfigFile);
   if (!file || file.available() < 10) {
     Serial.printf("Configuration file \"%s\" not found or empty.\n\n", ConfigFile);
     Configured = false;
@@ -55,11 +55,7 @@ void Configurator::configure(SDCard &sd) {
   }
   Serial.printf("Read configuration file \"%s\" ...\n", ConfigFile);
   while (file.available()) {
-#ifdef SDCARD_USE_SDFAT
-    file.fgets(line, nline);
-#else
     file.readBytesUntil('\n', line, nline);
-#endif
     char *key = NULL;
     char *val = NULL;
     int state = 0;

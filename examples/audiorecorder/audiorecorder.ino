@@ -179,7 +179,7 @@ void storeData() {
         file.closeWave();
         char mfs[20];
         sprintf(mfs, "error%d-%d.msg", restarts+1, -samples);
-        SDFILE mf = sdcard.openWrite(mfs);
+        File mf = sdcard.openWrite(mfs);
         mf.close();
       }
     }

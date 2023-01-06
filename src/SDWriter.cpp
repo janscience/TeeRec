@@ -2,12 +2,7 @@
 #include <SDWriter.h>
 
 
-#ifdef SDCARD_USE_SDFAT
 SDCard::SDCard() {
-#else
-SDCard::SDCard() :
-  SDFS(SD.sdfs) {
-#endif
   Available = false;
   NameCounter = 0;
 }
@@ -26,115 +21,56 @@ bool SDCard::begin() {
 
 
 bool SDCard::begin(uint8_t csPin) {
-  if (!SDFS.begin(csPin))
+  if (!SDClass::begin(csPin))
     return false;
   Available = true;
-  SDFS.chvol();
+  sdfs.chvol();
   return true;
 }
-
-
-#ifdef SDCARD_USE_SDFAT
-
-bool SDCard::begin(SdCsPin_t csPin, uint32_t maxSck) {
-  if (!SDFS.begin(csPin, maxSck))
-    return false;
-  Available = true;
-  SDFS.chvol();
-  return true;
-}
-
-
-bool SDCard::begin(SdioConfig sdioConfig) {
-  if (!SDFS.begin(sdioConfig))
-    return false;
-  Available = true;
-  SDFS.chvol();
-  return true;
-}
-
-
-bool SDCard::begin(SdSpiConfig spiConfig) {
-  if (!SDFS.begin(spiConfig))
-    return false;
-  Available = true;
-  SDFS.chvol();
-  return true;
-}
-
-#endif
 
 
 void SDCard::end() {
-#ifdef SDCARD_USE_SDFAT
   if (Available)
-    SDFS.end();
-#endif
+    sdfs.end();
+  Available = false;
 }
 
 
 bool SDCard::isBusy() {
-  return SDFS.isBusy();
+  return sdfs.isBusy();
 }
 
 
 bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;
-  if (! SDFS.exists(path))
-    SDFS.mkdir(path);
+  if (! exists(path))
+    mkdir(path);
   NameCounter = 0;
-  return SDFS.chdir(path);
+  return sdfs.chdir(path);
 }
 
 
 bool SDCard::rootDir() {
   if (! Available)
     return false;
-  return SDFS.chdir("/");
-}
-
-
-bool SDCard::exists(const char *path) {
-  return SDFS.exists(path);
-}
-
-
-bool SDCard::remove(const char *path) {
-  return SDFS.remove(path);
+  return sdfs.chdir("/");
 }
 
 
 void SDCard::removeFiles(const char *path) {
-  SDFILE file;
+  SdFile file;
   if (! Available)
     return;
-#ifdef SDCARD_USE_SDFAT
-  SDFILE dir;
+  SdFile dir;
   if (!dir.open(path))
     return;
-#else
-  SDFILE dir = SD.open(path);
-  if (!dir)
-    return;
-#endif
   Serial.printf("Removing all files in %s:\n", path);
-#ifdef SDCARD_USE_SDFAT
   while (file.openNext(&dir, O_WRITE)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
       if (file.remove()) {
-#else
-  while (file = dir.openNextFile()) {
-    if (!file.isDirectory()) {
-      char file_path[200];
-      strcpy(file_path, path);
-      strcat(file_path, "/");
-      strcat(file_path, file.name());
-      const char *fname = file.name();
-      if (SDFS.remove(file_path)) {
-#endif
 	Serial.print("  ");
 	Serial.println(fname);
       }
@@ -193,30 +129,18 @@ void SDCard::resetFileCounter() {
 }
 
 
-SDFILE SDCard::openRead(const char *path) {
-#ifdef SDCARD_USE_SDFAT
-  return SDFS.open(path, O_READ);
-#else
+File SDCard::openRead(const char *path) {
   return SD.open(path, FILE_READ);
-#endif
 }
 
 
-SDFILE SDCard::openWrite(const char *path) {
-#ifdef SDCARD_USE_SDFAT
-  return SDFS.open(path, O_RDWR | O_CREAT);
-#else
+File SDCard::openWrite(const char *path) {
   return SD.open(path, FILE_WRITE_BEGIN);
-#endif
 }
 
 
-SDFILE SDCard::openAppend(const char *path) {
-#ifdef SDCARD_USE_SDFAT
-  return SDFS.open(path, O_RDWR | O_APPEND);
-#else
+File SDCard::openAppend(const char *path) {
   return SD.open(path, FILE_WRITE);
-#endif
 }
 
 
@@ -319,11 +243,6 @@ bool SDWriter::isOpen() const {
 
 void SDWriter::close() {
   DataFile.close();
-}
-
-
-SDFILE &SDWriter::file() {
-  return DataFile;
 }
 
 
