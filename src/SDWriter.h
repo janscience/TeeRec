@@ -142,27 +142,11 @@ class SDWriter : public DataWorker {
   // Availability of a SD card. 
   bool cardAvailable() const;
 
+  // The SD card volume on which data are written.
+  SDCard *sdcard() { return SDC; };
+
   // End usage of SD card if it was created by SDWriter.
   void end();
-
-  // Make directory if it does not exist and
-  // make it the currrent working directory.
-  // Return true on succes.
-  bool dataDir(const char *path);
-
-  // Reset current working directory to root.
-  // Return true on succes.
-  bool rootDir();
-
-  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
-  // such that it specifies a non existing file. 
-  // If no SD card is available, or if no unique file can be found, return an empty string.
-  // Takes about 1-2ms.
-  String incrementFileName(const String &fname);
-
-  // Reset the counter that is used by incrementFileName().
-  // Call it, whenever the filename changes, for example, because of a new date.
-  void resetFileCounter();
 
   // Set name of software to be saved in wave header by openWave().
   void setSoftware(const char *software);
@@ -218,11 +202,11 @@ class SDWriter : public DataWorker {
   // many samples.
   // Returns number of written samples or a negative number on error:
   // -1: file is not open.
-  // -2: file is already full according too maxFileSamples().
+  // -2: file is already full according to maxFileSamples().
   // -3: no data are available.
   ssize_t write();
 
-  // Start writing to a file from the current minus decr sample on.
+  // Start writing to a file from the current sample minus decr samples on.
   void start(size_t decr=0);
 
   // Return current file size in samples.

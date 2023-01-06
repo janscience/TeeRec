@@ -90,7 +90,7 @@ void setup() {
   sdcard.begin();
   setupADC();
   aidata.start();
-  file.dataDir("tests");
+  file.sdcard()->dataDir("tests");
   const char *convs = aidata.conversionSpeedShortStr();
   const char *sampls = aidata.samplingSpeedShortStr();
   Serial.printf("ADC settings: %gkHz, %s conversion speed, %s sampling speed, %d averaging.\n",

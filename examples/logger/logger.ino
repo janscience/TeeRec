@@ -55,10 +55,10 @@ bool openNextFile() {
   time_t t = now();
   String name = rtclock.makeStr(settings.FileName, t, true);
   if (name != prevname) {
-    file.resetFileCounter();
+    file.sdcard()->resetFileCounter();
     prevname = name;
   }
-  name = file.incrementFileName(name);
+  name = file.sdcard()->incrementFileName(name);
   if (name.length() == 0) {
     Serial.println("WARNING: failed to increment file name.");
     Serial.println("SD card probably not inserted -> halt");
@@ -89,7 +89,7 @@ bool openNextFile() {
 void setupStorage() {
   if (settings.FileTime > 30)
     blink.setTiming(5000);
-  if (file.dataDir(settings.Path))
+  if (file.sdcard()->dataDir(settings.Path))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
   file.setWriteInterval();
   file.setMaxFileTime(settings.FileTime);

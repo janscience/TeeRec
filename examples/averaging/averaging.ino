@@ -224,7 +224,7 @@ void setup() {
   }
   setupADC();
   sdcard.begin();
-  file.dataDir("tests");
+  file.sdcard()->dataDir("tests");
   delay(4000);
   watchdog.enable(Watchdog::TIMEOUT_4S);
   delay(500);

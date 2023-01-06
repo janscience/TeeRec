@@ -300,30 +300,6 @@ void SDWriter::end() {
 }
 
 
-bool SDWriter::dataDir(const char *path) {
-  return SDC->dataDir(path);
-}
-
-
-bool SDWriter::rootDir() {
-  return SDC->rootDir();
-}
-
-
-String SDWriter::incrementFileName(const String &fname) {
-  if (cardAvailable())
-    return SDC->incrementFileName(fname);
-  else
-    return "";
-}
-
-
-void SDWriter::resetFileCounter() {
-  if (cardAvailable())
-    return SDC->resetFileCounter();
-}
-
-
 void SDWriter::setSoftware(const char *software) {
   Wave.setSoftware(software);
 }
