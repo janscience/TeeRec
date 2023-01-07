@@ -65,8 +65,12 @@ class SDCard : public SDClass {
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path);
 
+  // Flash erase all data.
+  void erase();
+  
   // Format the SD card, but keep the specified (small) file.
-  void format(const char *path=0);
+  // If erase_card, flash erase all data first.
+  void format(const char *path=0, bool erase_card=false);
 
   // Open file on SD card for reading.
   File openRead(const char *path);

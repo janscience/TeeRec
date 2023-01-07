@@ -83,8 +83,36 @@ void SDCard::removeFiles(const char *path) {
   Serial.println("done");
 }
 
+// flash erase all data
+void SDCard::erase() {
+  uint32_t const ERASE_SIZE = 262144L;
+  uint32_t card_sector_count = 0;
+  uint32_t first_block = 0;
+  uint32_t last_block;
+  uint16_t n = 0;
+  
+  Serial.println("Erase SD card");
+  card_sector_count = sdfs.card()->sectorCount();
+  do {
+    last_block = first_block + ERASE_SIZE - 1;
+    if (last_block >= card_sector_count) {
+      last_block = card_sector_count - 1;
+    }
+    if (!sdfs.card()->erase(first_block, last_block)) {
+      Serial.println("erase failed");
+      break;
+    }
+    Serial.print('.');
+    if ((n++)%64 == 63)
+      Serial.println();
+    first_block += ERASE_SIZE;
+  } while (first_block < card_sector_count);
+  Serial.println();
+  Serial.println("done.");
+}
 
-void SDCard::format(const char *path) {
+
+void SDCard::format(const char *path, bool erase_card) {
   File file;
   size_t n = 10;
   // read file:
@@ -98,6 +126,9 @@ void SDCard::format(const char *path) {
     file.read(buffer, n);
     file.close();
   }
+  // erase SD card:
+  if (erase_card)
+    erase();
   // format SD card:
   Serial.println("Format SD card:");
   SDClass::format(0, '.', Serial);
