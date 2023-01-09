@@ -75,7 +75,7 @@ void TeensyADC::setChannels(uint8_t adc, const int8_t *channels) {
   NChans[adc] = 0;
   if (channels == 0)
     return;
-  for (uint8_t k=0; k<MaxChannels && channels[k]>0; k++)
+  for (uint8_t k=0; k<MaxChannels && channels[k]>=0; k++)
     Channels[adc][NChans[adc]++] = channels[k];
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
