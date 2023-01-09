@@ -36,8 +36,8 @@ Connections:
 The [Audio Adaptor Boards for Teensy 3.x and Teensy
 4.x](https://www.pjrc.com/store/teensy3_audio.html) is soldered as a
 shield directly on the Teensy. It provides a mini stereo jack for
-pluggin in headphones and line out. For connecting a speaker you need
-an aditional amplifier.
+plugging in headphones and line out. For connecting a speaker you need
+an additional amplifier.
 
 ![audio adaptor](https://www.pjrc.com/store/teensy3_audio.jpg)
 
@@ -55,7 +55,7 @@ amplifier. It needs 5V power and an analog signal.
 
 The [Stereo Enclosed Speaker Set - 3W 4
 Ohm](https://www.adafruit.com/product/1669) work nicely on the
-amplifiers commented above.
+amplifiers described above.
 
 ![enclodes speakers](https://cdn-shop.adafruit.com/970x728/1669-06.jpg)
 
