@@ -38,17 +38,22 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save):
+def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
+                metadata_title, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 0)
     if data is None:
         print('file "%s" is empty!' % path)
         return
+    basename = os.path.basename(path)
     pins = []
+    title = basename
     if has_audioio:
         metadata, cues = metadata_wave(path)
-        pins = metadata['INFO']['PINS'].split(',')
-    basename = os.path.basename(path)
+        info = metadata['INFO']
+        pins = info['PINS'].split(',')
+        if metadata_title:
+            title = f"{0.001*rate:.0f}kHz @ {info['BITS']}bits: {info['CNVS']} conversion, {info['SMPS']} sampling, avrg={info['AVRG']}"
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.07, right=0.98, top=0.94, bottom=0.09)
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
@@ -83,7 +88,7 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save):
     ax.set_ylabel('Recording [%s]' % unit)
     if data.shape[1] > 1:
         ax.legend(loc='lower right')
-    ax.set_title(basename, fontsize=16)
+    ax.set_title(title, fontsize=16)
     if save:
         fig.savefig(os.path.splitext(os.path.basename(path))[0] + '-traces.png')
     else:
@@ -115,6 +120,8 @@ if __name__ == '__main__':
                         help='raw voltage readings without offset from 0 to 3.3V')
     parser.add_argument('-a', dest='autoy', action='store_true',
                         help='auto scale y-axis')
+    parser.add_argument('-i', dest='metadata', action='store_true',
+                        help='write info section from metadata into title of plot')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs=1, type=str,
@@ -128,9 +135,11 @@ if __name__ == '__main__':
     gain = args.gain
     raw = args.raw
     autoy = args.autoy
+    metadata_title = args.metadata
     save = args.save
     path = args.file[0]
     # load and plot:
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0.02
-    plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save)
+    plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
+                metadata_title, save)
