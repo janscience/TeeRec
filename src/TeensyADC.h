@@ -23,7 +23,8 @@
   uint8_t channels0[] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0, terminate with -1
   uint8_t channels1[] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1, terminate with -1
 
-  TeensyADC aidata;
+  DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+  TeensyADC aidata(AIBuffer, NAIBuffer);
 
   void setup() {
     aidata.setChannels(0, channels0);
@@ -346,10 +347,14 @@ class TeensyADC : public DataBuffer {
   // HIGH_SPEED, VERY_HIGH_SPEED, ADACK_2_4, ADACK_4_0, ADACK_5_2 or ADACK_6_2.
   // From https://forum.pjrc.com/threads/25532-ADC-library-update-now-with-support-for-Teensy-3-1:
   // The measurement of a voltage takes place in two steps:
-  //   Sampling: Load an internal capacitor with the voltage you want to measure.
-  //   The longer you let this capacitor be charged, the closest it will resemble the voltage.
-  //   Conversion: Convert that voltage into a digital representation that is as close
-  //   as possible to the selected resolution.
+  //   1. Sampling: Load an internal capacitor with the voltage you
+  //      want to measure.  The longer you let this capacitor be
+  //      charged, the closest it will resemble the voltage.
+  //   2. Conversion: Convert that voltage into a digital
+  //      representation that is as close as possible to the selected
+  //      resolution.
+  // The conversion speed will change the ADC clock, ADCK. And affects
+  // all stages in the measurement.
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // The conversion speed.
@@ -377,10 +382,15 @@ class TeensyADC : public DataBuffer {
   // HIGH_SPEED, HIGH_VERY_HIGH_SPEED, VERY_HIGH_SPEED.
   // From https://forum.pjrc.com/threads/25532-ADC-library-update-now-with-support-for-Teensy-3-1:
   // The measurement of a voltage takes place in two steps:
-  //   Sampling: Load an internal capacitor with the voltage you want to measure.
-  //   The longer you let this capacitor be charged, the closest it will resemble the voltage.
-  //   Conversion: Convert that voltage into a digital representation that is as close
-  //   as possible to the selected resolution.
+  //   1. Sampling: Load an internal capacitor with the voltage you
+  //      want to measure.  The longer you let this capacitor be
+  //      charged, the closest it will resemble the voltage.
+  //   2. Conversion: Convert that voltage into a digital
+  //      representation that is as close as possible to the selected
+  //      resolution.
+  // Usually you can increase the sampling speed if what you measure
+  // has a low impedance. However, if the impedance is high you should
+  // decrease the speed.
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
   // The sampling speed.
