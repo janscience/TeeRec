@@ -21,7 +21,7 @@ int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input 
 int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
 
 #define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "LDOAREF-SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME 10   // seconds
 
 #define INITIAL_DELAY  2.0  // seconds

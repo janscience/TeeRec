@@ -3,6 +3,11 @@ import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import wave
+try:
+    from audioio import metadata_wave
+    has_audioio = True
+except ImportError:
+    has_audioio = False
 
 
 def load_wave(filepath):
@@ -39,6 +44,10 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save):
     if data is None:
         print('file "%s" is empty!' % path)
         return
+    pins = []
+    if has_audioio:
+        metadata, cues = metadata_wave(path)
+        pins = metadata['INFO']['PINS'].split(',')
     basename = os.path.basename(path)
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.07, right=0.98, top=0.94, bottom=0.09)
@@ -59,8 +68,11 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy, save):
         unit = 'mV'
     for c in range(data.shape[1]):
         if channel < 0 or c == channel:
+            label = f'{c}'
+            if c < len(pins):
+                label = pins[c]
             ax.plot(1000*time[idx0:dtidx], scale*data[idx0:dtidx,c]+scale*(offs+step*c),
-                    '-', color=colors[c%len(colors)], label='%d' % c)
+                    '-', color=colors[c%len(colors)], label=label)
     maxy = 40000 + data.shape[1]*step
     if not autoy:
         if raw:
