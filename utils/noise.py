@@ -4,6 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import wave
+try:
+    from audioio import metadata_wave
+    has_audioio = True
+except ImportError:
+    has_audioio = False
 
 
 def load_wave(filepath):
@@ -42,16 +47,31 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
         return
     nchannels = data.shape[1]
     basename = os.path.basename(path)
-    parts = basename.split('-')
-    rate = 1000*float(parts[-5][:3])
-    bits = int(parts[-4][:2])
-    convs = parts[-3][4:]
-    sampls = parts[-2][5:]
-    avrgs = int(parts[-1][4:6])
+    if has_audioio:
+        metadata, cues = metadata_wave(path)
+        info = metadata['INFO']
+        pins = info['PINS'].split(',')
+        bits = int(info['BITS'])
+        convs = info['CNVS']
+        sampls = info['SMPS']
+        avrgs = int(info['AVRG'])
+    else:
+        pins = []
+        parts = basename.split('-')
+        rate = 1000*float(parts[-5][:3])
+        bits = int(parts[-4][:2])
+        convs = parts[-3][4:]
+        sampls = parts[-2][5:]
+        avrgs = int(parts[-1][4:6])
+    if basename[:10] != 'averaging-':
+        data = data//2**(16-bits)
     if header:
         print(f'rate bits convers  sampling avrg', end='')
         for c in range(nchannels):
-            print(f' c{c:<3d}', end='')
+            if pins:
+                print(f' {pins[c]:<4s}', end='')
+            else:
+                print(f' c{c:<3d}', end='')
         print()
     print(f'{0.001*rate:4.0f} {bits:4d} {convs:8s} {sampls:8s} {avrgs:4d}', end='')
     for c in range(nchannels):
@@ -90,7 +110,8 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
                                 fc=colors[c%len(colors)]);
             axs[c].axvline(m, color='k')
             axs[c].plot([m-s, m+s], [0.1*nmax, 0.1*nmax], 'k', lw=3)
-        axs[c].set_title('channel %d' % c)
+        cs = pins[c] if pins else c
+        axs[c].set_title(f'channel {cs}')
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
         axs[c].text(0.95, 0.87, '$\mu$=%.0f' % m, ha='right', transform=axs[c].transAxes)
