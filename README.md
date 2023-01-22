@@ -145,6 +145,10 @@ In [utils/](utils) you find some useful python scripts.
 - [spectra](utils/spectra): power spectra of traces in wave files.
 - [cycles](utils/cycles): plot failures in pulse traces? - needs update.
 
+For allowing these script to use metadata contained in the wav files
+generated via the TeeRec library (pin names for channels, settings of
+the ADC), install [audioio](https://github.com/janscience/audioio).
+
 
 ## Applications of the TeeRec libraries
 

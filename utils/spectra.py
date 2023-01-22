@@ -3,8 +3,17 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import psd
-from thunderfish.eventdetection import detect_peaks
 import wave
+try:
+    from thunderfish.eventdetection import detect_peaks
+    has_thunderfish = True
+else:
+    has_thunderfish = False
+try:
+    from audioio import metadata_wave
+    has_audioio = True
+except ImportError:
+    has_audioio = False
 
 
 def load_wave(filepath):
@@ -38,7 +47,12 @@ def load_bin(filepath, offset=0):
 def plot_psds(path, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
-    data = np.array(data, dtype=np.double)
+    #data = np.array(data, dtype=np.double)
+    pins = []
+    if has_audioio:
+        metadata, cues = metadata_wave(path)
+        info = metadata['INFO']
+        pins = info['PINS'].split(',')
     nchannels = data.shape[1]
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True)
@@ -48,8 +62,8 @@ def plot_psds(path, save):
         axs = [ax]
     fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
     fig.suptitle(os.path.basename(path), fontsize=16)
-    nfft = 1024*4
-    thresh = 15 # dB
+    nfft = 1024*8
+    thresh = 10 # dB
     for c in range(nchannels):
         #data[:,c] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
         pxx, freqs = psd(data[:,c] - np.mean(data[:,c]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
@@ -57,10 +71,13 @@ def plot_psds(path, save):
         #db = 10.0*np.log10(pxx/2**15)
         p, t = detect_peaks(db, thresh)
         axs[c].plot(0.001*freqs, db)
-        axs[c].plot(0.001*freqs[p], db[p], 'or')
-        for pi in p:
-            axs[c].text(0.001*(freqs[pi]+10), db[pi]+0.3, '%.0fHz' % freqs[pi])
-        axs[c].set_title('channel %d' % c)
+        if has_thunderfish:
+            p, t = detect_peaks(db, thresh)
+            axs[c].plot(0.001*freqs[p], db[p], 'or')
+            for pi in p:
+                axs[c].text(0.001*(freqs[pi]+10), db[pi]+0.3, '%.0fHz' % freqs[pi])
+        cs = pins[c] if pins else c
+        axs[c].set_title(f'channel {cs}')
         if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel('Frequency [kHz]')
         axs[c].set_ylabel('Power [dB rel max range]')
@@ -72,6 +89,8 @@ def plot_psds(path, save):
     
 if __name__ == '__main__':
     save = False
+    plt.rcParams['axes.xmargin'] = 0
+    plt.rcParams['axes.ymargin'] = 0
     for path in sys.argv[1:]:
         if path == '-s':
             save = True

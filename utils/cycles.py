@@ -4,6 +4,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 import wave
 from thunderfish.eventdetection import threshold_crossings
+try:
+    from audioio import metadata_wave
+    has_audioio = True
+except ImportError:
+    has_audioio = False
 
 
 def load_wave(filepath):
@@ -39,6 +44,11 @@ def analyze_periodicity(path):
     if data is None:
         return
     #data, rate = load_bin(path, 108)
+    pins = []
+    if has_audioio:
+        metadata, cues = metadata_wave(path)
+        info = metadata['INFO']
+        pins = info['PINS'].split(',')
     nchannels = data.shape[1]
     basename = os.path.basename(path)
     thresh = 0
@@ -54,7 +64,8 @@ def analyze_periodicity(path):
         isi = np.diff(up)
         if len(isi) > 10:
             axs[c].hist(isi, -0.5 + np.arange(np.max(isi)+2))
-        axs[c].set_title('channel %d' % c)
+        cs = pins[c] if pins else c
+        axs[c].set_title(f'channel {cs}')
     plt.show()
     """
     ax.plot(data[:1000,c]);
