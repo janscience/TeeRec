@@ -7,7 +7,7 @@ import wave
 try:
     from thunderfish.eventdetection import detect_peaks
     has_thunderfish = True
-else:
+except ImportError:
     has_thunderfish = False
 try:
     from audioio import metadata_wave
