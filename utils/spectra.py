@@ -1,5 +1,5 @@
 import os
-import sys
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.mlab import psd
@@ -44,7 +44,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_psds(path, save):
+def plot_psds(path, channel, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     #data = np.array(data, dtype=np.double)
@@ -54,33 +54,42 @@ def plot_psds(path, save):
         info = metadata['INFO']
         pins = info['PINS'].split(',')
     nchannels = data.shape[1]
+    if channel >= 0:
+        nchannels = 1
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True)
         axs = axs.ravel()
     else:
         fig, ax = plt.subplots()
         axs = [ax]
-    fig.subplots_adjust(top=0.88, right=0.96, hspace=0.2)
+    fig.set_size_inches(12, 6)
+    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.07, right=0.99,
+                        hspace=0.3)
     fig.suptitle(os.path.basename(path), fontsize=16)
+    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
     nfft = 1024*8
     thresh = 10 # dB
     for c in range(nchannels):
-        #data[:,c] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
-        pxx, freqs = psd(data[:,c] - np.mean(data[:,c]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
+        ch = c
+        if channel >= 0:
+            ch = channel
+        #data[:,ch] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
+        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
         db = 10.0*np.log10(pxx/2**14/freqs[-1])
         #db = 10.0*np.log10(pxx/2**15)
-        p, t = detect_peaks(db, thresh)
-        axs[c].plot(0.001*freqs, db)
+        axs[c].plot(0.001*freqs, db, color=colors[c%len(colors)])
         if has_thunderfish:
             p, t = detect_peaks(db, thresh)
-            axs[c].plot(0.001*freqs[p], db[p], 'or')
+            axs[c].plot(0.001*freqs[p], db[p], 'o', color='gray', clip_on=False)
             for pi in p:
-                axs[c].text(0.001*(freqs[pi]+10), db[pi]+0.3, '%.0fHz' % freqs[pi])
-        cs = pins[c] if pins else c
+                axs[c].text(0.001*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
+        cs = pins[ch] if pins else ch
         axs[c].set_title(f'channel {cs}')
         if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel('Frequency [kHz]')
         axs[c].set_ylabel('Power [dB rel max range]')
+        axs[c].spines['top'].set_visible(False)
+        axs[c].spines['right'].set_visible(False)
     if save:
         fig.savefig(os.path.splitext(path)[0] + '-spectra.png')
     else:
@@ -88,11 +97,21 @@ def plot_psds(path, save):
 
     
 if __name__ == '__main__':
-    save = False
+    # command line arguments:
+    parser = argparse.ArgumentParser(add_help=True,
+        description='Plot power spectra of recorded signals.')
+    parser.add_argument('-c', dest='channel', default=-1, type=int,
+                        help='show trace of channel CHANNEL only',
+                        metavar='CHANNEL')
+    parser.add_argument('-s', dest='save', action='store_true',
+                        help='save plot to png file')
+    parser.add_argument('file', nargs='+', type=str,
+                        help='wave files containing the data to be shown')
+    args = parser.parse_args()
+    # options:
+    channel = args.channel
+    save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
-    for path in sys.argv[1:]:
-        if path == '-s':
-            save = True
-            continue
-        plot_psds(path, save)
+    for path in args.file:
+        plot_psds(path, channel, save)

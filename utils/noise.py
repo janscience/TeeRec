@@ -39,7 +39,9 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
+def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
+              subtract_mean=True, show_filename=False,
+              log_counts=False, plot=True, save=False):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     if data is None:
@@ -63,26 +65,55 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
         convs = parts[-3][4:]
         sampls = parts[-2][5:]
         avrgs = int(parts[-1][4:6])
+    vunit = ''
+    unit = 'integer'
+    scale = 1
+    if gain is not None:
+        scale = 1.66/2**15 * 1000.0/gain
+        unit = 'mV'
+        vunit = unit
+        data = data*scale
+        scale_bits = False
+    bw = 1
     if basename[:10] != 'averaging-':
-        data = data//2**(16-bits)
+        bw = 2**(16-bits)
+    if scale_bits:
+        data = data/bw
+        bw = 1
     if header:
+        if show_filename:
+            print(f'{"":<{width}} ', end='')
+        print(f'{"recording":<32} ', end='')
+        print(f'{"stdev":<{nchannels*5}}', end='')
+        print(f'{"range":<{nchannels*5}}')
+        if show_filename:
+            print(f'{"file":<{width}} ', end='')
         print(f'rate bits convers  sampling avrg', end='')
         for c in range(nchannels):
             if pins:
                 print(f' {pins[c]:<4s}', end='')
             else:
                 print(f' c{c:<3d}', end='')
+        for c in range(nchannels):
+            if pins:
+                print(f' {pins[c]:<4s}', end='')
+            else:
+                print(f' c{c:<3d}', end='')
         print()
+    if show_filename:
+        print(f'{basename:<{width}} ', end='')
     print(f'{0.001*rate:4.0f} {bits:4d} {convs:8s} {sampls:8s} {avrgs:4d}', end='')
     for c in range(nchannels):
-        m = np.mean(data[:,c])
         s = np.std(data[:,c])
         print(f' {s:4.1f}', end='')
+    for c in range(nchannels):
+        r = np.max(data[:,c]) - np.min(data[:,c])
+        print(f' {r:4.0f}', end='')
     print()
     if not plot:
         return
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    abins = np.arange(-2**15, 2**15+1, 1)
+    abins = np.arange(-2**15, 2**15+1, bw)*scale
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True, sharey=True)
         axs = axs.ravel()
@@ -91,14 +122,18 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
         axs = [ax]
     fig.set_size_inches(8, 6)
     fig.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.96, hspace=0.3)
-    fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)
+    if show_filename:
+        fig.suptitle(basename, fontsize=14)
+    else:
+        fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)
     for c in range(nchannels):
         m = np.mean(data[:,c])
         s = np.std(data[:,c])
+        r = np.max(data[:,c]) - np.min(data[:,c])
         n, b = np.histogram(data[:,c], abins);
         nmax = np.max(n)
-        i0 = np.argmax(n>0)
-        i1 = len(n) - np.argmax(n[::-1]>0)
+        i0 = max(0, np.argmax(n>0) - 1)
+        i1 = min(len(n), len(n) - np.argmax(n[::-1]>0) + 1)
         if subtract_mean:
             b -= int(m)
             axs[c].fill_between(b[i0:i1], n[i0:i1], ec='none',
@@ -114,9 +149,17 @@ def plot_hist(path, header, subtract_mean=True, plot=True, save=False):
         axs[c].set_title(f'channel {cs}')
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
-        axs[c].text(0.95, 0.87, '$\mu$=%.0f' % m, ha='right', transform=axs[c].transAxes)
-        axs[c].text(0.95, 0.75, '$\sigma$=%.1f' % s, ha='right', transform=axs[c].transAxes)
-    fig.text(0.55, 0.02, 'Amplitude [integer]', ha='center')
+        axs[c].text(0.95, 0.87, f'$\mu$={m:.0f}{vunit}',
+                    ha='right', transform=axs[c].transAxes)
+        axs[c].text(0.95, 0.75, f'$\sigma$={s:.1f}{vunit}',
+                    ha='right', transform=axs[c].transAxes)
+        axs[c].text(0.95, 0.63, f'range={r:.0f}{vunit}',
+                    ha='right', transform=axs[c].transAxes)
+        axs[c].set_ylabel('counts')
+        if log_counts:
+            axs[c].set_ylim(bottom=1)
+            axs[c].set_yscale('log')
+    axs[nchannels-1].set_xlabel(f'Amplitude [{unit}]')
     if save:
         fig.savefig(os.path.splitext(basename)[0] + '-noise.png')
     else:
@@ -127,8 +170,17 @@ if __name__ == '__main__':
     # command line arguments:
     parser = argparse.ArgumentParser(add_help=True,
         description='Analyse noisyness of recorded zero-signals.')
+    parser.add_argument('-g', dest='gain', default=None, type=float,
+                        help='Gain of an amplifier (default no gain, i.e. raw integer recordings)',
+                        metavar='GAIN')
+    parser.add_argument('-b', dest='scale_bits', action='store_true',
+                        help='scale back to single bits')
     parser.add_argument('-m', dest='subtract_mean', action='store_true',
                         help='subtract mean from data traces')
+    parser.add_argument('-f', dest='show_filename', action='store_true',
+                        help='show file name in plot title')
+    parser.add_argument('-l', dest='log_counts', action='store_true',
+                        help='logarithmic counts')
     parser.add_argument('-p', dest='plot', action='store_true',
                         help='plot distribution of samples')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -139,11 +191,18 @@ if __name__ == '__main__':
     # options:
     plot = args.plot
     save = args.save
+    gain = args.gain
+    scale_bits = args.scale_bits
     subtract_mean = args.subtract_mean
+    show_filename = args.show_filename
+    log_counts = args.log_counts
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     # analyse:
     header = True
+    bn = [len(os.path.basename(path)) for path in args.file]
+    width = max(*bn)
     for path in args.file:
-        plot_hist(path, header, subtract_mean, plot, save)
+        plot_hist(path, header, width, gain, scale_bits, subtract_mean,
+                  show_filename, log_counts, plot, save)
         header = False

@@ -124,8 +124,8 @@ if __name__ == '__main__':
                         help='write info section from metadata into title of plot')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
-    parser.add_argument('file', nargs=1, type=str,
-                        help='wave file containing the data to be shown')
+    parser.add_argument('file', nargs='+', type=str,
+                        help='wave files containing the data to be shown')
     args = parser.parse_args()
     # options:
     channel = args.channel
@@ -137,9 +137,9 @@ if __name__ == '__main__':
     autoy = args.autoy
     metadata_title = args.metadata
     save = args.save
-    path = args.file[0]
     # load and plot:
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0.02
-    plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
-                metadata_title, save)
+    for path in args.file:
+        plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
+                    metadata_title, save)
