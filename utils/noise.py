@@ -201,7 +201,7 @@ if __name__ == '__main__':
     # analyse:
     header = True
     bn = [len(os.path.basename(path)) for path in args.file]
-    width = max(*bn)
+    width = max(bn)
     for path in args.file:
         plot_hist(path, header, width, gain, scale_bits, subtract_mean,
                   show_filename, log_counts, plot, save)
