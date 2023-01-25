@@ -44,7 +44,7 @@ def load_bin(filepath, offset=0):
     return data, float(rate)
 
 
-def plot_psds(path, channel, save):
+def plot_psds(path, channel, maxfreq, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     #data = np.array(data, dtype=np.double)
@@ -63,10 +63,15 @@ def plot_psds(path, channel, save):
         fig, ax = plt.subplots()
         axs = [ax]
     fig.set_size_inches(12, 6)
-    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.07, right=0.99,
+    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.07, right=0.98,
                         hspace=0.3)
     fig.suptitle(os.path.basename(path), fontsize=16)
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+    tscale = 0.001
+    funit = 'kHz'
+    if maxfreq and maxfreq < 1200:
+        tscale = 1
+        funit = 'Hz'
     nfft = 1024*8
     thresh = 10 # dB
     for c in range(nchannels):
@@ -77,17 +82,19 @@ def plot_psds(path, channel, save):
         pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
         db = 10.0*np.log10(pxx/2**14/freqs[-1])
         #db = 10.0*np.log10(pxx/2**15)
-        axs[c].plot(0.001*freqs, db, color=colors[c%len(colors)])
+        axs[c].plot(tscale*freqs, db, color=colors[c%len(colors)])
         if has_thunderfish:
             p, t = detect_peaks(db, thresh)
-            axs[c].plot(0.001*freqs[p], db[p], 'o', color='gray', clip_on=False)
+            axs[c].plot(tscale*freqs[p], db[p], 'o', color='gray', clip_on=False)
             for pi in p:
-                axs[c].text(0.001*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
+                axs[c].text(tscale*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
         cs = pins[ch] if pins else ch
         axs[c].set_title(f'channel {cs}')
         if c % 2 == 1 or nchannels == 1:
-            axs[c].set_xlabel('Frequency [kHz]')
+            axs[c].set_xlabel(f'Frequency [{funit}]')
         axs[c].set_ylabel('Power [dB rel max range]')
+        if maxfreq:
+            axs[c].set_xlim(0, tscale*maxfreq)
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
     if save:
@@ -103,6 +110,9 @@ if __name__ == '__main__':
     parser.add_argument('-c', dest='channel', default=-1, type=int,
                         help='show trace of channel CHANNEL only',
                         metavar='CHANNEL')
+    parser.add_argument('-f', dest='maxfreq', default=None, type=float,
+                        help='Maximum frequency shown in the plot in Hertz',
+                        metavar='MAXFREQ')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs='+', type=str,
@@ -110,8 +120,9 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # options:
     channel = args.channel
+    maxfreq = args.maxfreq
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, save)
+        plot_psds(path, channel, maxfreq, save)
