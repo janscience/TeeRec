@@ -85,6 +85,8 @@ def plot_psds(path, channel, maxfreq, save):
         axs[c].plot(tscale*freqs, db, color=colors[c%len(colors)])
         if has_thunderfish:
             p, t = detect_peaks(db, thresh)
+            if maxfreq:
+                p = p[freqs[p] < maxfreq]
             axs[c].plot(tscale*freqs[p], db[p], 'o', color='gray', clip_on=False)
             for pi in p:
                 axs[c].text(tscale*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
