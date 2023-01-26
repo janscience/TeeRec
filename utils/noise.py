@@ -49,16 +49,26 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         return
     nchannels = data.shape[1]
     basename = os.path.basename(path)
+    bits = 16
+    pins = []
+    convs = '-'
+    sampls = '-'
+    avrgs = 0
     if has_audioio:
         metadata, cues = metadata_wave(path)
-        info = metadata['INFO']
-        pins = info['PINS'].split(',')
-        bits = int(info['BITS'])
-        convs = info['CNVS']
-        sampls = info['SMPS']
-        avrgs = int(info['AVRG'])
+        if 'INFO' in metadata:
+            info = metadata['INFO']
+            if 'PINS' in metadata:
+                pins = info['PINS'].split(',')
+            if 'BITS' in metadata:
+                bits = int(info['BITS'])
+            if 'CNVS' in metadata:
+                convs = info['CNVS']
+            if 'SMPS' in metadata:
+                sampls = info['SMPS']
+            if 'AVRG' in metadata:
+                avrgs = int(info['AVRG'])
     else:
-        pins = []
         parts = basename.split('-')
         rate = 1000*float(parts[-5][:3])
         bits = int(parts[-4][:2])
@@ -122,7 +132,7 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         axs = [ax]
     fig.set_size_inches(8, 6)
     fig.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.96, hspace=0.3)
-    if show_filename:
+    if show_filename or len(convs) == 0:
         fig.suptitle(basename, fontsize=14)
     else:
         fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)

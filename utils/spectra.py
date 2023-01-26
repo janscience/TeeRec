@@ -51,8 +51,10 @@ def plot_psds(path, channel, maxfreq, save):
     pins = []
     if has_audioio:
         metadata, cues = metadata_wave(path)
-        info = metadata['INFO']
-        pins = info['PINS'].split(',')
+        if 'INFO' in metadata:
+            info = metadata['INFO']
+            if 'PINS' in metadata:
+                pins = info['PINS'].split(',')
     nchannels = data.shape[1]
     if channel >= 0:
         nchannels = 1

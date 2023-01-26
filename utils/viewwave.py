@@ -50,10 +50,12 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
     title = basename
     if has_audioio:
         metadata, cues = metadata_wave(path)
-        info = metadata['INFO']
-        pins = info['PINS'].split(',')
-        if metadata_title:
-            title = f"{0.001*rate:.0f}kHz @ {info['BITS']}bits: {info['CNVS']} conversion, {info['SMPS']} sampling, avrg={info['AVRG']}"
+        if 'INFO' in metadata:
+            info = metadata['INFO']
+            if 'PINS' in metadata:
+                pins = info['PINS'].split(',')
+            if metadata_title and 'BITS' in metadata and 'CNVS' in metadata and 'SMPS' in metadata and 'AVRG' in metadata:
+                title = f"{0.001*rate:.0f}kHz @ {info['BITS']}bits: {info['CNVS']} conversion, {info['SMPS']} sampling, avrg={info['AVRG']}"
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.07, right=0.98, top=0.94, bottom=0.09)
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
