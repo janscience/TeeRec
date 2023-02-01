@@ -233,10 +233,10 @@ sampling speeds on a Teensy 3.5.
 ![linearity](images/teensysine-800mV-traces.png)
 ![linearityspectrum](images/teensysine-800mV-spectra.png)
 
-- 1600mV amplitude:
+- 1500mV amplitude:
 
-![linearity](images/teensysine-1600mV-traces.png)
-![linearityspectrum](images/teensysine-1600mV-spectra.png)
+![linearity](images/teensysine-1500mV-traces.png)
+![linearityspectrum](images/teensysine-1500mV-spectra.png)
 
 Pretty linear with harmonics at less than -60dB!
 
