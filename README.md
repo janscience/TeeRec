@@ -44,6 +44,7 @@ library](https://github.com/janscience/ESensors).
 ## Documentation
 
 - [Installation instructions](docs/install.md)
+- [Performance of Teensy ADC](docs/teensyadc.md)
 - [Audio output](docs/audioout.md): hardware for audio output.
 - [Audio input](docs/audioin.md): hardware for audio input (microphones).
 
@@ -58,7 +59,8 @@ via the `TeeRec.h` header.
 
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
-- [TeensyADC](src/TeensyADC.h): Sample from multiple analog pins into a DataBuffer.
+- [TeensyADC](src/TeensyADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/teensyadc.md).
+
 
 ### Storage on SD card
 
