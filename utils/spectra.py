@@ -53,7 +53,7 @@ def plot_psds(path, channel, maxfreq, save):
         metadata, cues = metadata_wave(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
-            if 'PINS' in metadata:
+            if 'PINS' in info:
                 pins = info['PINS'].split(',')
     nchannels = data.shape[1]
     if channel >= 0:

@@ -58,15 +58,15 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         metadata, cues = metadata_wave(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
-            if 'PINS' in metadata:
+            if 'PINS' in info:
                 pins = info['PINS'].split(',')
-            if 'BITS' in metadata:
+            if 'BITS' in info:
                 bits = int(info['BITS'])
-            if 'CNVS' in metadata:
+            if 'CNVS' in info:
                 convs = info['CNVS']
-            if 'SMPS' in metadata:
+            if 'SMPS' in info:
                 sampls = info['SMPS']
-            if 'AVRG' in metadata:
+            if 'AVRG' in info:
                 avrgs = int(info['AVRG'])
     else:
         parts = basename.split('-')

@@ -52,9 +52,9 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
         metadata, cues = metadata_wave(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
-            if 'PINS' in metadata:
+            if 'PINS' in info:
                 pins = info['PINS'].split(',')
-            if metadata_title and 'BITS' in metadata and 'CNVS' in metadata and 'SMPS' in metadata and 'AVRG' in metadata:
+            if metadata_title and 'BITS' in info and 'CNVS' in info and 'SMPS' in info and 'AVRG' in info:
                 title = f"{0.001*rate:.0f}kHz @ {info['BITS']}bits: {info['CNVS']} conversion, {info['SMPS']} sampling, avrg={info['AVRG']}"
     fig, ax = plt.subplots(figsize=(12,6))
     fig.subplots_adjust(left=0.07, right=0.98, top=0.94, bottom=0.09)
