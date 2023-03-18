@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.mlab import psd
+from matplotlib.mlab import psd, window_none
 import wave
 try:
     from thunderfish.eventdetection import detect_peaks
@@ -21,12 +21,15 @@ def load_wave(filepath):
         wf = wave.open(filepath, 'r')
         nchannels, sampwidth, rate, nframes, comptype, compname = wf.getparams()
         buffer = wf.readframes(nframes)
+        factor = 2.0**(sampwidth*8-1)
         if sampwidth == 1:
             dtype = 'u1'
-            data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+            buffer = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+            data = buffer.astype('d')/factor - 1.0
         else:
             dtype = 'i%d' % sampwidth
-            data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+            buffer = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
+            data = buffer.astype('d')/factor
         wf.close()
         return data, float(rate)
     except EOFError:
@@ -74,16 +77,15 @@ def plot_psds(path, channel, maxfreq, save):
     if maxfreq and maxfreq < 1200:
         tscale = 1
         funit = 'Hz'
-    nfft = 1024*8
+    nfft = 1024*32
     thresh = 10 # dB
     for c in range(nchannels):
         ch = c
         if channel >= 0:
             ch = channel
-        #data[:,ch] = 2**15*np.sin(2.0*np.pi*1000.0*np.arange(len(data))/rate) + 100*np.random.randn(len(data))
-        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2)
-        db = 10.0*np.log10(pxx/2**14/freqs[-1])
-        #db = 10.0*np.log10(pxx/2**15)
+        #data[:,ch] = np.sin(2.0*np.pi*1000.37*np.arange(len(data))/rate) + 0.001*np.random.randn(len(data))
+        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2, window=window_none)
+        db = 10.0*np.log10(pxx*freqs[1])
         axs[c].plot(tscale*freqs, db, color=colors[c%len(colors)])
         if has_thunderfish:
             p, t = detect_peaks(db, thresh)
@@ -96,7 +98,7 @@ def plot_psds(path, channel, maxfreq, save):
         axs[c].set_title(f'channel {cs}')
         if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel(f'Frequency [{funit}]')
-        axs[c].set_ylabel('Power [dB rel max range]')
+        axs[c].set_ylabel('Power [dBFS]')
         if maxfreq:
             axs[c].set_xlim(0, tscale*maxfreq)
         axs[c].spines['top'].set_visible(False)
