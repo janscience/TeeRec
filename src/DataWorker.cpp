@@ -41,23 +41,19 @@ void DataWorker::reset() {
 
 
 size_t DataWorker::index() const {
-  unsigned char sreg_backup;
   size_t head = 0;
-  sreg_backup = SREG;
-  cli();
+  noInterrupts();
   head = Index;
-  SREG = sreg_backup;
+  interrupts();
   return head;
 }
 
 
 size_t DataWorker::cycle() const {
-  unsigned char sreg_backup;
   size_t headcycle = 0;
-  sreg_backup = SREG;
-  cli();
+  noInterrupts();
   headcycle = Cycle;
-  SREG = sreg_backup;
+  interrupts();
   return headcycle;
 }
 
@@ -67,8 +63,7 @@ size_t DataWorker::available() const {
     return 0;
   size_t index = 0;
   size_t cycle = 0;
-  unsigned char sreg_backup = SREG;
-  cli();
+  noInterrupts();
   if (Producer != 0) {
     index = Producer->Index;
     cycle = Producer->Cycle;
@@ -77,7 +72,7 @@ size_t DataWorker::available() const {
     index = Data->Index;
     cycle = Data->Cycle;
   }
-  SREG = sreg_backup;
+  interrupts();
   if (Index < index)
     return index - Index;
   else if (Cycle < cycle)
@@ -93,11 +88,10 @@ size_t DataWorker::overrun() {
   // get head:
   size_t index = 0;
   size_t cycle = 0;
-  unsigned char sreg_backup = SREG;
-  cli();
+  noInterrupts();
   index = Producer->Index;
   cycle = Producer->Cycle;
-  SREG = sreg_backup;
+  interrupts();
   // compute number of missed samples:
   size_t missed = 0;
   if (index >= Index && cycle > Cycle)

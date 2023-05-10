@@ -376,10 +376,12 @@ void TeensyADC::setReference(ADC_REFERENCE ref) {
 const char *TeensyADC::referenceStr(ADC_REFERENCE ref) {
   if (ref == ADC_REFERENCE::REF_3V3)
     return (const char *)"3.3V";
+#ifndef TEENSY4
   else if (ref == ADC_REFERENCE::REF_1V2)
     return (const char *)"1.2V";
   else if (ref == ADC_REFERENCE::REF_EXT)
     return (const char *)"EXT";
+#endif
   else
     return (const char *)"NONE";
 }
@@ -396,10 +398,12 @@ ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) {
     str[k] = tolower(reference[k]);
   if (strcmp(str, "3.3V") == 0)
     return ADC_REFERENCE::REF_3V3;
+#ifndef TEENSY4
   else if (strcmp(str, "1.2V") == 0)
     return ADC_REFERENCE::REF_1V2;
   else if (strcmp(str, "EXT") == 0)
     return ADC_REFERENCE::REF_EXT;
+#endif
   else
     return ADC_REFERENCE::REF_3V3;
 }
@@ -594,7 +598,11 @@ void TeensyADC::setupChannels(uint8_t adc) {
       sc1a_pin = ADConv.channel2sc1aADC0[Channels[adc][i]];
     else if ( adc == 1 )
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
+#ifdef TEENSY4
+    #warning "setupChannels needs to be implemented for Teensy4"
+#else
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
+#endif
   }
   if ( NChans[adc] > 1 ) {
     // reorder:
@@ -639,23 +647,35 @@ void TeensyADC::setupDMA(uint8_t adc) {
   DMABuffer[adc].begin();
   DMABuffer[adc].disable();
   for (size_t mi=0; mi<NMajors; mi++) {
+#ifdef TEENSY4
+    #warning "setupDMA() needs to be implemented for Teensy4"
+#else
     DMASettings[adc][mi].source(adc==0?ADC0_RA:ADC1_RA);
+#endif
     DMASettings[adc][mi].destinationBuffer(&ADCBuffer[adc][mi*MajorSize], sizeof(uint16_t)*MajorSize);
     DMASettings[adc][mi].transferSize(sizeof(uint16_t));
     DMASettings[adc][mi].replaceSettingsOnCompletion(DMASettings[adc][(mi+1)%NMajors]);
     DMASettings[adc][mi].interruptAtCompletion();
   }
   DMABuffer[adc] = DMASettings[adc][0];
-  DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
+#ifdef TEENSY4
+    #warning "setupDMA() needs to be implemented for Teensy4"
+#else
+  DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1);
+#endif
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
   DMABuffer[adc].enable();
 
   if ( NChans[adc] > 1 ) {
     DMASwitch[adc].begin();
     DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChans[adc]);
+#ifdef TEENSY4
+    #warning "setupDMA() needs to be implemented for Teensy4"
+#else
     DMASwitch[adc].destination(adc==0?ADC0_SC1A:ADC1_SC1A); // this switches channels
     DMASwitch[adc].transferSize(1);
     DMASwitch[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
+#endif
     DMASwitch[adc].enable();
   }
 }

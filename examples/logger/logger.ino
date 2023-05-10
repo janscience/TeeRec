@@ -17,14 +17,16 @@
 #define CONVERSION    ADC_CONVERSION_SPEED::HIGH_SPEED
 #define SAMPLING      ADC_SAMPLING_SPEED::HIGH_SPEED
 #define REFERENCE     ADC_REFERENCE::REF_3V3
-int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
-int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
+//int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
+int8_t channels0 [] =  {A10, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
+//int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
+int8_t channels1 [] =  {-1, A10, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
 
 #define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "LDOAREF-SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "GAIN27K-AMP0Ohm-1CHANNELA10-GND-SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME 10   // seconds
 
-#define INITIAL_DELAY  2.0  // seconds
+#define INITIAL_DELAY  6.0  // seconds
 
 #define PULSE_FREQUENCY 230 // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals

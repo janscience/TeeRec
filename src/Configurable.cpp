@@ -17,7 +17,7 @@ void Configurable::configure(const char *key, const char *val) {
 
 
 void Configurable::setName(const char *name) {
-  strncpy(ConfigName, name, MaxName);
+  strncpy(ConfigName, name, MaxName-1);
 }
 
 

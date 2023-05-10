@@ -27,6 +27,10 @@ Support](https://www.pjrc.com/arduino-ide-2-0-0-teensy-support/):
 3. Activate the board manager from the tool bar on the left.
    Search for Teensy and click on the "Install" button.
 
+4. For Linux, copy the
+   [udev rules](https://www.pjrc.com/teensy/00-teensy.rules)
+   to `/etc/udev/rules.d/`.
+
 
 ## Installation from github repository
 

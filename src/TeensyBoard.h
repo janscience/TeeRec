@@ -64,6 +64,9 @@ const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12
 #elif !defined(PIN_A14)
 const int NAPins = 14;
 const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13};
+#elif !defined(PIN_A18)
+const int NAPins = 18;
+const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17};
 #elif !defined(PIN_A21)
 const int NAPins = 21;
 const int APins[NAPins] = {A0, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12,
