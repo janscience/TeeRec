@@ -11,7 +11,25 @@
 #include <Wire.h>
 #include <AudioControl.h>  // Teensy Audio library
 
+
 #define PCM186x_I2C_ADDR     0x94
+
+// input and output channels:
+#define PCM186x_CH1L         0x01
+#define PCM186x_CH1R         0x02
+#define PCM186x_CH1          0x03
+#define PCM186x_CH2L         0x04
+#define PCM186x_CH2R         0x08
+#define PCM186x_CH2          0x0C
+#define PCM186x_CH3L         0x10
+#define PCM186x_CH3R         0x20
+#define PCM186x_CH3          0x30
+#define PCM186x_CH4L         0x40
+#define PCM186x_CH4R         0x80
+#define PCM186x_CH4          0xC0
+#define PCM186x_CHL          0x55
+#define PCM186x_CHR          0xAA
+#define PCM186x_CHLR         0xFF
 
 
 class ControlPCM186x : public AudioControl {
@@ -28,6 +46,13 @@ public:
   /* Initialize PCM186x with address (0x94 or 0x96) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
+
+  /* Set gain of one or more channels to gain in dB,
+     between -12 and 40 in steps of 0.5 */
+  bool setGain(int channel, float gain);
+  
+  /* Set input channel for output dac. */
+  bool setChannel(int dac, int channel);
 
   /* Print state (all status registers) to Serial. */
   void printState();
