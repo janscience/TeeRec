@@ -94,6 +94,140 @@ bool ControlPCM186x::begin(uint8_t address) {
 bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   I2CAddress = address;
   I2CBus = wire;
+
+  // setup power:
+  // PCM186x_PWRDN_CTRL_REG 0x0070
+
+  // setup clocks for BCK input PLL slave mode:
+  uint8_t val = 0x01;   // CLKDET_EN enabled
+  val += 0x02;          // DSP1_CLK_SRC = PLL
+  val += 0x04;          // DSP2_CLK_SRC = PLL
+  val += 0x08;          // ADC_CLK_SRC = PLL
+  val += 0x00;          // MST_MODE = slave
+  val += 0x20;          // MST_SCK_SRC = PLL
+  if (!write(PCM186x_CLK_MODE_REG, val))
+    return false;
+
+  // enable filters:
+  // PCM186x_DSP_CTRL_REG 0x71  plus page 1 registers?
+
+  // disable micbias:
+  // PCM186x_MIC_BIAS_CTRL_REG  0x0315
+}
+
+
+bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, offs) {
+  uint8_t val = fmt;   // FMT
+  val += bits << 2;    // TX_WLEN
+  if (fmt == TDM)
+    val += 0x10;       // TDM_LRCK_MODE
+  val += bits << 6;    // RX_WLEN
+  if (!write(PCM186x_I2S_FMT_REG, val))
+    return false;
+  if (fmt == TDM) {
+    val = 0x01;        // TDM_OSEL: 4 channel TDM
+    if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
+      return false;
+  }
+  if ((fmt == TDM) && offs) {
+    val = 0x80;        // TX_TDM_OFFSET
+    if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+      return false;
+  }
+  else {
+    val = 0;           // TX_TDM_OFFSET
+    if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+      return false;
+  }
+  return true;  
+}
+
+
+bool ControlPCM186x::setChannel(int adc, int channel, bool inverted) {
+  // check and set channel:
+  uint8_t val = 0;
+  if (adc == PCM186x_CH1L || adc == PCM186x_CH2L) {
+    if (channel == PCM186x_CH1L)
+      val = 0x01;
+    else if (channel == PCM186x_CH2L)
+      val = 0x02;
+    else if (channel == PCM186x_CH3L)
+      val = 0x04;
+    else if (channel == PCM186x_CH4L)
+      val = 0x08;
+    else {
+      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxL %0x2\n", channel, adc);
+      return false;
+    }
+  }
+  else if (adc == PCM186x_CH1R || adc == PCM186x_CH2R) {
+    if (channel == PCM186x_CH1R)
+      val = 0x01;
+    else if (channel == PCM186x_CH2R)
+      val = 0x02;
+    else if (channel == PCM186x_CH3R)
+      val = 0x04;
+    else if (channel == PCM186x_CH4R)
+      val = 0x08;
+    else {
+      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxR %0x2\n", channel, adc);
+      return false;
+    }
+  }
+  // set bit 6 and 7:
+  val += 0x20;   // bit 6 always write 1
+  if (inverted)
+    val += 0x40;
+  // set input channel for adc:
+  if (adc == PCM186x_CH1L) {
+    if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
+      return false;
+  }
+  else if (adc == PCM186x_CH1R) {
+    if (!write(PCM186x_ADC1R_INPUT_SEL_REG, val))
+      return false;
+  }
+  else if (adc == PCM186x_CH2L) {
+    if (!write(PCM186x_ADC2L_INPUT_SEL_REG, val))
+      return false;
+  }
+  else if (adc == PCM186x_CH2R) {
+    if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
+      return false;
+  }
+  return true;
+}
+
+
+bool ControlPCM186x::setGain(int channel, float gain) {
+  if (gain < -12.0) {
+    Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
+    return false;
+  }
+  if (gain > 40.0) {
+    Serial.printf("ControlPCM186x: invalid gain %g > 40dB\n", gain);
+    return false;
+  }
+  int8_t igain = (int8_t)(2*gain);
+  // need to check the negative gains!
+  Serial.printf("set gain %g to %02x\n", gain, igain);
+  if (channel & PCM186x_CH1L) {
+    if (!write(PCM186x_PGA_CH1L_REG, igain))
+      return false;
+  }
+  if (channel & PCM186x_CH1R) {
+    if (!write(PCM186x_PGA_CH1R_REG, igain))
+      return false;
+  }
+  if (channel & PCM186x_CH2L) {
+    if (!write(PCM186x_PGA_CH2L_REG, igain))
+      return false;
+  }
+  if (channel & PCM186x_CH2R) {
+    if (!write(PCM186x_PGA_CH2R_REG, igain))
+      return false;
+  }
+  return true;
 }
 
 
@@ -211,13 +345,14 @@ unsigned int ControlPCM186x::read(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
 
-  if (!goToPage(page)) {
-    Serial.printf("ControlPCM186x: read() failed to go to page %02x\n", page);
+  uint8_t result goToPage(page);
+  if (result != 0) {
+    Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
     return 0x0100;
   }
   I2CBus.beginTransmission(I2CAddress);
   I2CBus.write(reg);
-  uint8_t result = I2CBus.endTransmission();
+  result = I2CBus.endTransmission();
   if (result != 0) {
     Serial.printf("ControlPCM186x: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
     return 0x0200 + result;
@@ -242,15 +377,18 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
     Serial.printf("ControlPCM186x: write page %02x, reg %02x, val %02x\n", page, reg, val);
 #endif
     
-  if (! goToPage(page))
+  uint8_t result = goToPage(page);
+  if (result != 0) {
+    Serial.printf("ControlPCM186x: write() failed to go to page %02x, error = %02x\n", page, result);
     return false;
+  }
   
   I2CBus.beginTransmission(I2CAddress);
   I2CBus.write(reg); delay(10);
   I2CBus.write(val); delay(10);
-  uint8_t result = I2CBus.endTransmission();
+  result = I2CBus.endTransmission();
   if (result != 0) {
-    Serial.printf("ControlPCM186x: Error in write() = %02x\n", result);
+    Serial.printf("ControlPCM186x: write() failed, error = %02x\n", result);
     return false;
   }
   return true;
@@ -262,15 +400,6 @@ bool ControlPCM186x::goToPage(byte page) {
   I2CBus.write(0x00); delay(10); // page register
   I2CBus.write(page); delay(10); // go to page
   uint8_t result = I2CBus.endTransmission();
-  if (result != 0) {
-    Serial.printf("ControlPCM186x: Error in goToPage() = %02x\n", result);
-    if (result == 2) {
-      // failed to transmit address
-    } else if (result == 3) {
-      // failed to transmit data
-    }
-    return false;
-  }
-  return true;
+  return result;
 }
 

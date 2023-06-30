@@ -31,10 +31,23 @@
 #define PCM186x_CHR          0xAA
 #define PCM186x_CHLR         0xFF
 
-
 class ControlPCM186x : public AudioControl {
   
 public:
+
+  enum DATA_FMT : uint8_t {
+    I2S,
+    LEFT,
+    RIGHT,
+    TDM
+  };
+  
+  enum DATA_BITS : uint8_t {
+    32BIT,
+    24BIT,
+    20BIT,
+    16BIT
+  };
 
   /* Do not initialize PCM186x yet. */
   ControlPCM186x();
@@ -47,12 +60,15 @@ public:
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
 
+  /* Set format for audio data transmission. */
+  bool setDataFormat(DATA_FMT fmt=I2S, DATA_BITS bits=16BIT, offs=false);
+  
+  /* Set input channel for output adc. */
+  bool setChannel(int adc, int channel, bool inverted=false);
+
   /* Set gain of one or more channels to gain in dB,
      between -12 and 40 in steps of 0.5 */
   bool setGain(int channel, float gain);
-  
-  /* Set input channel for output dac. */
-  bool setChannel(int dac, int channel);
 
   /* Print state (all status registers) to Serial. */
   void printState();
@@ -69,7 +85,7 @@ protected:
     
   unsigned int read(uint16_t address);
   bool write(uint16_t address, uint8_t val);
-  bool goToPage(uint8_t page);
+  uint8_t goToPage(uint8_t page);
 
   TwoWire &I2CBus;
   uint8_t I2CAddress;
