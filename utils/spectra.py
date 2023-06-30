@@ -36,20 +36,19 @@ def load_wave(filepath):
         return None, None
 
     
-def load_bin(filepath, offset=0):
+def load_bin(filepath, rate=48000, offset=0):
     with open(filepath, 'rb') as wf:
         wf.seek(offset)  # offset of data chunk
         buffer = wf.read()
         dtype = 'i2'
-        nchannels = 4
+        nchannels = 1
         data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
-    rate = 100000
     return data, float(rate)
 
 
 def plot_psds(path, channel, maxfreq, save):
     data, rate = load_wave(path)
-    #data, rate = load_bin(path, 108)
+    #data, rate = load_bin(path, 96000, 0)
     #data = np.array(data, dtype=np.double)
     pins = []
     if has_audioio:

@@ -27,21 +27,20 @@ def load_wave(filepath):
         return None, None
 
     
-def load_bin(filepath, offset=0):
+def load_bin(filepath, rate=48000, offset=0):
     with open(filepath, 'rb') as wf:
         wf.seek(offset); # offset of data chunk
         buffer = wf.read()
         dtype = 'i2'
         nchannels = 1
         data = np.frombuffer(buffer, dtype=dtype).reshape(-1, nchannels)
-    rate = 80000
     return data, float(rate)
 
 
 def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
                 metadata_title, save):
     data, rate = load_wave(path)
-    #data, rate = load_bin(path, 0)
+    #data, rate = load_bin(path, 96000, 0)
     if data is None:
         print('file "%s" is empty!' % path)
         return
