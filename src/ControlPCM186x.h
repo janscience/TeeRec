@@ -12,7 +12,7 @@
 #include <AudioControl.h>  // Teensy Audio library
 
 
-#define PCM186x_I2C_ADDR     0x94
+#define PCM186x_I2C_ADDR     0x4A
 
 // input and output channels:
 #define PCM186x_CH1L         0x01
@@ -31,7 +31,8 @@
 #define PCM186x_CHR          0xAA
 #define PCM186x_CHLR         0xFF
 
-class ControlPCM186x : public AudioControl {
+//class ControlPCM186x : public AudioControl {
+class ControlPCM186x {
   
 public:
 
@@ -52,11 +53,11 @@ public:
   /* Do not initialize PCM186x yet. */
   ControlPCM186x();
   
-  /* Initialize PCM186x with address (0x94 or 0x96) on default I2C bus.
+  /* Initialize PCM186x with address (0x4A or 0x4B) on default I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
   bool begin(uint8_t address=PCM186x_I2C_ADDR);
 
-  /* Initialize PCM186x with address (0x94 or 0x96) on I2C bus.
+  /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
 
@@ -73,13 +74,17 @@ public:
   /* Print state (all status registers) to Serial. */
   void printState();
 
+  /* Print values of all registers to Serial */
+  void printRegisters();
+
   // AudioControl interface:
+  /*
   virtual bool enable(void);
   virtual bool disable(void);
   virtual bool volume(float volume);      // volume 0.0 to 1.0
   virtual bool inputLevel(float volume);  // volume 0.0 to 1.0
   virtual bool inputSelect(int n);
-
+  */
   
 protected:
     
@@ -89,6 +94,7 @@ protected:
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
+  uint8_t CurrentPage;
   
 };
 

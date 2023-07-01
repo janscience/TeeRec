@@ -1,5 +1,7 @@
 #include "ControlPCM186x.h"
 
+// #define DEBUG 1
+
 // register addresses, MSB is page, LSB is register:
 #define PCM186x_PGA_CH1L_REG 0x0001
 #define PCM186x_PGA_CH1R_REG 0x0002
@@ -82,7 +84,8 @@
 
 ControlPCM186x::ControlPCM186x() :
   I2CBus(&Wire),
-  I2CAddress(PCM186x_I2C_ADDR) {
+  I2CAddress(PCM186x_I2C_ADDR),
+  CurrentPage(10) {
 }
 
 
@@ -95,11 +98,13 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   I2CAddress = address;
   I2CBus = &wire;
 
-  // setup power:
-  // PCM186x_PWRDN_CTRL_REG 0x0070
+  // power up:
+  uint8_t val = 0x70;
+  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+    return false;
 
   // setup clocks for BCK input PLL slave mode:
-  uint8_t val = 0x01;   // CLKDET_EN enabled
+  val = 0x01;           // CLKDET_EN enabled
   val += 0x02;          // DSP1_CLK_SRC = PLL
   val += 0x04;          // DSP2_CLK_SRC = PLL
   val += 0x08;          // ADC_CLK_SRC = PLL
@@ -107,12 +112,13 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   val += 0x20;          // MST_SCK_SRC = PLL
   if (!write(PCM186x_CLK_MODE_REG, val))
     return false;
-
+  
   // enable filters:
   // PCM186x_DSP_CTRL_REG 0x71  plus page 1 registers?
 
   // disable micbias:
   // PCM186x_MIC_BIAS_CTRL_REG  0x0315
+  
   return true;
 }
 
@@ -126,7 +132,8 @@ bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, bool offs) {
   if (!write(PCM186x_I2S_FMT_REG, val))
     return false;
   if (fmt == TDM) {
-    val = 0x01;        // TDM_OSEL: 4 channel TDM
+    val = 0x00;        // TDM_OSEL: 2 channel TDM
+    //val = 0x01;        // TDM_OSEL: 4 channel TDM
     if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
       return false;
   }
@@ -176,9 +183,9 @@ bool ControlPCM186x::setChannel(int adc, int channel, bool inverted) {
     }
   }
   // set bit 6 and 7:
-  val += 0x20;   // bit 6 always write 1
+  val += 0x40;   // bit 6 always write 1
   if (inverted)
-    val += 0x40;
+    val += 0x80;
   // set input channel for adc:
   if (adc == PCM186x_CH1L) {
     if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
@@ -210,7 +217,6 @@ bool ControlPCM186x::setGain(int channel, float gain) {
     return false;
   }
   int8_t igain = (int8_t)(2*gain);
-  // need to check the negative gains!
   Serial.printf("set gain %g to %02x\n", gain, igain);
   if (channel & PCM186x_CH1L) {
     if (!write(PCM186x_PGA_CH1L_REG, igain))
@@ -339,21 +345,44 @@ void ControlPCM186x::printState() {
   if ((val & 0x04) == 0)
     Serial.print("bad or missing DVDD ");
   Serial.println();
+
+  int8_t ival;
+  ival = read(PCM186x_PGA_CH1L_REG);
+  Serial.printf("PGA_CH1L: %5.1fdB\n", float(ival)/2);
+  ival = read(PCM186x_PGA_CH1R_REG);
+  Serial.printf("PGA_CH1R: %5.1fdB\n", float(ival)/2);
+  ival = read(PCM186x_PGA_CH2L_REG);
+  Serial.printf("PGA_CH2L: %5.1fdB\n", float(ival)/2);
+  ival = read(PCM186x_PGA_CH2R_REG);
+  Serial.printf("PGA_CH2R: %5.1fdB\n", float(ival)/2);
+}
+
+
+void ControlPCM186x::printRegisters() {
+  for (uint8_t reg=0x01; reg<0x80; reg++) {
+    uint8_t val = read(reg);
+    Serial.printf("%02x %02x\n", reg, val);
+  }
 }
 
 
 unsigned int ControlPCM186x::read(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
-
-  uint8_t result = goToPage(page);
-  if (result != 0) {
-    Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
-    return 0x0100;
+  uint8_t result;
+  
+  if (CurrentPage != page) {
+    result = goToPage(page);
+    result = goToPage(page);
+    if (result != 0) {
+      Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
+      return 0x0100;
+    }
   }
+  
   I2CBus->beginTransmission(I2CAddress);
   I2CBus->write(reg);
-  result = I2CBus->endTransmission();
+  result = I2CBus->endTransmission(false);
   if (result != 0) {
     Serial.printf("ControlPCM186x: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
     return 0x0200 + result;
@@ -373,17 +402,21 @@ unsigned int ControlPCM186x::read(uint16_t address) {
 bool ControlPCM186x::write(uint16_t address, uint8_t val) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
-
-#ifdef DEBUG
-    Serial.printf("ControlPCM186x: write page %02x, reg %02x, val %02x\n", page, reg, val);
-#endif
-    
-  uint8_t result = goToPage(page);
-  if (result != 0) {
-    Serial.printf("ControlPCM186x: write() failed to go to page %02x, error = %02x\n", page, result);
-    return false;
-  }
+  uint8_t result;
   
+#ifdef DEBUG
+  Serial.printf("ControlPCM186x: write page %02x, reg %02x, val %02x\n", page, reg, val);
+#endif
+
+  if (CurrentPage != page) {
+    result = goToPage(page);
+    result = goToPage(page);
+    if (result != 0) {
+      Serial.printf("ControlPCM186x: write() failed to go to page %02x, error = %02x\n", page, result);
+      return false;
+    }
+  }
+    
   I2CBus->beginTransmission(I2CAddress);
   I2CBus->write(reg); delay(10);
   I2CBus->write(val); delay(10);
@@ -401,6 +434,8 @@ uint8_t ControlPCM186x::goToPage(byte page) {
   I2CBus->write(0x00); delay(10); // page register
   I2CBus->write(page); delay(10); // go to page
   uint8_t result = I2CBus->endTransmission();
+  if (result == 0)
+    CurrentPage = page;
   return result;
 }
 
