@@ -43,10 +43,10 @@ public:
   };
   
   enum DATA_BITS : uint8_t {
-    32BIT,
-    24BIT,
-    20BIT,
-    16BIT
+    BIT32,
+    BIT24,
+    BIT20,
+    BIT16
   };
 
   /* Do not initialize PCM186x yet. */
@@ -61,7 +61,7 @@ public:
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
 
   /* Set format for audio data transmission. */
-  bool setDataFormat(DATA_FMT fmt=I2S, DATA_BITS bits=16BIT, offs=false);
+  bool setDataFormat(DATA_FMT fmt=I2S, DATA_BITS bits=BIT16, bool offs=false);
   
   /* Set input channel for output adc. */
   bool setChannel(int adc, int channel, bool inverted=false);
@@ -87,7 +87,7 @@ protected:
   bool write(uint16_t address, uint8_t val);
   uint8_t goToPage(uint8_t page);
 
-  TwoWire &I2CBus;
+  TwoWire *I2CBus;
   uint8_t I2CAddress;
   
 };

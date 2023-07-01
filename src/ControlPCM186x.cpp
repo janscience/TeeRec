@@ -81,7 +81,7 @@
 
 
 ControlPCM186x::ControlPCM186x() :
-  I2CBus(Wire),
+  I2CBus(&Wire),
   I2CAddress(PCM186x_I2C_ADDR) {
 }
 
@@ -93,7 +93,7 @@ bool ControlPCM186x::begin(uint8_t address) {
 
 bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   I2CAddress = address;
-  I2CBus = wire;
+  I2CBus = &wire;
 
   // setup power:
   // PCM186x_PWRDN_CTRL_REG 0x0070
@@ -113,10 +113,11 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 
   // disable micbias:
   // PCM186x_MIC_BIAS_CTRL_REG  0x0315
+  return true;
 }
 
 
-bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, offs) {
+bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, bool offs) {
   uint8_t val = fmt;   // FMT
   val += bits << 2;    // TX_WLEN
   if (fmt == TDM)
@@ -255,7 +256,7 @@ void ControlPCM186x::printState() {
     Serial.println("reserved");
 
   Serial.print("FS_INFO: ");
-  unsigned int val = read(PCM186x_FS_INFO_REG);
+  val = read(PCM186x_FS_INFO_REG);
   val &= 0x07;
   if (val == 0)
     Serial.println("out of range (low) or LRCK halt");
@@ -274,7 +275,7 @@ void ControlPCM186x::printState() {
   else
     Serial.println("invalid sampling frequency");
 
-  unsigned int val = read(PCM186x_CURRENT_RATIO_REG);
+  val = read(PCM186x_CURRENT_RATIO_REG);
   Serial.print("SCK_RATIO: ");
   unsigned int ratio = val & 0x07;
   if (ratio == 0)
@@ -295,7 +296,7 @@ void ControlPCM186x::printState() {
     Serial.println("invalid SCK ratio or LRCK halt");
   
   Serial.print("BCK_RATIO: ");
-  unsigned int ratio = (val >> 4) & 0x07;
+  ratio = (val >> 4) & 0x07;
   if (ratio == 0)
     Serial.println("out of range (low) or BCK halt");
   else if (ratio == 1)
@@ -313,8 +314,8 @@ void ControlPCM186x::printState() {
   else
     Serial.println("invalid BCK ratio or LRCK halt");
 
-  Serial.print("CLK_ERR_STAT: ");
-  unsigned int val = read(PCM186x_CLOCK_ERR_STAT_REG);
+  Serial.print("CLK_ERROR_STAT: ");
+  val = read(PCM186x_CLK_ERROR_STAT_REG);
   if ((val & 0x01) > 0)
     Serial.print("SCK error ");
   if ((val & 0x02) > 0)
@@ -330,7 +331,7 @@ void ControlPCM186x::printState() {
   Serial.println();
 
   Serial.print("POWER_STAT: ");
-  unsigned int val = read(PCM186x_POWER_STAT_REG);
+  val = read(PCM186x_POWER_STAT_REG);
   if ((val & 0x01) == 0)
     Serial.print("bad or missing LDO ");
   if ((val & 0x02) == 0)
@@ -345,23 +346,23 @@ unsigned int ControlPCM186x::read(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
 
-  uint8_t result goToPage(page);
+  uint8_t result = goToPage(page);
   if (result != 0) {
     Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
     return 0x0100;
   }
-  I2CBus.beginTransmission(I2CAddress);
-  I2CBus.write(reg);
-  result = I2CBus.endTransmission();
+  I2CBus->beginTransmission(I2CAddress);
+  I2CBus->write(reg);
+  result = I2CBus->endTransmission();
   if (result != 0) {
     Serial.printf("ControlPCM186x: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
     return 0x0200 + result;
   }
-  if (I2CBus.requestFrom(I2CAddress, 1) < 1) {
+  if (I2CBus->requestFrom(I2CAddress, (uint8_t)1) < 1) {
     Serial.printf("ControlPCM186x: empty read() on page %02x reg %02x\n", page, reg);
-    return 0x0400 + val;
+    return 0x0400;
   }
-  int val = I2CBus.read();
+  int val = I2CBus->read();
 #ifdef DEBUG
     Serial.printf("ControlPCM186x: read page %02x, reg %02x, val %02x\n", page, reg, val);
 #endif
@@ -383,10 +384,10 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
     return false;
   }
   
-  I2CBus.beginTransmission(I2CAddress);
-  I2CBus.write(reg); delay(10);
-  I2CBus.write(val); delay(10);
-  result = I2CBus.endTransmission();
+  I2CBus->beginTransmission(I2CAddress);
+  I2CBus->write(reg); delay(10);
+  I2CBus->write(val); delay(10);
+  result = I2CBus->endTransmission();
   if (result != 0) {
     Serial.printf("ControlPCM186x: write() failed, error = %02x\n", result);
     return false;
@@ -395,11 +396,11 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
 }
 
 
-bool ControlPCM186x::goToPage(byte page) {
-  I2CBus.beginTransmission(I2CAddress);
-  I2CBus.write(0x00); delay(10); // page register
-  I2CBus.write(page); delay(10); // go to page
-  uint8_t result = I2CBus.endTransmission();
+uint8_t ControlPCM186x::goToPage(byte page) {
+  I2CBus->beginTransmission(I2CAddress);
+  I2CBus->write(0x00); delay(10); // page register
+  I2CBus->write(page); delay(10); // go to page
+  uint8_t result = I2CBus->endTransmission();
   return result;
 }
 
