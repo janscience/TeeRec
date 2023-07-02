@@ -13,6 +13,7 @@ WaveHeader::WaveHeader() :
   Conversion("CNVS", ""),
   Sampling("SMPS", ""),
   Reference("VREF", ""),
+  Gain("GAIN", ""),
   Board("IBRD", teensyBoard()),
   MAC("IMAC", teensyMAC()),
   DateTime("DTIM", ""),
@@ -154,6 +155,11 @@ void WaveHeader::setReference(const char *ref) {
 }
 
 
+void WaveHeader::setGain(const char *gain) {
+  Gain.set(gain);
+}
+
+
 void WaveHeader::setData(int32_t samples) {
   Data.set(DataResolution, samples);
 }
@@ -200,6 +206,8 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Sampling;
   if (Reference.Use)
     chunks[nchunks++] = &Reference;
+  if (Gain.Use)
+    chunks[nchunks++] = &Gain;
   if (Board.Use)
     chunks[nchunks++] = &Board;
   if (MAC.Use)

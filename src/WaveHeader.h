@@ -40,6 +40,9 @@ public:
   // Set string describing voltage reference.
   void setReference(const char *ref);
 
+  // Set string describing overall gain.
+  void setGain(const char *gain);
+
   // Set size of data chunk.
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
@@ -110,8 +113,8 @@ protected:
     InfoChunk(const char *infoid, const char *text);
     void set(const char *text);
     void clear();
-    static const size_t MaxText = 50;
-    char Text[MaxText];
+    static const size_t MaxText = 47;
+    char Text[MaxText+1];
   };
 
   class DataChunk : public Chunk {
@@ -133,6 +136,7 @@ protected:
   InfoChunk Conversion;
   InfoChunk Sampling;
   InfoChunk Reference;
+  InfoChunk Gain;
   InfoChunk Board;
   InfoChunk MAC;
   InfoChunk DateTime;

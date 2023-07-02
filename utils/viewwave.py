@@ -4,15 +4,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import wave
 try:
-    from audioio import load_audio, metadata_wave
+    from audioio import metadata_wave
     has_audioio = True
 except ImportError:
     has_audioio = False
 
 
 def load_wave(filepath):
-    if has_audioio:
-        return load_audio(filepath)
     try:
         wf = wave.open(filepath, 'r')
         nchannels, sampwidth, rate, nframes, comptype, compname = wf.getparams()
@@ -43,7 +41,7 @@ def load_bin(filepath, rate=48000, nchannels=2, offset=0):
 def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
                 metadata_title, save):
     data, rate = load_wave(path)
-    #data, rate = load_bin(path, 48000, 4, 0)
+    #data, rate = load_bin(path, 48000, 4, 4)
     if data is None:
         print('file "%s" is empty!' % path)
         return
