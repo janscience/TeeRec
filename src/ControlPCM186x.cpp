@@ -85,7 +85,8 @@
 ControlPCM186x::ControlPCM186x() :
   I2CBus(&Wire),
   I2CAddress(PCM186x_I2C_ADDR),
-  CurrentPage(10) {
+  CurrentPage(10),
+  PGALinked(false) {
 }
 
 
@@ -103,7 +104,8 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   if (!write(PCM186x_PWRDN_CTRL_REG, val))
     return false;
 
-  // setup clocks for BCK input PLL slave mode:
+  // setup clocks for BCK input slave PLL mode
+  // (section 9.3.9.4.4 in data sheet):
   val = 0x01;           // CLKDET_EN enabled
   val += 0x02;          // DSP1_CLK_SRC = PLL
   val += 0x04;          // DSP2_CLK_SRC = PLL
@@ -151,55 +153,56 @@ bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, bool offs) {
 }
 
 
-bool ControlPCM186x::setChannel(int adc, int channel, bool inverted) {
+bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
+				bool inverted) {
   // check and set channel:
   uint8_t val = 0;
-  if (adc == PCM186x_CH1L || adc == PCM186x_CH2L) {
-    if (channel == PCM186x_CH1L)
-      val = 0x01;
-    else if (channel == PCM186x_CH2L)
-      val = 0x02;
-    else if (channel == PCM186x_CH3L)
-      val = 0x04;
-    else if (channel == PCM186x_CH4L)
-      val = 0x08;
+  if (adc == ADC1L || adc == ADC2L) {
+    if (channel & CH1L)
+      val |= 0x01;
+    else if (channel & CH2L)
+      val |= 0x02;
+    else if (channel & CH3L)
+      val |= 0x04;
+    else if (channel & CH4L)
+      val |= 0x08;
     else {
       Serial.printf("ControlPCM186x: invalid channel %02x for ADCxL %0x2\n", channel, adc);
       return false;
     }
   }
-  else if (adc == PCM186x_CH1R || adc == PCM186x_CH2R) {
-    if (channel == PCM186x_CH1R)
-      val = 0x01;
-    else if (channel == PCM186x_CH2R)
-      val = 0x02;
-    else if (channel == PCM186x_CH3R)
-      val = 0x04;
-    else if (channel == PCM186x_CH4R)
-      val = 0x08;
+  else if (adc == ADC1R || adc == ADC2R) {
+    if (channel & CH1R)
+      val |= 0x01;
+    else if (channel & CH2R)
+      val |= 0x02;
+    else if (channel & CH3R)
+      val |= 0x04;
+    else if (channel & CH4R)
+      val |= 0x08;
     else {
       Serial.printf("ControlPCM186x: invalid channel %02x for ADCxR %0x2\n", channel, adc);
       return false;
     }
   }
   // set bit 6 and 7:
-  val += 0x40;   // bit 6 always write 1
+  val += 0x40;    // RSV bit 6 always write 1
   if (inverted)
-    val += 0x80;
+    val += 0x80;  // POL bit 7
   // set input channel for adc:
-  if (adc == PCM186x_CH1L) {
+  if (adc == ADC1L) {
     if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
       return false;
   }
-  else if (adc == PCM186x_CH1R) {
+  else if (adc == ADC1R) {
     if (!write(PCM186x_ADC1R_INPUT_SEL_REG, val))
       return false;
   }
-  else if (adc == PCM186x_CH2L) {
+  else if (adc == ADC2L) {
     if (!write(PCM186x_ADC2L_INPUT_SEL_REG, val))
       return false;
   }
-  else if (adc == PCM186x_CH2R) {
+  else if (adc == ADC2R) {
     if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
       return false;
   }
@@ -207,7 +210,7 @@ bool ControlPCM186x::setChannel(int adc, int channel, bool inverted) {
 }
 
 
-bool ControlPCM186x::setGain(int channel, float gain) {
+bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
   if (gain < -12.0) {
     Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
     return false;
@@ -218,21 +221,39 @@ bool ControlPCM186x::setGain(int channel, float gain) {
   }
   int8_t igain = (int8_t)(2*gain);
   Serial.printf("set gain %g to %02x\n", gain, igain);
-  if (channel & PCM186x_CH1L) {
+  if (adc == ADCLR) {
+    unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+    val |= 0x40;
+    if (!write(PCM186x_PGA_CONTROL_REG, val))
+      return false;
+    PGALinked = true;
     if (!write(PCM186x_PGA_CH1L_REG, igain))
       return false;
   }
-  if (channel & PCM186x_CH1R) {
-    if (!write(PCM186x_PGA_CH1R_REG, igain))
-      return false;
-  }
-  if (channel & PCM186x_CH2L) {
-    if (!write(PCM186x_PGA_CH2L_REG, igain))
-      return false;
-  }
-  if (channel & PCM186x_CH2R) {
-    if (!write(PCM186x_PGA_CH2R_REG, igain))
-      return false;
+  else {
+    if (PGALinked) {
+      unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+      val &= ~0x40;
+      if (!write(PCM186x_PGA_CONTROL_REG, val))
+	return false;
+      PGALinked = false;
+    }
+    if (adc & ADC1L) {
+      if (!write(PCM186x_PGA_CH1L_REG, igain))
+	return false;
+    }
+    if (adc & ADC1R) {
+      if (!write(PCM186x_PGA_CH1R_REG, igain))
+	return false;
+    }
+    if (adc & ADC2L) {
+      if (!write(PCM186x_PGA_CH2L_REG, igain))
+	return false;
+    }
+    if (adc & ADC2R) {
+      if (!write(PCM186x_PGA_CH2R_REG, igain))
+	return false;
+    }
   }
   return true;
 }

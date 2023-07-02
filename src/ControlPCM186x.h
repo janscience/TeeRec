@@ -14,22 +14,6 @@
 
 #define PCM186x_I2C_ADDR     0x4A
 
-// input and output channels:
-#define PCM186x_CH1L         0x01
-#define PCM186x_CH1R         0x02
-#define PCM186x_CH1          0x03
-#define PCM186x_CH2L         0x04
-#define PCM186x_CH2R         0x08
-#define PCM186x_CH2          0x0C
-#define PCM186x_CH3L         0x10
-#define PCM186x_CH3R         0x20
-#define PCM186x_CH3          0x30
-#define PCM186x_CH4L         0x40
-#define PCM186x_CH4R         0x80
-#define PCM186x_CH4          0xC0
-#define PCM186x_CHL          0x55
-#define PCM186x_CHR          0xAA
-#define PCM186x_CHLR         0xFF
 
 //class ControlPCM186x : public AudioControl {
 class ControlPCM186x {
@@ -50,6 +34,37 @@ public:
     BIT16
   };
 
+  enum INPUT_CHANNELS : uint8_t {
+    CH1L  = 0x01,
+    CH1R  = 0x02,
+    CH1   = 0x03,
+    CH2L  = 0x04,
+    CH2R  = 0x08,
+    CH2   = 0x0C,
+    CH3L  = 0x10,
+    CH3R  = 0x20,
+    CH3   = 0x30,
+    CH4L  = 0x40,
+    CH4R  = 0x80,
+    CH4   = 0xC0,
+    CHL   = 0x55,
+    CHR   = 0xAA,
+    CHLR  = 0xFF
+  };
+
+  enum OUTPUT_CHANNELS : uint8_t {
+    ADC1L  = 0x01,
+    ADC1R  = 0x02,
+    ADC1   = 0x03,
+    ADC2L  = 0x04,
+    ADC2R  = 0x08,
+    ADC2   = 0x0C,
+    ADCL   = 0x05,
+    ADCR   = 0x0A,
+    ADCLR  = 0x0F
+  };
+  
+
   /* Do not initialize PCM186x yet. */
   ControlPCM186x();
   
@@ -65,11 +80,12 @@ public:
   bool setDataFormat(DATA_FMT fmt=I2S, DATA_BITS bits=BIT16, bool offs=false);
   
   /* Set input channel for output adc. */
-  bool setChannel(int adc, int channel, bool inverted=false);
+  bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
+		  bool inverted=false);
 
-  /* Set gain of one or more channels to gain in dB,
+  /* Set gain of one or more adc channels to gain in dB,
      between -12 and 40 in steps of 0.5 */
-  bool setGain(int channel, float gain);
+  bool setGain(OUTPUT_CHANNELS adc, float gain);
 
   /* Print state (all status registers) to Serial. */
   void printState();
@@ -95,6 +111,7 @@ protected:
   TwoWire *I2CBus;
   uint8_t I2CAddress;
   uint8_t CurrentPage;
+  bool PGALinked;
   
 };
 
