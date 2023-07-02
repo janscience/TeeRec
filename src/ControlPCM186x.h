@@ -19,13 +19,6 @@
 class ControlPCM186x {
   
 public:
-
-  enum DATA_FMT : uint8_t {
-    I2S,
-    LEFT,
-    RIGHT,
-    TDM
-  };
   
   enum DATA_BITS : uint8_t {
     BIT32,
@@ -75,13 +68,35 @@ public:
   /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
-
-  /* Set format for audio data transmission. */
-  bool setDataFormat(DATA_FMT fmt=I2S, DATA_BITS bits=BIT16, bool offs=false);
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
 		  bool inverted=false);
+
+  /* Setup I2S output for the specified two input channels.
+     Get the recorded data with AudioInputI2S */
+  bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2);
+  
+  /* Setup I2S output for the specified four input channels.
+     Channels 3 and 4 are available as DOUT2 via GPIO0.
+     Get the recorded data with AudioInputI2SQuad. */
+  bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
+		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4);
+  
+  /* Setup TDM output for the specified two input channels.
+     Get the recorded data with AudioInputTDM on slots 0, 2.
+     If offset, shift the recorded data such that they appear
+     on slots 8, 10. */
+  bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
+		bool offs=false);
+  
+  /* Setup TDM output for the specified four input channels.
+     Get the recorded data with AudioInputTDM on slots 0, 2, 4, 6.
+     If offset, shift the recorded data such that they appear
+     on slots 8, 10, 12, 14. */
+  bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
+		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
+		bool offs=false);
 
   /* Set gain of one or more adc channels to gain in dB,
      between -12 and 40 in steps of 0.5 */
@@ -90,8 +105,11 @@ public:
   /* Print state (all status registers) to Serial. */
   void printState();
 
-  /* Print values of all registers to Serial */
+  /* Print values of all page 0x00 registers to Serial */
   void printRegisters();
+
+  /* Print values of all DSP coefficients to Serial */
+  void printDSPCoefficients();
 
   // AudioControl interface:
   /*
@@ -107,6 +125,9 @@ protected:
   unsigned int read(uint16_t address);
   bool write(uint16_t address, uint8_t val);
   uint8_t goToPage(uint8_t page);
+
+  float readCoefficient(uint8_t address);
+  
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;

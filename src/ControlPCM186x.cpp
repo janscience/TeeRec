@@ -80,6 +80,44 @@
 
 #define PCM186x_PGA_ICI_REG 0xFD14
 
+// virtual addresses of mixer coefficients
+// (table 24 on page 69 of the data sheet):
+#define PCM186x_MIX1_CH1L 0x00
+#define PCM186x_MIX1_CH1R 0x01
+#define PCM186x_MIX1_CH2L 0x02
+#define PCM186x_MIX1_CH2R 0x03
+#define PCM186x_MIX1_I2SL 0x04
+#define PCM186x_MIX1_I2SR 0x05
+#define PCM186x_MIX2_CH1L 0x06
+#define PCM186x_MIX2_CH1R 0x07
+#define PCM186x_MIX2_CH2L 0x08
+#define PCM186x_MIX2_CH2R 0x09
+#define PCM186x_MIX2_I2SL 0x0A
+#define PCM186x_MIX2_I2SR 0x0B
+#define PCM186x_MIX3_CH1L 0x0C
+#define PCM186x_MIX3_CH1R 0x0D
+#define PCM186x_MIX3_CH2L 0x0E
+#define PCM186x_MIX3_CH2R 0x0F
+#define PCM186x_MIX3_I2SL 0x10
+#define PCM186x_MIX3_I2SR 0x11
+#define PCM186x_MIX4_CH1L 0x12
+#define PCM186x_MIX4_CH1R 0x13
+#define PCM186x_MIX4_CH2L 0x14
+#define PCM186x_MIX4_CH2R 0x15
+#define PCM186x_MIX4_I2SL 0x16
+#define PCM186x_MIX4_I2SR 0x17
+#define PCM186x_LPF_B0 0x18
+#define PCM186x_LPF_B1 0x19
+#define PCM186x_LPF_B2 0x1A
+#define PCM186x_LPF_A1 0x1B
+#define PCM186x_LPF_A2 0x1C
+#define PCM186x_HPF_B0 0x1D
+#define PCM186x_HPF_B1 0x1E
+#define PCM186x_HPF_B2 0x1F
+#define PCM186x_HPF_A1 0x20
+#define PCM186x_HPF_A2 0x21
+#define PCM186x_LOSS_THRESHOLD 0x22
+#define PCM186x_RESUME_THRESHOLD 0x23
 
 
 ControlPCM186x::ControlPCM186x() :
@@ -125,30 +163,112 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 }
 
 
-bool ControlPCM186x::setDataFormat(DATA_FMT fmt, DATA_BITS bits, bool offs) {
+bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2) {
+  uint8_t fmt = 0x00;  // I2S
+  DATA_BITS bits = BIT24;
   uint8_t val = fmt;   // FMT
-  val += bits << 2;    // TX_WLEN
-  if (fmt == TDM)
-    val += 0x10;       // TDM_LRCK_MODE
-  val += bits << 6;    // RX_WLEN
+  val |= bits << 2;    // TX_WLEN
+  val |= bits << 6;    // RX_WLEN
   if (!write(PCM186x_I2S_FMT_REG, val))
     return false;
-  if (fmt == TDM) {
-    val = 0x00;        // TDM_OSEL: 2 channel TDM
-    //val = 0x01;        // TDM_OSEL: 4 channel TDM
-    if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
+  if (!setChannel(ADC1L, channel1))
+    return false;
+  if (!setChannel(ADC1R, channel2))
+    return false;
+  return true;  
+}
+
+
+bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2,
+			      INPUT_CHANNELS channel3,
+			      INPUT_CHANNELS channel4) {
+  // data format:
+  uint8_t fmt = 0x00;   // I2S
+  DATA_BITS bits = BIT24;
+  uint8_t fval = fmt;   // FMT
+  fval |= bits << 2;    // TX_WLEN
+  fval |= bits << 6;    // RX_WLEN
+  if (!write(PCM186x_I2S_FMT_REG, fval))
+    return false;
+  // enable DOUT2 on GPIO0:
+  unsigned int val = read(PCM186x_GPIO_FUNC_1_REG);
+  val &= ~0x07;
+  val |= 0x05;
+  if (!write(PCM186x_GPIO_FUNC_1_REG, val))
+    return false;
+  // input channels:
+  if (!setChannel(ADC1L, channel1))
+    return false;
+  if (!setChannel(ADC1R, channel2))
+    return false;
+  if (!setChannel(ADC2L, channel3))
+    return false;
+  if (!setChannel(ADC2R, channel4))
+    return false;
+  return true;  
+}
+
+
+bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2,
+			      bool offs) {
+  // data format:
+  uint8_t fmt = 0x03;   // TDM
+  DATA_BITS bits = BIT32;
+  uint8_t val = fmt;   // FMT
+  val |= bits << 2;    // TX_WLEN
+  val |= 0x10;         // TDM_LRCK_MODE
+  val |= bits << 6;    // RX_WLEN
+  if (!write(PCM186x_I2S_FMT_REG, val))
+    return false;
+  // number of ADCs:
+  val = 0x00;        // TDM_OSEL: 2 channel TDM
+  if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
       return false;
-  }
-  if ((fmt == TDM) && offs) {
-    val = 0x80;        // TX_TDM_OFFSET
-    if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+  val = offs ? 0x80 : 0x00; // TX_TDM_OFFSET
+  if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+    return false;
+  // input channels:
+  if (!setChannel(ADC1L, channel1))
+    return false;
+  if (!setChannel(ADC1R, channel2))
+    return false;
+  return true;  
+}
+
+
+bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2,
+			      INPUT_CHANNELS channel3,
+			      INPUT_CHANNELS channel4,
+			      bool offs) {
+  // data format:
+  uint8_t fmt = 0x03;   // TDM
+  DATA_BITS bits = BIT32;
+  uint8_t val = fmt;   // FMT
+  val |= bits << 2;    // TX_WLEN
+  val |= 0x10;         // TDM_LRCK_MODE
+  val |= bits << 6;    // RX_WLEN
+  if (!write(PCM186x_I2S_FMT_REG, val))
+    return false;
+  // number of ADCs:
+  val = 0x01;           // TDM_OSEL: 4 channel TDM
+  if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
       return false;
-  }
-  else {
-    val = 0;           // TX_TDM_OFFSET
-    if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
-      return false;
-  }
+  val = offs ? 0x80 : 0x00; // TX_TDM_OFFSET
+  if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+    return false;
+  // input channels:
+  if (!setChannel(ADC1L, channel1))
+    return false;
+  if (!setChannel(ADC1R, channel2))
+    return false;
+  if (!setChannel(ADC2L, channel3))
+    return false;
+  if (!setChannel(ADC2R, channel4))
+    return false;
   return true;  
 }
 
@@ -222,11 +342,13 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
   int8_t igain = (int8_t)(2*gain);
   Serial.printf("set gain %g to %02x\n", gain, igain);
   if (adc == ADCLR) {
-    unsigned int val = read(PCM186x_PGA_CONTROL_REG);
-    val |= 0x40;
-    if (!write(PCM186x_PGA_CONTROL_REG, val))
-      return false;
-    PGALinked = true;
+    if (!PGALinked) {
+      unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+      val |= 0x40;
+      if (!write(PCM186x_PGA_CONTROL_REG, val))
+	return false;
+      PGALinked = true;
+    }
     if (!write(PCM186x_PGA_CH1L_REG, igain))
       return false;
   }
@@ -387,12 +509,88 @@ void ControlPCM186x::printRegisters() {
 }
 
 
+void ControlPCM186x::printDSPCoefficients() {
+  const char names[][10] = {
+    "MIX1_CH1L",
+    "MIX1_CH1R",
+    "MIX1_CH2L",
+    "MIX1_CH2R",
+    "MIX1_I2SL",
+    "MIX1_I2SR",
+    "MIX2_CH1L",
+    "MIX2_CH1R",
+    "MIX2_CH2L",
+    "MIX2_CH2R",
+    "MIX2_I2SL",
+    "MIX2_I2SR",
+    "MIX3_CH1L",
+    "MIX3_CH1R",
+    "MIX3_CH2L",
+    "MIX3_CH2R",
+    "MIX3_I2SL",
+    "MIX3_I2SR",
+    "MIX4_CH1L",
+    "MIX4_CH1R",
+    "MIX4_CH2L",
+    "MIX4_CH2R",
+    "MIX4_I2SL",
+    "MIX4_I2SR" };
+  
+  for (uint8_t address=0x00; address<=0x17; address++) {
+    float coeff = readCoefficient(address);
+    Serial.printf("coefficient %s %02x = %g\n", names[address], address, coeff);
+  }
+}
+
+
+float ControlPCM186x::readCoefficient(uint8_t address) {
+  float coeff = 0.0;
+  uint32_t frac = 0;
+  unsigned int val;
+  uint8_t result;
+  uint8_t page = 0x01;
+  if (CurrentPage != page) {
+    result = goToPage(page);
+    result = goToPage(page);
+    result = goToPage(page);
+  }
+  val = 0;
+  for (int n=0; n < 10 && val == 0; n++) {
+    val = read(0x0101);
+    delay(10);
+  }
+  write(0x0102, address); // memory address for reading/writing coefficient
+  write(0x0101, 0x02);    // bit 0 request=1/check=0 write, bit 1 request=1/check=0 read
+  val = 0x02;             // check progress in reading
+  for (int n=0; n < 10 && val == 0x02; n++) {
+    val = read(0x0101);
+    delay(10);
+  }
+  val = read(0x0108);  // bit[23:16]
+  coeff = (val & 0xf0) >> 4;
+  frac = (val & 0x0f) << 16;
+  val = read(0x0109);  // bit[15:8]
+  frac |= val << 8;
+  val = read(0x010A);  // bit[7:0]
+  frac |= val;
+  //Serial.printf("%d  %d\n", coeff, frac);
+  coeff += frac/float(1 << 20);   // TODO: fix this!!!
+  return coeff;
+  // read(0x010B);  // read data from 24-bit memory, bit 7
+
+  // write: 0x0104 bit[23:16], 0x0105 bit[15:8], 0x0106 bit[7:0],
+  // 0x0107 bit 7 "write data to 24-bit memory"
+}
+
+
 unsigned int ControlPCM186x::read(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
   uint8_t result;
   
   if (CurrentPage != page) {
+    // switch page (three times, see page 68 of the data sheet):
+    result = goToPage(page);
     result = goToPage(page);
     result = goToPage(page);
     if (result != 0) {
@@ -430,6 +628,8 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
 #endif
 
   if (CurrentPage != page) {
+    // switch page (three times, see page 68 of the data sheet):
+    result = goToPage(page);
     result = goToPage(page);
     result = goToPage(page);
     if (result != 0) {
