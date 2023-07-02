@@ -46,7 +46,7 @@ def load_bin(filepath, rate=48000, offset=0):
     return data, float(rate)
 
 
-def plot_psds(path, channel, maxfreq, save):
+def plot_psds(path, channel, maxfreq, maxdb, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 96000, 0)
     #data = np.array(data, dtype=np.double)
@@ -100,6 +100,8 @@ def plot_psds(path, channel, maxfreq, save):
         axs[c].set_ylabel('Power [dBFS]')
         if maxfreq:
             axs[c].set_xlim(0, tscale*maxfreq)
+        if not maxdb is None:
+            axs[c].set_ylim(top=maxdb)
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
     if save:
@@ -118,6 +120,9 @@ if __name__ == '__main__':
     parser.add_argument('-f', dest='maxfreq', default=None, type=float,
                         help='Maximum frequency shown in the plot in Hertz',
                         metavar='MAXFREQ')
+    parser.add_argument('-m', dest='maxdb', default=None, type=float,
+                        help='Maximum power shown in the plot in decibel',
+                        metavar='MAXDB')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs='+', type=str,
@@ -126,8 +131,9 @@ if __name__ == '__main__':
     # options:
     channel = args.channel
     maxfreq = args.maxfreq
+    maxdb = args.maxdb
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, maxfreq, save)
+        plot_psds(path, channel, maxfreq, maxdb, save)
