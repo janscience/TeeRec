@@ -381,6 +381,47 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
 }
 
 
+bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
+  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  val &= ~0x20;
+  if (lowpass == IIR)
+    val |= 0x02;    // FLT
+  if (highpass)
+    val |= 0x01;    // HPF_EN
+  if (!write(PCM186x_DSP_CTRL_REG, val))
+    return false;
+}
+
+
+bool ControlPCM186x::mute(OUTPUT_CHANNELS adcs) {
+  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  val |= adcs;    // MUTE_CHX_Y
+  if (!write(PCM186x_DSP_CTRL_REG, val))
+    return false;
+}
+
+
+bool ControlPCM186x::unmute(OUTPUT_CHANNELS adcs) {
+  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  val &= ~0x0f;
+  val &= ~adcs;    // MUTE_CHX_Y
+  if (!write(PCM186x_DSP_CTRL_REG, val))
+    return false;
+}
+
+
+bool ControlPCM186x::setMicBias(bool power, bool bypass) {
+  unsigned int val = read(PCM186x_MIC_BIAS_CTRL_REG);
+  val &= ~0x11;
+  if (power)
+    val |= 0x01;    // PDZ
+  if (bypass)
+    val |= 0x10;    // TERM
+  if (!write(PCM186x_MIC_BIAS_CTRL_REG, val))
+    return false;
+}
+
+
 void ControlPCM186x::printState() {
   Serial.print("DEV_STAT: ");
   unsigned int val = read(PCM186x_DEV_STAT_REG);

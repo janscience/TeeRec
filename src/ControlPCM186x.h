@@ -19,13 +19,6 @@
 class ControlPCM186x {
   
 public:
-  
-  enum DATA_BITS : uint8_t {
-    BIT32,
-    BIT24,
-    BIT20,
-    BIT16
-  };
 
   enum INPUT_CHANNELS : uint8_t {
     CH1L  = 0x01,
@@ -55,6 +48,18 @@ public:
     ADCL   = 0x05,
     ADCR   = 0x0A,
     ADCLR  = 0x0F
+  };
+  
+  enum DATA_BITS : uint8_t {
+    BIT32,
+    BIT24,
+    BIT20,
+    BIT16
+  };
+
+  enum LOWPASS : uint8_t {
+    FIR,   // classic FIR (default)
+    IIR    // low-latency IIR
   };
   
 
@@ -101,6 +106,18 @@ public:
   /* Set gain of one or more adc channels to gain in dB,
      between -12 and 40 in steps of 0.5 */
   bool setGain(OUTPUT_CHANNELS adc, float gain);
+
+  /*! Setup digital low- and highpass filter. */
+  bool setFilters(LOWPASS lowpass=FIR, bool highpass=true);
+
+  /*! Mute ADC outputs. */
+  bool mute(OUTPUT_CHANNELS adcs);
+
+  /*! Unmute ADC outputs. */
+  bool unmute(OUTPUT_CHANNELS adcs);
+
+  /*! Setup mic bias. */
+  bool setMicBias(bool power=true, bool bypass=false);
 
   /* Print state (all status registers) to Serial. */
   void printState();
