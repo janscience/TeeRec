@@ -133,7 +133,7 @@ class TeensyADC : public DataBuffer {
   void setScaling(bool scale=true);
   
   // Do not scale ADC data to 16bit, keep the resolution requested by
-  // setResoution(). Nevertheless convert ADC data to signed
+  // setResolution(). Nevertheless convert ADC data to signed
   // integers. Call this *before* setResolution().
   void unsetScaling();
   
