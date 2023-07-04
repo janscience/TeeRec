@@ -104,10 +104,12 @@ public:
 		bool offs=false);
 
   /* Set gain of one or more adc channels to gain in dB,
-     between -12 and 40 in steps of 0.5 */
-  bool setGain(OUTPUT_CHANNELS adc, float gain);
+     between -12 and 40 in steps of 0.5.
+     If smooth then smoothly ramp to the new gains. */
+  bool setGain(OUTPUT_CHANNELS adc, float gain, bool smooth=true);
 
-  /*! Setup digital low- and highpass filter. */
+  /*! Setup digital low- and highpass filter.
+      Highpass is belwo 10Hz. */
   bool setFilters(LOWPASS lowpass=FIR, bool highpass=true);
 
   /*! Mute ADC outputs. */

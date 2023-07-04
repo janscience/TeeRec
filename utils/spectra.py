@@ -85,7 +85,9 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
             ch = channel
         #data[:,ch] = np.sin(2.0*np.pi*1000.37*np.arange(len(data))/rate) + 0.001*np.random.randn(len(data))
         pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2, window=window_none)
-        db = 10.0*np.log10(pxx*freqs[1])
+        db = pxx.copy()
+        db[pxx <= 1e-20] = float('-inf')
+        db[pxx > 1e-20] = 10.0*np.log10(pxx[pxx > 1e-20]*freqs[1])
         axs[c].plot(tscale*freqs, db, color=colors[c%len(colors)])
         if has_thunderfish:
             p, t = detect_peaks(db, thresh)

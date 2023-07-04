@@ -330,7 +330,8 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
 }
 
 
-bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
+bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain, bool smooth) {
+  // check gain:
   if (gain < -12.0) {
     Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
     return false;
@@ -339,6 +340,14 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
     Serial.printf("ControlPCM186x: invalid gain %g > 40dB\n", gain);
     return false;
   }
+  // smooth gain change:
+  unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+  val &= ~0x80;
+  if (smooth)
+    val |= 0x80;    // SMOOTH
+  if (!write(PCM186x_PGA_CONTROL_REG, val))
+    return false;
+  // set gains:
   int8_t igain = (int8_t)(2*gain);
   Serial.printf("set gain %g to %02x\n", gain, igain);
   if (adc == ADCLR) {
@@ -390,6 +399,7 @@ bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
     val |= 0x01;    // HPF_EN
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
+  return true;
 }
 
 
@@ -398,6 +408,7 @@ bool ControlPCM186x::mute(OUTPUT_CHANNELS adcs) {
   val |= adcs;    // MUTE_CHX_Y
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
+  return true;
 }
 
 
@@ -407,6 +418,7 @@ bool ControlPCM186x::unmute(OUTPUT_CHANNELS adcs) {
   val &= ~adcs;    // MUTE_CHX_Y
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
+  return true;
 }
 
 
@@ -419,6 +431,7 @@ bool ControlPCM186x::setMicBias(bool power, bool bypass) {
     val |= 0x10;    // TERM
   if (!write(PCM186x_MIC_BIAS_CTRL_REG, val))
     return false;
+  return true;
 }
 
 
