@@ -60,7 +60,8 @@ via the `TeeRec.h` header.
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
 - [TeensyADC](src/TeensyADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/teensyadc.md).
-
+- [TeensyTDM](src/TeensyTDM.h): Streaming TDM data into a single cyclic buffer.
+- [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
 
 ### Storage on SD card
 

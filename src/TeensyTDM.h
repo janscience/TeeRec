@@ -1,7 +1,7 @@
 /*
-  TeensyTDM - library for streaming TDM into a single cyclic buffer.
+  TeensyTDM - Streaming TDM data into a single cyclic buffer.
   Created by Jan Benda, July 4th, 2023.
-  Based on input_tdm.h of the Teensy Audio library.
+  Heavily based on input_tdm.h of the Teensy Audio library.
 
   The Teensy is the master producing the MCLK, BCLK, and LRCLK.
 */

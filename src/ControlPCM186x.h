@@ -1,5 +1,5 @@
 /*
-  ControlPCM186x - Control the PCM186x chip.
+  ControlPCM186x - Control a TI PCM186x chip.
   Created by Jan Benda, June 29th, 2023.
 */
 
