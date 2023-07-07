@@ -2,7 +2,7 @@ import os
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.mlab import psd, window_none
+from matplotlib.mlab import psd, window_none, window_hanning
 import wave
 try:
     from thunderfish.eventdetection import detect_peaks
@@ -77,14 +77,14 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
     if maxfreq and maxfreq < 1200:
         tscale = 1
         funit = 'Hz'
-    nfft = 1024*32
+    nfft = 1024*16
     thresh = 10 # dB
     for c in range(nchannels):
         ch = c
         if channel >= 0:
             ch = channel
         #data[:,ch] = np.sin(2.0*np.pi*1000.37*np.arange(len(data))/rate) + 0.001*np.random.randn(len(data))
-        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2, window=window_none)
+        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2, window=window_hanning)
         db = pxx.copy()
         db[pxx <= 1e-20] = float('-inf')
         db[pxx > 1e-20] = 10.0*np.log10(pxx[pxx > 1e-20]*freqs[1])

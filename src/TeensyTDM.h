@@ -20,7 +20,7 @@ class TeensyTDM : public DataBuffer {
 
  public:
   
-  TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
+  TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
 
   
  protected:

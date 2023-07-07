@@ -78,7 +78,7 @@ void TeensyTDM::setupTDM() {
   if (I2S1_TCSR & I2S_TCSR_TE) return;
   if (I2S1_RCSR & I2S_RCSR_RE) return;
   //PLL:
-  int fs = AUDIO_SAMPLE_RATE_EXACT;
+  int fs = 48000; // XXX AUDIO_SAMPLE_RATE_EXACT;
   // PLL between 27*24 = 648MHz und 54*24=1296MHz
   int n1 = 4; //SAI prescaler 4 => (n1*n2) = multiple of 4
   int n2 = 1 + (24000000 * 27) / (fs * 256 * n1);
@@ -183,6 +183,8 @@ void TeensyTDM::ISR() {
   uint32_t daddr;
   const uint32_t *src;
   unsigned int i;
+  unsigned int c;
+  unsigned int nchannels;
 
   daddr = (uint32_t)(DMA.TCD->DADDR);
   DMA.clearInterrupt();
@@ -201,14 +203,17 @@ void TeensyTDM::ISR() {
   arm_dcache_delete((void*)src, sizeof(TDMBuffer) / 2);
 #endif
   // copy from src into cyclic buffer:
+  nchannels = 4; // XXX should be NChannels!
   for (i=0; i < TDM_FRAMES/2; i++) {
-    sample_t *slot = src;
-    for (int c=0; c < NChannels; c++) {
+    sample_t *slot = (sample_t *)src;
+    for (c=0; c < nchannels; c++) {
+      /*
       Buffer[Index++] = *slot++;
       if (Index >= NBuffer) {
 	Index = 0;
 	Cycles++;
       }
+      */
     }
     src += 8;
   }
