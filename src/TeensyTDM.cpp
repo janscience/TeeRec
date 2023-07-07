@@ -12,9 +12,13 @@ static uint32_t TDMBuffer[TDM_FRAMES*8];
 
 DMAChannel TeensyTDM::DMA(false);
 
+TeensyTDM *TeensyTDM::TDM = 0;
+
+
 
 TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   DataBuffer(buffer, nbuffer) {
+  TDM = this;
   setDataResolution(16);
   Rate = 0;
   NChannels = 0;
@@ -179,16 +183,11 @@ void TeensyTDM::setupDMA() {
 }
 
 
-void TeensyTDM::ISR() {
-  uint32_t daddr;
-  const uint32_t *src;
-  unsigned int i;
-  unsigned int c;
-  unsigned int nchannels;
-
-  daddr = (uint32_t)(DMA.TCD->DADDR);
+void TeensyTDM::TDMISR() {
+  uint32_t daddr = (uint32_t)(DMA.TCD->DADDR);
   DMA.clearInterrupt();
 
+  const uint32_t *src;
   if (daddr < (uint32_t)TDMBuffer + sizeof(TDMBuffer) / 2) {
     // DMA is receiving to the first half of the buffer
     // need to remove data from the second half
@@ -203,20 +202,23 @@ void TeensyTDM::ISR() {
   arm_dcache_delete((void*)src, sizeof(TDMBuffer) / 2);
 #endif
   // copy from src into cyclic buffer:
-  nchannels = 4; // XXX should be NChannels!
-  for (i=0; i < TDM_FRAMES/2; i++) {
+  unsigned int nchannels = NChannels;
+  for (unsigned int i=0; i < TDM_FRAMES/2; i++) {
     sample_t *slot = (sample_t *)src;
-    for (c=0; c < nchannels; c++) {
-      /*
+    for (unsigned int c=0; c < nchannels; c++) {
       Buffer[Index++] = *slot++;
       if (Index >= NBuffer) {
 	Index = 0;
-	Cycles++;
+	Cycle++;
       }
-      */
     }
     src += 8;
   }
+}
+
+
+void TeensyTDM::ISR() {
+  TDM->TDMISR();
 }
 
 

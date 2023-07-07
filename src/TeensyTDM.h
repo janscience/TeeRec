@@ -22,6 +22,8 @@ class TeensyTDM : public DataBuffer {
   
   TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
 
+  static TeensyTDM *TDM;
+
   
  protected:
 
@@ -29,8 +31,10 @@ class TeensyTDM : public DataBuffer {
   void setupTDM();
   void setupDMA();
   
-  static DMAChannel DMA;
+  void TDMISR();
   static void ISR();
+  
+  static DMAChannel DMA;
   
 };
 
