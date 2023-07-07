@@ -26,11 +26,72 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
 
 
 void TeensyTDM::setup(uint8_t nchannels, uint8_t bits, uint32_t rate) {
+  bool success = true;
+  if (bits != 32) {
+    Serial.printf("TeensyTDM::setup() -> resolution of %ubits not supported.\n", bits);
+    success = false;
+  }
+  if (!success)
+    return;
+  if (nchannels >= 8) {
+    Serial.printf("TeensyTDM::setup() -> too many channels=%u.\n", nchannels);
+    success = false;
+  }
   NChannels = nchannels;  // make this a function in DataBuffer
   setResolution(bits);
   setRate(rate);
-  if (Bits != 32)
-    Serial.printf("TeensyTDM::setup() -> resolution of %ubits not supported.\n", Bits);
+}
+
+
+bool TeensyTDM::check() {
+  if ( Rate < 1 ) {
+    Serial.println("ERROR: no sampling rate specfied.");
+    Rate = 0;
+    NChannels = 0;
+    return false;
+  }
+  if ( NBuffer < TDM_FRAMES*8 ) {
+    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
+    Rate = 0;
+    NChannels = 0;
+    return false;
+  }
+  if (bufferTime() < 0.1)
+    Serial.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
+		  1000.0*bufferTime());
+  if ( NChannels < 1 ) {
+    Serial.println("ERROR: no channels specfied.");
+    Rate = 0;
+    NChannels = 0;
+    return false;
+  }
+  return true;
+}
+
+  
+void TeensyTDM::report() {
+  float bt = bufferTime();
+  char bts[20];
+  if (bt < 1.0)
+    sprintf(bts, "%.0fms", 1000.0*bt);
+  else
+    sprintf(bts, "%.2fs", bt);
+  Serial.println("TDM settings:");
+  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  Serial.printf("  resolution: %dbits\n", Bits);
+  Serial.printf("  channels:   %d\n", NChannels);
+  Serial.printf("  Buffer:     %s\n", bts);
+  Serial.println();
+}
+
+
+void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
+  DataWorker::setWaveHeader(wave);
+  /*
+  char cs[100];
+  channels(cs);
+  wave.setChannels(cs);
+  */
 }
 
 

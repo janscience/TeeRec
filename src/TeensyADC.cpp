@@ -442,7 +442,7 @@ void TeensyADC::pinAssignment() {
   }
 }
 
-  
+
 bool TeensyADC::check() {
   if ( Rate < 1 ) {
     Serial.println("ERROR: no sampling rate specfied.");
