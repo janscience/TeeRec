@@ -23,8 +23,12 @@ class TeensyTDM : public DataBuffer {
   TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
 
   static TeensyTDM *TDM;
-
-  void setup(uint8_t nchannels, uint8_t bits, uint32_t rate);
+  
+  // Set resolution of data slots to bits per sample.
+  virtual void setResolution(uint8_t bits);
+  
+  // Set number of channels to nchannels.
+  virtual void setNChannels(uint8_t nchannels);
   
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -40,10 +44,8 @@ class TeensyTDM : public DataBuffer {
   virtual void setWaveHeader(WaveHeader &wave) const;
 
   // Start generation of clock signals.
+  // Need to setup resolution and sampling rate before.
   void begin();
-
-  // Stop generation of clock signals.
-  void end();
 
   // Start data transfer to the buffer.
   void start();
@@ -53,14 +55,11 @@ class TeensyTDM : public DataBuffer {
 
   
  protected:
-
-  void setupTDM();
-  void setupDMA();
-  
-  void TDMISR();
-  static void ISR();
   
   static DMAChannel DMA;
+
+  void TDMISR();
+  static void ISR();
   
 };
 

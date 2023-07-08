@@ -22,26 +22,28 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   DataBuffer(buffer, nbuffer) {
   TDM = this;
   setDataResolution(16);
+  Bits = 32;
   Rate = 0;
   NChannels = 0;
 }
 
 
-void TeensyTDM::setup(uint8_t nchannels, uint8_t bits, uint32_t rate) {
-  bool success = true;
+void TeensyTDM::setResolution(uint8_t bits) {
   if (bits != 32) {
-    Serial.printf("TeensyTDM::setup() -> resolution of %ubits not supported.\n", bits);
-    success = false;
+    Serial.printf("TeensyTDM::setResolution() -> resolution of %ubits not supported.\n", bits);
+    Bits = 0;
   }
-  if (!success)
-    return;
-  if (nchannels >= 8) {
-    Serial.printf("TeensyTDM::setup() -> too many channels=%u.\n", nchannels);
-    success = false;
+  else
+    Bits = 32;
+}
+
+  
+void TeensyTDM::setNChannels(uint8_t nchannels) {
+  if (nchannels >= 256/Bits) {
+    Serial.printf("TeensyTDM::setNChannels() -> too many channels=%u.\n", nchannels);
+    nchannels = 0;
   }
-  NChannels = nchannels;  // make this a function in DataBuffer
-  setResolution(bits);
-  setRate(rate);
+  setNChannels(nchannels);
 }
 
 
@@ -62,7 +64,7 @@ bool TeensyTDM::check() {
     Serial.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
 		  1000.0*bufferTime());
   if ( NChannels < 1 ) {
-    Serial.println("ERROR: no channels specfied.");
+    Serial.println("ERROR: no channels specified.");
     Rate = 0;
     NChannels = 0;
     return false;
@@ -88,39 +90,11 @@ void TeensyTDM::report() {
 
 
 void TeensyTDM::begin() {
-  setupTDM();
-}
-
-
-void TeensyTDM::end() {
-}
-
-
-void TeensyTDM::start() {
-  setupDMA();
-}
-
-
-void TeensyTDM::stop() {
-}
-
-
-void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
-  DataWorker::setWaveHeader(wave);
-  char cs[100];
-  char *sp = cs;
-  for (int c=0; c<NChannels; c++) {
-    if (c > 0)
-      *(sp++) = ',';
-    sp += sprintf(sp, "%d", c);
+  if (Bits == 0 || Rate == 0) {
+    Serial.println("ERROR: TeensyTDM::begin() -> resultion and sampling rate not yet specified.");
+    return;
   }
-  *sp = '\0';
-  wave.setChannels(cs);
-}
-
-
-void TeensyTDM::setupTDM() {
-  // this is config_tdm() from output_tdm.cpp of the Audio library
+  // the following is config_tdm() from output_tdm.cpp of the Audio library
   // merged with the setI2SFreq() function of Frank B from the Teensy forum.
 #if defined(KINETISK)
   typedef struct {
@@ -176,9 +150,8 @@ void TeensyTDM::setupTDM() {
     }
   }
   if (!rate_found) {
-    Serial.printf("TeensyTDM::setupTDM() -> invalid sampling rate %d Hz.\n", Rate);
+    Serial.printf("TeensyTDM::begin() -> invalid sampling rate %d Hz.\n", Rate);
     Rate = 0;
-    NChannels = 0;
     return;
   }
 
@@ -286,13 +259,11 @@ void TeensyTDM::setupTDM() {
 }
 
 
-void TeensyTDM::setupDMA() {
+void TeensyTDM::start() {
   // this is begin() from input_tdm.cpp of the Audio library
   DMA.begin(true); // Allocate the DMA channel first
 
   // TODO: should we set & clear the I2S_RCSR_SR bit here?
-  setupTDM();
-  
 #if defined(KINETISK)
   CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
   DMA.TCD->SADDR = &I2S0_RDR0;
@@ -332,6 +303,24 @@ void TeensyTDM::setupDMA() {
   I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
   DMA.attachInterrupt(ISR);	
 #endif	
+}
+
+
+void TeensyTDM::stop() {
+}
+
+
+void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
+  DataWorker::setWaveHeader(wave);
+  char cs[100];
+  char *sp = cs;
+  for (int c=0; c<NChannels; c++) {
+    if (c > 0)
+      *(sp++) = ',';
+    sp += sprintf(sp, "%d", c);
+  }
+  *sp = '\0';
+  wave.setChannels(cs);
 }
 
 

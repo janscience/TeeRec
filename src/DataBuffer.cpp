@@ -22,6 +22,11 @@ void DataBuffer::setRate(uint32_t rate) {
 }
 
 
+void DataBuffer::setNChannels(uint8_t nchannels) {
+  NChannels = nchannels;
+}
+
+
 void DataBuffer::setResolution(uint8_t bits) {
   Bits = bits;
 }

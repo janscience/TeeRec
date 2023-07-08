@@ -60,6 +60,9 @@ public:
 
   // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const { return NChannels; };
+  
+  // Set number of channels to nchannels.
+  virtual void setNChannels(uint8_t nchannels);
 
   // Time the cyclic buffer can hold in seconds given the
   // sampling rate and the number of channels.
