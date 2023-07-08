@@ -1,9 +1,11 @@
 #include <Arduino.h>
 #include <TeensyTDM.h>
+#ifdef __IMXRT1062__
+// For set_audioClock on T4.x
+#include <utility/imxrt_hw.h>
+#endif
 
 #if defined(KINETISK) || defined(__IMXRT1062__)
-
-#include "utility/imxrt_hw.h"
 
 // DMA buffer for 256 TDM frames:
 #define TDM_FRAMES  256
@@ -85,19 +87,72 @@ void TeensyTDM::report() {
 }
 
 
+void TeensyTDM::begin() {
+  setupTDM();
+}
+
+
+void TeensyTDM::end() {
+}
+
+
+void TeensyTDM::start() {
+  setupDMA();
+}
+
+
+void TeensyTDM::stop() {
+}
+
+
 void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
   DataWorker::setWaveHeader(wave);
-  /*
   char cs[100];
-  channels(cs);
+  char *sp = cs;
+  for (int c=0; c<NChannels; c++) {
+    if (c > 0)
+      *(sp++) = ',';
+    sp += sprintf(sp, "%d", c);
+  }
+  *sp = '\0';
   wave.setChannels(cs);
-  */
 }
 
 
 void TeensyTDM::setupTDM() {
   // this is config_tdm() from output_tdm.cpp of the Audio library
+  // merged with the setI2SFreq() function of Frank B from the Teensy forum.
 #if defined(KINETISK)
+  typedef struct {
+    uint8_t mult;
+    uint16_t div;
+  } tmclk;
+
+  const int numfreqs = 14;
+  const int samplefreqs[numfreqs] = { 8000, 11025, 16000, 22050, 32000, 44100, (int)44117.64706 , 48000, 88200, (int)44117.64706 * 2, 96000, 176400, (int)44117.64706 * 4, 192000};
+
+#if (F_PLL==16000000)
+  const tmclk clkArr[numfreqs] = {{16, 125}, {148, 839}, {32, 125}, {145, 411}, {64, 125}, {151, 214}, {12, 17}, {96, 125}, {151, 107}, {24, 17}, {192, 125}, {127, 45}, {48, 17}, {255, 83} };
+#elif (F_PLL==72000000)
+  const tmclk clkArr[numfreqs] = {{32, 1125}, {49, 1250}, {64, 1125}, {49, 625}, {128, 1125}, {98, 625}, {8, 51}, {64, 375}, {196, 625}, {16, 51}, {128, 375}, {249, 397}, {32, 51}, {185, 271} };
+#elif (F_PLL==96000000)
+  const tmclk clkArr[numfreqs] = {{8, 375}, {73, 2483}, {16, 375}, {147, 2500}, {32, 375}, {147, 1250}, {2, 17}, {16, 125}, {147, 625}, {4, 17}, {32, 125}, {151, 321}, {8, 17}, {64, 125} };
+#elif (F_PLL==120000000)
+  const tmclk clkArr[numfreqs] = {{32, 1875}, {89, 3784}, {64, 1875}, {147, 3125}, {128, 1875}, {205, 2179}, {8, 85}, {64, 625}, {89, 473}, {16, 85}, {128, 625}, {178, 473}, {32, 85}, {145, 354} };
+#elif (F_PLL==144000000)
+  const tmclk clkArr[numfreqs] = {{16, 1125}, {49, 2500}, {32, 1125}, {49, 1250}, {64, 1125}, {49, 625}, {4, 51}, {32, 375}, {98, 625}, {8, 51}, {64, 375}, {196, 625}, {16, 51}, {128, 375} };
+#elif (F_PLL==168000000)
+  const tmclk clkArr[numfreqs] = {{32, 2625}, {21, 1250}, {64, 2625}, {21, 625}, {128, 2625}, {42, 625}, {8, 119}, {64, 875}, {84, 625}, {16, 119}, {128, 875}, {168, 625}, {32, 119}, {189, 646} };
+#elif (F_PLL==180000000)
+  const tmclk clkArr[numfreqs] = {{46, 4043}, {49, 3125}, {73, 3208}, {98, 3125}, {183, 4021}, {196, 3125}, {16, 255}, {128, 1875}, {107, 853}, {32, 255}, {219, 1604}, {214, 853}, {64, 255}, {219, 802} };
+#elif (F_PLL==192000000)
+  const tmclk clkArr[numfreqs] = {{4, 375}, {37, 2517}, {8, 375}, {73, 2483}, {16, 375}, {147, 2500}, {1, 17}, {8, 125}, {147, 1250}, {2, 17}, {16, 125}, {147, 625}, {4, 17}, {32, 125} };
+#elif (F_PLL==216000000)
+  const tmclk clkArr[numfreqs] = {{32, 3375}, {49, 3750}, {64, 3375}, {49, 1875}, {128, 3375}, {98, 1875}, {8, 153}, {64, 1125}, {196, 1875}, {16, 153}, {128, 1125}, {226, 1081}, {32, 153}, {147, 646} };
+#elif (F_PLL==240000000)
+  const tmclk clkArr[numfreqs] = {{16, 1875}, {29, 2466}, {32, 1875}, {89, 3784}, {64, 1875}, {147, 3125}, {4, 85}, {32, 625}, {205, 2179}, {8, 85}, {64, 625}, {89, 473}, {16, 85}, {128, 625} };
+#endif
+  
   SIM_SCGC6 |= SIM_SCGC6_I2S;
   SIM_SCGC7 |= SIM_SCGC7_DMA;
   SIM_SCGC6 |= SIM_SCGC6_DMAMUX;
@@ -110,6 +165,22 @@ void TeensyTDM::setupTDM() {
   I2S0_MCR = I2S_MCR_MICS(MCLK_SRC) | I2S_MCR_MOE;
   while (I2S0_MCR & I2S_MCR_DUF) ;
   I2S0_MDR = I2S_MDR_FRACT((MCLK_MULT-1)) | I2S_MDR_DIVIDE((MCLK_DIV-1));
+
+  bool rate_found = false;
+  for (int f = 0; f < numfreqs; f++) {
+    if (Rate == samplefreqs[f]) {
+      while (I2S0_MCR & I2S_MCR_DUF);
+      I2S0_MDR = I2S_MDR_FRACT((clkArr[f].mult - 1)) | I2S_MDR_DIVIDE((clkArr[f].div - 1));
+      Rate = round(((float)F_PLL / 256.0) * clkArr[f].mult / clkArr[f].div); //return real freq
+      rate_found = true;
+    }
+  }
+  if (!rate_found) {
+    Serial.printf("TeensyTDM::setupTDM() -> invalid sampling rate %d Hz.\n", Rate);
+    Rate = 0;
+    NChannels = 0;
+    return;
+  }
 
   // configure transmitter
   I2S0_TMR = 0;
@@ -142,26 +213,46 @@ void TeensyTDM::setupTDM() {
   // if either transmitter or receiver is enabled, do nothing
   if (I2S1_TCSR & I2S_TCSR_TE) return;
   if (I2S1_RCSR & I2S_RCSR_RE) return;
-  //PLL:
-  int fs = 48000; // XXX AUDIO_SAMPLE_RATE_EXACT;
+  // PLL:
+  int fs = Rate;
   // PLL between 27*24 = 648MHz und 54*24=1296MHz
-  int n1 = 4; //SAI prescaler 4 => (n1*n2) = multiple of 4
+  // Handle samplerates below 10K different
+  int n1;
+  if(fs > 10000) {
+    n1 = 4; //SAI prescaler 4 => (n1*n2) = multiple of 4
+  } else {
+    n1 = 8;
+  }
   int n2 = 1 + (24000000 * 27) / (fs * 256 * n1);
+  if (n2 > 63) {
+    // n2 must fit into a 6-bit field
+    Serial.printf("ERROR: n2 exceeds 63 - %d\n",n2);
+    return;
+  }
 
   double C = ((double)fs * 256 * n1 * n2) / 24000000;
+//  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ",freq,n1,n2,C);
   int c0 = C;
   int c2 = 10000;
   int c1 = C * c2 - (c0 * c2);
-  set_audioClock(c0, c1, c2);
+//  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n",c0,c1,c2);
+  set_audioClock(c0, c1, c2, true);
+  
   // clear SAI1_CLK register locations
   CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI1_CLK_SEL_MASK))
     | CCM_CSCMR1_SAI1_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
 
-  n1 = n1 / 2; //Double Speed for TDM
+  n1 = n1 / 2; // double speed for TDM
 
   CCM_CS1CDR = (CCM_CS1CDR & ~(CCM_CS1CDR_SAI1_CLK_PRED_MASK | CCM_CS1CDR_SAI1_CLK_PODF_MASK))
-    | CCM_CS1CDR_SAI1_CLK_PRED(n1-1) // &0x07
-    | CCM_CS1CDR_SAI1_CLK_PODF(n2-1); // &0x3f
+    | CCM_CS1CDR_SAI1_CLK_PRED(n1 - 1)  // &0x07
+    | CCM_CS1CDR_SAI1_CLK_PODF(n2 - 1); // &0x3f
+
+  // START//Added afterwards to make the SAI2 function at the desired frequency as well.
+  CCM_CS2CDR = (CCM_CS2CDR & ~(CCM_CS2CDR_SAI2_CLK_PRED_MASK | CCM_CS2CDR_SAI2_CLK_PODF_MASK))
+               | CCM_CS2CDR_SAI2_CLK_PRED(n1 - 1)  // &0x07
+               | CCM_CS2CDR_SAI2_CLK_PODF(n2 - 1); // &0x3f)
+  // END//Added afterwards to make the SAI2 function at the desired frequency as well.
 
   IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL_MASK))
     | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	//Select MCLK

@@ -39,10 +39,16 @@ class TeensyTDM : public DataBuffer {
   // buffer.
   virtual void setWaveHeader(WaveHeader &wave) const;
 
-  // Start data transfer based on rate and buffer settings.
+  // Start generation of clock signals.
+  void begin();
+
+  // Stop generation of clock signals.
+  void end();
+
+  // Start data transfer to the buffer.
   void start();
 
-  // Stop data transfer.
+  // Stop data transfer to buffer.
   void stop();
 
   
