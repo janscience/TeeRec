@@ -38,10 +38,6 @@ class TeensyTDM : public DataBuffer {
 
   // Print current settings on Serial.
   void report();
- 
-  // Add metadata to the header of a wave file holding the data of the
-  // buffer.
-  virtual void setWaveHeader(WaveHeader &wave) const;
 
   // Start generation of clock signals.
   // Need to setup resolution and sampling rate before.

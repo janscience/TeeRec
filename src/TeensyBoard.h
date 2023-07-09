@@ -13,16 +13,21 @@
 // From https://github.com/pedvide/ADC/blob/master/settings_defines.h
 
 #if defined(TEENSYDUINO) 
-  #if defined(__MK20DX256__)   // Teensy 3.1/3.2
-    #define TEENSY32
-  #elif defined(__MK20DX128__) // Teensy 3.0
-    #define TEENSY30
-  #elif defined(__MKL26Z64__)  // Teensy LC
+  #if defined(__MKL26Z64__) || defined(KINETISL)  // Teensy LC
     #define TEENSYLC
-  #elif defined(__MK64FX512__) // Teensy 3.5
-    #define TEENSY35
-  #elif defined(__MK66FX1M0__) // Teensy 3.6
-    #define TEENSY36
+  #elif defined(KINETISK)      // Teensy 3.X
+    #define TEENSY3
+    #if defined(__MK20DX256__)   // Teensy 3.1/3.2
+      #define TEENSY32
+    #elif defined(__MK20DX128__) // Teensy 3.0
+      #define TEENSY30
+    #elif defined(__MK64FX512__) // Teensy 3.5
+      #define TEENSY35
+    #elif defined(__MK66FX1M0__) // Teensy 3.6
+      #define TEENSY36
+    #else
+      #error "Unknown Teensy 3.X board!"
+    #endif
   #elif defined(__IMXRT1062__) // Teensy 4.0/4.1
     // They only differ in the number of exposed pins
     #define TEENSY4

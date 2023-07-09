@@ -163,6 +163,80 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 }
 
 
+ControlPCM186x::INPUT_CHANNELS ControlPCM186x::channel(OUTPUT_CHANNELS adc) {
+  int ichan = 0x0100;
+  if (adc == ADC1L)
+    ichan = read(PCM186x_ADC1L_INPUT_SEL_REG);
+  else if (adc == ADC1R)
+    ichan = read(PCM186x_ADC1R_INPUT_SEL_REG);
+  else if (adc == ADC2L)
+    ichan = read(PCM186x_ADC2L_INPUT_SEL_REG);
+  else if (adc == ADC2R)
+    ichan = read(PCM186x_ADC2R_INPUT_SEL_REG);
+  if (ichan > 0x00ff)
+    return CHNONE;
+  ichan &= 0x0f;
+  INPUT_CHANNELS chan = CHNONE;
+  if (adc == ADC1L || adc == ADC2L) {
+    if (ichan == 0x01)
+      chan = CH1L;
+    else if (ichan == 0x02)
+      chan = CH2L;
+    else if (ichan == 0x04)
+      chan = CH3L;
+    else if (ichan == 0x08)
+      chan = CH4L;
+  }
+  else if (adc == ADC1R || adc == ADC2R) {
+    if (ichan == 0x01)
+      chan = CH1R;
+    else if (ichan == 0x02)
+      chan = CH2R;
+    else if (ichan == 0x04)
+      chan = CH3R;
+    else if (ichan == 0x08)
+      chan = CH4R;
+  }
+  return chan;
+}
+
+
+const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
+  INPUT_CHANNELS chan = channel(adc);
+  if (chan == CH1L)
+    return (const char *)"CH1L";
+  else if (chan == CH1R)
+    return (const char *)"CH1R";
+  else if (chan == CH2L)
+    return (const char *)"CH2L";
+  else if (chan == CH2R)
+    return (const char *)"CH2R";
+  else if (chan == CH3L)
+    return (const char *)"CH3L";
+  else if (chan == CH3R)
+    return (const char *)"CH3R";
+  else if (chan == CH4L)
+    return (const char *)"CH4L";
+  else if (chan == CH4R)
+    return (const char *)"CH4R";
+  else
+    return (const char *)"NONE";
+}
+
+
+void ControlPCM186x::channelsStr(char *chans) {
+  *chans = '\0';
+  strcat(chans, channelStr(ADC1L));
+  strcat(chans, ",");
+  strcat(chans, channelStr(ADC1R));
+  strcat(chans, ",");
+  strcat(chans, channelStr(ADC2L));
+  strcat(chans, ",");
+  strcat(chans, channelStr(ADC2R));
+  strcat(chans, ",");
+}
+
+
 bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2) {
   uint8_t fmt = 0x00;  // I2S
@@ -327,6 +401,30 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
       return false;
   }
   return true;
+}
+
+
+float ControlPCM186x::gain(OUTPUT_CHANNELS adc) {
+  int igain = 0x0100;
+  if (adc == ADC1L)
+    igain = read(PCM186x_PGA_CH1L_REG);
+  else if (adc == ADC1R)
+    igain = read(PCM186x_PGA_CH1R_REG);
+  else if (adc == ADC2L)
+    igain = read(PCM186x_PGA_CH2L_REG);
+  else if (adc == ADC2R)
+    igain = read(PCM186x_PGA_CH2R_REG);
+  if (igain > 0x00ff)
+    return -999.0;
+  // TODO: also check for mute!
+  int8_t igainv = igain & 0x00ff;
+  float gainv = (float)igainv;
+  return 0.5*gainv;
+}
+
+
+void ControlPCM186x::gainStr(OUTPUT_CHANNELS adc, char *gains) {
+  sprintf(gains, "%.1fdB", gain(adc));
 }
 
 

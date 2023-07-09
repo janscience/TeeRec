@@ -314,8 +314,6 @@ class TeensyADC : public DataBuffer {
   void setupDMA(uint8_t adc);
 #if defined(ADC_USE_PDB)
   void startPDB(uint32_t freq);   // start both ADCs from PDB at the same time
-#else
-  #warning "Need to implement startTimer() for Teensy 4 for both ADCs"
 #endif
 
 

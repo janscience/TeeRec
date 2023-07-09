@@ -89,11 +89,33 @@ void TeensyTDM::report() {
 }
 
 
+#if defined(KINETISK)
+#if F_CPU == 180000000
+  #define MCLK_SRC  0
+#elif F_CPU == 216000000
+  #define MCLK_SRC  1
+#elif F_CPU == 240000000
+  #define MCLK_SRC  0
+#elif F_CPU == 256000000
+  #define MCLK_SRC  1
+#endif
+
+#ifndef MCLK_SRC
+#if F_CPU >= 20000000
+  #define MCLK_SRC  3  // the PLL
+#else
+  #define MCLK_SRC  0  // system clock
+#endif
+#endif
+#endif
+
+
 void TeensyTDM::begin() {
   if (Bits == 0 || Rate == 0) {
     Serial.println("ERROR: TeensyTDM::begin() -> resultion and sampling rate not yet specified.");
     return;
   }
+  
   // the following is config_tdm() from output_tdm.cpp of the Audio library
   // merged with the setI2SFreq() function of Frank B from the Teensy forum.
 #if defined(KINETISK)
@@ -137,8 +159,6 @@ void TeensyTDM::begin() {
 
   // enable MCLK output
   I2S0_MCR = I2S_MCR_MICS(MCLK_SRC) | I2S_MCR_MOE;
-  while (I2S0_MCR & I2S_MCR_DUF) ;
-  I2S0_MDR = I2S_MDR_FRACT((MCLK_MULT-1)) | I2S_MDR_DIVIDE((MCLK_DIV-1));
 
   bool rate_found = false;
   for (int f = 0; f < numfreqs; f++) {
@@ -309,20 +329,6 @@ void TeensyTDM::start() {
 void TeensyTDM::stop() {
   DMA.disable();
   DMA.detachInterrupt();
-}
-
-
-void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
-  DataWorker::setWaveHeader(wave);
-  char cs[100];
-  char *sp = cs;
-  for (int c=0; c<NChannels; c++) {
-    if (c > 0)
-      *(sp++) = ',';
-    sp += sprintf(sp, "%d", c);
-  }
-  *sp = '\0';
-  wave.setChannels(cs);
 }
 
 

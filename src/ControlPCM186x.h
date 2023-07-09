@@ -21,21 +21,22 @@ class ControlPCM186x {
 public:
 
   enum INPUT_CHANNELS : uint8_t {
-    CH1L  = 0x01,
-    CH1R  = 0x02,
-    CH1   = 0x03,
-    CH2L  = 0x04,
-    CH2R  = 0x08,
-    CH2   = 0x0C,
-    CH3L  = 0x10,
-    CH3R  = 0x20,
-    CH3   = 0x30,
-    CH4L  = 0x40,
-    CH4R  = 0x80,
-    CH4   = 0xC0,
-    CHL   = 0x55,
-    CHR   = 0xAA,
-    CHLR  = 0xFF
+    CHNONE = 0x00,
+    CH1L   = 0x01,
+    CH1R   = 0x02,
+    CH1    = 0x03,
+    CH2L   = 0x04,
+    CH2R   = 0x08,
+    CH2    = 0x0C,
+    CH3L   = 0x10,
+    CH3R   = 0x20,
+    CH3    = 0x30,
+    CH4L   = 0x40,
+    CH4R   = 0x80,
+    CH4    = 0xC0,
+    CHL    = 0x55,
+    CHR    = 0xAA,
+    CHLR   = 0xFF
   };
 
   enum OUTPUT_CHANNELS : uint8_t {
@@ -73,6 +74,17 @@ public:
   /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
+
+  /* Return the input channel set for output channel adc. */
+  INPUT_CHANNELS channel(OUTPUT_CHANNELS adc);
+
+  /* Return the input channel set for output channel adc
+     as a string. */
+  const char *channelStr(OUTPUT_CHANNELS adc);
+
+  /* Return the input channels set for each output channel
+     as a string in chans. */
+  void channelsStr(char *chans);
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
@@ -102,6 +114,12 @@ public:
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
 		bool offs=false);
+
+  /* Return the gain set for output channel adc in dB. */
+  float gain(OUTPUT_CHANNELS adc);
+
+  /* Return the gain set for output channel adc as a string in gains. */
+  void gainStr(OUTPUT_CHANNELS adc, char *gains);
 
   /* Set gain of one or more adc channels to gain in dB,
      between -12 and 40 in steps of 0.5.

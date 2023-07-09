@@ -1,4 +1,14 @@
-#include <TeensyADC.h>
+// select a data source:
+//#define TEENSYADC     // data are recorded from Teensy internal ADCs
+#define PCM186X     // data are recorded by TI PCM186x chip via TDM
+
+#if defined(TEENSYADC)
+  #include <TeensyADC.h>
+#elif defined(PCM186X)
+  #include <Wire.h>
+  #include <ControlPCM186x.h>
+  #include <TeensyTDM.h>
+#endif
 #include <SDWriter.h>
 #include <RTClock.h>
 #include <Blink.h>
@@ -10,20 +20,24 @@
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
-
-#define SAMPLING_RATE 44100 // samples per second and channel in Hertz
-#define BITS             12 // resolution: 10bit 12bit, or 16bit
-#define AVERAGING         8 // number of averages per sample: 0, 4, 8, 16, 32
-#define CONVERSION    ADC_CONVERSION_SPEED::HIGH_SPEED
-#define SAMPLING      ADC_SAMPLING_SPEED::HIGH_SPEED
-#define REFERENCE     ADC_REFERENCE::REF_3V3
-//int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
-int8_t channels0 [] =  {A10, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
-//int8_t channels1 [] =  {A10, -1, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
-int8_t channels1 [] =  {-1, A10, A11, A16, A17, A18, A19, A20, A22, A12, A13};  // input pins for ADC1
+#if defined(TEENSYADC)
+  #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
+  #define BITS             12 // resolution: 10bit 12bit, or 16bit
+  #define AVERAGING         8 // number of averages per sample: 0, 4, 8, 16, 32
+  #define CONVERSION    ADC_CONVERSION_SPEED::HIGH_SPEED
+  #define SAMPLING      ADC_SAMPLING_SPEED::HIGH_SPEED
+  #define REFERENCE     ADC_REFERENCE::REF_3V3
+  //int8_t channels0 [] =  {A2, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
+  int8_t channels0 [] =  {A10, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
+  //int8_t channels1 [] =  {A10, -1, A11, A16, A17, A12, A13};  // input pins for ADC1
+  int8_t channels1 [] =  {-1, A10, A11, A16, A17, A12, A13};  // input pins for ADC1
+#elif defined(PCM186X)
+  #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
+  #define GAIN 0.0            // dB
+#endif
 
 #define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "GAIN27K-AMP0Ohm-1CHANNELA10-GND-SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME 10   // seconds
 
 #define INITIAL_DELAY  6.0  // seconds
@@ -35,14 +49,21 @@ int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test s
 // ----------------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+#if defined(TEENSYADC)
 TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
+#elif defined(PCM186X)
+ControlPCM186x pcm;
+TeensyTDM aidata(AIBuffer, NAIBuffer);
+#endif
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
+#if defined(TEENSYADC)
 TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 			     CONVERSION, SAMPLING, REFERENCE);
+#endif
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 RTClock rtclock;
@@ -129,7 +150,7 @@ void storeData() {
       if (samples == -3) {
         aidata.stop();
         file.closeWave();
-        char mfs[20];
+        char mfs[30];
         sprintf(mfs, "error%d-%d.msg", restarts+1, -samples);
         File mf = sdcard.openWrite(mfs);
         mf.close();
@@ -169,7 +190,24 @@ void setup() {
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
+#if defined(TEENSYADC)
   aidata.configure(aisettings);
+#elif defined(PCM186X)
+  Wire.begin();
+  pcm.begin();
+  pcm.setMicBias(false, true);
+  pcm.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
+  pcm.setGain(ControlPCM186x::ADCLR, GAIN);
+  pcm.setFilters(ControlPCM186x::FIR, false);
+  char ws[30];
+  pcm.channelsStr(ws);
+  file.header().setChannels(ws);
+  pcm.gainStr(ControlPCM186x::ADC1L, ws);
+  file.header().setGain(ws);
+  aidata.setResolution(32);
+  aidata.setRate(SAMPLING_RATE);
+  aidata.setNChannels(4);   // TODO: take it from pcm!
+#endif
   aidata.check();
   aidata.start();
   aidata.report();
