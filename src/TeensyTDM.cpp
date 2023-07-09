@@ -307,6 +307,8 @@ void TeensyTDM::start() {
 
 
 void TeensyTDM::stop() {
+  DMA.disable();
+  DMA.detachInterrupt();
 }
 
 

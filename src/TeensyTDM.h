@@ -47,7 +47,7 @@ class TeensyTDM : public DataBuffer {
   // Need to setup resolution and sampling rate before.
   void begin();
 
-  // Start data transfer to the buffer.
+  // Start data transfer to buffer.
   void start();
 
   // Stop data transfer to buffer.
