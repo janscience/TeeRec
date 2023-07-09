@@ -29,7 +29,7 @@ WaveHeader::~WaveHeader() {
 
 
 WaveHeader::Chunk::Chunk(const char *id, uint32_t size) {
-  strncpy(Header.Id, id, 4);
+  memcpy(Header.Id, id, 4);
   setSize(size);
   NBuffer = sizeof(Header) + Header.Size;
   Buffer = (char *)&Header;
@@ -49,7 +49,7 @@ void WaveHeader::Chunk::addSize(uint32_t size) {
 
 WaveHeader::ListChunk::ListChunk(const char *id, const char *listid) :
   Chunk(id, 4) {
-  strncpy(ListId, listid, 4);
+  memcpy(ListId, listid, 4);
 }
 
 
@@ -119,7 +119,7 @@ void WaveHeader::setFormat(uint8_t nchannels, uint32_t samplerate,
 		           uint16_t resolution, uint16_t dataresolution) {
   Format.set(nchannels, samplerate, dataresolution);
   DataResolution = dataresolution;
-  char bs[4];
+  char bs[6];
   sprintf(bs, "%u", resolution);
   Bits.set(bs);
   sprintf(bs, "%u", dataresolution);
@@ -134,7 +134,7 @@ void WaveHeader::setChannels(const char *chans) {
 
 
 void WaveHeader::setAveraging(uint8_t num) {
-  char ns[3];
+  char ns[4];
   sprintf(ns, "%u", num);
   Averaging.set(ns);
 }
