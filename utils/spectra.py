@@ -77,7 +77,7 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
     if maxfreq and maxfreq < 1200:
         tscale = 1
         funit = 'Hz'
-    nfft = 1024*16
+    nfft = 1024*32
     thresh = 10 # dB
     for c in range(nchannels):
         ch = c

@@ -33,7 +33,7 @@
   int8_t channels1 [] =  {-1, A10, A11, A16, A17, A12, A13};  // input pins for ADC1
 #elif defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 0.0            // dB
+  #define GAIN 20.0            // dB
 #endif
 
 #define PATH          "recordings" // folder where to store the recordings
