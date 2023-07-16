@@ -43,7 +43,7 @@ void TeensyTDM::setNChannels(uint8_t nchannels) {
     Serial.printf("TeensyTDM::setNChannels() -> too many channels=%u.\n", nchannels);
     nchannels = 0;
   }
-  setNChannels(nchannels);
+  NChannels = nchannels;
 }
 
 
@@ -81,10 +81,10 @@ void TeensyTDM::report() {
   else
     sprintf(bts, "%.2fs", bt);
   Serial.println("TDM settings:");
-  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  resolution: %dbits\n", Bits);
-  Serial.printf("  channels:   %d\n", NChannels);
-  Serial.printf("  Buffer:     %s\n", bts);
+  Serial.printf("  rate:        %.1fkHz\n", 0.001*Rate);
+  Serial.printf("  resolution:  %dbits\n", Bits);
+  Serial.printf("  channels:    %d\n", NChannels);
+  Serial.printf("  buffer time: %s\n", bts);
   Serial.println();
 }
 
@@ -323,6 +323,8 @@ void TeensyTDM::start() {
   I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
   DMA.attachInterrupt(ISR);	
 #endif	
+  reset();   // resets the buffer and consumers
+             // (they also might want to know about Rate)
 }
 
 
@@ -353,8 +355,9 @@ void TeensyTDM::TDMISR() {
   // copy from src into cyclic buffer:
   unsigned int nchannels = NChannels;
   for (unsigned int i=0; i < TDM_FRAMES/2; i++) {
-    sample_t *slot = (sample_t *)src;
+    const sample_t *slot = (const sample_t *)src;
     for (unsigned int c=0; c < nchannels; c++) {
+      slot++;
       Buffer[Index++] = *slot++;
       if (Index >= NBuffer) {
 	Index = 0;

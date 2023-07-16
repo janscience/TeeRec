@@ -48,7 +48,11 @@ int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test s
 
 // ----------------------------------------------------------------------------
 
+#ifdef TEENSY4
+DATA_BUFFER(AIBuffer, NAIBuffer, 512*256)
+#else
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
+#endif
 #if defined(TEENSYADC)
 TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 #elif defined(PCM186X)
@@ -207,6 +211,7 @@ void setup() {
   aidata.setResolution(32);
   aidata.setRate(SAMPLING_RATE);
   aidata.setNChannels(4);   // TODO: take it from pcm!
+  aidata.begin();
 #endif
   aidata.check();
   aidata.start();
