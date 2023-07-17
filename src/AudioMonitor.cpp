@@ -133,8 +133,8 @@ void AudioMonitor::setFeedback(float frac, uint8_t soundidx) {
 
 void AudioMonitor::volumeUp() {
   Volume *= 1.414213;
-  if (Volume > 0.8)
-    Volume = 0.8;
+  if (Volume > 10.0)
+    Volume = 10.0;
   setVolume();
 }
 

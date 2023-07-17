@@ -86,14 +86,15 @@ class TeensyADC : public DataBuffer {
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.
   // Use pinAssignment() to see which pins are available for each ADC.
+  // Disable the adc by providing a negative channel.
   // Use check() to ensure a valid channel configuration.
-  void setChannel(uint8_t adc, uint8_t channel);
+  void setChannel(uint8_t adc, int8_t channel);
   
   // Add a channel to the configuration for acquisition on ADC adc.
   // channel is a pin specifier like A6, A19.
   // Use pinAssignment() to see which pins are available for each ADC.
   // Use check() to ensure a valid channel configuration.
-  void addChannel(uint8_t adc, uint8_t channel);
+  void addChannel(uint8_t adc, int8_t channel);
 
   // Configure for acquisition from several channels on a single ADC.
   // channels is an array with pin specifications like A6, A19,

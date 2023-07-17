@@ -57,17 +57,25 @@ TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer,
 }
 
 
-void TeensyADC::setChannel(uint8_t adc, uint8_t channel) {
-  Channels[adc][0] = channel;
-  NChans[adc] = 1;
+void TeensyADC::setChannel(uint8_t adc, int8_t channel) {
+  if (channel >= 0) {
+    Channels[adc][0] = channel;
+    NChans[adc] = 1;
+    ADCUse |= (1 << adc);
+  }
+  else {
+    NChans[adc] = 0;
+    ADCUse &= ~(1 << adc);
+  }
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
     NChannels += NChans[adc];
-  ADCUse |= (1 << adc);
 }
 
 
-void TeensyADC::addChannel(uint8_t adc, uint8_t channel) {
+void TeensyADC::addChannel(uint8_t adc, int8_t channel) {
+  if (channel < 0)
+    return;
   Channels[adc][NChans[adc]++] = channel;
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
@@ -95,6 +103,7 @@ void TeensyADC::clearChannels(uint8_t adc) {
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
     NChannels += NChans[adc];
+  ADCUse &= ~(1 << adc);
 }
 
 
@@ -102,6 +111,7 @@ void TeensyADC::clearChannels() {
   for (uint8_t adc=0; adc<2; adc++)
     NChans[adc] = 0;
   NChannels = 0;
+  ADCUse = 0;
 }
 
 
@@ -141,10 +151,12 @@ void TeensyADC::channels(char *chans) const
   int nchan = NChans[0]>=NChans[1]?NChans[0]:NChans[1];
   for (uint8_t k=0; k<nchan; k++) {
     for (uint8_t adc=0; adc<2; adc++) {
-      if ( ! first )
-	*chans++ = ',';
-      chans += analogPin(Channels[adc][k], chans);
-      first = false;
+      if (k < NChans[adc]) {
+        if ( ! first )
+	  *chans++ = ',';
+        chans += analogPin(Channels[adc][k], chans);
+        first = false;
+      }
     }
   }
   *chans = '\0';
@@ -578,7 +590,7 @@ void TeensyADC::start() {
 
 void TeensyADC::stop() {
   for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) > 0 ) {
+    if ( (ADCUse & (1 << adc)) > 0 ) {
       ADConv.adc[adc]->disableDMA();
       ADConv.adc[adc]->stopTimer();
       if ( NChans[adc] > 1 )
