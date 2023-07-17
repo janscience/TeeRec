@@ -4,6 +4,15 @@
   Heavily based on input_tdm.h of the Teensy Audio library.
 
   The Teensy is the master producing the MCLK, BCLK, and LRCLK.
+
+  Based on input_tdm.h and input_tdm.cpp of the [Teensy Audio
+  library](https://github.com/PaulStoffregen/Audio) and the
+  setI2SFreq() function introduced by Frank B on the [Teensy
+  forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-change-the-sample-rate/page4),
+  see also [Frank's bat
+  detector](https://forum.pjrc.com/threads/38988-Bat-detector) and the
+  [Teensy
+  Batdetector](https://github.com/CorBer/teensy_batdetector/releases/tag/v1.6).
 */
 
 #ifndef TeensyTDM_h
