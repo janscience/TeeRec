@@ -122,21 +122,29 @@
 
 ControlPCM186x::ControlPCM186x() :
   I2CBus(&Wire),
-  I2CAddress(PCM186x_I2C_ADDR),
+  I2CAddress(PCM186x_I2C_ADDR1),
   CurrentPage(10),
   PGALinked(false) {
 }
 
 
-bool ControlPCM186x::begin(uint8_t address) {
-  return begin(Wire, address);
+ControlPCM186x::ControlPCM186x(uint8_t address) :
+  I2CBus(&Wire),
+  I2CAddress(address),
+  CurrentPage(10),
+  PGALinked(false) {
 }
 
 
-bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
-  I2CAddress = address;
-  I2CBus = &wire;
+ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address) :
+  I2CBus(&wire),
+  I2CAddress(address),
+  CurrentPage(10),
+  PGALinked(false) {
+}
 
+
+bool ControlPCM186x::begin() {
   // power up:
   uint8_t val = 0x70;
   if (!write(PCM186x_PWRDN_CTRL_REG, val))
@@ -160,6 +168,18 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   // PCM186x_MIC_BIAS_CTRL_REG  0x0315
   
   return true;
+}
+
+
+bool ControlPCM186x::begin(uint8_t address) {
+  return begin(Wire, address);
+}
+
+
+bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
+  I2CAddress = address;
+  I2CBus = &wire;
+  return begin();
 }
 
 

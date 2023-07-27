@@ -56,7 +56,7 @@ DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 #if defined(TEENSYADC)
 TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 #elif defined(PCM186X)
-ControlPCM186x pcm;
+ControlPCM186x pcm(PCM186x_I2C_ADDR1);
 TeensyTDM aidata(AIBuffer, NAIBuffer);
 #endif
 

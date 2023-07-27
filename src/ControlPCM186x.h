@@ -12,7 +12,8 @@
 #include <AudioControl.h>  // Teensy Audio library
 
 
-#define PCM186x_I2C_ADDR     0x4A
+#define PCM186x_I2C_ADDR1     0x4A
+#define PCM186x_I2C_ADDR2     0x4B
 
 
 //class ControlPCM186x : public AudioControl {
@@ -66,14 +67,25 @@ public:
 
   /* Do not initialize PCM186x yet. */
   ControlPCM186x();
+
+  /* Communicate with PCM chip using defaut I2C bus
+     and address (0x4A or 0x4B). */
+  ControlPCM186x(uint8_t address);
+
+  /* Communicate with PCM chip using wire and address (0x4A or 0x4B). */
+  ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
+  
+  /* Initialize PCM186x with already provided address and I2C bus.
+     You need to initialize I2C by calling `Wire.begin()` before. */
+  bool begin();
   
   /* Initialize PCM186x with address (0x4A or 0x4B) on default I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
-  bool begin(uint8_t address=PCM186x_I2C_ADDR);
+  bool begin(uint8_t address);
 
   /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
-  bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR);
+  bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
 
   /* Return the input channel set for output channel adc. */
   INPUT_CHANNELS channel(OUTPUT_CHANNELS adc);
