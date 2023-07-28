@@ -142,11 +142,12 @@ Demonstrate the usage of some of the provided libraries.
 
 In [utils/](utils) you find some useful python scripts.
 
-- [viewwave](utils/viewwave): display the traces in a wave file.
-- [continuity](utils/continuity): check whether pulse signals recorded into wave file have consistent periods over many wave files.
-- [noise](utils/noise): plot and analyse baseline noise levels from wave files.
-- [spectra](utils/spectra): power spectra of traces in wave files.
-- [cycles](utils/cycles): plot failures in pulse traces? - needs update.
+- [viewwave](utils/viewwave.py): display the traces in a wave file.
+- [spectra](utils/spectra.py): power spectra of traces in wave files.
+- [noise](utils/noise.py): plot and analyse baseline noise levels from wave files.
+- [continuity](utils/continuity.py): check whether pulse signals recorded into wave file have consistent periods over many wave files.
+- [mergechannels](utils/mergechannels.py)
+- [cycles](utils/cycles.py): plot failures in pulse traces? - needs update.
 
 For allowing these script to use metadata contained in the wav files
 generated via the TeeRec library (pin names for channels, settings of
