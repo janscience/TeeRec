@@ -85,6 +85,8 @@ WaveHeader::InfoChunk::InfoChunk(const char *infoid, const char *text) :
 
 
 void WaveHeader::InfoChunk::set(const char *text) {
+  if (strlen(text) > MaxText)
+    Serial.printf("WARNING in WaveHeader::InfoChunk(): string \"%s\" of len %d exceeds buffer size of %d!\n", text, strlen(text), MaxText);
   setSize(strlen(text));
   NBuffer = sizeof(Header) + Header.Size;
   strncpy(Text, text, MaxText);
