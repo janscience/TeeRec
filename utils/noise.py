@@ -40,20 +40,23 @@ def load_bin(filepath, offset=0):
 
 
 def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
-              subtract_mean=True, show_filename=False,
+              subtract_mean=True, tskip=0.0, show_filename=False,
               log_counts=False, plot=True, save=False):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 108)
     if data is None:
         print('file "%s" is empty!' % path)
         return
+    if tskip > 0:
+        i0 = int(tskip*rate)
+        data = data[i0:,:]
     nchannels = data.shape[1]
     basename = os.path.basename(path)
     bits = 16
     pins = []
     convs = '-'
     sampls = '-'
-    avrgs = 0
+    avrgs = -1
     if has_audioio:
         metadata, cues = metadata_wave(path)
         if 'INFO' in metadata:
@@ -86,44 +89,58 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         scale_bits = False
     bw = 1
     if basename[:10] != 'averaging-':
-        bw = 2**(16-bits)
+        bw = 2**(16-bits) if bits < 16 else 1
     if scale_bits:
         data = data/bw
         bw = 1
     if header:
         if show_filename:
             print(f'{"":<{width}} ', end='')
-        print(f'{"recording":<32} ', end='')
-        print(f'{"stdev":<{nchannels*5}}', end='')
-        print(f'{"range":<{nchannels*5}}')
+        if len(convs) > 1 and len(sampls) > 1 and avrgs > 0:
+            print(f'{"recording":<32} ', end='')
+        else:
+            print(f'{"recording":<9} ', end='')
+        cw = 7 if pins else 5
+        print(f'{"stdev":<{nchannels*cw}}', end='')
+        print(f'{"range":<{nchannels*cw}}')
         if show_filename:
             print(f'{"file":<{width}} ', end='')
-        print(f'rate bits convers  sampling avrg', end='')
+        print('rate bits', end='')
+        if len(convs) > 1 and len(sampls) > 1 and avrgs > 0:
+            print(' convers  sampling avrg', end='')
         for c in range(nchannels):
             if pins:
-                print(f' {pins[c]:<4s}', end='')
+                print(f' {pins[c]:<6s}', end='')
             else:
-                print(f' c{c:<3d}', end='')
+                print(f' c{c:<4d}', end='')
         for c in range(nchannels):
             if pins:
-                print(f' {pins[c]:<4s}', end='')
+                print(f' {pins[c]:<6s}', end='')
             else:
-                print(f' c{c:<3d}', end='')
+                print(f' c{c:<4d}', end='')
         print()
     if show_filename:
         print(f'{basename:<{width}} ', end='')
-    print(f'{0.001*rate:4.0f} {bits:4d} {convs:8s} {sampls:8s} {avrgs:4d}', end='')
+    print(f'{0.001*rate:4.0f} {bits:4d}', end='')
+    if len(convs) > 1 and len(sampls) > 1 and avrgs > 0:
+        print(f' {convs:8s} {sampls:8s} {avrgs:4d}', end='')
     for c in range(nchannels):
         s = np.std(data[:,c])
-        print(f' {s:4.1f}', end='')
+        if pins:
+            print(f' {s:6.1f}', end='')
+        else:
+            print(f' {s:4.1f}', end='')
     for c in range(nchannels):
         r = np.max(data[:,c]) - np.min(data[:,c])
-        print(f' {r:4.0f}', end='')
+        if pins:
+            print(f' {r:6.0f}', end='')
+        else:
+            print(f' {r:4.0f}', end='')
     print()
     if not plot:
         return
     colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
-    abins = np.arange(-2**15, 2**15+1, bw)*scale
+    abins = np.arange(np.min(data), np.max(data) + 2, bw)*scale
     if nchannels > 1:
         fig, axs = plt.subplots(2, nchannels//2, sharex=True, sharey=True)
         axs = axs.ravel()
@@ -132,7 +149,7 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         axs = [ax]
     fig.set_size_inches(8, 6)
     fig.subplots_adjust(top=0.85, bottom=0.1, left=0.1, right=0.96, hspace=0.3)
-    if show_filename or len(convs) == 0:
+    if show_filename or len(convs) <= 1:
         fig.suptitle(basename, fontsize=14)
     else:
         fig.suptitle(f'{0.001*rate:.0f}kHz @ {bits}bits: {convs} conversion, {sampls} sampling, avrg={avrgs}', fontsize=14)
@@ -159,7 +176,7 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
         axs[c].set_title(f'channel {cs}')
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
-        axs[c].text(0.95, 0.87, f'$\mu$={m:.0f}{vunit}',
+        axs[c].text(0.95, 0.87, f'$\mu$={m:.1f}{vunit}',
                     ha='right', transform=axs[c].transAxes)
         axs[c].text(0.95, 0.75, f'$\sigma$={s:.1f}{vunit}',
                     ha='right', transform=axs[c].transAxes)
@@ -191,6 +208,9 @@ if __name__ == '__main__':
                         help='show file name in plot title')
     parser.add_argument('-l', dest='log_counts', action='store_true',
                         help='logarithmic counts')
+    parser.add_argument('-t', dest='tskip', default=0.0, type=float,
+                        help='initial time to skip from analysis (default 0 seconds)',
+                        metavar='TSKIP')
     parser.add_argument('-p', dest='plot', action='store_true',
                         help='plot distribution of samples')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -206,6 +226,7 @@ if __name__ == '__main__':
     subtract_mean = args.subtract_mean
     show_filename = args.show_filename
     log_counts = args.log_counts
+    tskip = args.tskip
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     # analyse:
@@ -214,5 +235,5 @@ if __name__ == '__main__':
     width = max(bn)
     for path in args.file:
         plot_hist(path, header, width, gain, scale_bits, subtract_mean,
-                  show_filename, log_counts, plot, save)
+                  tskip, show_filename, log_counts, plot, save)
         header = False
