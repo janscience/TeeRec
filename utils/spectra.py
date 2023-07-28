@@ -96,7 +96,7 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
             axs[c].plot(tscale*freqs[p], db[p], 'o', color='gray', clip_on=False)
             for pi in p:
                 axs[c].text(tscale*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
-        cs = pins[ch] if pins else ch
+        cs = pins[ch] if ch < len(pins) else ch
         axs[c].set_title(f'channel {cs}')
         if c % 2 == 1 or nchannels == 1:
             axs[c].set_xlabel(f'Frequency [{funit}]')
