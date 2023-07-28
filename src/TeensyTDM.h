@@ -38,6 +38,9 @@ class TeensyTDM : public DataBuffer {
   
   // Set number of channels to nchannels.
   virtual void setNChannels(uint8_t nchannels);
+
+  // Swap left/right channels.
+  void swapLR();
   
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -65,6 +68,8 @@ class TeensyTDM : public DataBuffer {
 
   void TDMISR();
   static void ISR();
+
+  bool SwapLR;
   
 };
 

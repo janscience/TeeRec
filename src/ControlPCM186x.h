@@ -95,8 +95,9 @@ public:
   const char *channelStr(OUTPUT_CHANNELS adc);
 
   /* Return the input channels set for each output channel
-     as a string in chans. */
-  void channelsStr(char *chans);
+     as a string in chans. If swaplr then left and right channels are swapped.
+     If provided prepend prefix to each channel. */
+  void channelsStr(char *chans, bool swaplr, const char *prefix=0);
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,

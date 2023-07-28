@@ -25,6 +25,7 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   Bits = 32;
   Rate = 0;
   NChannels = 0;
+  SwapLR = false;
 }
 
 
@@ -39,11 +40,16 @@ void TeensyTDM::setResolution(uint8_t bits) {
 
   
 void TeensyTDM::setNChannels(uint8_t nchannels) {
-  if (nchannels >= 256/Bits) {
+  if (nchannels > 256/Bits) {
     Serial.printf("TeensyTDM::setNChannels() -> too many channels=%u.\n", nchannels);
     nchannels = 0;
   }
   NChannels = nchannels;
+}
+
+
+void TeensyTDM::swapLR() {
+  SwapLR = true;
 }
 
 
@@ -84,6 +90,7 @@ void TeensyTDM::report() {
   Serial.printf("  rate:        %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution:  %dbits\n", Bits);
   Serial.printf("  channels:    %d\n", NChannels);
+  Serial.printf("  swap l/r:    %d\n", SwapLR);
   Serial.printf("  buffer time: %s\n", bts);
   Serial.println();
 }
@@ -354,15 +361,21 @@ void TeensyTDM::TDMISR() {
 #endif
   // copy from src into cyclic buffer:
   unsigned int nchannels = NChannels;
+  sample_t buffer[nchannels];
   for (unsigned int i=0; i < TDM_FRAMES/2; i++) {
     const sample_t *slot = (const sample_t *)src;
     for (unsigned int c=0; c < nchannels; c++) {
       slot++;
-      Buffer[Index++] = *slot++;
-      if (Index >= NBuffer) {
-	Index = 0;
-	Cycle++;
-      }
+      unsigned int ci = c;
+      if (SwapLR)
+	ci += c%2 > 0 ? -1 : +1;
+      buffer[ci] = *slot++;
+    }
+    memcpy((void *)&Buffer[Index], (void *)buffer, sizeof(buffer));
+    Index += nchannels;
+    if (Index >= NBuffer) {
+      Index -= NBuffer;
+      Cycle++;
     }
     src += 8;
   }

@@ -244,16 +244,43 @@ const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::channelsStr(char *chans) {
+void ControlPCM186x::channelsStr(char *chans, bool swaplr,
+				 const char *prefix) {
   *chans = '\0';
-  strcat(chans, channelStr(ADC1L));
-  strcat(chans, ",");
-  strcat(chans, channelStr(ADC1R));
-  strcat(chans, ",");
-  strcat(chans, channelStr(ADC2L));
-  strcat(chans, ",");
-  strcat(chans, channelStr(ADC2R));
-  strcat(chans, ",");
+  if (swaplr) {
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC1R));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC1L));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC2R));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC2L));
+  }
+  else {
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC1L));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC1R));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC2L));
+    strcat(chans, ",");
+    if (prefix != 0)
+      strcat(chans, prefix);
+    strcat(chans, channelStr(ADC2R));
+  }
 }
 
 

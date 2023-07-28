@@ -1,6 +1,9 @@
+#define SINGLE_FILE_MTP
+
 // select a data source:
 //#define TEENSYADC     // data are recorded from Teensy internal ADCs
 #define PCM186X     // data are recorded by TI PCM186x chip via TDM
+#define PCM186X_2ND // data are recorded by a second TI PCM186x chips via TDM
 
 #if defined(TEENSYADC)
   #include <TeensyADC.h>
@@ -15,12 +18,20 @@
 #include <TestSignals.h>
 #include <Configurator.h>
 #include <Settings.h>
+#ifndef TEENSYADC
 #include <TeensyADCSettings.h>
+#endif
+#ifdef SINGLE_FILE_MTP
+#include <MTP_Teensy.h>
+#endif
 
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
-#if defined(TEENSYADC)
+#if defined(PCM186X)
+  #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
+  #define GAIN 0.0            // dB
+#elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
   #define AVERAGING         8 // number of averages per sample: 0, 4, 8, 16, 32
@@ -31,16 +42,17 @@
   int8_t channels0 [] =  {A10, -1, A3, A4, A5, A6, A7, A8, A9, A10};      // input pins for ADC0
   //int8_t channels1 [] =  {A10, -1, A11, A16, A17, A12, A13};  // input pins for ADC1
   int8_t channels1 [] =  {-1, A10, A11, A16, A17, A12, A13};  // input pins for ADC1
-#elif defined(PCM186X)
-  #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 20.0            // dB
 #endif
 
 #define PATH          "recordings" // folder where to store the recordings
+#ifdef SINGLE_FILE_MTP
+#define FILENAME      "recording"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#else
 #define FILENAME      "SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#endif
 #define FILE_SAVE_TIME 10   // seconds
 
-#define INITIAL_DELAY  6.0  // seconds
+#define INITIAL_DELAY  2.0  // seconds
 
 #define PULSE_FREQUENCY 230 // Hertz
 int signalPins[] = {9, 8, 7, 6, 5, 4, 3, 2, -1}; // pins where to put out test signals
@@ -56,7 +68,10 @@ DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 #if defined(TEENSYADC)
 TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 #elif defined(PCM186X)
-ControlPCM186x pcm(PCM186x_I2C_ADDR1);
+ControlPCM186x pcm1(PCM186x_I2C_ADDR1);
+#ifdef PCM186X_2ND
+ControlPCM186x pcm2(PCM186x_I2C_ADDR2);
+#endif
 TeensyTDM aidata(AIBuffer, NAIBuffer);
 #endif
 
@@ -162,6 +177,17 @@ void storeData() {
     }
     if (file.endWrite() || samples < 0) {
       file.close();  // file size was set by openWave()
+#ifdef SINGLE_FILE_MTP
+      blink.clear();
+      Serial.println();
+      Serial.println("MTP file transfer.");
+      Serial.flush();
+      MTP.begin();
+      MTP.addFilesystem(sdcard, "logger");
+      while (true) {
+        MTP.loop();
+      }
+#endif      
       if (samples < 0) {
         restarts++;
         if (restarts >= 5) {
@@ -198,19 +224,41 @@ void setup() {
   aidata.configure(aisettings);
 #elif defined(PCM186X)
   Wire.begin();
-  pcm.begin();
-  pcm.setMicBias(false, true);
-  pcm.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
-  pcm.setGain(ControlPCM186x::ADCLR, GAIN);
-  pcm.setFilters(ControlPCM186x::FIR, false);
-  char ws[30];
-  pcm.channelsStr(ws);
-  file.header().setChannels(ws);
-  pcm.gainStr(ControlPCM186x::ADC1L, ws);
-  file.header().setGain(ws);
+  pcm1.begin();
+  pcm1.setMicBias(false, true);
+  //pcm1.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
+  pcm1.setupTDM(ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
+  pcm1.setGain(ControlPCM186x::ADCLR, GAIN);
+  pcm1.setFilters(ControlPCM186x::FIR, false);
+  char gs[10];
+  pcm1.gainStr(ControlPCM186x::ADC1L, gs);
+  file.header().setGain(gs);
+  char cs[80];
+#ifdef PCM186X_2ND
+  pcm1.channelsStr(cs, true, "1-");
+#else
+  pcm1.channelsStr(cs);
+#endif
+  file.header().setChannels(cs);
+#ifdef PCM186X_2ND
+  pcm2.begin();
+  pcm2.setMicBias(false, true);
+  //pcm2.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
+  pcm2.setupTDM(ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, true);
+  pcm2.setGain(ControlPCM186x::ADCLR, GAIN);
+  pcm1.setFilters(ControlPCM186x::FIR, false);
+  char cs2[40];
+  pcm2.channelsStr(cs2, true, "2-");
+  strcat(cs, ",");
+  strcat(cs, cs2);
+  file.header().setChannels(cs);
+  aidata.setNChannels(8);   // TODO: take it from pcm!
+#else
+  aidata.setNChannels(4);   // TODO: take it from pcm!
+#endif
   aidata.setResolution(32);
   aidata.setRate(SAMPLING_RATE);
-  aidata.setNChannels(4);   // TODO: take it from pcm!
+  aidata.swapLR();
   aidata.begin();
 #endif
   aidata.check();
