@@ -10,6 +10,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <AudioControl.h>  // Teensy Audio library
+#include <TeensyTDM.h>
 
 
 #define PCM186x_I2C_ADDR1     0x4A
@@ -116,9 +117,15 @@ public:
   /* Setup TDM output for the specified two input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2.
      If offset, shift the recorded data such that they appear
-     on slots 8, 10. */
+     on slots 4, 6. */
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		bool offs=false);
+  
+  /* Setup TDM output for the specified two input channels.
+     If offset, shift the recorded data by two slots.
+     Set resolution and number of channels of tdm accordingly. */
+  bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
+		INPUT_CHANNELS channel2, bool offs=false);
   
   /* Setup TDM output for the specified four input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2, 4, 6.
@@ -127,6 +134,13 @@ public:
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
 		bool offs=false);
+  
+  /* Setup TDM output for the specified four input channels.
+     If offset, shift the recorded data by four slots.
+     Set resolution and number of channels of tdm accordingly. */
+  bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
+		INPUT_CHANNELS channel2, INPUT_CHANNELS channel3,
+		INPUT_CHANNELS channel4, bool offs=false);
 
   /* Return the gain set for output channel adc in dB. */
   float gain(OUTPUT_CHANNELS adc);

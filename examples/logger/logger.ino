@@ -3,7 +3,7 @@
 // select a data source:
 //#define TEENSYADC     // data are recorded from Teensy internal ADCs
 #define PCM186X     // data are recorded by TI PCM186x chip via TDM
-#define PCM186X_2ND // data are recorded by a second TI PCM186x chips via TDM
+#define PCM186X_2ND // data are recorded by a second TI PCM186x chip via TDM
 
 #if defined(TEENSYADC)
   #include <TeensyADC.h>
@@ -30,7 +30,7 @@
 // (may be overwritten by config file logger.cfg)
 #if defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 0.0            // dB
+  #define GAIN 20.0            // dB
 #elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
@@ -226,8 +226,8 @@ void setup() {
   Wire.begin();
   pcm1.begin();
   pcm1.setMicBias(false, true);
-  //pcm1.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
-  pcm1.setupTDM(ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
+  //pcm1.setupTDM(aidata, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
+  pcm1.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
   pcm1.setGain(ControlPCM186x::ADCLR, GAIN);
   pcm1.setFilters(ControlPCM186x::FIR, false);
   char gs[10];
@@ -243,8 +243,8 @@ void setup() {
 #ifdef PCM186X_2ND
   pcm2.begin();
   pcm2.setMicBias(false, true);
-  //pcm2.setupTDM(ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
-  pcm2.setupTDM(ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, true);
+  //pcm2.setupTDM(aidata, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
+  pcm2.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, true);
   pcm2.setGain(ControlPCM186x::ADCLR, GAIN);
   pcm1.setFilters(ControlPCM186x::FIR, false);
   char cs2[40];
@@ -252,11 +252,7 @@ void setup() {
   strcat(cs, ",");
   strcat(cs, cs2);
   file.header().setChannels(cs);
-  aidata.setNChannels(8);   // TODO: take it from pcm!
-#else
-  aidata.setNChannels(4);   // TODO: take it from pcm!
 #endif
-  aidata.setResolution(32);
   aidata.setRate(SAMPLING_RATE);
   aidata.swapLR();
   aidata.begin();

@@ -360,6 +360,19 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 }
 
 
+bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
+			      INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2,
+			      bool offs) {
+  if (setupTDM(channel1, channel2, offs)) {
+    tdm.setNChannels(offs ? 4 : 2);
+    tdm.setResolution(32);
+    return true;
+  }
+  return false;
+}
+
+
 bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
@@ -391,6 +404,21 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!setChannel(ADC2R, channel4))
     return false;
   return true;  
+}
+
+
+bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
+			      INPUT_CHANNELS channel1,
+			      INPUT_CHANNELS channel2,
+			      INPUT_CHANNELS channel3,
+			      INPUT_CHANNELS channel4,
+			      bool offs) {
+  if (setupTDM(channel1, channel2, channel3, channel4, offs)) {
+    tdm.setNChannels(offs ? 8 : 4);
+    tdm.setResolution(32);
+    return true;
+  }
+  return false;
 }
 
 
