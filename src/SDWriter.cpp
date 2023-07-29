@@ -428,6 +428,8 @@ void SDWriter::setMaxFileSamples(size_t samples) {
 
 
 void SDWriter::setMaxFileTime(float secs) {
+  if (Data->rate() == 0)
+    Serial.println("WARNING in SDWriter::setMaxFileTime(): sampling rate not yet set!");
   setMaxFileSamples(Data->samples(secs));
 }
 

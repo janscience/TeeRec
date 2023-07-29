@@ -254,7 +254,7 @@ void setup() {
   }
   else
     delay(uint32_t(1000.0*settings.InitialDelay));
-char gs[16];
+  char gs[16];
 #if defined(TEENSYADC)
   aidata.gainStr(gs, PREGAIN);
 #elif defined(PCM186X)
