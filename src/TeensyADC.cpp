@@ -426,6 +426,16 @@ ADC_REFERENCE TeensyADC::referenceEnum(const char *reference) {
 }
 
 
+void TeensyADC::gainStr(char *gains, float pregain) {
+  float range = 3300.0;
+#ifndef TEENSY4
+  if (ref == ADC_REFERENCE::REF_1V2)
+    range = 1200.0;
+#endif
+  sprintf(gains, "%.2fmV", 0.5*range/pregain);
+}
+
+
 void TeensyADC::configure(const TeensyADCSettings &settings) {
   setRate(settings.rate());
   setResolution(settings.resolution());

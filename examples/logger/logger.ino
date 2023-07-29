@@ -28,10 +28,10 @@
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
+#define PREGAIN 1.0           // gain factor of a preamplifier.
 #if defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
   #define GAIN 0.0            // dB
-  #define PREGAIN 1.0          // gain factor of a preamplifier.
 #elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
@@ -254,11 +254,13 @@ void setup() {
   }
   else
     delay(uint32_t(1000.0*settings.InitialDelay));
-#if defined(PCM186X)
-  char gs[10];
+char gs[16];
+#if defined(TEENSYADC)
+  aidata.gainStr(gs, PREGAIN);
+#elif defined(PCM186X)
   pcm1.gainStr(ControlPCM186x::ADC1L, gs, PREGAIN);
-  file.header().setGain(gs);
 #endif  
+  file.header().setGain(gs);
   setupStorage();
 }
 

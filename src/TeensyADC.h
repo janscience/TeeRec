@@ -241,6 +241,10 @@ class TeensyADC : public DataBuffer {
   // Translate voltage reference string to reference enum.
   static ADC_REFERENCE referenceEnum(const char *reference);
 
+  /* Return the current gain as a string in gains.
+     The gain of a possible preamplifier is specified by pregain. */
+  void gainStr(char *gains, float pregain=1.0);
+
   // Return DMA counter for specified adc.
   size_t counter(uint8_t adc) const;
 
