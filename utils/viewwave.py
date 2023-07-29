@@ -48,12 +48,15 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
     basename = os.path.basename(path)
     pins = []
     title = basename
+    gains = ''
     if has_audioio:
         metadata, cues = metadata_wave(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
             if 'PINS' in info:
                 pins = info['PINS'].split(',')
+            if 'GAIN' in info:
+                gains = info['GAIN']
             if metadata_title:
                 if 'BITS' in info and 'CNVS' in info and 'SMPS' in info and 'AVRG' in info:
                     title = f"{0.001*rate:.0f}kHz @ {info['BITS']}bits: {info['CNVS']} conversion, {info['SMPS']} sampling, avrg={info['AVRG']}"
@@ -73,9 +76,14 @@ def plot_traces(path, channel, toffs, tmax, step, gain, raw, autoy,
     offs = 0
     if raw:
         offs = 2**15
-    if gain is not None:
-        scale = 1.66/2**15 * 1000.0/gain
-        unit = 'mV'
+    if gain and gains:
+        unit = ''
+        scale = 1.0
+        for i in range(len(gains)):
+            if not gains[i].isdecimal() and gains[i] != '.' and gains[i] != 'e':
+                unit = gains[i:]
+                scale = float(gains[:i])/2**15
+                break
     for c in range(data.shape[1]):
         if channel < 0 or c == channel:
             label = f'{c}'
@@ -118,9 +126,8 @@ if __name__ == '__main__':
     parser.add_argument('-S', dest='step', default=0, type=int,
                         help='shift each channel by STEP integers upwards',
                         metavar='STEP')
-    parser.add_argument('-g', dest='gain', default=None, type=float,
-                        help='Gain of an amplifier (default no gain, i.e. raw integer recordings)',
-                        metavar='GAIN')
+    parser.add_argument('-g', dest='gain', action='store_true', 
+                        help='Use gain stored in metadata for proper scaling (default no gain, i.e. raw integer recordings)')
     parser.add_argument('-r', dest='raw', action='store_true',
                         help='raw voltage readings without offset from 0 to 3.3V')
     parser.add_argument('-a', dest='autoy', action='store_true',

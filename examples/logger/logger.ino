@@ -31,7 +31,7 @@
 #define PREGAIN 1.0           // gain factor of a preamplifier.
 #if defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 0.0            // dB
+  #define GAIN 20.0            // dB
 #elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
