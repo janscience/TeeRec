@@ -38,9 +38,18 @@ class TeensyTDM : public DataBuffer {
   
   // Set number of channels to nchannels.
   virtual void setNChannels(uint8_t nchannels);
+  
+  // The string identifying channel pins.
+  const char *channels() { return Channels; };
+  
+  // Set string identifying channel pins.
+  void setChannels(const char *cs);
 
   // Swap left/right channels.
-  void swapLR();
+  bool swapLR() const;
+
+  // Set whether to swap left/right channels.
+  void setSwapLR(bool swap=true);
   
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -50,6 +59,10 @@ class TeensyTDM : public DataBuffer {
 
   // Print current settings on Serial.
   void report();
+ 
+  // Add metadata to the header of a wave file holding the data of the
+  // buffer.
+  virtual void setWaveHeader(WaveHeader &wave) const;
 
   // Start generation of clock signals.
   // Need to setup resolution and sampling rate before.
@@ -70,6 +83,8 @@ class TeensyTDM : public DataBuffer {
   static void ISR();
 
   bool SwapLR;
+
+  char Channels[128];
   
 };
 

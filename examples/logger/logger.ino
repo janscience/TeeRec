@@ -30,7 +30,8 @@
 // (may be overwritten by config file logger.cfg)
 #if defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 20.0            // dB
+  #define GAIN 0.0            // dB
+  #define PREGAIN 1.0          // gain factor of a preamplifier.
 #elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
@@ -223,6 +224,9 @@ void setup() {
 #if defined(TEENSYADC)
   aidata.configure(aisettings);
 #elif defined(PCM186X)
+  aidata.setRate(SAMPLING_RATE);
+  aidata.setSwapLR();
+  aidata.begin();
   Wire.begin();
   pcm1.begin();
   pcm1.setMicBias(false, true);
@@ -230,16 +234,6 @@ void setup() {
   pcm1.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
   pcm1.setGain(ControlPCM186x::ADCLR, GAIN);
   pcm1.setFilters(ControlPCM186x::FIR, false);
-  char gs[10];
-  pcm1.gainStr(ControlPCM186x::ADC1L, gs);
-  file.header().setGain(gs);
-  char cs[80];
-#ifdef PCM186X_2ND
-  pcm1.channelsStr(cs, true, "1-");
-#else
-  pcm1.channelsStr(cs);
-#endif
-  file.header().setChannels(cs);
 #ifdef PCM186X_2ND
   pcm2.begin();
   pcm2.setMicBias(false, true);
@@ -247,15 +241,7 @@ void setup() {
   pcm2.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, true);
   pcm2.setGain(ControlPCM186x::ADCLR, GAIN);
   pcm1.setFilters(ControlPCM186x::FIR, false);
-  char cs2[40];
-  pcm2.channelsStr(cs2, true, "2-");
-  strcat(cs, ",");
-  strcat(cs, cs2);
-  file.header().setChannels(cs);
 #endif
-  aidata.setRate(SAMPLING_RATE);
-  aidata.swapLR();
-  aidata.begin();
 #endif
   aidata.check();
   aidata.start();
@@ -268,6 +254,11 @@ void setup() {
   }
   else
     delay(uint32_t(1000.0*settings.InitialDelay));
+#if defined(PCM186X)
+  char gs[10];
+  pcm1.gainStr(ControlPCM186x::ADC1L, gs, PREGAIN);
+  file.header().setGain(gs);
+#endif  
   setupStorage();
 }
 

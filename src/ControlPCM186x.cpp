@@ -244,8 +244,8 @@ const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::channelsStr(char *chans, bool swaplr,
-				 const char *prefix) {
+void ControlPCM186x::channels(char *chans, bool swaplr,
+			      const char *prefix) {
   *chans = '\0';
   if (swaplr) {
     if (prefix != 0)
@@ -332,6 +332,41 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 }
 
 
+void ControlPCM186x::setTDMChannels(TeensyTDM &tdm, bool offs) {
+  char cs[128];
+  if (offs) {
+    bool prefix = true;
+    int chipnum = 0;
+    char *cp = cs;
+    for (const char *sp=tdm.channels(); *sp != '\0'; sp++) {
+      if (prefix) {
+	if (*(sp+1) != '-') {
+	  *(cp++) = '1';
+	  *(cp++) = '-';
+	  chipnum = 1;
+	}
+	else
+	  chipnum = *(sp) - '0';
+      }
+      *(cp++) = *sp;
+      prefix = false;
+      if (*sp == ',')
+	prefix = true;
+    }
+    *(cp++) = '\0';
+    char ps[6];
+    sprintf(ps, "%d-", ++chipnum);
+    char ccs[128];
+    channels(ccs, tdm.swapLR(), ps);
+    strcat(cs, ",");
+    strcat(cs, ccs);
+  }
+  else
+    channels(cs, tdm.swapLR());
+  tdm.setChannels(cs);
+}
+
+
 bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      bool offs) {
@@ -367,6 +402,7 @@ bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
   if (setupTDM(channel1, channel2, offs)) {
     tdm.setNChannels(offs ? 4 : 2);
     tdm.setResolution(32);
+    setTDMChannels(tdm, offs);
     return true;
   }
   return false;
@@ -416,6 +452,7 @@ bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
   if (setupTDM(channel1, channel2, channel3, channel4, offs)) {
     tdm.setNChannels(offs ? 8 : 4);
     tdm.setResolution(32);
+    setTDMChannels(tdm, offs);
     return true;
   }
   return false;
@@ -498,8 +535,12 @@ float ControlPCM186x::gain(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::gainStr(OUTPUT_CHANNELS adc, char *gains) {
-  sprintf(gains, "%.1fdB", gain(adc));
+void ControlPCM186x::gainStr(OUTPUT_CHANNELS adc, char *gains, float pregain) {
+  *gains = '\0';
+  float g = gain(adc);
+  if (g < -500.0)
+    return;
+  sprintf(gains, "%.2fmV", 0.5*3300/pregain/pow(10.0, g/20.0));
 }
 
 
@@ -522,7 +563,6 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain, bool smooth) {
     return false;
   // set gains:
   int8_t igain = (int8_t)(2*gain);
-  Serial.printf("set gain %g to %02x\n", gain, igain);
   if (adc == ADCLR) {
     if (!PGALinked) {
       unsigned int val = read(PCM186x_PGA_CONTROL_REG);

@@ -98,7 +98,7 @@ public:
   /* Return the input channels set for each output channel
      as a string in chans. If swaplr then left and right channels are swapped.
      If provided prepend prefix to each channel. */
-  void channelsStr(char *chans, bool swaplr=false, const char *prefix=0);
+  void channels(char *chans, bool swaplr=false, const char *prefix=0);
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
@@ -123,7 +123,8 @@ public:
   
   /* Setup TDM output for the specified two input channels.
      If offset, shift the recorded data by two slots.
-     Set resolution and number of channels of tdm accordingly. */
+     Set resolution, number and identifiers of channels of tdm accordingly.
+     tdm.setSwapLR() needs to be called before this function. */
   bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, bool offs=false);
   
@@ -137,7 +138,8 @@ public:
   
   /* Setup TDM output for the specified four input channels.
      If offset, shift the recorded data by four slots.
-     Set resolution and number of channels of tdm accordingly. */
+     Set resolution, number and identifiers of channels of tdm accordingly.
+     tdm.setSwapLR() needs to be called before this function. */
   bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, INPUT_CHANNELS channel3,
 		INPUT_CHANNELS channel4, bool offs=false);
@@ -145,13 +147,16 @@ public:
   /* Return the gain set for output channel adc in dB. */
   float gain(OUTPUT_CHANNELS adc);
 
-  /* Return the gain set for output channel adc as a string in gains. */
-  void gainStr(OUTPUT_CHANNELS adc, char *gains);
+  /* Return the current gain of output channel adc as a string in gains.
+     The gain of the PCM186x chip is multiplied with pregain.
+     Warning: it may take a while after setGain()
+     until this gain is really set. */
+  void gainStr(OUTPUT_CHANNELS adc, char *gains, float pregain=1.0);
 
   /* Set gain of one or more adc channels to gain in dB,
      between -12 and 40 in steps of 0.5.
      If smooth then smoothly ramp to the new gains. */
-  bool setGain(OUTPUT_CHANNELS adc, float gain, bool smooth=true);
+  bool setGain(OUTPUT_CHANNELS adc, float gain, bool smooth=false);
 
   /*! Setup digital low- and highpass filter.
       Highpass is belwo 10Hz. */
@@ -191,7 +196,8 @@ protected:
   uint8_t goToPage(uint8_t page);
 
   float readCoefficient(uint8_t address);
-  
+
+  void setTDMChannels(TeensyTDM &tdm, bool offs);
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;

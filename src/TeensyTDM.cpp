@@ -26,6 +26,7 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   Rate = 0;
   NChannels = 0;
   SwapLR = false;
+  Channels[0] = '\0';
 }
 
 
@@ -47,9 +48,19 @@ void TeensyTDM::setNChannels(uint8_t nchannels) {
   NChannels = nchannels;
 }
 
+  
+void TeensyTDM::setChannels(const char *cs) {
+  strncpy(Channels, cs, 127);
+}
 
-void TeensyTDM::swapLR() {
-  SwapLR = true;
+
+bool TeensyTDM::swapLR() const {
+  return SwapLR;
+}
+
+
+void TeensyTDM::setSwapLR(bool swap) {
+  SwapLR = swap;
 }
 
 
@@ -93,6 +104,13 @@ void TeensyTDM::report() {
   Serial.printf("  swap l/r:    %d\n", SwapLR);
   Serial.printf("  buffer time: %s\n", bts);
   Serial.println();
+}
+
+
+void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
+  DataWorker::setWaveHeader(wave);
+  if (strlen(Channels) > 0)
+    wave.setChannels(Channels);
 }
 
 
