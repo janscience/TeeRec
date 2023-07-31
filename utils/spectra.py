@@ -47,7 +47,39 @@ def load_bin(filepath, rate=48000, nchannels=2, offset=0):
     return data, float(rate)
 
 
-def plot_psds(path, channel, maxfreq, maxdb, save):
+def unwrap(data, thresh=0.0):
+    """Fixes data that exceeded the -1 to 1 range.
+
+    If data that exceed the range from -1.0 to 1.0 are stored in a wav file,
+    they get wrapped around. This functions tries to undo this wrapping.
+
+    From https://github.com/bendalab/audioio/blob/master/audioio/audioloader.py .
+    
+    Parameters
+    ----------
+    data: 1D or 2D ndarray
+        Data to be fixed.
+
+    Returns
+    -------
+    data: same as input data
+        The fixed data.
+    """
+    if len(data.shape) > 1:
+        for c in range(data.shape[1]):
+            data[:,c] = unwrap(data[:,c])
+    else:
+        for k in range(1000):
+            dd = (data[1:] < -thresh) & (np.diff(data) <= -1.0)
+            du = (data[1:] > thresh) & (np.diff(data) >= 1.0)
+            if np.sum(dd) == 0 and np.sum(du) == 0:
+                break
+            data[1:][dd] += 2.0
+            data[1:][du] -= 2.0
+    return data
+
+
+def plot_psds(path, channel, maxfreq, maxdb, unwrapd, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 96000, 2, 0)
     #data = np.array(data, dtype=np.double)
@@ -84,7 +116,11 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
         if channel >= 0:
             ch = channel
         #data[:,ch] = np.sin(2.0*np.pi*1000.37*np.arange(len(data))/rate) + 0.001*np.random.randn(len(data))
-        pxx, freqs = psd(data[:,ch] - np.mean(data[:,ch]), Fs=rate, NFFT=nfft, noverlap=nfft//2, window=window_hanning)
+        trace = data[:,ch]
+        if unwrapd:
+            trace = unwrap(trace)
+        pxx, freqs = psd(trace - np.mean(trace), Fs=rate, NFFT=nfft,
+                         noverlap=nfft//2, window=window_hanning)
         db = pxx.copy()
         db[pxx <= 1e-20] = float('-inf')
         db[pxx > 1e-20] = 10.0*np.log10(pxx[pxx > 1e-20]*freqs[1])
@@ -108,7 +144,10 @@ def plot_psds(path, channel, maxfreq, maxdb, save):
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
     if save:
-        fig.savefig(os.path.splitext(path)[0] + '-spectra.png')
+        if unwrapd:
+            fig.savefig(os.path.splitext(path)[0] + '-unwrapped-spectra.png')
+        else:
+            fig.savefig(os.path.splitext(path)[0] + '-spectra.png')
     else:
         plt.show()
 
@@ -126,6 +165,8 @@ if __name__ == '__main__':
     parser.add_argument('-m', dest='maxdb', default=None, type=float,
                         help='Maximum power shown in the plot in decibel',
                         metavar='MAXDB')
+    parser.add_argument('-u', dest='unwrap', action='store_true', 
+                        help='Unwrap clipped data using unwrap() from audioio package')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs='+', type=str,
@@ -135,8 +176,9 @@ if __name__ == '__main__':
     channel = args.channel
     maxfreq = args.maxfreq
     maxdb = args.maxdb
+    unwrapd = args.unwrap
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, maxfreq, maxdb, save)
+        plot_psds(path, channel, maxfreq, maxdb, unwrapd, save)
