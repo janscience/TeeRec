@@ -47,7 +47,7 @@ def load_bin(filepath, rate=48000, nchannels=2, offset=0):
     return data, float(rate)
 
 
-def unwrap(data, thresh=0.0):
+def unwrap(data, thresh=-0.01):
     """Fixes data that exceeded the -1 to 1 range.
 
     If data that exceed the range from -1.0 to 1.0 are stored in a wav file,
