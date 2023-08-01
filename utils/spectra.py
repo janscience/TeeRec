@@ -79,7 +79,7 @@ def unwrap(data, thresh=-0.01):
     return data
 
 
-def plot_psds(path, channel, maxfreq, maxdb, unwrapd, save):
+def plot_psds(path, channel, maxfreq, maxdb, mindb, unwrapd, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 96000, 2, 0)
     #data = np.array(data, dtype=np.double)
@@ -94,7 +94,7 @@ def plot_psds(path, channel, maxfreq, maxdb, unwrapd, save):
     if channel >= 0:
         nchannels = 1
     if nchannels > 1:
-        fig, axs = plt.subplots(2, nchannels//2, sharex=True)
+        fig, axs = plt.subplots(2, nchannels//2, sharex=True, sharey=True)
         axs = axs.ravel()
     else:
         fig, ax = plt.subplots()
@@ -134,13 +134,18 @@ def plot_psds(path, channel, maxfreq, maxdb, unwrapd, save):
                 axs[c].text(tscale*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
         cs = pins[ch] if ch < len(pins) else ch
         axs[c].set_title(f'channel {cs}')
-        if c % 2 == 1 or nchannels == 1:
+        if  nchannels == 1 or c // (nchannels//2) == 1:
             axs[c].set_xlabel(f'Frequency [{funit}]')
-        axs[c].set_ylabel('Power [dBFS]')
+        if nchannels == 1 or c % (nchannels//2) == 0:
+            axs[c].set_ylabel('Power [dBFS]')
         if maxfreq:
             axs[c].set_xlim(0, tscale*maxfreq)
-        if not maxdb is None:
+        if not maxdb is None and not mindb is None:
+            axs[c].set_ylim(mindb, maxdb)
+        elif not maxdb is None:
             axs[c].set_ylim(top=maxdb)
+        elif not mindb is None:
+            axs[c].set_ylim(bottom=mindb)
         axs[c].spines['top'].set_visible(False)
         axs[c].spines['right'].set_visible(False)
     if save:
@@ -162,9 +167,12 @@ if __name__ == '__main__':
     parser.add_argument('-f', dest='maxfreq', default=None, type=float,
                         help='Maximum frequency shown in the plot in Hertz',
                         metavar='MAXFREQ')
-    parser.add_argument('-m', dest='maxdb', default=None, type=float,
+    parser.add_argument('-M', dest='maxdb', default=None, type=float,
                         help='Maximum power shown in the plot in decibel',
                         metavar='MAXDB')
+    parser.add_argument('-m', dest='mindb', default=None, type=float,
+                        help='Minimum power shown in the plot in decibel',
+                        metavar='MINDB')
     parser.add_argument('-u', dest='unwrap', action='store_true', 
                         help='Unwrap clipped data using unwrap() from audioio package')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -176,9 +184,10 @@ if __name__ == '__main__':
     channel = args.channel
     maxfreq = args.maxfreq
     maxdb = args.maxdb
+    mindb = args.mindb
     unwrapd = args.unwrap
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, maxfreq, maxdb, unwrapd, save)
+        plot_psds(path, channel, maxfreq, maxdb, mindb, unwrapd, save)
