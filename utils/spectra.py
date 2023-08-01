@@ -79,7 +79,7 @@ def unwrap(data, thresh=-0.01):
     return data
 
 
-def plot_psds(path, channel, maxfreq, maxdb, mindb, unwrapd, save):
+def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 96000, 2, 0)
     #data = np.array(data, dtype=np.double)
@@ -110,7 +110,6 @@ def plot_psds(path, channel, maxfreq, maxdb, mindb, unwrapd, save):
         tscale = 1
         funit = 'Hz'
     nfft = 1024*32
-    thresh = 10 # dB
     for c in range(nchannels):
         ch = c
         if channel >= 0:
@@ -173,6 +172,9 @@ if __name__ == '__main__':
     parser.add_argument('-m', dest='mindb', default=None, type=float,
                         help='Minimum power shown in the plot in decibel',
                         metavar='MINDB')
+    parser.add_argument('-a', dest='thresh', default=10.0, type=float,
+                        help='Threshold for peak size to be annotated (default 10dB)',
+                        metavar='THRESH')
     parser.add_argument('-u', dest='unwrap', action='store_true', 
                         help='Unwrap clipped data using unwrap() from audioio package')
     parser.add_argument('-s', dest='save', action='store_true',
@@ -185,9 +187,10 @@ if __name__ == '__main__':
     maxfreq = args.maxfreq
     maxdb = args.maxdb
     mindb = args.mindb
+    thresh = args.thresh
     unwrapd = args.unwrap
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, maxfreq, maxdb, mindb, unwrapd, save)
+        plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save)
