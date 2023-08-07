@@ -1,4 +1,4 @@
-import sys
+import argparse
 import numpy as np
 import wave
 
@@ -21,24 +21,25 @@ def load_wave(filepath):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print('usage: mergechannels.py -o OUTFILE file1 file2 ...')
-        print()
-        print('Take from each provided wav file one channel and merge them into OUTFILE.')
-
-    # get name of out file:
-    outfile = 'out.wav'
-    for k in range(len(sys.argv)):
-        if sys.argv[k] == '-o':
-            outfile = sys.argv[k+1]
-            del sys.argv[k:k+2]
-            break
+    # command line arguments:
+    parser = argparse.ArgumentParser(add_help=True,
+        description='Take from each provided wave file one channel and merge them into a single wav file. That is, take from the first file the first channel, from the second file the second channel and so on.')
+        #epilog='version %s by Benda-Lab (2015-%s)' % (__version__, __year__))
+    #parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument('-o', dest='outfile', default='merged.wav', type=str,
+                        help='output file with the merged channels',
+                        metavar='OUTFILE')
+    parser.add_argument('files', nargs='+', type=str,
+                        help='wave files')
+    args = parser.parse_args()
+    # options:
+    outfile = args.outfile
     # read channels:
     data = None
     sampwidth = 0
     rate = 0
-    for c in range(len(sys.argv[1:])):
-        fname = sys.argv[1 + c]
+    for c in range(len(args.files)):
+        fname = args.files[c]
         fdata, params = load_wave(fname)
         if data is None:
             data = fdata.copy()
@@ -53,6 +54,8 @@ if __name__ == '__main__':
             if len(fdata) < len(data):
                 data = data[:len(fdata),:]
             data[:,c] = fdata[:len(data),c]
+    if len(args.files) < data.shape[1]:
+        data = data[:,:len(args.files)]
     # write merged channels:
     wave = wave.open(outfile, "w")
     wave.setparams((data.shape[1], sampwidth, rate, len(data),
