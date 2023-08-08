@@ -35,6 +35,10 @@ class TeensyTDM : public DataBuffer {
   
   // Set resolution of data slots to bits per sample.
   virtual void setResolution(uint8_t bits);
+
+  // When transfering data from the TDM data stream to the buffer,
+  // downsample them by n samples.
+  void downSample(uint8_t n);
   
   // Set number of channels to nchannels.
   virtual void setNChannels(uint8_t nchannels);
@@ -82,6 +86,7 @@ class TeensyTDM : public DataBuffer {
   void TDMISR();
   static void ISR();
 
+  uint8_t DownSample;
   bool SwapLR;
 
   char Channels[128];

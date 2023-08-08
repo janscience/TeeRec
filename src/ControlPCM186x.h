@@ -87,6 +87,9 @@ public:
   /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
+  
+  // Set sampling rate per channel in Hertz.
+  void setRate(TeensyTDM &tdm, uint32_t rate);
 
   /* Return the input channel set for output channel adc. */
   INPUT_CHANNELS channel(OUTPUT_CHANNELS adc);

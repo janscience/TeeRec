@@ -25,6 +25,7 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   Bits = 32;
   Rate = 0;
   NChannels = 0;
+  DownSample = 1;
   SwapLR = false;
   Channels[0] = '\0';
 }
@@ -37,6 +38,13 @@ void TeensyTDM::setResolution(uint8_t bits) {
   }
   else
     Bits = 32;
+}
+
+
+void TeensyTDM::downSample(uint8_t n) {
+  if (n < 1)
+    n = 1;
+  DownSample = n;
 }
 
   
@@ -187,10 +195,10 @@ void TeensyTDM::begin() {
 
   bool rate_found = false;
   for (int f = 0; f < numfreqs; f++) {
-    if (Rate == samplefreqs[f]) {
+    if (Rate*DownSample == samplefreqs[f]) {
       while (I2S0_MCR & I2S_MCR_DUF);
       I2S0_MDR = I2S_MDR_FRACT((clkArr[f].mult - 1)) | I2S_MDR_DIVIDE((clkArr[f].div - 1));
-      Rate = round(((float)F_PLL / 256.0) * clkArr[f].mult / clkArr[f].div); //return real freq
+      Rate = round(((float)F_PLL / 256.0) * clkArr[f].mult / clkArr[f].div / DownSample); //return real freq
       rate_found = true;
     }
   }
@@ -232,7 +240,7 @@ void TeensyTDM::begin() {
   if (I2S1_TCSR & I2S_TCSR_TE) return;
   if (I2S1_RCSR & I2S_RCSR_RE) return;
   // PLL:
-  int fs = Rate;
+  int fs = Rate*DownSample;
   // PLL between 27*24 = 648MHz und 54*24=1296MHz
   // Handle samplerates below 10K different
   int n1;
@@ -395,7 +403,9 @@ void TeensyTDM::TDMISR() {
       Index -= NBuffer;
       Cycle++;
     }
-    src += 8;
+    // next frames:
+    for (unsigned int j=0; j < DownSample; j++)
+      src += 8;
   }
 }
 

@@ -224,12 +224,12 @@ void setup() {
 #if defined(TEENSYADC)
   aidata.configure(aisettings);
 #elif defined(PCM186X)
-  aidata.setRate(SAMPLING_RATE);
   aidata.setSwapLR();
   aidata.begin();
   Wire.begin();
   pcm1.begin();
   pcm1.setMicBias(false, true);
+  pcm1.setRate(aidata, SAMPLING_RATE);
   //pcm1.setupTDM(aidata, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
   pcm1.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
   pcm1.setGain(ControlPCM186x::ADCLR, GAIN);

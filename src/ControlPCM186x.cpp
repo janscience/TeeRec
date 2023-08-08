@@ -183,6 +183,27 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 }
 
 
+void ControlPCM186x::setRate(TeensyTDM &tdm, uint32_t rate) {
+  switch (rate) {
+  case 8:
+  case 16:
+  case 48:
+  case 96:
+  case 192:
+    tdm.setRate(rate);
+    break;
+  case 24:
+    tdm.setRate(rate);
+    tdm.downSample(2);
+    break;
+  default:
+    Serial.printf("WARNING in ControlPCM186x::setRate(): invalid sampling rate of %dHz\n", rate);
+    tdm.setRate(0);
+    break;
+  };
+}
+							     
+
 ControlPCM186x::INPUT_CHANNELS ControlPCM186x::channel(OUTPUT_CHANNELS adc) {
   int ichan = 0x0100;
   if (adc == ADC1L)
