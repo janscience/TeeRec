@@ -4,6 +4,7 @@
 
 Blink::Blink() {
   Pin = -1;
+  Invert = false;
   On = false;
   memset(Times, 0, sizeof(Times));
   Index = 0;
@@ -15,9 +16,9 @@ Blink::Blink() {
 }
 
 
-Blink::Blink(int pin) :
+Blink::Blink(int pin, bool invert) :
   Blink() {
-  setPin(pin);
+  setPin(pin, invert);
 }
 
 
@@ -26,11 +27,12 @@ Blink::~Blink() {
 }
 
 
-void Blink::setPin(int pin) {
+void Blink::setPin(int pin, bool invert) {
   Pin = pin;
+  Invert = invert;
   if (Pin >= 0) {
     pinMode(Pin, OUTPUT);
-    digitalWrite(Pin, LOW);
+    switchOff();
   }
 }
 
@@ -233,14 +235,15 @@ void Blink::delay(uint32_t delayms) {
   time = 0;
   while (time < delayms) {
     update();
+    yield();
   };
 }
 
 
 void Blink::switchOn(bool on) {
-  if ( on != On ) {
-    if (Pin >=0 )
-      digitalWrite(Pin, on);
+  if (on != On) {
+    if (Pin >=0)
+      digitalWrite(Pin, Invert != on);
     On = on;
   }
 }

@@ -18,14 +18,14 @@ class Blink {
   // used for controling a LED via setPin().
   Blink();
 
-  // Control LED on pin.
-  Blink(int pin);
+  // Control LED on pin. If invert, LOW is on.
+  Blink(int pin, bool invert=false);
 
   // Switch off LED.
   ~Blink();
 
-  // Set pin of LED.
-  void setPin(int pin=LED_BUILTIN);
+  // Set pin of LED. If invert, LOW is on.
+  void setPin(int pin=LED_BUILTIN, bool invert=false);
 
   // abstract level (requires update() to be called regularly):
 
@@ -125,6 +125,7 @@ class Blink {
  protected:
   
   int Pin;
+  bool Invert;
   bool On;
   static const int MaxTimes = 11;
   uint32_t Times[2][MaxTimes];
