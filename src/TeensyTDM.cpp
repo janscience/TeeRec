@@ -388,7 +388,7 @@ void TeensyTDM::TDMISR() {
   // copy from src into cyclic buffer:
   unsigned int nchannels = NChannels;
   sample_t buffer[nchannels];
-  for (unsigned int i=0; i < TDM_FRAMES/2; i++) {
+  for (unsigned int i=0; i < TDM_FRAMES/2/DownSample; i++) {
     const sample_t *slot = (const sample_t *)src;
     for (unsigned int c=0; c < nchannels; c++) {
       slot++;

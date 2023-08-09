@@ -185,14 +185,14 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 
 void ControlPCM186x::setRate(TeensyTDM &tdm, uint32_t rate) {
   switch (rate) {
-  case 8:
-  case 16:
-  case 48:
-  case 96:
-  case 192:
+  case 8000:
+  case 16000:
+  case 48000:
+  case 96000:
+  case 192000:
     tdm.setRate(rate);
     break;
-  case 24:
+  case 24000:
     tdm.setRate(rate);
     tdm.downSample(2);
     break;

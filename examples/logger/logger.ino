@@ -18,7 +18,7 @@
 #include <TestSignals.h>
 #include <Configurator.h>
 #include <Settings.h>
-#ifndef TEENSYADC
+#ifdef TEENSYADC
 #include <TeensyADCSettings.h>
 #endif
 #ifdef SINGLE_FILE_MTP
@@ -28,10 +28,10 @@
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
-#define PREGAIN 1.0           // gain factor of a preamplifier.
+#define PREGAIN 10.0           // gain factor of a preamplifier.
 #if defined(PCM186X)
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
-  #define GAIN 20.0            // dB
+  #define GAIN 0.0            // dB
 #elif defined(TEENSYADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
@@ -47,9 +47,9 @@
 
 #define PATH          "recordings" // folder where to store the recordings
 #ifdef SINGLE_FILE_MTP
-#define FILENAME      "recording"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "recNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #else
-#define FILENAME      "SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "SDATELNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #endif
 #define FILE_SAVE_TIME 10   // seconds
 
@@ -110,7 +110,6 @@ bool openNextFile() {
     while (1) {};
     return false;
   }
-  name += ".wav";
   char dts[20];
   rtclock.dateTime(dts, t);
   if (! file.openWave(name.c_str(), -1, dts)) {
@@ -207,6 +206,17 @@ void storeData() {
 }
 
 
+void setupPCM(TeensyTDM &tdm, ControlPCM186x &pcm, bool offs) {
+  pcm.begin();
+  pcm.setMicBias(false, true);
+  pcm.setRate(tdm, SAMPLING_RATE);
+  pcm.setupTDM(tdm, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, offs);
+  //pcm.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, offs);
+  pcm.setGain(ControlPCM186x::ADCLR, GAIN);
+  pcm.setFilters(ControlPCM186x::FIR, false);
+}
+
+
 // -----------------------------------------------------------------------------
 
 void setup() {
@@ -225,23 +235,12 @@ void setup() {
   aidata.configure(aisettings);
 #elif defined(PCM186X)
   aidata.setSwapLR();
-  aidata.begin();
   Wire.begin();
-  pcm1.begin();
-  pcm1.setMicBias(false, true);
-  pcm1.setRate(aidata, SAMPLING_RATE);
-  //pcm1.setupTDM(aidata, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, false);
-  pcm1.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, false);
-  pcm1.setGain(ControlPCM186x::ADCLR, GAIN);
-  pcm1.setFilters(ControlPCM186x::FIR, false);
+  setupPCM(aidata, pcm1, false);
 #ifdef PCM186X_2ND
-  pcm2.begin();
-  pcm2.setMicBias(false, true);
-  //pcm2.setupTDM(aidata, ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R, true);
-  pcm2.setupTDM(aidata, ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R, true);
-  pcm2.setGain(ControlPCM186x::ADCLR, GAIN);
-  pcm1.setFilters(ControlPCM186x::FIR, false);
+  setupPCM(aidata, pcm2, true);
 #endif
+  aidata.begin();
 #endif
   aidata.check();
   aidata.start();
