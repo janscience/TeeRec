@@ -18,7 +18,7 @@ TeensyTDM *TeensyTDM::TDM = 0;
 
 
 
-TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
+TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer, TDM_DATA data) :
   DataBuffer(buffer, nbuffer) {
   TDM = this;
   setDataResolution(16);
@@ -28,6 +28,7 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   DownSample = 1;
   SwapLR = false;
   Channels[0] = '\0';
+  Data1 = data;
 }
 
 
@@ -234,11 +235,21 @@ void TeensyTDM::begin() {
   CORE_PIN11_CONFIG = PORT_PCR_MUX(6); // pin 11, PTC6, I2S0_MCLK - 22.5 MHz
 
 #elif defined(__IMXRT1062__)
-  CCM_CCGR5 |= CCM_CCGR5_SAI1(CCM_CCGR_ON);
+  if (Data1 == TDM1) {
+    CCM_CCGR5 |= CCM_CCGR5_SAI1(CCM_CCGR_ON);
 
-  // if either transmitter or receiver is enabled, do nothing
-  if (I2S1_TCSR & I2S_TCSR_TE) return;
-  if (I2S1_RCSR & I2S_RCSR_RE) return;
+    // if either transmitter or receiver is enabled, do nothing
+    if (I2S1_TCSR & I2S_TCSR_TE) return;
+    if (I2S1_RCSR & I2S_RCSR_RE) return;
+  }
+  else {
+    CCM_CCGR5 |= CCM_CCGR5_SAI2(CCM_CCGR_ON);
+
+    // if either transmitter or receiver is enabled, do nothing
+    if (I2S2_TCSR & I2S_TCSR_TE) return;
+    if (I2S2_RCSR & I2S_RCSR_RE) return;
+  }
+  
   // PLL:
   int fs = Rate*DownSample;
   // PLL between 27*24 = 648MHz und 54*24=1296MHz
@@ -257,57 +268,94 @@ void TeensyTDM::begin() {
   }
 
   double C = ((double)fs * 256 * n1 * n2) / 24000000;
-//  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ",freq,n1,n2,C);
+  //  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ",freq,n1,n2,C);
   int c0 = C;
   int c2 = 10000;
   int c1 = C * c2 - (c0 * c2);
-//  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n",c0,c1,c2);
+  //  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n",c0,c1,c2);
   set_audioClock(c0, c1, c2, true);
   
-  // clear SAI1_CLK register locations
-  CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI1_CLK_SEL_MASK))
-    | CCM_CSCMR1_SAI1_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
+  if (Data1 == TDM1) {
+    // clear SAI1_CLK register locations
+    CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI1_CLK_SEL_MASK))
+      | CCM_CSCMR1_SAI1_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
 
-  n1 = n1 / 2; // double speed for TDM
+    n1 = n1 / 2; // double speed for TDM
 
-  CCM_CS1CDR = (CCM_CS1CDR & ~(CCM_CS1CDR_SAI1_CLK_PRED_MASK | CCM_CS1CDR_SAI1_CLK_PODF_MASK))
-    | CCM_CS1CDR_SAI1_CLK_PRED(n1 - 1)  // &0x07
-    | CCM_CS1CDR_SAI1_CLK_PODF(n2 - 1); // &0x3f
+    CCM_CS1CDR = (CCM_CS1CDR & ~(CCM_CS1CDR_SAI1_CLK_PRED_MASK | CCM_CS1CDR_SAI1_CLK_PODF_MASK))
+      | CCM_CS1CDR_SAI1_CLK_PRED(n1 - 1)  // &0x07
+      | CCM_CS1CDR_SAI1_CLK_PODF(n2 - 1); // &0x3f
 
-  // START//Added afterwards to make the SAI2 function at the desired frequency as well.
-  CCM_CS2CDR = (CCM_CS2CDR & ~(CCM_CS2CDR_SAI2_CLK_PRED_MASK | CCM_CS2CDR_SAI2_CLK_PODF_MASK))
-               | CCM_CS2CDR_SAI2_CLK_PRED(n1 - 1)  // &0x07
-               | CCM_CS2CDR_SAI2_CLK_PODF(n2 - 1); // &0x3f)
-  // END//Added afterwards to make the SAI2 function at the desired frequency as well.
+    IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL_MASK))
+      | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	//Select MCLK
 
-  IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL_MASK))
-    | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	//Select MCLK
+    // configure transmitter
+    int rsync = 0;
+    int tsync = 1;
 
-  // configure transmitter
-  int rsync = 0;
-  int tsync = 1;
+    I2S1_TMR = 0;
+    I2S1_TCR1 = I2S_TCR1_RFW(4);
+    I2S1_TCR2 = I2S_TCR2_SYNC(tsync) | I2S_TCR2_BCP | I2S_TCR2_MSEL(1)
+      | I2S_TCR2_BCD | I2S_TCR2_DIV(0);
+    I2S1_TCR3 = I2S_TCR3_TCE;
+    I2S1_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
+      | I2S_TCR4_FSE | I2S_TCR4_FSD;
+    I2S1_TCR5 = I2S_TCR5_WNW(31) | I2S_TCR5_W0W(31) | I2S_TCR5_FBT(31);
 
-  I2S1_TMR = 0;
-  I2S1_TCR1 = I2S_TCR1_RFW(4);
-  I2S1_TCR2 = I2S_TCR2_SYNC(tsync) | I2S_TCR2_BCP | I2S_TCR2_MSEL(1)
-    | I2S_TCR2_BCD | I2S_TCR2_DIV(0);
-  I2S1_TCR3 = I2S_TCR3_TCE;
-  I2S1_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
-    | I2S_TCR4_FSE | I2S_TCR4_FSD;
-  I2S1_TCR5 = I2S_TCR5_WNW(31) | I2S_TCR5_W0W(31) | I2S_TCR5_FBT(31);
+    I2S1_RMR = 0;
+    I2S1_RCR1 = I2S_RCR1_RFW(4);
+    I2S1_RCR2 = I2S_RCR2_SYNC(rsync) | I2S_TCR2_BCP | I2S_RCR2_MSEL(1)
+      | I2S_RCR2_BCD | I2S_RCR2_DIV(0);
+    I2S1_RCR3 = I2S_RCR3_RCE;
+    I2S1_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
+      | I2S_RCR4_FSE | I2S_RCR4_FSD;
+    I2S1_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
-  I2S1_RMR = 0;
-  I2S1_RCR1 = I2S_RCR1_RFW(4);
-  I2S1_RCR2 = I2S_RCR2_SYNC(rsync) | I2S_TCR2_BCP | I2S_RCR2_MSEL(1)
-    | I2S_RCR2_BCD | I2S_RCR2_DIV(0);
-  I2S1_RCR3 = I2S_RCR3_RCE;
-  I2S1_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
-    | I2S_RCR4_FSE | I2S_RCR4_FSD;
-  I2S1_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
+    CORE_PIN23_CONFIG = 3;  //1:MCLK
+    CORE_PIN21_CONFIG = 3;  //1:RX_BCLK
+    CORE_PIN20_CONFIG = 3;  //1:RX_SYNC
+  }
+  else {
+    // clear SAI2_CLK register locations
+    CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI2_CLK_SEL_MASK))
+      | CCM_CSCMR1_SAI2_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
 
-  CORE_PIN23_CONFIG = 3;  //1:MCLK
-  CORE_PIN21_CONFIG = 3;  //1:RX_BCLK
-  CORE_PIN20_CONFIG = 3;  //1:RX_SYNC
+    n1 = n1 / 2; //Double Speed for TDM
+
+    CCM_CS2CDR = (CCM_CS2CDR & ~(CCM_CS2CDR_SAI2_CLK_PRED_MASK | CCM_CS2CDR_SAI2_CLK_PODF_MASK))
+      | CCM_CS2CDR_SAI2_CLK_PRED(n1-1) // &0x07
+      | CCM_CS2CDR_SAI2_CLK_PODF(n2-1); // &0x3f
+
+    IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL_MASK))
+      | (IOMUXC_GPR_GPR1_SAI2_MCLK_DIR | IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL(0));	//Select MCLK
+
+    // configure transmitter
+    int rsync = 1;
+    int tsync = 0;
+
+    I2S2_TMR = 0;
+    I2S2_TCR1 = I2S_TCR1_RFW(4);
+    I2S2_TCR2 = I2S_TCR2_SYNC(tsync) | I2S_TCR2_BCP | I2S_TCR2_MSEL(1)
+      | I2S_TCR2_BCD | I2S_TCR2_DIV(0);
+    I2S2_TCR3 = I2S_TCR3_TCE;
+    I2S2_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
+      | I2S_TCR4_FSE | I2S_TCR4_FSD;
+    I2S2_TCR5 = I2S_TCR5_WNW(31) | I2S_TCR5_W0W(31) | I2S_TCR5_FBT(31);
+
+    // configure receiver (sync'd to transmitter clocks)
+    I2S2_RMR = 0;
+    I2S2_RCR1 = I2S_RCR1_RFW(4);
+    I2S2_RCR2 = I2S_RCR2_SYNC(rsync) | I2S_TCR2_BCP | I2S_RCR2_MSEL(1)
+      | I2S_RCR2_BCD | I2S_RCR2_DIV(0);
+    I2S2_RCR3 = I2S_RCR3_RCE;
+    I2S2_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
+      | I2S_RCR4_FSE | I2S_RCR4_FSD;
+    I2S2_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
+
+    CORE_PIN33_CONFIG = 2;  //2:MCLK
+    CORE_PIN4_CONFIG  = 2;  //2:TX_BCLK
+    CORE_PIN3_CONFIG  = 2;  //2:TX_SYNC
+  }
 #endif
 }
 
@@ -335,11 +383,17 @@ void TeensyTDM::start() {
 
   I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
   I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
-  DMA.attachInterrupt(ISR);
 #elif defined(__IMXRT1062__)
-  CORE_PIN8_CONFIG  = 3;  //RX_DATA0
-  IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
-  DMA.TCD->SADDR = &I2S1_RDR0;
+  if (Data1 == TDM1) {
+    CORE_PIN8_CONFIG  = 3;  //RX_DATA0
+    IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
+    DMA.TCD->SADDR = &I2S1_RDR0;
+  }
+  else {
+    CORE_PIN5_CONFIG = 2;  //2:RX_DATA0
+    IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
+    DMA.TCD->SADDR = &I2S2_RDR0;
+  }
   DMA.TCD->SOFF = 0;
   DMA.TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
   DMA.TCD->NBYTES_MLNO = 4;
@@ -350,12 +404,20 @@ void TeensyTDM::start() {
   DMA.TCD->DLASTSGA = -sizeof(TDMBuffer);
   DMA.TCD->BITER_ELINKNO = sizeof(TDMBuffer) / 4;
   DMA.TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
-  DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_SAI1_RX);
+  if (Data1 == TDM1)
+    DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_SAI1_RX);
+  else
+    DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_SAI2_RX);
   DMA.enable();
 
-  I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
-  DMA.attachInterrupt(ISR);	
+  if (Data1 == TDM1)
+    I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+  else {
+    I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+    I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
+  }
 #endif	
+  DMA.attachInterrupt(ISR);	
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
 }
@@ -382,7 +444,7 @@ void TeensyTDM::TDMISR() {
     src = &TDMBuffer[0];
   }
 
-#if IMXRT_CACHE_ENABLED >=1
+#if IMXRT_CACHE_ENABLED >= 1
   arm_dcache_delete((void*)src, sizeof(TDMBuffer) / 2);
 #endif
   // copy from src into cyclic buffer:

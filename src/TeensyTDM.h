@@ -29,7 +29,14 @@ class TeensyTDM : public DataBuffer {
 
  public:
   
-  TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
+  enum TDM_DATA {
+    TDM1,     // Teensy 3: pin 13, Teensy 4: pin 8
+#if defined(__IMXRT1062__)
+    TDM2      // Teensy 4: pin 5
+#endif
+  };
+  
+  TeensyTDM(volatile sample_t *buffer, size_t nbuffer, TDM_DATA data=TDM1);
 
   static TeensyTDM *TDM;
   
@@ -90,6 +97,8 @@ class TeensyTDM : public DataBuffer {
   bool SwapLR;
 
   char Channels[128];
+
+  TDM_DATA Data1;
   
 };
 
