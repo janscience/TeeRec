@@ -29,14 +29,14 @@ class TeensyTDM : public DataBuffer {
 
  public:
   
-  enum TDM_DATA {
-    TDM1,     // Teensy 3: pin 13, Teensy 4: pin 8
+  enum TDM_BUS {
+    TDM1=0,     // Teensy 3: pin 13, Teensy 4: pin 8
 #if defined(__IMXRT1062__)
-    TDM2      // Teensy 4: pin 5
+    TDM2=1      // Teensy 4: pin 5
 #endif
   };
   
-  TeensyTDM(volatile sample_t *buffer, size_t nbuffer, TDM_DATA data=TDM1);
+  TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
 
   static TeensyTDM *TDM;
   
@@ -50,17 +50,29 @@ class TeensyTDM : public DataBuffer {
   // Set number of channels to nchannels.
   virtual void setNChannels(uint8_t nchannels);
   
+  // Set number of channels of the TDM bus to nchannels.
+  void setNChannels(TDM_BUS bus, uint8_t nchannels);
+  
   // The string identifying channel pins.
   const char *channels() { return Channels; };
   
   // Set string identifying channel pins.
-  void setChannels(const char *cs);
+  void setChannelStr(const char *cs);
+  
+  // Clear the channels for a given TDM bus.
+  void clearChannels(TDM_BUS bus);
+  
+  // Clear the channel configuration of all TDM buses.
+  void clearChannels();
 
   // Swap left/right channels.
   bool swapLR() const;
 
   // Set whether to swap left/right channels.
   void setSwapLR(bool swap=true);
+
+  // Return DMA counter for specified TDM bus.
+  size_t counter(TDM_BUS bus) const;
   
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -88,17 +100,21 @@ class TeensyTDM : public DataBuffer {
   
  protected:
   
-  static DMAChannel DMA;
+  static DMAChannel DMA[2];
+  volatile size_t DMACounter[2];  // total count of TDMBuffer segments
+  size_t DataHead[2];             // current index for each TDM bus for writing. Only used in isr.
 
-  void TDMISR();
-  static void ISR();
+  void TDMISR(uint8_t tdm);
+  static void ISR0();
+  static void ISR1();
 
   uint8_t DownSample;
   bool SwapLR;
 
   char Channels[128];
 
-  TDM_DATA Data1;
+  uint8_t TDMUse;
+  uint8_t NChans[2];
   
 };
 

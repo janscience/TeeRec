@@ -75,6 +75,10 @@ public:
 
   /* Communicate with PCM chip using wire and address (0x4A or 0x4B). */
   ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
+
+  /* Communicate with PCM chip using wire, address (0x4A or 0x4B),
+     and TDM bus. */
+  ControlPCM186x(TwoWire &wire, uint8_t address, TeensyTDM::TDM_BUS bus);
   
   /* Initialize PCM186x with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
@@ -109,27 +113,30 @@ public:
 
   /* Setup I2S output for the specified two input channels.
      Get the recorded data with AudioInputI2S */
-  bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2);
+  bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
+		bool inverted=false);
   
   /* Setup I2S output for the specified four input channels.
      Channels 3 and 4 are available as DOUT2 via GPIO0.
      Get the recorded data with AudioInputI2SQuad. */
   bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
-		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4);
+		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
+		bool inverted=false);
   
   /* Setup TDM output for the specified two input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2.
      If offset, shift the recorded data such that they appear
      on slots 4, 6. */
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
-		bool offs=false);
+		bool offs=false, bool inverted=false);
   
   /* Setup TDM output for the specified two input channels.
      If offset, shift the recorded data by two slots.
      Set resolution, number and identifiers of channels of tdm accordingly.
      tdm.setSwapLR() needs to be called before this function. */
   bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
-		INPUT_CHANNELS channel2, bool offs=false);
+		INPUT_CHANNELS channel2, bool offs=false,
+		bool inverted=false);
   
   /* Setup TDM output for the specified four input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2, 4, 6.
@@ -137,7 +144,7 @@ public:
      on slots 8, 10, 12, 14. */
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
-		bool offs=false);
+		bool offs=false, bool inverted=false);
   
   /* Setup TDM output for the specified four input channels.
      If offset, shift the recorded data by four slots.
@@ -145,7 +152,8 @@ public:
      tdm.setSwapLR() needs to be called before this function. */
   bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, INPUT_CHANNELS channel3,
-		INPUT_CHANNELS channel4, bool offs=false);
+		INPUT_CHANNELS channel4, bool offs=false,
+		bool inverted=false);
 
   /* Return the gain set for output channel adc in dB. */
   float gain(OUTPUT_CHANNELS adc);
@@ -200,12 +208,14 @@ protected:
 
   float readCoefficient(uint8_t address);
 
-  void setTDMChannels(TeensyTDM &tdm, bool offs);
+  void setTDMChannelStr(TeensyTDM &tdm);
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
   uint8_t CurrentPage;
   bool PGALinked;
+  int NChannels;
+  TeensyTDM::TDM_BUS Bus;
   
 };
 

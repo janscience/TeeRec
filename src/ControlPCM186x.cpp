@@ -124,7 +124,9 @@ ControlPCM186x::ControlPCM186x() :
   I2CBus(&Wire),
   I2CAddress(PCM186x_I2C_ADDR1),
   CurrentPage(10),
-  PGALinked(false) {
+  PGALinked(false),
+  NChannels(0),
+  Bus(TeensyTDM::TDM1) {
 }
 
 
@@ -132,7 +134,9 @@ ControlPCM186x::ControlPCM186x(uint8_t address) :
   I2CBus(&Wire),
   I2CAddress(address),
   CurrentPage(10),
-  PGALinked(false) {
+  PGALinked(false),
+  NChannels(0),
+  Bus(TeensyTDM::TDM1) {
 }
 
 
@@ -140,7 +144,20 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address) :
   I2CBus(&wire),
   I2CAddress(address),
   CurrentPage(10),
-  PGALinked(false) {
+  PGALinked(false),
+  NChannels(0),
+  Bus(TeensyTDM::TDM1) {
+}
+
+
+ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
+			       TeensyTDM::TDM_BUS bus) :
+  I2CBus(&wire),
+  I2CAddress(address),
+  CurrentPage(10),
+  PGALinked(false),
+  NChannels(0),
+  Bus(bus) {
 }
 
 
@@ -276,14 +293,16 @@ void ControlPCM186x::channels(char *chans, bool swaplr,
     if (prefix != 0)
       strcat(chans, prefix);
     strcat(chans, channelStr(ADC1L));
-    strcat(chans, ",");
-    if (prefix != 0)
-      strcat(chans, prefix);
-    strcat(chans, channelStr(ADC2R));
-    strcat(chans, ",");
-    if (prefix != 0)
-      strcat(chans, prefix);
-    strcat(chans, channelStr(ADC2L));
+    if (NChannels > 2) {
+      strcat(chans, ",");
+      if (prefix != 0)
+	strcat(chans, prefix);
+      strcat(chans, channelStr(ADC2R));
+      strcat(chans, ",");
+      if (prefix != 0)
+	strcat(chans, prefix);
+      strcat(chans, channelStr(ADC2L));
+    }
   }
   else {
     if (prefix != 0)
@@ -293,20 +312,23 @@ void ControlPCM186x::channels(char *chans, bool swaplr,
     if (prefix != 0)
       strcat(chans, prefix);
     strcat(chans, channelStr(ADC1R));
-    strcat(chans, ",");
-    if (prefix != 0)
-      strcat(chans, prefix);
-    strcat(chans, channelStr(ADC2L));
-    strcat(chans, ",");
-    if (prefix != 0)
-      strcat(chans, prefix);
-    strcat(chans, channelStr(ADC2R));
+    if (NChannels > 2) {
+      strcat(chans, ",");
+      if (prefix != 0)
+	strcat(chans, prefix);
+      strcat(chans, channelStr(ADC2L));
+      strcat(chans, ",");
+      if (prefix != 0)
+	strcat(chans, prefix);
+      strcat(chans, channelStr(ADC2R));
+    }
   }
 }
 
 
 bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2) {
+			      INPUT_CHANNELS channel2,
+			      bool inverted) {
   uint8_t fmt = 0x00;  // I2S
   DATA_BITS bits = BIT24;
   uint8_t val = fmt;   // FMT
@@ -314,10 +336,11 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
   val |= bits << 6;    // RX_WLEN
   if (!write(PCM186x_I2S_FMT_REG, val))
     return false;
-  if (!setChannel(ADC1L, channel1))
+  if (!setChannel(ADC1L, channel1, inverted))
     return false;
-  if (!setChannel(ADC1R, channel2))
+  if (!setChannel(ADC1R, channel2, inverted))
     return false;
+  NChannels = 2;
   return true;  
 }
 
@@ -325,7 +348,8 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
-			      INPUT_CHANNELS channel4) {
+			      INPUT_CHANNELS channel4,
+			      bool inverted) {
   // data format:
   uint8_t fmt = 0x00;   // I2S
   DATA_BITS bits = BIT24;
@@ -341,21 +365,22 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
   if (!write(PCM186x_GPIO_FUNC_1_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1))
+  if (!setChannel(ADC1L, channel1, inverted))
     return false;
-  if (!setChannel(ADC1R, channel2))
+  if (!setChannel(ADC1R, channel2, inverted))
     return false;
-  if (!setChannel(ADC2L, channel3))
+  if (!setChannel(ADC2L, channel3, inverted))
     return false;
-  if (!setChannel(ADC2R, channel4))
+  if (!setChannel(ADC2R, channel4, inverted))
     return false;
+  NChannels = 4;
   return true;  
 }
 
 
-void ControlPCM186x::setTDMChannels(TeensyTDM &tdm, bool offs) {
+void ControlPCM186x::setTDMChannelStr(TeensyTDM &tdm) {
   char cs[128];
-  if (offs) {
+  if (strlen(tdm.channels()) > 0) {
     bool prefix = true;
     int chipnum = 0;
     char *cp = cs;
@@ -384,13 +409,13 @@ void ControlPCM186x::setTDMChannels(TeensyTDM &tdm, bool offs) {
   }
   else
     channels(cs, tdm.swapLR());
-  tdm.setChannels(cs);
+  tdm.setChannelStr(cs);
 }
 
 
 bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs) {
+			      bool offs, bool inverted) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -408,10 +433,11 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1))
+  if (!setChannel(ADC1L, channel1, inverted))
     return false;
-  if (!setChannel(ADC1R, channel2))
+  if (!setChannel(ADC1R, channel2, inverted))
     return false;
+  NChannels = 2;
   return true;  
 }
 
@@ -419,11 +445,11 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
 			      INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs) {
-  if (setupTDM(channel1, channel2, offs)) {
-    tdm.setNChannels(offs ? 4 : 2);
+			      bool offs, bool inverted) {
+  if (setupTDM(channel1, channel2, offs, inverted)) {
+    tdm.setNChannels(Bus, offs ? 4 : 2);
     tdm.setResolution(32);
-    setTDMChannels(tdm, offs);
+    setTDMChannelStr(tdm);
     return true;
   }
   return false;
@@ -434,7 +460,7 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs) {
+			      bool offs, bool inverted) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -452,14 +478,15 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1))
+  if (!setChannel(ADC1L, channel1, inverted))
     return false;
-  if (!setChannel(ADC1R, channel2))
+  if (!setChannel(ADC1R, channel2, inverted))
     return false;
-  if (!setChannel(ADC2L, channel3))
+  if (!setChannel(ADC2L, channel3, inverted))
     return false;
-  if (!setChannel(ADC2R, channel4))
+  if (!setChannel(ADC2R, channel4, inverted))
     return false;
+  NChannels = 4;
   return true;  
 }
 
@@ -469,11 +496,11 @@ bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs) {
-  if (setupTDM(channel1, channel2, channel3, channel4, offs)) {
-    tdm.setNChannels(offs ? 8 : 4);
+			      bool offs, bool inverted) {
+  if (setupTDM(channel1, channel2, channel3, channel4, offs, inverted)) {
+    tdm.setNChannels(Bus, offs ? 8 : 4);
     tdm.setResolution(32);
-    setTDMChannels(tdm, offs);
+    setTDMChannelStr(tdm);
     return true;
   }
   return false;
@@ -940,8 +967,10 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
 
 uint8_t ControlPCM186x::goToPage(byte page) {
   I2CBus->beginTransmission(I2CAddress);
-  I2CBus->write(0x00); delay(10); // page register
-  I2CBus->write(page); delay(10); // go to page
+  I2CBus->write(0x00); // page register
+  delay(10);
+  I2CBus->write(page); // go to page
+  delay(10);
   uint8_t result = I2CBus->endTransmission();
   if (result == 0)
     CurrentPage = page;

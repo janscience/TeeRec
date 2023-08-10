@@ -1,8 +1,7 @@
 #include <Arduino.h>
 #include <TeensyTDM.h>
 #ifdef __IMXRT1062__
-// For set_audioClock on T4.x
-#include <utility/imxrt_hw.h>
+#include <utility/imxrt_hw.h>   // set_audioClock on T4.x
 #endif
 
 #if defined(KINETISK) || defined(__IMXRT1062__)
@@ -10,15 +9,15 @@
 // DMA buffer for 256 TDM frames:
 #define TDM_FRAMES  256
 DMAMEM __attribute__((aligned(32)))
-static uint32_t TDMBuffer[TDM_FRAMES*8];
+static uint32_t TDMBuffer[2][TDM_FRAMES*8];
 
-DMAChannel TeensyTDM::DMA(false);
+DMAChannel TeensyTDM::DMA[2];
 
 TeensyTDM *TeensyTDM::TDM = 0;
 
 
 
-TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer, TDM_DATA data) :
+TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
   DataBuffer(buffer, nbuffer) {
   TDM = this;
   setDataResolution(16);
@@ -28,7 +27,12 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer, TDM_DATA data) :
   DownSample = 1;
   SwapLR = false;
   Channels[0] = '\0';
-  Data1 = data;
+  for (int bus=0; bus<2; bus++) {
+    NChans[bus] = 0;
+    DMACounter[bus] = 0;
+    DataHead[bus] = 0;
+  }
+  TDMUse = 0;
 }
 
 
@@ -50,16 +54,49 @@ void TeensyTDM::downSample(uint8_t n) {
 
   
 void TeensyTDM::setNChannels(uint8_t nchannels) {
+  setNChannels(TDM1, nchannels);
+}
+
+  
+void TeensyTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
   if (nchannels > 256/Bits) {
     Serial.printf("TeensyTDM::setNChannels() -> too many channels=%u.\n", nchannels);
     nchannels = 0;
   }
-  NChannels = nchannels;
+  if (nchannels == 0) {
+    NChans[bus] = 0;
+    TDMUse &= ~(1 << bus);
+  }
+  else {
+    NChans[bus] = nchannels;
+    TDMUse |= (1 << bus);
+  }
+  NChannels = 0;
+  for (int k=0; k<2; k++)
+    NChannels += NChans[k];
 }
 
   
-void TeensyTDM::setChannels(const char *cs) {
+void TeensyTDM::setChannelStr(const char *cs) {
   strncpy(Channels, cs, 127);
+}
+
+
+void TeensyTDM::clearChannels(TDM_BUS bus) {
+  NChans[bus] = 0;
+  TDMUse &= ~(1 << bus);
+  NChannels = 0;
+  for (int k=0; k<2; k++)
+    NChannels += NChans[k];
+}
+
+
+void TeensyTDM::clearChannels() {
+  NChannels = 0;
+  for (int k=0; k<2; k++)
+    NChans[k] = 0;
+  TDMUse = 0;
+  Channels[0] = '\0';
 }
 
 
@@ -70,6 +107,11 @@ bool TeensyTDM::swapLR() const {
 
 void TeensyTDM::setSwapLR(bool swap) {
   SwapLR = swap;
+}
+
+
+size_t TeensyTDM::counter(TDM_BUS bus) const {
+  return DMACounter[bus];
 }
 
 
@@ -235,14 +277,14 @@ void TeensyTDM::begin() {
   CORE_PIN11_CONFIG = PORT_PCR_MUX(6); // pin 11, PTC6, I2S0_MCLK - 22.5 MHz
 
 #elif defined(__IMXRT1062__)
-  if (Data1 == TDM1) {
+  if (TDMUse & (1 << TDM1)) {
     CCM_CCGR5 |= CCM_CCGR5_SAI1(CCM_CCGR_ON);
 
     // if either transmitter or receiver is enabled, do nothing
     if (I2S1_TCSR & I2S_TCSR_TE) return;
     if (I2S1_RCSR & I2S_RCSR_RE) return;
   }
-  else {
+  if (TDMUse & (1 << TDM2)) {
     CCM_CCGR5 |= CCM_CCGR5_SAI2(CCM_CCGR_ON);
 
     // if either transmitter or receiver is enabled, do nothing
@@ -275,7 +317,7 @@ void TeensyTDM::begin() {
   //  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n",c0,c1,c2);
   set_audioClock(c0, c1, c2, true);
   
-  if (Data1 == TDM1) {
+  if (TDMUse & (1 << TDM1)) {
     // clear SAI1_CLK register locations
     CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI1_CLK_SEL_MASK))
       | CCM_CSCMR1_SAI1_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
@@ -315,7 +357,7 @@ void TeensyTDM::begin() {
     CORE_PIN21_CONFIG = 3;  //1:RX_BCLK
     CORE_PIN20_CONFIG = 3;  //1:RX_SYNC
   }
-  else {
+  if (TDMUse & (1 << TDM2)) {
     // clear SAI2_CLK register locations
     CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI2_CLK_SEL_MASK))
       | CCM_CSCMR1_SAI2_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
@@ -361,94 +403,112 @@ void TeensyTDM::begin() {
 
 
 void TeensyTDM::start() {
-  // this is begin() from input_tdm.cpp of the Audio library
-  DMA.begin(true); // Allocate the DMA channel first
-
-  // TODO: should we set & clear the I2S_RCSR_SR bit here?
-#if defined(KINETISK)
-  CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
-  DMA.TCD->SADDR = &I2S0_RDR0;
-  DMA.TCD->SOFF = 0;
-  DMA.TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
-  DMA.TCD->NBYTES_MLNO = 4;
-  DMA.TCD->SLAST = 0;
-  DMA.TCD->DADDR = TDMBuffer;
-  DMA.TCD->DOFF = 4;
-  DMA.TCD->CITER_ELINKNO = sizeof(TDMBuffer) / 4;
-  DMA.TCD->DLASTSGA = -sizeof(TDMBuffer);
-  DMA.TCD->BITER_ELINKNO = sizeof(TDMBuffer) / 4;
-  DMA.TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
-  DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_I2S0_RX);
-  DMA.enable();
-
-  I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
-  I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
-#elif defined(__IMXRT1062__)
-  if (Data1 == TDM1) {
-    CORE_PIN8_CONFIG  = 3;  //RX_DATA0
-    IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
-    DMA.TCD->SADDR = &I2S1_RDR0;
-  }
-  else {
-    CORE_PIN5_CONFIG = 2;  //2:RX_DATA0
-    IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
-    DMA.TCD->SADDR = &I2S2_RDR0;
-  }
-  DMA.TCD->SOFF = 0;
-  DMA.TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
-  DMA.TCD->NBYTES_MLNO = 4;
-  DMA.TCD->SLAST = 0;
-  DMA.TCD->DADDR = TDMBuffer;
-  DMA.TCD->DOFF = 4;
-  DMA.TCD->CITER_ELINKNO = sizeof(TDMBuffer) / 4;
-  DMA.TCD->DLASTSGA = -sizeof(TDMBuffer);
-  DMA.TCD->BITER_ELINKNO = sizeof(TDMBuffer) / 4;
-  DMA.TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
-  if (Data1 == TDM1)
-    DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_SAI1_RX);
-  else
-    DMA.triggerAtHardwareEvent(DMAMUX_SOURCE_SAI2_RX);
-  DMA.enable();
-
-  if (Data1 == TDM1)
-    I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
-  else {
-    I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
-    I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
-  }
-#endif	
-  DMA.attachInterrupt(ISR);	
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
+  // this is begin() from input_tdm.cpp of the Audio library
+  for (int bus=0; bus < 2; bus++) {
+    if (TDMUse & (1 << bus)) {
+      DataHead[bus] = 0;
+      DMACounter[bus] = 0;
+      DMA[bus].begin(true); // Allocate the DMA channel first
+
+      // TODO: should we set & clear the I2S_RCSR_SR bit here?
+#if defined(KINETISK)
+      CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
+      DMA[bus].TCD->SADDR = &I2S0_RDR0;
+      DMA[bus].TCD->SOFF = 0;
+      DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
+      DMA[bus].TCD->NBYTES_MLNO = 4;
+      DMA[bus].TCD->SLAST = 0;
+      DMA[bus].TCD->DADDR = TDMBuffer[bus];
+      DMA[bus].TCD->DOFF = 4;
+      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer[bus]);
+      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
+      DMA[bus].triggerAtHardwareEvent(DMAMUX_SOURCE_I2S0_RX);
+      //DMA[bus].enable();
+
+      I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+      I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
+#elif defined(__IMXRT1062__)
+      if (bus == TDM2) {
+	CORE_PIN5_CONFIG = 2;  //2:RX_DATA0
+	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
+	DMA[bus].TCD->SADDR = &I2S2_RDR0;
+      }
+      else {
+	CORE_PIN8_CONFIG  = 3;  //RX_DATA0
+	IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
+	DMA[bus].TCD->SADDR = &I2S1_RDR0;
+      }
+      DMA[bus].TCD->SOFF = 0;
+      DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
+      DMA[bus].TCD->NBYTES_MLNO = 4;
+      DMA[bus].TCD->SLAST = 0;
+      DMA[bus].TCD->DADDR = TDMBuffer[bus];
+      DMA[bus].TCD->DOFF = 4;
+      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer[bus]);
+      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
+      DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
+      //DMA[bus].enable();
+
+      if (bus == TDM2) {
+	I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+	I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
+      }
+      else
+	I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+#endif
+      DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
+    }
+  }
+  /*
+  if (TDMUse == 3)
+    DataHead[TDM2] = NChans[TDM1];
+  */
+  for (int bus=0; bus < 2; bus++) {
+    if (TDMUse & (1 << bus))
+      DMA[bus].enable();
+  }
 }
 
 
 void TeensyTDM::stop() {
-  DMA.disable();
-  DMA.detachInterrupt();
+  for (int bus=0; bus < 2; bus++) {
+    if (TDMUse & (1 << bus)) {
+      DMA[bus].disable();
+      DMA[bus].detachInterrupt();
+    }
+  }
 }
 
 
-void TeensyTDM::TDMISR() {
-  uint32_t daddr = (uint32_t)(DMA.TCD->DADDR);
-  DMA.clearInterrupt();
-
+void TeensyTDM::TDMISR(uint8_t bus) {
+  uint32_t daddr = (uint32_t)(DMA[bus].TCD->DADDR);
+  DMA[bus].clearInterrupt();
+  
   const uint32_t *src;
-  if (daddr < (uint32_t)TDMBuffer + sizeof(TDMBuffer) / 2) {
+  if (daddr < (uint32_t)TDMBuffer[bus] + sizeof(TDMBuffer[bus]) / 2) {
     // DMA is receiving to the first half of the buffer
     // need to remove data from the second half
-    src = &TDMBuffer[TDM_FRAMES*4];
+    src = &TDMBuffer[bus][TDM_FRAMES*4];
   } else {
     // DMA is receiving to the second half of the buffer
     // need to remove data from the first half
-    src = &TDMBuffer[0];
+    src = &TDMBuffer[bus][0];
   }
 
+  if (DataHead[bus] >= NBuffer)
+    DataHead[bus] -= NBuffer;
+
 #if IMXRT_CACHE_ENABLED >= 1
-  arm_dcache_delete((void*)src, sizeof(TDMBuffer) / 2);
+  arm_dcache_delete((void*)src, sizeof(TDMBuffer[bus]) / 2);
 #endif
   // copy from src into cyclic buffer:
-  unsigned int nchannels = NChannels;
+  unsigned int nchannels = NChans[bus];
   sample_t buffer[nchannels];
   for (unsigned int i=0; i < TDM_FRAMES/2/DownSample; i++) {
     const sample_t *slot = (const sample_t *)src;
@@ -459,21 +519,38 @@ void TeensyTDM::TDMISR() {
 	ci += c%2 > 0 ? -1 : +1;
       buffer[ci] = *slot++;
     }
-    memcpy((void *)&Buffer[Index], (void *)buffer, sizeof(buffer));
-    Index += nchannels;
-    if (Index >= NBuffer) {
-      Index -= NBuffer;
-      Cycle++;
-    }
+    memcpy((void *)&Buffer[DataHead[bus]], (void *)buffer, sizeof(buffer));
+    DataHead[bus] += NChannels;
+    if (DataHead[bus] >= NBuffer)
+      DataHead[bus] -= NBuffer;
     // next frames:
     for (unsigned int j=0; j < DownSample; j++)
       src += 8;
   }
+  DMACounter[bus]++;
+  /*
+  if (TDMUse == 3) {
+    if (DMACounter[TDM1] == DMACounter[TDM2]) {
+      if (DataHead[TDM2] < Index)
+	Cycle++;
+      Index = DataHead[TDM2];
+    }
+  } else {
+  */
+    if (DataHead[bus] < Index)
+      Cycle++;
+    Index = DataHead[bus];
+    //}
 }
 
 
-void TeensyTDM::ISR() {
-  TDM->TDMISR();
+void TeensyTDM::ISR0() {
+  TDM->TDMISR(TDM1);
+}
+
+
+void TeensyTDM::ISR1() {
+  TDM->TDMISR(TDM2);
 }
 
 
