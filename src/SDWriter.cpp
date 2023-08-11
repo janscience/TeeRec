@@ -257,9 +257,13 @@ float SDWriter::writeInterval() const {
 }
 
  
-void SDWriter::setWriteInterval() {
-  WriteInterval = uint(250*Data->bufferTime()); // a quarter of the buffer
-  //WriteInterval = uint(100*Data->bufferTime()); // a tenth of the buffer
+void SDWriter::setWriteInterval(float time) {
+  if (time < 0)
+    WriteInterval = uint(-1000*time*Data->bufferTime()); // fraction of the buffer
+  else
+    WriteInterval = uint(1000*time);                     // time interval in seconds
+  if (0.001*WriteInterval > 0.5*Data->bufferTime())
+    Serial.println("WARNING! SDWriter::setWriteInterval() write larger than half the buffer!");
 }
 
 

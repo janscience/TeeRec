@@ -119,7 +119,9 @@ class SDWriter : public DataWorker {
   float writeInterval() const;
 
   // Set write interval depending on settings of the DataWorker.
-  void setWriteInterval();
+  // If time is positive it is a time interval in seconds.
+  // If time is negative it is the fraction of the full data buffer.
+  void setWriteInterval(float time=-0.25);
 
   // Return time after last write in seconds.
   float writeTime() const;
