@@ -310,19 +310,19 @@ void TeensyTDM::begin() {
   }
 
   double C = ((double)fs * 256 * n1 * n2) / 24000000;
-  //  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ",freq,n1,n2,C);
+  //  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ", freq, n1, n2, C);
   int c0 = C;
   int c2 = 10000;
   int c1 = C * c2 - (c0 * c2);
-  //  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n",c0,c1,c2);
+  //  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n", c0, c1, c2);
   set_audioClock(c0, c1, c2, true);
+
+  n1 = n1 / 2; // double speed for TDM
   
   if (TDMUse & (1 << TDM1)) {
     // clear SAI1_CLK register locations
     CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI1_CLK_SEL_MASK))
       | CCM_CSCMR1_SAI1_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
-
-    n1 = n1 / 2; // double speed for TDM
 
     CCM_CS1CDR = (CCM_CS1CDR & ~(CCM_CS1CDR_SAI1_CLK_PRED_MASK | CCM_CS1CDR_SAI1_CLK_PODF_MASK))
       | CCM_CS1CDR_SAI1_CLK_PRED(n1 - 1)  // &0x07
@@ -361,8 +361,6 @@ void TeensyTDM::begin() {
     // clear SAI2_CLK register locations
     CCM_CSCMR1 = (CCM_CSCMR1 & ~(CCM_CSCMR1_SAI2_CLK_SEL_MASK))
       | CCM_CSCMR1_SAI2_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
-
-    n1 = n1 / 2; //Double Speed for TDM
 
     CCM_CS2CDR = (CCM_CS2CDR & ~(CCM_CS2CDR_SAI2_CLK_PRED_MASK | CCM_CS2CDR_SAI2_CLK_PODF_MASK))
       | CCM_CS2CDR_SAI2_CLK_PRED(n1-1) // &0x07
@@ -453,7 +451,7 @@ void TeensyTDM::start() {
       DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
-      //DMA[bus].enable();
+      DMA[bus].enable();
 
       if (bus == TDM2) {
 	I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
@@ -465,14 +463,15 @@ void TeensyTDM::start() {
       DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
     }
   }
-  /*
   if (TDMUse == 3)
     DataHead[TDM2] = NChans[TDM1];
-  */
+
+  /*
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus))
       DMA[bus].enable();
   }
+  */
 }
 
 
@@ -528,19 +527,17 @@ void TeensyTDM::TDMISR(uint8_t bus) {
       src += 8;
   }
   DMACounter[bus]++;
-  /*
   if (TDMUse == 3) {
     if (DMACounter[TDM1] == DMACounter[TDM2]) {
-      if (DataHead[TDM2] < Index)
+      if (DataHead[TDM1] < Index)
 	Cycle++;
-      Index = DataHead[TDM2];
+      Index = DataHead[TDM1];
     }
   } else {
-  */
     if (DataHead[bus] < Index)
       Cycle++;
-    Index = DataHead[bus];
-    //}
+    Index = DataHead[bus] - 8;
+  }
 }
 
 
