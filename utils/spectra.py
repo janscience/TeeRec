@@ -79,7 +79,7 @@ def unwrap(data, thresh=-0.01):
     return data
 
 
-def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save):
+def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, nrows, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 96000, 2, 0)
     #data = np.array(data, dtype=np.double)
@@ -94,7 +94,7 @@ def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save):
     if channel >= 0:
         nchannels = 1
     if nchannels > 1:
-        fig, axs = plt.subplots(2, nchannels//2, sharex=True, sharey=True)
+        fig, axs = plt.subplots(nrows, nchannels//nrows, sharex=True, sharey=True)
         axs = axs.ravel()
     else:
         fig, ax = plt.subplots()
@@ -133,9 +133,9 @@ def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save):
                 axs[c].text(tscale*(freqs[pi]+40), db[pi]+0.4, '%.0fHz' % freqs[pi])
         cs = pins[ch] if ch < len(pins) else ch
         axs[c].set_title(f'channel {cs}')
-        if  nchannels == 1 or c // (nchannels//2) == 1:
+        if  nchannels == 1 or c // (nchannels//nrows) == nrows - 1:
             axs[c].set_xlabel(f'Frequency [{funit}]')
-        if nchannels == 1 or c % (nchannels//2) == 0:
+        if nchannels == 1 or c % (nchannels//nrows) == 0:
             axs[c].set_ylabel('Power [dBFS]')
         if maxfreq:
             axs[c].set_xlim(0, tscale*maxfreq)
@@ -177,6 +177,9 @@ if __name__ == '__main__':
                         metavar='THRESH')
     parser.add_argument('-u', dest='unwrap', action='store_true', 
                         help='Unwrap clipped data using unwrap() from audioio package')
+    parser.add_argument('-r', dest='nrows', default=2, type=int,
+                        help='Number of rows in plot',
+                        metavar='NROWS')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs='+', type=str,
@@ -189,8 +192,9 @@ if __name__ == '__main__':
     mindb = args.mindb
     thresh = args.thresh
     unwrapd = args.unwrap
+    nrows = args.nrows
     save = args.save
     plt.rcParams['axes.xmargin'] = 0
     plt.rcParams['axes.ymargin'] = 0
     for path in args.file:
-        plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, save)
+        plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, nrows, save)
