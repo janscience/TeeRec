@@ -425,7 +425,6 @@ void TeensyTDM::start() {
       DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(DMAMUX_SOURCE_I2S0_RX);
-      //DMA[bus].enable();
 
       I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
       I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
@@ -451,7 +450,6 @@ void TeensyTDM::start() {
       DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
-      DMA[bus].enable();
 
       if (bus == TDM2) {
 	I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
@@ -463,15 +461,14 @@ void TeensyTDM::start() {
       DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
     }
   }
+  
   if (TDMUse == 3)
     DataHead[TDM2] = NChans[TDM1];
 
-  /*
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus))
       DMA[bus].enable();
   }
-  */
 }
 
 
