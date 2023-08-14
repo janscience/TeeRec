@@ -20,7 +20,7 @@ DMASetting TeensyADC::DMASettings[2][NMajors];
 
 TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer,
 		     int8_t channel0, int8_t channel1) :
-  DataBuffer(buffer, nbuffer) {
+  DataBuffer(buffer, nbuffer, MajorSize) {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;
@@ -534,6 +534,9 @@ void TeensyADC::report() {
     sprintf(bts, "%.0fms", 1000.0*bt);
   else
     sprintf(bts, "%.2fs", bt);
+  float dt = DMABufferTime();
+  char dts[20];
+  sprintf(dts, "%.1fms", 1000.0*dt);
   Serial.println("ADC settings:");
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
@@ -544,6 +547,7 @@ void TeensyADC::report() {
   Serial.printf("  ADC0:       %s\n", chans0);
   Serial.printf("  ADC1:       %s\n", chans1);
   Serial.printf("  Buffer:     %s\n", bts);
+  Serial.printf("  DMA time:    %s\n", dts);
   Serial.println();
 }
 

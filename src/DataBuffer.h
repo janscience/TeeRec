@@ -32,7 +32,7 @@ class DataBuffer : public DataWorker {
 public:
 
   // Pass a buffer that has been created with the DATA_BUFFER macro.
-  DataBuffer(volatile sample_t *buffer, size_t nbuffer);
+  DataBuffer(volatile sample_t *buffer, size_t nbuffer, size_t dmabuffer=0);
   
   // Return total number of samples the buffer holds.
   size_t nbuffer() const { return NBuffer; };
@@ -68,6 +68,16 @@ public:
   // sampling rate and the number of channels.
   float bufferTime() const;
 
+  // The size of a DMA buffer in samples.
+  size_t DMABufferSize() const { return NDMABuffer; };
+
+  // Time the DMA buffer can hold in seconds given the
+  // sampling rate and the number of channels.
+  float DMABufferTime() const;
+  
+  // Inform the DataBuffer about the size of a DMA buffer used to get the data.
+  void setDMABufferSize(size_t samples);
+
   // Number of frames (samples of a single channel) corresponding to
   // time (in seconds).
   size_t frames(float time) const;
@@ -89,7 +99,7 @@ public:
   // Can be much larger than bufferTime().
   float sampledTime() const;
 
-  // Return sample right after most current data value in data buffer
+  // Return index to sample right after most current data value in data buffer
   // optionally decremented by decr frames.
   size_t currentSample(size_t decr=0) const;
 
@@ -112,12 +122,13 @@ public:
   
 protected:
 
-  size_t NBuffer;            // Number of samples the buffer can hold.
-  volatile sample_t *Buffer; // Pointer to the one and only buffer
+  size_t NBuffer;            // number of samples the buffer can hold.
+  volatile sample_t *Buffer; // pointer to the one and only buffer
   uint8_t Bits;
   uint32_t Rate;             // sampling rate per channel
   uint8_t NChannels;         // number of channels multiplexed into the buffer
   uint8_t DataBits;
+  size_t NDMABuffer;         // number of samples of a DMA buffer
   
 };
 

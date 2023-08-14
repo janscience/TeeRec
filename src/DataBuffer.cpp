@@ -2,7 +2,8 @@
 #include <DataBuffer.h>
 
 
-DataBuffer::DataBuffer(volatile sample_t *buffer, size_t nbuffer)
+DataBuffer::DataBuffer(volatile sample_t *buffer, size_t nbuffer,
+		       size_t dmabuffer)
   : DataWorker() {
   NBuffer = nbuffer;
   Buffer = buffer;
@@ -14,6 +15,7 @@ DataBuffer::DataBuffer(volatile sample_t *buffer, size_t nbuffer)
   memset((void *)Buffer, 0, sizeof(sample_t)*NBuffer);
   Data = this;
   Producer = 0;
+  NDMABuffer = dmabuffer;
 }
 
 
@@ -39,6 +41,16 @@ void DataBuffer::setDataResolution(uint8_t bits) {
 
 float DataBuffer::bufferTime() const {
   return float(NBuffer/NChannels)/Rate;
+}
+
+
+float DataBuffer::DMABufferTime() const {
+  return float(NDMABuffer/NChannels)/Rate;
+}
+
+
+void DataBuffer::setDMABufferSize(size_t samples) {
+  NDMABuffer = samples;
 }
 
 

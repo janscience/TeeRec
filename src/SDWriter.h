@@ -167,9 +167,12 @@ class SDWriter : public DataWorker {
   // If maxFileSamples() is set (>0), then stop writing after that
   // many samples.
   // Return number of written samples or a negative number on error:
+  //  0: no data available yet.
   // -1: file is not open.
   // -2: file is already full according to maxFileSamples().
-  // -3: no data are available.
+  // -3: no data are available, although there should be some.
+  // -4: overrun.
+  // -5: data were not written to file (disk full?)
   ssize_t write();
 
   // Start writing to a file from the current sample minus decr samples on.

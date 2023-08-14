@@ -19,7 +19,7 @@ TeensyTDM *TeensyTDM::TDM = 0;
 
 
 TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
-  DataBuffer(buffer, nbuffer) {
+  DataBuffer(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
   TDM = this;
   setDataResolution(16);
   Bits = 32;
@@ -149,12 +149,16 @@ void TeensyTDM::report() {
     sprintf(bts, "%.0fms", 1000.0*bt);
   else
     sprintf(bts, "%.2fs", bt);
+  float dt = DMABufferTime();
+  char dts[20];
+  sprintf(dts, "%.1fms", 1000.0*dt);
   Serial.println("TDM settings:");
   Serial.printf("  rate:        %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution:  %dbits\n", Bits);
   Serial.printf("  channels:    %d\n", NChannels);
   Serial.printf("  swap l/r:    %d\n", SwapLR);
   Serial.printf("  buffer time: %s\n", bts);
+  Serial.printf("  DMA time:    %s\n", dts);
   Serial.println();
 }
 

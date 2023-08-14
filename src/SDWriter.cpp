@@ -2,6 +2,9 @@
 #include <SDWriter.h>
 
 
+#define DEBUG 1
+
+
 SDCard::SDCard() {
   Available = false;
   NameCounter = 0;
@@ -263,7 +266,7 @@ void SDWriter::setWriteInterval(float time) {
   else
     WriteInterval = uint(1000*time);                     // time interval in seconds
   if (0.001*WriteInterval > 0.5*Data->bufferTime())
-    Serial.println("WARNING! SDWriter::setWriteInterval() write larger than half the buffer!");
+    Serial.println("WARNING! SDWriter::setWriteInterval() interval larger than half the buffer!");
 }
 
 
@@ -273,14 +276,9 @@ float SDWriter::writeTime() const {
 
 
 bool SDWriter::pending() {
-  //if (DataFile && available() >= 2048 && SDC != 0 && !SDC->isBusy()) {
+  //return (DataFile && available() >= 2048 && SDC != 0 && !SDC->isBusy()) {
   // or a combination of samples and writetime!!!
-  if (DataFile && WriteTime > WriteInterval && SDC != 0 && !SDC->isBusy()) {
-    WriteTime -= WriteInterval;
-    return true;
-  }
-  else
-    return false;
+  return (DataFile && WriteTime > WriteInterval && SDC != 0 && !SDC->isBusy());
 }
 
 
@@ -293,7 +291,6 @@ bool SDWriter::open(const char *fname) {
   }
   DataFile = SDC->openWrite(fname);
   FileSamples = 0;
-  WriteTime = 0;
   return isOpen();
 }
 
@@ -358,13 +355,34 @@ ssize_t SDWriter::write() {
   size_t samples1 = 0;
   if (! (DataFile))
     return -1;
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+  if (FileMaxSamples > 0 && FileSamples >= FileMaxSamples)
     return -2;
   size_t missed = overrun();
-  if (missed > 0)
+  if (missed > 0) {
+#ifdef DEBUG
     Serial.printf("ERROR in SDWriter::writeData(): Data overrun 1! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
-  if (available() == 0)
-    return -3;
+    int wt = WriteTime;
+    Serial.printf("Last write %dms ago.\n", wt);
+#endif
+    return -4;
+  }
+  if (available() == 0) {
+    if (writeTime() > 4*Data->DMABufferTime()) {
+#ifdef DEBUG
+      Serial.printf(" SD cycle: %5d,  SD index: %6d\n", Cycle, Index);
+      Serial.printf("TDM cycle: %5d, TDM index: %6d\n", Data->cycle(), Data->index());
+#endif
+      return -3;
+    }
+    else
+      return 0;
+  }
+#ifdef DEBUG
+  if (WriteTime > 30) {
+    int wt = WriteTime;
+    Serial.printf("Last write %dms ago.\n", wt);
+  }
+#endif
   size_t index = Producer->index();
   size_t nwrite = 0;
   if (Index >= index) {
@@ -373,18 +391,24 @@ ssize_t SDWriter::write() {
       nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
       nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
+      if (nbytes == 0)
+	return -5;
+#ifdef DEBUG
+      if (WriteTime > 30) {
+	int wt = WriteTime;
+	Serial.printf("Needed %dms for writing end-of-buffer data to SD card.\n", wt);
+      }
+#endif
+      WriteTime = 0;
       samples0 = nbytes / sizeof(sample_t);
       increment(samples0);
       FileSamples += samples0;
       if (samples0 < nwrite) {
-	Serial.printf("ERROR: only wrote %d samples of %d to the end of the data buffer\n", samples0, nwrite);
+	Serial.printf("WARNING: only wrote %d samples of %d to the end of the data buffer\n", samples0, nwrite);
 	return samples0;
       }
-      if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+      if (FileMaxSamples > 0 && FileSamples >= FileMaxSamples)
 	return samples0;
-      size_t missed = overrun();
-      if (missed > 0)
-	Serial.printf("ERROR in SDWriter::writeData(): Data overrun 2! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
       index = Producer->index();
     }
   }
@@ -394,12 +418,21 @@ ssize_t SDWriter::write() {
   nwrite = (nwrite/MajorSize)*MajorSize;          // write only full blocks
   if (nwrite > 0) {
     nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
+    if (nbytes == 0)
+      return -5;
+    WriteTime = 0;
     samples1 = nbytes / sizeof(sample_t);
     if (samples1 < nwrite)
-      Serial.printf("ERROR: only wrote %d samples of %d\n", samples1, nwrite);
+      Serial.printf("WARNING: only wrote %d samples of %d\n", samples1, nwrite);
     increment(samples1);
     FileSamples += samples1;
   }
+#ifdef DEBUG
+  if (WriteTime > 30) {
+    int wt = WriteTime;
+    Serial.printf("Needed %dms for writing beginning-of-buffer data to SD card.\n", wt);
+  }
+#endif
   return samples0 + samples1;
 }
 
@@ -453,7 +486,7 @@ float SDWriter::maxFileTime() const {
 
 
 bool SDWriter::endWrite() {
-  return ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples );
+  return (FileMaxSamples > 0 && FileSamples >= FileMaxSamples);
 }
 
 
