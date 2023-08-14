@@ -362,7 +362,7 @@ ssize_t SDWriter::write() {
     return -2;
   size_t missed = overrun();
   if (missed > 0)
-    Serial.printf("ERROR in SDWriter::writeData(): Data overrun! Missed %d samples.\n", missed);
+    Serial.printf("ERROR in SDWriter::writeData(): Data overrun 1! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
   if (available() == 0)
     return -3;
   size_t index = Producer->index();
@@ -380,10 +380,14 @@ ssize_t SDWriter::write() {
 	Serial.printf("ERROR: only wrote %d samples of %d to the end of the data buffer\n", samples0, nwrite);
 	return samples0;
       }
+      if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
+	return samples0;
+      size_t missed = overrun();
+      if (missed > 0)
+	Serial.printf("ERROR in SDWriter::writeData(): Data overrun 2! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
+      index = Producer->index();
     }
   }
-  if ( FileMaxSamples > 0 && FileSamples >= FileMaxSamples )
-    return samples0;
   nwrite = index - Index;
   if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
     nwrite = FileMaxSamples - FileSamples;

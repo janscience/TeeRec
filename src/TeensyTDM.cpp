@@ -7,9 +7,10 @@
 #if defined(KINETISK) || defined(__IMXRT1062__)
 
 // DMA buffer for 256 TDM frames:
+#define TDM_FRAME_SIZE  8
 #define TDM_FRAMES  256
 DMAMEM __attribute__((aligned(32)))
-static uint32_t TDMBuffer[2][TDM_FRAMES*8];
+static uint32_t TDMBuffer[2][TDM_FRAMES*TDM_FRAME_SIZE];
 
 DMAChannel TeensyTDM::DMA[2];
 
@@ -490,7 +491,7 @@ void TeensyTDM::TDMISR(uint8_t bus) {
   if (daddr < (uint32_t)TDMBuffer[bus] + sizeof(TDMBuffer[bus]) / 2) {
     // DMA is receiving to the first half of the buffer
     // need to remove data from the second half
-    src = &TDMBuffer[bus][TDM_FRAMES*4];
+    src = &TDMBuffer[bus][TDM_FRAMES*TDM_FRAME_SIZE/2];
   } else {
     // DMA is receiving to the second half of the buffer
     // need to remove data from the first half

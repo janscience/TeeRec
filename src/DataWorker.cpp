@@ -59,23 +59,17 @@ size_t DataWorker::cycle() const {
 
 
 size_t DataWorker::available() const {
-  if (Producer == 0 && Data == 0)
+  if (Producer == 0 || Data == 0)
     return 0;
   size_t index = 0;
   size_t cycle = 0;
   noInterrupts();
-  if (Producer != 0) {
-    index = Producer->Index;
-    cycle = Producer->Cycle;
-  }
-  else {
-    index = Data->Index;
-    cycle = Data->Cycle;
-  }
+  index = Producer->Index;
+  cycle = Producer->Cycle;
   interrupts();
-  if (Index < index)
+  if (cycle == Cycle && index > Index)
     return index - Index;
-  else if (Cycle < cycle)
+  else if (cycle == Cycle + 1 && index <= Index)
     return Data->nbuffer() - Index + index;
   else
     return 0;
@@ -94,18 +88,14 @@ size_t DataWorker::overrun() {
   interrupts();
   // compute number of missed samples:
   size_t missed = 0;
-  if (index >= Index && cycle > Cycle)
-    missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
-  else if (index < Index && cycle > Cycle+1)
+  if (cycle > Cycle+1 && index < Index)
     missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
+  else if (cycle > Cycle && index >= Index)
+    missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
   if (missed > 0) {
     // update tail:
-    Index = index + Data->nchannels();
+    Index = index;
     Cycle = cycle - 1;
-    if (Index >= Data->nbuffer()) {
-      Index -= Data->nbuffer();
-      Cycle++;
-    }
   }
   return missed;
 }
