@@ -94,6 +94,9 @@ class TeensyTDM : public DataBuffer {
   // Start data transfer to buffer.
   void start();
 
+  // True if TDM is running and transfering to buffer.
+  bool running() const { return Running; };
+
   // Stop data transfer to buffer.
   void stop();
 
@@ -115,6 +118,8 @@ class TeensyTDM : public DataBuffer {
 
   uint8_t TDMUse;
   uint8_t NChans[2];
+
+  bool Running;
   
 };
 

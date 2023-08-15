@@ -160,6 +160,12 @@ class SDWriter : public DataWorker {
   // file size.
   bool closeWave();
 
+  // Name of the currently or previously open file.
+  const String &name() const {return FileName; };
+
+  // Basename of the currently or previously open file (without extension).
+  String baseName() const;
+
   // Return wave header. 
   WaveHeader &header() { return Wave; };
 
@@ -213,6 +219,7 @@ class SDWriter : public DataWorker {
   SDCard *SDC;
   bool SDOwn;
   mutable File DataFile;   // mutable because File from FS.h has non-constant bool() function
+  String FileName;         // name of the currently or previously open file.
 
   WaveHeader Wave;
 

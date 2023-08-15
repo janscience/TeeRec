@@ -77,8 +77,8 @@ size_t DataWorker::available() const {
   else {
 #ifdef DEBUG
     Serial.printf("No data available:\n");
-    Serial.printf("    Worker cycle: %5d,   Worker index: %6d\n", Cycle, Index);
-    Serial.printf("  Producer cycle: %5d, Producer index: %6d\n", cycle, index);
+    Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
+    Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, Data->nbuffer());
 #endif
     return 0;
   }
@@ -100,17 +100,19 @@ size_t DataWorker::overrun() {
   if (cycle > Cycle+1 && index < Index) {
     missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
 #ifdef DEBUG
-    Serial.printf("Overrun 1 by %d samples:\n", missed);
-    Serial.printf("    Worker cycle: %5d,   Worker index: %6d\n", Cycle, Index);
-    Serial.printf("  Producer cycle: %5d, Producer index: %6d\n", cycle, index);
+    Serial.printf("Overrun 1 by %zu samples:\n", missed);
+    Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
+    Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, Data->nbuffer());
 #endif
   }
   else if (cycle > Cycle && index >= Index) {
     missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
 #ifdef DEBUG
-    Serial.printf("Overrun 2 by %d samples:\n", missed);
-    Serial.printf("    Worker cycle: %5d,   Worker index: %6d\n", Cycle, Index);
-    Serial.printf("  Producer cycle: %5d, Producer index: %6d\n", cycle, index);
+    if (missed > 0) {
+      Serial.printf("Overrun 2 by %zu samples:\n", missed);
+      Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
+      Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, index, Data->nbuffer());
+    }
 #endif
   }
   if (missed > 0) {

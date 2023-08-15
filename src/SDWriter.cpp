@@ -209,6 +209,7 @@ SDWriter::SDWriter(const DataWorker &producer) :
   DataWorker(&producer) {
   SDC = new SDCard;
   SDOwn = true;
+  FileName = "";
   DataFile.close();
   WriteInterval = 100;
   WriteTime = 0;
@@ -221,6 +222,7 @@ SDWriter::SDWriter(SDCard &sd, const DataWorker &producer) :
   DataWorker(&producer) {
   SDC = &sd;
   SDOwn = false;
+  FileName = "";
   DataFile.close();
   WriteInterval = 100;
   WriteTime = 0;
@@ -289,6 +291,7 @@ bool SDWriter::open(const char *fname) {
     Serial.println("failed to open file because the file is still open.");
     return false;
   }
+  FileName = fname;
   DataFile = SDC->openWrite(fname);
   FileSamples = 0;
   return isOpen();
@@ -307,10 +310,7 @@ void SDWriter::close() {
 
 bool SDWriter::openWave(const char *fname, int32_t samples,
 			const char *datetime) {
-  String name(fname);
-  if (name.indexOf('.') < 0 )
-    name += ".wav";
-  if (!open(name.c_str()))                // 11ms
+  if (!open(fname))
     return false;
   if (samples < 0)
     samples = FileMaxSamples;
@@ -349,6 +349,15 @@ bool SDWriter::closeWave() {
 }
 
 
+String SDWriter::baseName() const {
+  int idx = FileName.lastIndexOf('.');
+  if (idx >= 0)
+    return FileName.substring(0, idx);
+  else
+    return FileName;
+}
+
+
 ssize_t SDWriter::write() {
   size_t nbytes = 0;
   size_t samples0 = 0;
@@ -360,7 +369,7 @@ ssize_t SDWriter::write() {
   size_t missed = overrun();
   if (missed > 0) {
 #ifdef DEBUG
-    Serial.printf("ERROR in SDWriter::writeData(): Data overrun 1! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
+    Serial.printf("ERROR in SDWriter::write(): Data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
     int wt = WriteTime;
     Serial.printf("Last write %dms ago.\n", wt);
 #endif

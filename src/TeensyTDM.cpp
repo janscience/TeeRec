@@ -34,6 +34,7 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
     DataHead[bus] = 0;
   }
   TDMUse = 0;
+  Running = false;
 }
 
 
@@ -153,12 +154,12 @@ void TeensyTDM::report() {
   char dts[20];
   sprintf(dts, "%.1fms", 1000.0*dt);
   Serial.println("TDM settings:");
-  Serial.printf("  rate:        %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  resolution:  %dbits\n", Bits);
-  Serial.printf("  channels:    %d\n", NChannels);
-  Serial.printf("  swap l/r:    %d\n", SwapLR);
-  Serial.printf("  buffer time: %s\n", bts);
-  Serial.printf("  DMA time:    %s\n", dts);
+  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  Serial.printf("  resolution: %dbits\n", Bits);
+  Serial.printf("  channels:   %d\n", NChannels);
+  Serial.printf("  swap l/r:   %d\n", SwapLR);
+  Serial.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
+  Serial.printf("  DMA time:   %s\n", dts);
   Serial.println();
 }
 
@@ -474,6 +475,9 @@ void TeensyTDM::start() {
     if (TDMUse & (1 << bus))
       DMA[bus].enable();
   }
+
+  if (TDMUse > 0)
+    Running = true;
 }
 
 
@@ -484,6 +488,7 @@ void TeensyTDM::stop() {
       DMA[bus].detachInterrupt();
     }
   }
+  Running = false;
 }
 
 

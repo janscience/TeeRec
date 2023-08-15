@@ -267,6 +267,9 @@ class TeensyADC : public DataBuffer {
   // Start the acquisition based on the channel, rate, and buffer settings.
   void start();
 
+  // True if ADC is running and transfering to buffer.
+  bool running() const { return Running; };
+
   // Stop acquisition.
   void stop();
 
@@ -301,6 +304,7 @@ class TeensyADC : public DataBuffer {
   static DMAMEM uint8_t SC1AChannels[2][MaxChannels] __attribute__((aligned(MaxChannels)));
   uint8_t NChans[2];
   uint8_t ADCUse;
+  bool Running;
 
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;

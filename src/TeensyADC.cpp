@@ -41,6 +41,7 @@ TeensyADC::TeensyADC(volatile sample_t *buffer, size_t nbuffer,
   Rate = 0;
   NChannels = 0;
   ADCUse = 0;
+  Running = false;
   ADCC = this;
   if (channel0 >= 0)
     setChannel(0, channel0);
@@ -546,8 +547,8 @@ void TeensyADC::report() {
   Serial.printf("  reference:  %s\n", referenceStr());
   Serial.printf("  ADC0:       %s\n", chans0);
   Serial.printf("  ADC1:       %s\n", chans1);
-  Serial.printf("  Buffer:     %s\n", bts);
-  Serial.printf("  DMA time:    %s\n", dts);
+  Serial.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
+  Serial.printf("  DMA time:   %s\n", dts);
   Serial.println();
 }
 
@@ -599,6 +600,9 @@ void TeensyADC::start() {
   }
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
+
+  if (ADCUse > 0)
+    Running = true;
 }
 
 
@@ -613,6 +617,7 @@ void TeensyADC::stop() {
       DMABuffer[adc].detachInterrupt();
     }
   }
+  Running = false;
 }
 
 
