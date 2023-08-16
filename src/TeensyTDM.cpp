@@ -543,7 +543,7 @@ void TeensyTDM::TDMISR(uint8_t bus) {
   } else {
     if (DataHead[bus] < Index)
       Cycle++;
-    Index = DataHead[bus] - 8;
+    Index = DataHead[bus];
   }
 }
 

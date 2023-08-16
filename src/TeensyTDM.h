@@ -101,11 +101,11 @@ class TeensyTDM : public DataBuffer {
   void stop();
 
   
- protected:
+protected:
   
   static DMAChannel DMA[2];
   volatile size_t DMACounter[2];  // total count of TDMBuffer segments
-  size_t DataHead[2];             // current index for each TDM bus for writing. Only used in isr.
+  volatile size_t DataHead[2];    // current index for each TDM bus for writing. Only used in isr.
 
   void TDMISR(uint8_t tdm);
   static void ISR0();

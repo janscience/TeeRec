@@ -76,9 +76,17 @@ size_t DataWorker::available() const {
     return Data->nbuffer() - Index + index;
   else {
 #ifdef DEBUG
-    Serial.printf("No data available:\n");
-    Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
-    Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, Data->nbuffer());
+    Serial.println("No data available:");
+    Serial.print("    Worker cycle: ");
+    Serial.print(Cycle);
+    Serial.print(",   Worker index: ");
+    Serial.println(Index);
+    Serial.print("  Producer cycle: ");
+    Serial.print(cycle);
+    Serial.print(", Producer index: ");
+    Serial.print(index);
+    Serial.print(", Buffer size: ");
+    Serial.println(Data->nbuffer());
 #endif
     return 0;
   }
@@ -100,18 +108,38 @@ size_t DataWorker::overrun() {
   if (cycle > Cycle+1 && index < Index) {
     missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
 #ifdef DEBUG
-    Serial.printf("Overrun 1 by %zu samples:\n", missed);
-    Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
-    Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, Data->nbuffer());
+    Serial.print("Overrun 1 by ");
+    Serial.print(missed);
+    Serial.println(" samples:");
+    Serial.print("    Worker cycle: ");
+    Serial.print(Cycle);
+    Serial.print(",   Worker index: ");
+    Serial.println(Index);
+    Serial.print("  Producer cycle: ");
+    Serial.print(cycle);
+    Serial.print(", Producer index: ");
+    Serial.print(index);
+    Serial.print(", Buffer size: ");
+    Serial.println(Data->nbuffer());
 #endif
   }
   else if (cycle > Cycle && index >= Index) {
     missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
 #ifdef DEBUG
     if (missed > 0) {
-      Serial.printf("Overrun 2 by %zu samples:\n", missed);
-      Serial.printf("    Worker cycle: %5zu,   Worker index: %7zu\n", Cycle, Index);
-      Serial.printf("  Producer cycle: %5zu, Producer index: %7zu, Buffer size: %7zu\n", cycle, index, index, Data->nbuffer());
+      Serial.print("Overrun 2 by ");
+      Serial.print(missed);
+      Serial.println(" samples:");
+      Serial.print("    Worker cycle: ");
+      Serial.print(Cycle);
+      Serial.print(",   Worker index: ");
+      Serial.println(Index);
+      Serial.print("  Producer cycle: ");
+      Serial.print(cycle);
+      Serial.print(", Producer index: ");
+      Serial.print(index);
+      Serial.print(", Buffer size: ");
+      Serial.println(Data->nbuffer());
     }
 #endif
   }

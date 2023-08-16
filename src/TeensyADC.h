@@ -313,7 +313,7 @@ class TeensyADC : public DataBuffer {
 
   ADC ADConv;
 
-  size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
+  volatile size_t DataHead[2]; // current index for each ADC for writing. Only used in isr.
   uint8_t DataShift;  // number of bits ADC data need to be shifted to make them 16 bit.
   uint16_t DataOffs;  // offset to be added to ADC data to convert them to signed integers.
   bool DataScaling;   // scale ADC data to 16bit.
