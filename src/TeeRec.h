@@ -1,6 +1,8 @@
 #include <DataWorker.h>
 #include <DataBuffer.h>
 #include <TeensyADC.h>
+#include <TeensyTDM.h>
+#include <ControlPCM186x.h>
 #include <WaveHeader.h>
 #include <SDWriter.h>
 

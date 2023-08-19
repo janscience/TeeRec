@@ -2,32 +2,37 @@
 
 # TeeRec - Teensy recorder
 
-Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6 microcontrollers.
+Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6/4.0/4.1 microcontrollers.
 
-Based on Pedro Villanueva's [ADC](https://github.com/pedvide/ADC)
-library, Paul Stoffregen's
+Recording from the Teensy's internal ADCs
+([TeensyADC](src/TeensyADC.h)) is based on Pedro Villanueva's
+[ADC](https://github.com/pedvide/ADC) library, Paul Stoffregen's
 [DMAChannel](https://github.com/PaulStoffregen/cores/tree/master/teensy3),
 Bill Greiman's [SdFat](https://github.com/greiman/SdFat) library, and
-on Stefan Mucha's first
-[EOD logger sketch](https://github.com/muchaste/EOD-Logger/tree/master/eodlogger_v1)
-with contributions by
-[Lydia Federman](https://github.com/LydiaFe/EOD-Logger)
-(simultaneous recordings from both ADCs) and
-[Sebastian Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2channel_barebone/eodlogger_8channel.ino)
+on Stefan Mucha's first [EOD logger
+sketch](https://github.com/muchaste/EOD-Logger/tree/master/eodlogger_v1)
+with contributions by [Lydia
+Federman](https://github.com/LydiaFe/EOD-Logger) (simultaneous
+recordings from both ADCs) and [Sebastian
+Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2channel_barebone/eodlogger_8channel.ino)
 (multiplexing).
 
+Recording a TDM data stream ([TeensyTDM](src/TeensyTDM.h)) is based on
+the [Teensy Audio library](https://github.com/PaulStoffregen/Audio)
+and the setI2SFreq() function introduced by Frank B on the [Teensy
+forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-change-the-sample-rate/page4).
 
 ## Features
 
 - Flexible producer/consumer data model based on a single multiplexed circular buffer.
-- Continuous DMA-based data acquisition.
-- Single channel or multiplexed acquisition from multiple channels, from one or both ADCs.
-- Highspeed timed acquisition up to 500kHz.
+- Multiplexed acquisition from multiple channels, from one or both
+  ADCs or TDM streams.
 - Conversion of data to signed 16bit for direct storage into wave files.
 - Continuous storing of recorded data as wave files on SD cards.
 - Detailed metadata in wave file header: sampling rate, number of
-  channels and pin IDs, bit resolution, date and time, Teensy board
+  channels and pin IDs, bit resolution, gain, date and time, Teensy board
   version, and its unique MAC address.
+- Filenames based on date and/or time of the real-time-clock or incremental.
 - Analysis chain on top of data buffer.
 - Audio monitor.
 - Display recorded data on a monitor.
@@ -146,7 +151,7 @@ In [utils/](utils) you find some useful python scripts.
 - [spectra](utils/spectra.py): power spectra of traces in wave files.
 - [noise](utils/noise.py): plot and analyse baseline noise levels from wave files.
 - [continuity](utils/continuity.py): check whether pulse signals recorded into wave file have consistent periods over many wave files.
-- [mergechannels](utils/mergechannels.py)
+- [mergechannels](utils/mergechannels.py): take from each provided wave file one channel and merge them into a single wav file.
 - [cycles](utils/cycles.py): plot failures in pulse traces? - needs update.
 
 For allowing these script to use metadata contained in the wav files
@@ -178,3 +183,5 @@ TeeRec is used in:
   [[github]](https://github.com/WMXZ-EU/microSoundRecorder)
   [[wiki]](https://github.com/WMXZ-EU/microSoundRecorder/wiki/Hardware-setup)
   [[forum]](https://forum.pjrc.com/threads/52175?p=185386&viewfull=1#post185386)
+- [Frank's bat detector](https://forum.pjrc.com/threads/38988-Bat-detector)
+- [Teensy Batdetector](https://github.com/CorBer/teensy_batdetector/releases/tag/v1.6)
