@@ -13,7 +13,8 @@ TeensyADCSettings::TeensyADCSettings(uint32_t rate, uint8_t bits,
   Averaging(averaging),
   ConversionSpeed(conversion_speed),
   SamplingSpeed(sampling_speed),
-  Reference(reference) {
+  Reference(reference),
+  ADC(0) {
 }
 
 
@@ -44,7 +45,8 @@ TeensyADCSettings::TeensyADCSettings(const char *name, uint32_t rate,
   Averaging(averaging),
   ConversionSpeed(conversion_speed),
   SamplingSpeed(sampling_speed),
-  Reference(reference) {
+  Reference(reference),
+  ADC(0) {
 }
 
 

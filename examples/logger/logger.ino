@@ -7,10 +7,12 @@
 
 #if defined(TEENSYADC)
   #include <TeensyADC.h>
+  #include <TeensyADCSettings.h>
 #elif defined(PCM186X)
   #include <Wire.h>
   #include <ControlPCM186x.h>
   #include <TeensyTDM.h>
+  #include <TeensyTDMSettings.h>
 #endif
 #include <SDWriter.h>
 #include <RTClock.h>
@@ -18,9 +20,6 @@
 #include <TestSignals.h>
 #include <Configurator.h>
 #include <Settings.h>
-#ifdef TEENSYADC
-#include <TeensyADCSettings.h>
-#endif
 #ifdef SINGLE_FILE_MTP
 #include <MTP_Teensy.h>
 #endif
@@ -83,6 +82,8 @@ Configurator config;
 #if defined(TEENSYADC)
 TeensyADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
 			     CONVERSION, SAMPLING, REFERENCE);
+#elif defined(PCM186X)
+TeensyTDMSettings aisettings(&aidata, SAMPLING_RATE);
 #endif
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);

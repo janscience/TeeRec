@@ -19,8 +19,17 @@ public:
   // Constructor. Sets configuration name to "TDM".
   TeensyTDMSettings(uint32_t rate=0, float gain=0);
 
+  // Constructor. Provides an instance of a TeensyTDM and
+  // sets configuration name to "ADC".
+  TeensyTDMSettings(TeensyTDM *tdm, uint32_t rate=0, float gain=0);
+
   // Constructor setting configuration name.
   TeensyTDMSettings(const char *name, uint32_t rate=0, float gain=0);
+
+  // Constructor providing an instance of a TeensyTDM and
+  // setting configuration name.
+  TeensyTDMSettings(TeensyTDM *tdm, const char *name,
+		    uint32_t rate=0, float gain=0);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };
@@ -37,6 +46,13 @@ public:
   // Configure TDM settings with the provided key-value pair.
   virtual void configure(const char *key, const char *val);
 
+  // Apply TDM settings on tdm.
+  // If no tdm is provided, the one provided to the constructor is used.
+  void configure(TeensyTDM *tdm=0);
+
+  // Transfer TDM settings from tdm to the TeensyTDMSettings instance.
+  void setConfiguration(TeensyTDM *tdm=0);
+
   // Report current settings on Serial.
   void report() const;
 
@@ -45,7 +61,8 @@ protected:
 
   uint32_t Rate;
   float Gain;
-
+  TeensyTDM *TDM;
+  
 };
 
 #endif
