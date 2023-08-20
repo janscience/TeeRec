@@ -81,7 +81,7 @@ SDWriter file(sdcard, aidata);
 
 Configurator config;
 #if defined(TEENSYADC)
-TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+TeensyADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
 			     CONVERSION, SAMPLING, REFERENCE);
 #endif
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
@@ -231,9 +231,7 @@ void setup() {
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
-#if defined(TEENSYADC)
-  aidata.configure(aisettings);
-#elif defined(PCM186X)
+#if defined(PCM186X)
   aidata.setSwapLR();
   Wire.begin();
   setupPCM(aidata, pcm1, false);

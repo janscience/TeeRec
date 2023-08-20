@@ -437,26 +437,6 @@ void TeensyADC::gainStr(char *gains, float pregain) {
 }
 
 
-void TeensyADC::configure(const TeensyADCSettings &settings) {
-  setRate(settings.rate());
-  setResolution(settings.resolution());
-  setAveraging(settings.averaging());
-  setConversionSpeed(settings.conversionSpeed());
-  setSamplingSpeed(settings.samplingSpeed());
-  setReference(settings.reference());
-}
-
-
-void TeensyADC::setConfiguration(TeensyADCSettings &settings) {
-  settings.setRate(rate());
-  settings.setResolution(resolution());
-  settings.setAveraging(averaging());
-  settings.setConversionSpeed(conversionSpeed());
-  settings.setSamplingSpeed(samplingSpeed());
-  settings.setReference(reference());
-}
-
-
 size_t TeensyADC::counter(uint8_t adc) const {
   return DMACounter[adc];
 }

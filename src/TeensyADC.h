@@ -58,7 +58,6 @@
 #include <ADC.h>
 #include <DMAChannel.h>
 #include <DataBuffer.h>
-#include <TeensyADCSettings.h>
 
 
 class TeensyADC : public DataBuffer {
@@ -275,12 +274,6 @@ class TeensyADC : public DataBuffer {
 
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
-
-  // Configure ADC settings from TeensyADCSettings instance.
-  void configure(const TeensyADCSettings &settings);
-
-  // Transfer current ADC settings to a TeensyADCSettings instance.
-  void setConfiguration(TeensyADCSettings &settings);
 
   // Interrupt service routine. For internal usage.
   void isr(uint8_t adc);
