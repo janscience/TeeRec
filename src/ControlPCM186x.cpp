@@ -650,6 +650,21 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain, bool smooth) {
   return true;
 }
 
+  
+float ControlPCM186x::gain() {
+  return gain(ADC1L);
+}
+		    
+
+void ControlPCM186x::gainStr(char *gains, float pregain) {
+  gainStr(ADC1L, gains, pregain); 
+}
+
+
+bool ControlPCM186x::setGain(float gain) {
+  return setGain(ADCLR, gain, false);
+}
+
 
 bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
   unsigned int val = read(PCM186x_DSP_CTRL_REG);

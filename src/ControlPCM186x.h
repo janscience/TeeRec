@@ -9,7 +9,8 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <AudioControl.h>  // Teensy Audio library
+#include <Control.h>
+//#include <AudioControl.h>  // Teensy Audio library
 #include <TeensyTDM.h>
 
 
@@ -18,7 +19,7 @@
 
 
 //class ControlPCM186x : public AudioControl {
-class ControlPCM186x {
+class ControlPCM186x : public Control {
   
 public:
 
@@ -168,6 +169,16 @@ public:
      between -12 and 40 in steps of 0.5.
      If smooth then smoothly ramp to the new gains. */
   bool setGain(OUTPUT_CHANNELS adc, float gain, bool smooth=false);
+  
+  /* Return the gain set for all channels in dB. */
+  virtual float gain();
+
+  /* Return the current gain as a string in gains.
+     The gain of the acquisition system is multiplied with pregain. */
+  virtual void gainStr(char *gains, float pregain=1.0);
+
+  /* Set gain of all channels to gain in dB. */
+  virtual bool setGain(float gain);
 
   /*! Setup digital low- and highpass filter.
       Highpass is belwo 10Hz. */
