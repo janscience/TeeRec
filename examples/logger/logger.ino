@@ -244,7 +244,6 @@ void setup() {
   aidata.check();
   aidata.start();
   aidata.report();
-  blink.switchOff();
   if (settings.InitialDelay >= 2.0) {
     delay(1000);
     blink.setDouble();

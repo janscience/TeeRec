@@ -32,15 +32,25 @@ public:
 		    uint32_t rate=0, float gain=0);
 
   // Return sampling rate per channel in Hertz.
+  // If a TeensyTDM instance is provided via the constructor,
+  // the sampling rate is passed on to this instance by the configure()
+  // function when parsing a configuration file.
   uint32_t rate() const { return Rate; };
   
   // Set sampling rate per channel in Hertz.
+  // If a TeensyTDM instance is provided via the constructor,
+  // the sampling rate is passed on to this instance by the configure()
+  // function when parsing a configuration file.
   void setRate(uint32_t rate);
 
   // Return gain in dB.
+  // The gain is set from the configuration file but needs to be passed
+  // manually to appropriate Control instances.
   uint32_t gain() const { return Gain; };
   
   // Set gain in dB.
+  // The gain is also set from the configuration file but needs to be passed
+  // manually to appropriate Control instances.
   void setGain(float gain);
   
   // Configure TDM settings with the provided key-value pair.

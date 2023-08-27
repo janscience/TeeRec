@@ -9,7 +9,6 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <Control.h>
 //#include <AudioControl.h>  // Teensy Audio library
 #include <TeensyTDM.h>
 
@@ -19,7 +18,7 @@
 
 
 //class ControlPCM186x : public AudioControl {
-class ControlPCM186x : public Control {
+class ControlPCM186x {
   
 public:
 

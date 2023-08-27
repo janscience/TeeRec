@@ -58,10 +58,6 @@ void TeensyTDMSettings::configure(const char *key, const char *val) {
   else if (strcmp(key, "gain") == 0) {
     setGain(atof(val));
     sprintf(pval, "%.1f", Gain);
-    /*
-    if (TDM != 0)
-      TDM->setGain(gain());
-    */
   }
   else {
     Serial.printf("  %s key \"%s\" not found.\n", name(), key);
