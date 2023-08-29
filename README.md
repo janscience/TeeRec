@@ -64,6 +64,7 @@ via the `TeeRec.h` header.
 
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
+- [Input](src/Input.h): Base class for all input streams.
 - [InputADC](src/InputADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/inputadc.md).
 - [InputTDM](src/InputTDM.h): Streaming TDM data into a single cyclic buffer.
 - [Control](src/Control.h): Minimum interface to classes controlling data acquisition.

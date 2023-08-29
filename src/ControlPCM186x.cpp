@@ -380,11 +380,13 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 
 void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
   char cs[128];
-  if (strlen(tdm.channels()) > 0) {
+  char tdmcs[128];
+  tdm.channels(tdmcs);
+  if (strlen(tdmcs) > 0) {
     bool prefix = true;
     int chipnum = 0;
     char *cp = cs;
-    for (const char *sp=tdm.channels(); *sp != '\0'; sp++) {
+    for (const char *sp=tdmcs; *sp != '\0'; sp++) {
       if (prefix) {
 	if (*(sp+1) != '-') {
 	  *(cp++) = '1';
@@ -883,6 +885,10 @@ float ControlPCM186x::readCoefficient(uint8_t address) {
     result = goToPage(page);
     result = goToPage(page);
     result = goToPage(page);
+    if (result != 0) {
+      Serial.printf("ControlPCM186x: readCoefficient() failed to go to page %02x, error = %02x\n", page, result);
+      return -1.0;
+    }
   }
   val = 0;
   for (int n=0; n < 10 && val == 0; n++) {

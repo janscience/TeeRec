@@ -20,7 +20,7 @@ DMASetting InputADC::DMASettings[2][NMajors];
 
 InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
 		   int8_t channel0, int8_t channel1) :
-  DataBuffer(buffer, nbuffer, MajorSize) {
+  Input(buffer, nbuffer, MajorSize) {
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;

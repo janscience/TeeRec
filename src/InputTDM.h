@@ -22,10 +22,10 @@
 #include <Arduino.h>
 #include <ADC.h>
 #include <DMAChannel.h>
-#include <DataBuffer.h>
+#include <Input.h>
 
 
-class InputTDM : public DataBuffer {
+class InputTDM : public Input {
 
  public:
   
@@ -53,8 +53,9 @@ class InputTDM : public DataBuffer {
   // Set number of channels of the TDM bus to nchannels.
   void setNChannels(TDM_BUS bus, uint8_t nchannels);
   
-  // The string identifying channel pins.
-  const char *channels() { return Channels; };
+  // Return in chans the string with the channels
+  // in the order they are multiplexed into the buffer.
+  virtual void channels(char *chans) const;
   
   // Set string identifying channel pins.
   void setChannelStr(const char *cs);
@@ -78,10 +79,10 @@ class InputTDM : public DataBuffer {
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
   // If successfull, you may remove this check from your code.
-  bool check();
+  virtual bool check();
 
   // Print current settings on Serial.
-  void report();
+  virtual void report();
  
   // Add metadata to the header of a wave file holding the data of the
   // buffer.
@@ -92,13 +93,10 @@ class InputTDM : public DataBuffer {
   void begin();
 
   // Start data transfer to buffer.
-  void start();
-
-  // True if TDM is running and transfering to buffer.
-  bool running() const { return Running; };
+  virtual void start();
 
   // Stop data transfer to buffer.
-  void stop();
+  virtual void stop();
 
   
 protected:
@@ -120,8 +118,6 @@ protected:
 
   uint8_t TDMUse;
   uint8_t NChans[2];
-
-  bool Running;
   
 };
 

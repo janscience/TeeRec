@@ -19,7 +19,7 @@ InputTDM *InputTDM::TDM = 0;
 
 
 InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
-  DataBuffer(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
+  Input(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
   TDM = this;
   setDataResolution(16);
   Bits = 32;
@@ -34,7 +34,6 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
     DataHead[bus] = 0;
   }
   TDMUse = 0;
-  Running = false;
 }
 
 
@@ -76,6 +75,11 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
   NChannels = 0;
   for (int k=0; k<2; k++)
     NChannels += NChans[k];
+}
+
+
+void InputTDM::channels(char *chans) const {
+  strcpy(chans, Channels);
 }
 
   

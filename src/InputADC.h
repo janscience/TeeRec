@@ -46,7 +46,7 @@
   Properties and performance
   --------------------------
 
-  See https://github.com/janscience/TeeRec/tree/main/docs/teensyadc.md .
+  See https://github.com/janscience/TeeRec/tree/main/docs/inputadc.md .
 
 */
 
@@ -57,16 +57,14 @@
 #include <Arduino.h>
 #include <ADC.h>
 #include <DMAChannel.h>
-#include <DataBuffer.h>
+#include <Input.h>
 
 
-class InputADC : public DataBuffer {
+class InputADC : public Input {
 
  public:
 
   static InputADC *ADCC;
-  
-  static const size_t MajorSize = 256;
   
   static const size_t MaxChannels = 8;
 
@@ -126,7 +124,7 @@ class InputADC : public DataBuffer {
 
   // Return in chans a string with the channels/pins sampled from both ADCs
   // in the order they are multiplexed into the buffer.
-  void channels(char *chans) const;
+  virtual void channels(char *chans) const;
 
   // If set true, ADC data are scaled to 16bit and are converted to
   // signed integers. Call this *before* setResolution().
@@ -254,23 +252,20 @@ class InputADC : public DataBuffer {
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
   // If successfull, you may remove this check from your code.
-  bool check();
+  virtual bool check();
 
   // Print current settings on Serial.
-  void report();
+  virtual void report();
  
   // Add metadata to the header of a wave file holding the data of the
   // buffer.
   virtual void setWaveHeader(WaveHeader &wave) const;
 
   // Start the acquisition based on the channel, rate, and buffer settings.
-  void start();
-
-  // True if ADC is running and transfering to buffer.
-  bool running() const { return Running; };
+  virtual void start();
 
   // Stop acquisition.
-  void stop();
+  virtual void stop();
 
   // Number of ADCs in use (0, 1, or 2).
   uint8_t adcs() const;
@@ -297,7 +292,6 @@ class InputADC : public DataBuffer {
   static DMAMEM uint8_t SC1AChannels[2][MaxChannels] __attribute__((aligned(MaxChannels)));
   uint8_t NChans[2];
   uint8_t ADCUse;
-  bool Running;
 
   uint8_t Averaging;
   ADC_CONVERSION_SPEED ConversionSpeed;
