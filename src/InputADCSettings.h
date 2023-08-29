@@ -1,11 +1,11 @@
 /*
-  TeensyADCSettings - configuration settings for TeensyADC.
+  InputADCSettings - configuration settings for InputADC.
   Created by Jan Benda, Dec 27th, 2022.
 */
 
 
-#ifndef TeensyADCSettings_h
-#define TeensyADCSettings_h
+#ifndef InputADCSettings_h
+#define InputADCSettings_h
 
 
 #include <Arduino.h>
@@ -13,37 +13,37 @@
 #include <Configurable.h>
 
 
-class TeensyADCSettings : public Configurable {
+class InputADCSettings : public Configurable {
 
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  TeensyADCSettings(uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
-		    ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		    ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		    ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+  InputADCSettings(uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
+		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
+		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
-  // Constructor. Provides an instance of a TeensyADC and
+  // Constructor. Provides an instance of a InputADC and
   // sets configuration name to "ADC".
-  TeensyADCSettings(TeensyADC *adc, uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
-		    ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		    ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		    ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+  InputADCSettings(InputADC *adc, uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
+		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
+		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
   // Constructor setting configuration name.
-  TeensyADCSettings(const char *name, uint32_t rate=0,
-		    uint8_t bits=16, uint8_t averaging=4,
-		    ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		    ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		    ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+  InputADCSettings(const char *name, uint32_t rate=0,
+		   uint8_t bits=16, uint8_t averaging=4,
+		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
+		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
-  // Constructor. Provides an instance of a TeensyADC and
+  // Constructor. Provides an instance of a InputADC and
   // sets configuration name.
-  TeensyADCSettings(TeensyADC *adc, const char *name, uint32_t rate=0,
-		    uint8_t bits=16, uint8_t averaging=4,
-		    ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		    ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		    ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+  InputADCSettings(InputADC *adc, const char *name, uint32_t rate=0,
+		   uint8_t bits=16, uint8_t averaging=4,
+		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
+		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };
@@ -104,16 +104,16 @@ public:
   ADC_REFERENCE reference() const { return Reference; };
   
   // Configure ADC settings with the provided key-value pair.
-  // If an TeensyADC instance was provided to the constructor,
-  // the settings are also directly applied to this TeensyADC instance.
+  // If an InputADC instance was provided to the constructor,
+  // the settings are also directly applied to this InputADC instance.
   virtual void configure(const char *key, const char *val);
 
   // Apply ADC settings on adc.
   // If no adc is provided, the one provided to the constructor is used.
-  void configure(TeensyADC *adc=0);
+  void configure(InputADC *adc=0);
 
-  // Transfer ADC settings from adc to the TeensyADCSettings instance.
-  void setConfiguration(TeensyADC *adc=0);
+  // Transfer ADC settings from adc to the InputADCSettings instance.
+  void setConfiguration(InputADC *adc=0);
   
   // Report current settings on Serial.
   void report() const;
@@ -127,7 +127,7 @@ protected:
   ADC_CONVERSION_SPEED ConversionSpeed;
   ADC_SAMPLING_SPEED SamplingSpeed;
   ADC_REFERENCE Reference;
-  TeensyADC *ADC;
+  InputADC *ADC;
 
 };
 

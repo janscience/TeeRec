@@ -7,7 +7,7 @@
 //#define ST7789_ADAFRUIT
 //#define ILI9341_ADAFRUIT
 
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <AudioMonitor.h>
 #include <Display.h>
   
@@ -43,7 +43,7 @@ float displayTime = 0.01;
 // ---------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
-TeensyADC aidata(AIBuffer, NAIBuffer);
+InputADC aidata(AIBuffer, NAIBuffer);
 
 Display screen;
 elapsedMillis screenTime;

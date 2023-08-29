@@ -25,7 +25,7 @@ library uses 1.2V as a reference and not 3.3V. You can modify this on
 line 55 in `input_adc.cpp`: change `analogReference(INTERNAL);` to
 `analogReference(EXTERNAL)`.
 
-Or use the [`TeensyADC`](../src/TeensyADC.h) class from `TeeRec`.
+Or use the [`InputADC`](../src/InputADC.h) class from `TeeRec`.
 
 This microphone has a nice sensitivity!
 

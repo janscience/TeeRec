@@ -96,7 +96,7 @@ class SDWriter : public DataWorker {
  public:
 
   // Size of blocks for writing.
-  // Must be an integer multiple of TeensyADC::MajorSize.
+  // Must be an integer multiple of InputADC::MajorSize.
   static const size_t MajorSize = 512;
 
   // Initialize writer on default SD card.

@@ -1,12 +1,12 @@
-#include <TeensyADC.h>
-#include <TeensyADCSettings.h>
+#include <InputADC.h>
+#include <InputADCSettings.h>
 
 
-TeensyADCSettings::TeensyADCSettings(uint32_t rate, uint8_t bits,
-				     uint8_t averaging,
-				     ADC_CONVERSION_SPEED conversion_speed,
-				     ADC_SAMPLING_SPEED sampling_speed,
-				     ADC_REFERENCE reference) :
+InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
+				   uint8_t averaging,
+				   ADC_CONVERSION_SPEED conversion_speed,
+				   ADC_SAMPLING_SPEED sampling_speed,
+				   ADC_REFERENCE reference) :
   Configurable("ADC"),
   Rate(rate),
   Bits(bits),
@@ -18,11 +18,11 @@ TeensyADCSettings::TeensyADCSettings(uint32_t rate, uint8_t bits,
 }
 
 
-TeensyADCSettings::TeensyADCSettings(TeensyADC *adc, uint32_t rate,
-				     uint8_t bits, uint8_t averaging,
-				     ADC_CONVERSION_SPEED conversion_speed,
-				     ADC_SAMPLING_SPEED sampling_speed,
-				     ADC_REFERENCE reference) :
+InputADCSettings::InputADCSettings(InputADC *adc, uint32_t rate,
+				   uint8_t bits, uint8_t averaging,
+				   ADC_CONVERSION_SPEED conversion_speed,
+				   ADC_SAMPLING_SPEED sampling_speed,
+				   ADC_REFERENCE reference) :
   Configurable("ADC"),
   Rate(rate),
   Bits(bits),
@@ -34,11 +34,11 @@ TeensyADCSettings::TeensyADCSettings(TeensyADC *adc, uint32_t rate,
 }
 
 
-TeensyADCSettings::TeensyADCSettings(const char *name, uint32_t rate,
-				     uint8_t bits, uint8_t averaging,
-				     ADC_CONVERSION_SPEED conversion_speed,
-				     ADC_SAMPLING_SPEED sampling_speed,
-				     ADC_REFERENCE reference) :
+InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
+				   uint8_t bits, uint8_t averaging,
+				   ADC_CONVERSION_SPEED conversion_speed,
+				   ADC_SAMPLING_SPEED sampling_speed,
+				   ADC_REFERENCE reference) :
   Configurable(name),
   Rate(rate),
   Bits(bits),
@@ -50,12 +50,12 @@ TeensyADCSettings::TeensyADCSettings(const char *name, uint32_t rate,
 }
 
 
-TeensyADCSettings::TeensyADCSettings(TeensyADC *adc, const char *name,
-				     uint32_t rate, uint8_t bits,
-				     uint8_t averaging,
-				     ADC_CONVERSION_SPEED conversion_speed,
-				     ADC_SAMPLING_SPEED sampling_speed,
-				     ADC_REFERENCE reference) :
+InputADCSettings::InputADCSettings(InputADC *adc, const char *name,
+				   uint32_t rate, uint8_t bits,
+				   uint8_t averaging,
+				   ADC_CONVERSION_SPEED conversion_speed,
+				   ADC_SAMPLING_SPEED sampling_speed,
+				   ADC_REFERENCE reference) :
   Configurable(name),
   Rate(rate),
   Bits(bits),
@@ -67,37 +67,37 @@ TeensyADCSettings::TeensyADCSettings(TeensyADC *adc, const char *name,
 }
 
 
-void TeensyADCSettings::setRate(uint32_t rate) {
+void InputADCSettings::setRate(uint32_t rate) {
   Rate = rate;
 }
 
 
-void TeensyADCSettings::setResolution(uint8_t bits) {
+void InputADCSettings::setResolution(uint8_t bits) {
   Bits = bits;
 }
 
 
-void TeensyADCSettings::setAveraging(uint8_t num) {
+void InputADCSettings::setAveraging(uint8_t num) {
   Averaging = num;
 }
 
 
-void TeensyADCSettings::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
+void InputADCSettings::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
   ConversionSpeed = speed;
 }
 
 
-void TeensyADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
+void InputADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
   SamplingSpeed = speed;
 }
 
 
-void TeensyADCSettings::setReference(ADC_REFERENCE ref) {
+void InputADCSettings::setReference(ADC_REFERENCE ref) {
   Reference = ref;
 }
 
 
-void TeensyADCSettings::configure(const char *key, const char *val) {
+void InputADCSettings::configure(const char *key, const char *val) {
   char pval[30];
   if (strcmp(key, "samplingrate") == 0) {
     setRate(uint32_t(parseFrequency(val)));
@@ -118,20 +118,20 @@ void TeensyADCSettings::configure(const char *key, const char *val) {
       ADC->setAveraging(averaging());
   }
   else if (strcmp(key, "conversion") == 0) {
-    setConversionSpeed(TeensyADC::conversionSpeedEnum(val));
-    strcpy(pval, TeensyADC::conversionSpeedStr(ConversionSpeed));
+    setConversionSpeed(InputADC::conversionSpeedEnum(val));
+    strcpy(pval, InputADC::conversionSpeedStr(ConversionSpeed));
     if (ADC != 0)
       ADC->setConversionSpeed(conversionSpeed());
   }
   else if (strcmp(key, "sampling") == 0) {
-    setSamplingSpeed(TeensyADC::samplingSpeedEnum(val));
-    strcpy(pval, TeensyADC::samplingSpeedStr(SamplingSpeed));
+    setSamplingSpeed(InputADC::samplingSpeedEnum(val));
+    strcpy(pval, InputADC::samplingSpeedStr(SamplingSpeed));
     if (ADC != 0)
       ADC->setSamplingSpeed(samplingSpeed());
   }
   else if (strcmp(key, "reference") == 0) {
-    setReference(TeensyADC::referenceEnum(val));
-    strcpy(pval, TeensyADC::referenceStr(Reference));
+    setReference(InputADC::referenceEnum(val));
+    strcpy(pval, InputADC::referenceStr(Reference));
     if (ADC != 0)
       ADC->setReference(reference());
   }
@@ -143,7 +143,7 @@ void TeensyADCSettings::configure(const char *key, const char *val) {
 }
 
 
-void TeensyADCSettings::configure(TeensyADC *adc) {
+void InputADCSettings::configure(InputADC *adc) {
   if (adc == 0)
     adc = ADC;
   if (adc == 0)
@@ -157,7 +157,7 @@ void TeensyADCSettings::configure(TeensyADC *adc) {
 }
 
 
-void TeensyADCSettings::setConfiguration(TeensyADC *adc) {
+void InputADCSettings::setConfiguration(InputADC *adc) {
   if (adc == 0)
     adc = ADC;
   if (adc == 0)
@@ -171,12 +171,12 @@ void TeensyADCSettings::setConfiguration(TeensyADC *adc) {
 }
 
 
-void TeensyADCSettings::report() const {
+void InputADCSettings::report() const {
   Serial.printf("%s settings:\n", name());
   Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   Serial.printf("  resolution: %dbits\n", Bits);
   Serial.printf("  averaging:  %d\n", Averaging);
-  Serial.printf("  conversion: %s\n", TeensyADC::conversionSpeedStr(ConversionSpeed));
-  Serial.printf("  sampling:   %s\n", TeensyADC::samplingSpeedStr(SamplingSpeed));
-  Serial.printf("  reference:  %s\n", TeensyADC::referenceStr(Reference));
+  Serial.printf("  conversion: %s\n", InputADC::conversionSpeedStr(ConversionSpeed));
+  Serial.printf("  sampling:   %s\n", InputADC::samplingSpeedStr(SamplingSpeed));
+  Serial.printf("  reference:  %s\n", InputADC::referenceStr(Reference));
 }

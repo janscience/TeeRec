@@ -1,4 +1,4 @@
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
@@ -6,7 +6,7 @@
 #include <Blink.h>
 #include <Configurator.h>
 #include <Settings.h>
-#include <TeensyADCSettings.h>
+#include <InputADCSettings.h>
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
@@ -33,7 +33,7 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 // ----------------------------------------------------------------------------
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256);
-TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
+InputADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 
 AudioOutputI2S speaker;
 // AudioControlSGTL5000 audioshield;  // uncomment if you use the Teensy audio shield
@@ -43,8 +43,8 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-TeensyADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
-			     CONVERSION, SAMPLING, REFERENCE);
+InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+			    CONVERSION, SAMPLING, REFERENCE);
 Settings settings(PATH, FILENAME);
 
 RTClock rtclock;

@@ -1,13 +1,13 @@
-#define SINGLE_FILE_MTP
+//#define SINGLE_FILE_MTP
 
 // select a data source:
 //#define TEENSYADC     // data are recorded from Teensy internal ADCs
 #define PCM186X     // data are recorded by TI PCM186x chip via TDM
-#define PCM186X_2ND // data are recorded by a second TI PCM186x chip via TDM
+//#define PCM186X_2ND // data are recorded by a second TI PCM186x chip via TDM
 
 #if defined(TEENSYADC)
-  #include <TeensyADC.h>
-  #include <TeensyADCSettings.h>
+  #include <InputADC.h>
+  #include <InputADCSettings.h>
 #elif defined(PCM186X)
   #include <Wire.h>
   #include <ControlPCM186x.h>
@@ -66,7 +66,7 @@ DATA_BUFFER(AIBuffer, NAIBuffer, 512*256)
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 #endif
 #if defined(TEENSYADC)
-TeensyADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
+InputADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
 #elif defined(PCM186X)
 ControlPCM186x pcm1(PCM186x_I2C_ADDR1);
 #ifdef PCM186X_2ND
@@ -80,8 +80,8 @@ SDWriter file(sdcard, aidata);
 
 Configurator config;
 #if defined(TEENSYADC)
-TeensyADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
-			     CONVERSION, SAMPLING, REFERENCE);
+InputADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
+		  	    CONVERSION, SAMPLING, REFERENCE);
 #elif defined(PCM186X)
 TeensyTDMSettings aisettings(&aidata, SAMPLING_RATE);
 #endif
@@ -207,6 +207,7 @@ void storeData() {
 }
 
 
+#if defined(PCM186X)
 void setupPCM(TeensyTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.begin();
   pcm.setMicBias(false, true);
@@ -216,6 +217,7 @@ void setupPCM(TeensyTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.setGain(ControlPCM186x::ADCLR, GAIN);
   pcm.setFilters(ControlPCM186x::FIR, false);
 }
+#endif
 
 
 // -----------------------------------------------------------------------------

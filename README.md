@@ -5,7 +5,7 @@
 Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6/4.0/4.1 microcontrollers.
 
 Recording from the Teensy's internal ADCs
-([TeensyADC](src/TeensyADC.h)) is based on Pedro Villanueva's
+([InputADC](src/InputADC.h)) is based on Pedro Villanueva's
 [ADC](https://github.com/pedvide/ADC) library, Paul Stoffregen's
 [DMAChannel](https://github.com/PaulStoffregen/cores/tree/master/teensy3),
 Bill Greiman's [SdFat](https://github.com/greiman/SdFat) library, and
@@ -49,7 +49,7 @@ library](https://github.com/janscience/ESensors).
 ## Documentation
 
 - [Installation instructions](docs/install.md)
-- [Performance of Teensy ADC](docs/teensyadc.md)
+- [Performance of Teensy ADC](docs/inputadc.md)
 - [Audio output](docs/audioout.md): hardware for audio output.
 - [Audio input](docs/audioin.md): hardware for audio input (microphones).
 
@@ -64,7 +64,7 @@ via the `TeeRec.h` header.
 
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
-- [TeensyADC](src/TeensyADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/teensyadc.md).
+- [InputADC](src/InputADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/inputadc.md).
 - [TeensyTDM](src/TeensyTDM.h): Streaming TDM data into a single cyclic buffer.
 - [Control](src/Control.h): Minimum interface to classes controlling data acquisition.
 - [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
@@ -77,7 +77,7 @@ via the `TeeRec.h` header.
 ### Configuration
 
 - [Configurable](src/Configurable.h): Base class for all configurable classes.
-- [TeensyADCSettings](src/TeensyADCSettings.h): Configuration settings for TeensyADC.
+- [TeensyADCSettings](src/TeensyADCSettings.h): Configuration settings for InputADC.
 - [TeensyTDMSettings](src/TeensyTDMSettings.h): Configuration settings for TeensyTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.

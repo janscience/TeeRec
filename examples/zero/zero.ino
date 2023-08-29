@@ -20,7 +20,7 @@
  * to look at the recorded signal.
  */ 
 
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <SDWriter.h>
 #include <Blink.h>
 
@@ -37,7 +37,7 @@ ADC_SAMPLING_SPEED samplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
 // ------------------------------------------------------------------------------------------
  
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-TeensyADC aidata(AIBuffer, NAIBuffer);
+InputADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);

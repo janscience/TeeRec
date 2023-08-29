@@ -16,7 +16,7 @@
 #define TFT_DC     7 // 8 
 #define TFT_BL    30 // backlight PWM, -1 to not use it
 
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
 #include <TestSignals.h>
@@ -42,7 +42,7 @@ int signalPins[] = {5, 4, 3, 2, -1}; // pins where to put out test signals
 
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 
-TeensyADC aidata(AIBuffer, NAIBuffer);
+InputADC aidata(AIBuffer, NAIBuffer);
 
 Display screen;
 elapsedMillis screenTime;

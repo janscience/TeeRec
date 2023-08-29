@@ -1,5 +1,5 @@
 /*
-  TeensyADC - library for sampling from multiple analog pins of the Teensy into a single cyclic buffer.
+  InputADC - library for sampling from multiple analog pins of the Teensy ADC into a single cyclic buffer.
   Created by Jan Benda, May 25th, 2021.
   Based on https://github.com/pedvide/ADC
   and on contributions from Stefan Mucha, Lydia Federman, and Sebastian Volkmer.
@@ -17,14 +17,14 @@
   Setup
   -----
   ```
-  #include <TeensyADC.h>
+  #include <InputADC.h>
 
   uint32_t samplingRate = 40000;  // samples per second and channel in Hertz
   uint8_t channels0[] =  { A2, A3, A4, A5, -1 };      // input pins for ADC0, terminate with -1
   uint8_t channels1[] =  { A16, A17, A18, A19, -1 };  // input pins for ADC1, terminate with -1
 
   DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-  TeensyADC aidata(AIBuffer, NAIBuffer);
+  InputADC aidata(AIBuffer, NAIBuffer);
 
   void setup() {
     aidata.setChannels(0, channels0);
@@ -50,8 +50,8 @@
 
 */
 
-#ifndef TeensyADC_h
-#define TeensyADC_h
+#ifndef InputADC_h
+#define InputADC_h
 
 
 #include <Arduino.h>
@@ -60,11 +60,11 @@
 #include <DataBuffer.h>
 
 
-class TeensyADC : public DataBuffer {
+class InputADC : public DataBuffer {
 
  public:
 
-  static TeensyADC *ADCC;
+  static InputADC *ADCC;
   
   static const size_t MajorSize = 256;
   
@@ -73,14 +73,14 @@ class TeensyADC : public DataBuffer {
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   // Use channel0 on ADC0 and channel1 on ADC (see setChannel()).
-  TeensyADC(volatile sample_t *buffer, size_t nbuffer,
-	    int8_t channel0=-1, int8_t channel1=-1);
+  InputADC(volatile sample_t *buffer, size_t nbuffer,
+	   int8_t channel0=-1, int8_t channel1=-1);
 
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   // Use channels0 on ADC0 and channels1 on ADC (see setChannels()).
-  TeensyADC(volatile sample_t *buffer, size_t nbuffer,
-	    const int8_t *channels0, const int8_t *channels1);
+  InputADC(volatile sample_t *buffer, size_t nbuffer,
+	   const int8_t *channels0, const int8_t *channels1);
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.

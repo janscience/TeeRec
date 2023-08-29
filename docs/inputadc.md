@@ -1,7 +1,7 @@
-# TeensyADC
+# InputADC
 
 Using the Teensy's internal ADCs for recording data using the
-[`TeensyADC`](../src/TeensyADC.h) class.
+[`InputADC`](../src/InputADC.h) class.
 
 If not mentioned otherwise, all data from Teensy 3.5.
 
@@ -10,7 +10,7 @@ If not mentioned otherwise, all data from Teensy 3.5.
 
 ### Teensy 3.5
 
-Output of `TeensyADC::pinAssignment()`:
+Output of `InputADC::pinAssignment()`:
 
 | pin | ADC0 | ADC1 |
 | :-- | ---: | ---: |
@@ -45,7 +45,7 @@ Output of `TeensyADC::pinAssignment()`:
 
 ### Teensy 3.6
 
-Output of `TeensyADC::pinAssignment()`:
+Output of `InputADC::pinAssignment()`:
 
 | pin | ADC0 | ADC1 |
 | :-- | ---: | ---: |

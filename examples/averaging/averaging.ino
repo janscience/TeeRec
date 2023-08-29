@@ -31,7 +31,7 @@
  * evaluate the noise levels in more detail.
  */ 
 
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <SDWriter.h>
 #include <Watchdog.h>
 // Install Watchdog library from Peter Polidoro via Library Manager.
@@ -89,7 +89,7 @@ DMAMEM double results_stdevs[maxConversionSpeeds*maxSamplingSpeeds*maxAverages][
 DMAMEM size_t counter;
  
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-TeensyADC aidata(AIBuffer, NAIBuffer);
+InputADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);

@@ -8,7 +8,7 @@
  * conditions.
  */
 
-#include <TeensyADC.h>
+#include <InputADC.h>
 #include <Watchdog.h>
 // Install Watchdog library from Peter Polidoro via Library Manager.
 // https://github.com/janelia-arduino/Watchdog
@@ -31,7 +31,7 @@ DMAMEM uint16_t results[8][5];  // nchans0, nchans1, 10bit, 12bit, 16bit
 DMAMEM uint16_t counter;
  
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
-TeensyADC aidata(AIBuffer, NAIBuffer);
+InputADC aidata(AIBuffer, NAIBuffer);
 
 Watchdog watchdog;
 
