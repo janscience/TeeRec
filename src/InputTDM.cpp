@@ -464,13 +464,19 @@ void InputTDM::start() {
       else
 	I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
 #endif
+#if defined(__IMXRT1062__)
       DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
+#else
+      DMA[bus].attachInterrupt(ISR0);
+#endif
     }
   }
   
+#if defined(__IMXRT1062__)
   if (TDMUse == 3)
     DataHead[TDM2] = NChans[TDM1];
-
+#endif
+  
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus))
       DMA[bus].enable();
@@ -534,13 +540,16 @@ void InputTDM::TDMISR(uint8_t bus) {
       src += 8;
   }
   DMACounter[bus]++;
+#if defined(__IMXRT1062__)
   if (TDMUse == 3) {
     if (DMACounter[TDM1] == DMACounter[TDM2]) {
       if (DataHead[TDM1] < Index)
 	Cycle++;
       Index = DataHead[TDM1];
     }
-  } else {
+  } else
+#endif
+  {
     if (DataHead[bus] < Index)
       Cycle++;
     Index = DataHead[bus];
@@ -553,10 +562,11 @@ void InputTDM::ISR0() {
 }
 
 
+#if defined(__IMXRT1062__)
 void InputTDM::ISR1() {
   TDM->TDMISR(TDM2);
 }
-
+#endif
 
 #endif
 

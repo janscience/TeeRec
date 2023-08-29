@@ -109,8 +109,10 @@ protected:
 
   void TDMISR(uint8_t tdm);
   static void ISR0();
+#if defined(__IMXRT1062__)
   static void ISR1();
-
+#endif
+  
   uint8_t DownSample;
   bool SwapLR;
 

@@ -13,6 +13,9 @@
 #include <Configurable.h>
 
 
+class InputADC;
+
+
 class InputADCSettings : public Configurable {
 
 public:

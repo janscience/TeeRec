@@ -428,7 +428,7 @@ ADC_REFERENCE InputADC::referenceEnum(const char *reference) {
 void InputADC::gainStr(char *gains, float pregain) {
   float range = 3300.0;
 #ifndef TEENSY4
-  if (ref == ADC_REFERENCE::REF_1V2)
+  if (Reference == ADC_REFERENCE::REF_1V2)
     range = 1200.0;
 #endif
   sprintf(gains, "%.2fmV", 0.5*range/pregain);
