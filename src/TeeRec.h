@@ -1,7 +1,7 @@
 #include <DataWorker.h>
 #include <DataBuffer.h>
 #include <InputADC.h>
-#include <TeensyTDM.h>
+#include <InputTDM.h>
 #include <ControlPCM186x.h>
 #include <WaveHeader.h>
 #include <SDWriter.h>
@@ -10,7 +10,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
-#include <TeensyTDMSettings.h>
+#include <InputTDMSettings.h>
 
 #include <TestSignals.h>
 

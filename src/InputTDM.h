@@ -1,5 +1,5 @@
 /*
-  TeensyTDM - Streaming TDM data into a single cyclic buffer.
+  InputTDM - Streaming TDM data into a single cyclic buffer.
   Created by Jan Benda, July 4th, 2023.
   Heavily based on input_tdm.h of the Teensy Audio library.
 
@@ -15,8 +15,8 @@
   Batdetector](https://github.com/CorBer/teensy_batdetector/releases/tag/v1.6).
 */
 
-#ifndef TeensyTDM_h
-#define TeensyTDM_h
+#ifndef InputTDM_h
+#define InputTDM_h
 
 
 #include <Arduino.h>
@@ -25,7 +25,7 @@
 #include <DataBuffer.h>
 
 
-class TeensyTDM : public DataBuffer {
+class InputTDM : public DataBuffer {
 
  public:
   
@@ -36,9 +36,9 @@ class TeensyTDM : public DataBuffer {
 #endif
   };
   
-  TeensyTDM(volatile sample_t *buffer, size_t nbuffer);
+  InputTDM(volatile sample_t *buffer, size_t nbuffer);
 
-  static TeensyTDM *TDM;
+  static InputTDM *TDM;
   
   // Set resolution of data slots to bits per sample.
   virtual void setResolution(uint8_t bits);

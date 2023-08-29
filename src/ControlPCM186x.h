@@ -10,7 +10,7 @@
 #include <Arduino.h>
 #include <Wire.h>
 //#include <AudioControl.h>  // Teensy Audio library
-#include <TeensyTDM.h>
+#include <InputTDM.h>
 
 
 #define PCM186x_I2C_ADDR1     0x4A
@@ -78,7 +78,7 @@ public:
 
   /* Communicate with PCM chip using wire, address (0x4A or 0x4B),
      and TDM bus. */
-  ControlPCM186x(TwoWire &wire, uint8_t address, TeensyTDM::TDM_BUS bus);
+  ControlPCM186x(TwoWire &wire, uint8_t address, InputTDM::TDM_BUS bus);
   
   /* Initialize PCM186x with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
@@ -93,7 +93,7 @@ public:
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
   
   // Set sampling rate per channel in Hertz.
-  void setRate(TeensyTDM &tdm, uint32_t rate);
+  void setRate(InputTDM &tdm, uint32_t rate);
 
   /* Return the input channel set for output channel adc. */
   INPUT_CHANNELS channel(OUTPUT_CHANNELS adc);
@@ -134,7 +134,7 @@ public:
      If offset, shift the recorded data by two slots.
      Set resolution, number and identifiers of channels of tdm accordingly.
      tdm.setSwapLR() needs to be called before this function. */
-  bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
+  bool setupTDM(InputTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, bool offs=false,
 		bool inverted=false);
   
@@ -150,7 +150,7 @@ public:
      If offset, shift the recorded data by four slots.
      Set resolution, number and identifiers of channels of tdm accordingly.
      tdm.setSwapLR() needs to be called before this function. */
-  bool setupTDM(TeensyTDM &tdm, INPUT_CHANNELS channel1,
+  bool setupTDM(InputTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, INPUT_CHANNELS channel3,
 		INPUT_CHANNELS channel4, bool offs=false,
 		bool inverted=false);
@@ -218,14 +218,14 @@ protected:
 
   float readCoefficient(uint8_t address);
 
-  void setTDMChannelStr(TeensyTDM &tdm);
+  void setTDMChannelStr(InputTDM &tdm);
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
   uint8_t CurrentPage;
   bool PGALinked;
   int NChannels;
-  TeensyTDM::TDM_BUS Bus;
+  InputTDM::TDM_BUS Bus;
   
 };
 

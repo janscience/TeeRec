@@ -126,7 +126,7 @@ ControlPCM186x::ControlPCM186x() :
   CurrentPage(10),
   PGALinked(false),
   NChannels(0),
-  Bus(TeensyTDM::TDM1) {
+  Bus(InputTDM::TDM1) {
 }
 
 
@@ -136,7 +136,7 @@ ControlPCM186x::ControlPCM186x(uint8_t address) :
   CurrentPage(10),
   PGALinked(false),
   NChannels(0),
-  Bus(TeensyTDM::TDM1) {
+  Bus(InputTDM::TDM1) {
 }
 
 
@@ -146,12 +146,12 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address) :
   CurrentPage(10),
   PGALinked(false),
   NChannels(0),
-  Bus(TeensyTDM::TDM1) {
+  Bus(InputTDM::TDM1) {
 }
 
 
 ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
-			       TeensyTDM::TDM_BUS bus) :
+			       InputTDM::TDM_BUS bus) :
   I2CBus(&wire),
   I2CAddress(address),
   CurrentPage(10),
@@ -200,7 +200,7 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
 }
 
 
-void ControlPCM186x::setRate(TeensyTDM &tdm, uint32_t rate) {
+void ControlPCM186x::setRate(InputTDM &tdm, uint32_t rate) {
   switch (rate) {
   case 8000:
   case 16000:
@@ -378,7 +378,7 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 }
 
 
-void ControlPCM186x::setTDMChannelStr(TeensyTDM &tdm) {
+void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
   char cs[128];
   if (strlen(tdm.channels()) > 0) {
     bool prefix = true;
@@ -442,7 +442,7 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 }
 
 
-bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
+bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      bool offs, bool inverted) {
@@ -491,7 +491,7 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 }
 
 
-bool ControlPCM186x::setupTDM(TeensyTDM &tdm,
+bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,

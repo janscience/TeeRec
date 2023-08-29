@@ -17,7 +17,7 @@ recordings from both ADCs) and [Sebastian
 Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2channel_barebone/eodlogger_8channel.ino)
 (multiplexing).
 
-Recording a TDM data stream ([TeensyTDM](src/TeensyTDM.h)) is based on
+Recording a TDM data stream ([InputTDM](src/InputTDM.h)) is based on
 the [Teensy Audio library](https://github.com/PaulStoffregen/Audio)
 and the setI2SFreq() function introduced by Frank B on the [Teensy
 forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-change-the-sample-rate/page4).
@@ -65,7 +65,7 @@ via the `TeeRec.h` header.
 - [DataBuffer](src/DataBuffer.h): A single cyclic, multiplexed buffer holding acquired data.
 - [DataWorker](src/DataWorker.h): Producer/consumer working on a DataBuffer.
 - [InputADC](src/InputADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/inputadc.md).
-- [TeensyTDM](src/TeensyTDM.h): Streaming TDM data into a single cyclic buffer.
+- [InputTDM](src/InputTDM.h): Streaming TDM data into a single cyclic buffer.
 - [Control](src/Control.h): Minimum interface to classes controlling data acquisition.
 - [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
 
@@ -78,7 +78,7 @@ via the `TeeRec.h` header.
 
 - [Configurable](src/Configurable.h): Base class for all configurable classes.
 - [TeensyADCSettings](src/TeensyADCSettings.h): Configuration settings for InputADC.
-- [TeensyTDMSettings](src/TeensyTDMSettings.h): Configuration settings for TeensyTDM.
+- [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
 

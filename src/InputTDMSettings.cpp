@@ -1,8 +1,8 @@
-#include <TeensyTDM.h>
-#include <TeensyTDMSettings.h>
+#include <InputTDM.h>
+#include <InputTDMSettings.h>
 
 
-TeensyTDMSettings::TeensyTDMSettings(uint32_t rate, float gain) :
+InputTDMSettings::InputTDMSettings(uint32_t rate, float gain) :
   Configurable("ADC"),
   Rate(rate),
   Gain(gain),
@@ -10,8 +10,8 @@ TeensyTDMSettings::TeensyTDMSettings(uint32_t rate, float gain) :
 }
 
 
-TeensyTDMSettings::TeensyTDMSettings(TeensyTDM *tdm, uint32_t rate,
-				     float gain) :
+InputTDMSettings::InputTDMSettings(InputTDM *tdm, uint32_t rate,
+				   float gain) :
   Configurable("ADC"),
   Rate(rate),
   Gain(gain),
@@ -19,8 +19,8 @@ TeensyTDMSettings::TeensyTDMSettings(TeensyTDM *tdm, uint32_t rate,
 }
 
 
-TeensyTDMSettings::TeensyTDMSettings(const char *name, uint32_t rate,
-				     float gain) :
+InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
+				   float gain) :
   Configurable(name),
   Rate(rate),
   Gain(gain),
@@ -28,8 +28,8 @@ TeensyTDMSettings::TeensyTDMSettings(const char *name, uint32_t rate,
 }
 
 
-TeensyTDMSettings::TeensyTDMSettings(TeensyTDM *tdm, const char *name,
-				     uint32_t rate, float gain) :
+InputTDMSettings::InputTDMSettings(InputTDM *tdm, const char *name,
+				   uint32_t rate, float gain) :
   Configurable(name),
   Rate(rate),
   Gain(gain),
@@ -37,17 +37,17 @@ TeensyTDMSettings::TeensyTDMSettings(TeensyTDM *tdm, const char *name,
 }
 
 
-void TeensyTDMSettings::setRate(uint32_t rate) {
+void InputTDMSettings::setRate(uint32_t rate) {
   Rate = rate;
 }
 
 
-void TeensyTDMSettings::setGain(float gain) {
+void InputTDMSettings::setGain(float gain) {
   Gain = gain;
 }
 
 
-void TeensyTDMSettings::configure(const char *key, const char *val) {
+void InputTDMSettings::configure(const char *key, const char *val) {
   char pval[30];
   if (strcmp(key, "samplingrate") == 0) {
     setRate(uint32_t(parseFrequency(val)));
@@ -67,7 +67,7 @@ void TeensyTDMSettings::configure(const char *key, const char *val) {
 }
 
 
-void TeensyTDMSettings::configure(TeensyTDM *tdm) {
+void InputTDMSettings::configure(InputTDM *tdm) {
   if (tdm == 0)
     tdm = TDM;
   if (tdm == 0)
@@ -77,7 +77,7 @@ void TeensyTDMSettings::configure(TeensyTDM *tdm) {
 }
 
 
-void TeensyTDMSettings::setConfiguration(TeensyTDM *tdm) {
+void InputTDMSettings::setConfiguration(InputTDM *tdm) {
   if (tdm == 0)
     tdm = TDM;
   if (tdm == 0)
@@ -87,7 +87,7 @@ void TeensyTDMSettings::setConfiguration(TeensyTDM *tdm) {
 }
 
 
-void TeensyTDMSettings::report() const {
+void InputTDMSettings::report() const {
   Serial.printf("%s settings:\n", name());
   Serial.printf("        %.1fkHz\n", 0.001*Rate);
   Serial.printf("  gain: %.1f\n", Gain);

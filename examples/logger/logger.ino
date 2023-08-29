@@ -11,8 +11,8 @@
 #elif defined(PCM186X)
   #include <Wire.h>
   #include <ControlPCM186x.h>
-  #include <TeensyTDM.h>
-  #include <TeensyTDMSettings.h>
+  #include <InputTDM.h>
+  #include <InputTDMSettings.h>
 #endif
 #include <SDWriter.h>
 #include <RTClock.h>
@@ -72,7 +72,7 @@ ControlPCM186x pcm1(PCM186x_I2C_ADDR1);
 #ifdef PCM186X_2ND
 ControlPCM186x pcm2(PCM186x_I2C_ADDR2);
 #endif
-TeensyTDM aidata(AIBuffer, NAIBuffer);
+InputTDM aidata(AIBuffer, NAIBuffer);
 #endif
 
 SDCard sdcard;
@@ -83,7 +83,7 @@ Configurator config;
 InputADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
 #elif defined(PCM186X)
-TeensyTDMSettings aisettings(&aidata, SAMPLING_RATE);
+InputTDMSettings aisettings(&aidata, SAMPLING_RATE);
 #endif
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
@@ -208,7 +208,7 @@ void storeData() {
 
 
 #if defined(PCM186X)
-void setupPCM(TeensyTDM &tdm, ControlPCM186x &pcm, bool offs) {
+void setupPCM(InputTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.begin();
   pcm.setMicBias(false, true);
   pcm.setRate(tdm, SAMPLING_RATE);

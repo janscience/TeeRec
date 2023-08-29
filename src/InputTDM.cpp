@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include <TeensyTDM.h>
+#include <InputTDM.h>
 #ifdef __IMXRT1062__
 #include <utility/imxrt_hw.h>   // set_audioClock on T4.x
 #endif
@@ -12,13 +12,13 @@
 DMAMEM __attribute__((aligned(32)))
 static uint32_t TDMBuffer[2][TDM_FRAMES*TDM_FRAME_SIZE];
 
-DMAChannel TeensyTDM::DMA[2];
+DMAChannel InputTDM::DMA[2];
 
-TeensyTDM *TeensyTDM::TDM = 0;
+InputTDM *InputTDM::TDM = 0;
 
 
 
-TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
+InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
   DataBuffer(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
   TDM = this;
   setDataResolution(16);
@@ -38,9 +38,9 @@ TeensyTDM::TeensyTDM(volatile sample_t *buffer, size_t nbuffer) :
 }
 
 
-void TeensyTDM::setResolution(uint8_t bits) {
+void InputTDM::setResolution(uint8_t bits) {
   if (bits != 32) {
-    Serial.printf("TeensyTDM::setResolution() -> resolution of %ubits not supported.\n", bits);
+    Serial.printf("InputTDM::setResolution() -> resolution of %ubits not supported.\n", bits);
     Bits = 0;
   }
   else
@@ -48,21 +48,21 @@ void TeensyTDM::setResolution(uint8_t bits) {
 }
 
 
-void TeensyTDM::downSample(uint8_t n) {
+void InputTDM::downSample(uint8_t n) {
   if (n < 1)
     n = 1;
   DownSample = n;
 }
 
   
-void TeensyTDM::setNChannels(uint8_t nchannels) {
+void InputTDM::setNChannels(uint8_t nchannels) {
   setNChannels(TDM1, nchannels);
 }
 
   
-void TeensyTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
+void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
   if (nchannels > 256/Bits) {
-    Serial.printf("TeensyTDM::setNChannels() -> too many channels=%u.\n", nchannels);
+    Serial.printf("InputTDM::setNChannels() -> too many channels=%u.\n", nchannels);
     nchannels = 0;
   }
   if (nchannels == 0) {
@@ -79,12 +79,12 @@ void TeensyTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
 }
 
   
-void TeensyTDM::setChannelStr(const char *cs) {
+void InputTDM::setChannelStr(const char *cs) {
   strncpy(Channels, cs, 127);
 }
 
 
-void TeensyTDM::clearChannels(TDM_BUS bus) {
+void InputTDM::clearChannels(TDM_BUS bus) {
   NChans[bus] = 0;
   TDMUse &= ~(1 << bus);
   NChannels = 0;
@@ -93,7 +93,7 @@ void TeensyTDM::clearChannels(TDM_BUS bus) {
 }
 
 
-void TeensyTDM::clearChannels() {
+void InputTDM::clearChannels() {
   NChannels = 0;
   for (int k=0; k<2; k++)
     NChans[k] = 0;
@@ -102,22 +102,22 @@ void TeensyTDM::clearChannels() {
 }
 
 
-bool TeensyTDM::swapLR() const {
+bool InputTDM::swapLR() const {
   return SwapLR;
 }
 
 
-void TeensyTDM::setSwapLR(bool swap) {
+void InputTDM::setSwapLR(bool swap) {
   SwapLR = swap;
 }
 
 
-size_t TeensyTDM::counter(TDM_BUS bus) const {
+size_t InputTDM::counter(TDM_BUS bus) const {
   return DMACounter[bus];
 }
 
 
-bool TeensyTDM::check() {
+bool InputTDM::check() {
   if ( Rate < 1 ) {
     Serial.println("ERROR: no sampling rate specfied.");
     Rate = 0;
@@ -143,7 +143,7 @@ bool TeensyTDM::check() {
 }
 
   
-void TeensyTDM::report() {
+void InputTDM::report() {
   float bt = bufferTime();
   char bts[20];
   if (bt < 1.0)
@@ -164,7 +164,7 @@ void TeensyTDM::report() {
 }
 
 
-void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
+void InputTDM::setWaveHeader(WaveHeader &wave) const {
   DataWorker::setWaveHeader(wave);
   if (strlen(Channels) > 0)
     wave.setChannels(Channels);
@@ -192,9 +192,9 @@ void TeensyTDM::setWaveHeader(WaveHeader &wave) const {
 #endif
 
 
-void TeensyTDM::begin() {
+void InputTDM::begin() {
   if (Bits == 0 || Rate == 0) {
-    Serial.println("ERROR: TeensyTDM::begin() -> resultion and sampling rate not yet specified.");
+    Serial.println("ERROR: InputTDM::begin() -> resultion and sampling rate not yet specified.");
     return;
   }
   
@@ -252,7 +252,7 @@ void TeensyTDM::begin() {
     }
   }
   if (!rate_found) {
-    Serial.printf("TeensyTDM::begin() -> invalid sampling rate %d Hz.\n", Rate);
+    Serial.printf("InputTDM::begin() -> invalid sampling rate %d Hz.\n", Rate);
     Rate = 0;
     return;
   }
@@ -406,7 +406,7 @@ void TeensyTDM::begin() {
 }
 
 
-void TeensyTDM::start() {
+void InputTDM::start() {
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
   // this is begin() from input_tdm.cpp of the Audio library
@@ -481,7 +481,7 @@ void TeensyTDM::start() {
 }
 
 
-void TeensyTDM::stop() {
+void InputTDM::stop() {
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus)) {
       DMA[bus].disable();
@@ -492,7 +492,7 @@ void TeensyTDM::stop() {
 }
 
 
-void TeensyTDM::TDMISR(uint8_t bus) {
+void InputTDM::TDMISR(uint8_t bus) {
   uint32_t daddr = (uint32_t)(DMA[bus].TCD->DADDR);
   DMA[bus].clearInterrupt();
   
@@ -548,12 +548,12 @@ void TeensyTDM::TDMISR(uint8_t bus) {
 }
 
 
-void TeensyTDM::ISR0() {
+void InputTDM::ISR0() {
   TDM->TDMISR(TDM1);
 }
 
 
-void TeensyTDM::ISR1() {
+void InputTDM::ISR1() {
   TDM->TDMISR(TDM2);
 }
 
