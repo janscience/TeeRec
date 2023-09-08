@@ -192,6 +192,12 @@ public:
   /*! Setup mic bias. */
   bool setMicBias(bool power=true, bool bypass=false);
 
+  /*! Enter power down mode. */
+  bool powerdown();
+
+  /*! Switch back into active mode. */
+  bool powerup();
+
   /* Print state (all status registers) to Serial. */
   void printState();
 

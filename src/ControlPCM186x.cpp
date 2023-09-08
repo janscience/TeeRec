@@ -713,6 +713,28 @@ bool ControlPCM186x::setMicBias(bool power, bool bypass) {
 }
 
 
+bool ControlPCM186x::powerdown() {
+  unsigned int val = read(PCM186x_PWRDN_CTRL_REG);
+  val &= ~0xF8;   // clear reserved bits
+  val |= 0x70;    // write reserved bits
+  val |= 0x04;    // set PWRDN
+  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+    return false;
+  return true;
+}
+
+
+bool ControlPCM186x::powerup() {
+  unsigned int val = read(PCM186x_PWRDN_CTRL_REG);
+  val &= ~0xF8;   // clear reserved bits
+  val |= 0x70;    // write reserved bits
+  val &= ~0x04;   // clear PWRDN
+  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+    return false;
+  return true;
+}
+
+
 void ControlPCM186x::printState() {
   Serial.print("DEV_STAT: ");
   unsigned int val = read(PCM186x_DEV_STAT_REG);
