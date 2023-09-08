@@ -371,7 +371,7 @@ ssize_t SDWriter::write() {
 #ifdef DEBUG
     Serial.printf("ERROR in SDWriter::write(): Data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
     int wt = WriteTime;
-    Serial.printf("Last write %dms ago.\n", wt);
+    Serial.printf("----> last write %dms ago.\n", wt);
 #endif
     return -4;
   }
@@ -389,7 +389,7 @@ ssize_t SDWriter::write() {
 #ifdef DEBUG
   if (WriteTime > 30) {
     int wt = WriteTime;
-    Serial.printf("Last write %dms ago.\n", wt);
+    Serial.printf("----> last write %dms ago.\n", wt);
   }
 #endif
   size_t index = Producer->index();
@@ -405,7 +405,7 @@ ssize_t SDWriter::write() {
 #ifdef DEBUG
       if (WriteTime > 30) {
 	int wt = WriteTime;
-	Serial.printf("Needed %dms for writing end-of-buffer data to SD card.\n", wt);
+	Serial.printf("----> needed %dms for writing end-of-buffer data to SD card.\n", wt);
       }
 #endif
       WriteTime = 0;
@@ -439,7 +439,7 @@ ssize_t SDWriter::write() {
 #ifdef DEBUG
   if (WriteTime > 30) {
     int wt = WriteTime;
-    Serial.printf("Needed %dms for writing beginning-of-buffer data to SD card.\n", wt);
+    Serial.printf("----> needed %dms for writing beginning-of-buffer data to SD card.\n", wt);
   }
 #endif
   return samples0 + samples1;
