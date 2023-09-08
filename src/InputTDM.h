@@ -46,12 +46,18 @@ class InputTDM : public Input {
   // When transfering data from the TDM data stream to the buffer,
   // downsample them by n samples.
   void downSample(uint8_t n);
+
+  // Return total number of channels multiplexed into the buffer.
+  uint8_t nchannels() const { return NChannels; };
   
   // Set number of channels to nchannels.
   virtual void setNChannels(uint8_t nchannels);
   
   // Set number of channels of the TDM bus to nchannels.
   void setNChannels(TDM_BUS bus, uint8_t nchannels);
+
+  // Return number of channels recorded from the given TDM bus.
+  uint8_t nchannels(TDM_BUS bus) const { return NChans[bus]; };
   
   // Return in chans the string with the channels
   // in the order they are multiplexed into the buffer.

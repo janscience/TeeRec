@@ -60,6 +60,11 @@ public:
     BIT16
   };
 
+  enum INVERSION : uint8_t {
+    NON_INVERTED,
+    INVERTED
+  };
+
   enum LOWPASS : uint8_t {
     FIR,   // classic FIR (default)
     IIR    // low-latency IIR
@@ -109,26 +114,26 @@ public:
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
-		  bool inverted=false);
+		  INVERSION inverted=NON_INVERTED);
 
   /* Setup I2S output for the specified two input channels.
      Get the recorded data with AudioInputI2S */
   bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
-		bool inverted=false);
+		INVERSION inverted=NON_INVERTED);
   
   /* Setup I2S output for the specified four input channels.
      Channels 3 and 4 are available as DOUT2 via GPIO0.
      Get the recorded data with AudioInputI2SQuad. */
   bool setupI2S(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
-		bool inverted=false);
+		INVERSION inverted=NON_INVERTED);
   
   /* Setup TDM output for the specified two input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2.
      If offset, shift the recorded data such that they appear
      on slots 4, 6. */
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
-		bool offs=false, bool inverted=false);
+		bool offs=false, INVERSION inverted=NON_INVERTED);
   
   /* Setup TDM output for the specified two input channels.
      If offset, shift the recorded data by two slots.
@@ -136,7 +141,7 @@ public:
      tdm.setSwapLR() needs to be called before this function. */
   bool setupTDM(InputTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, bool offs=false,
-		bool inverted=false);
+		INVERSION inverted=NON_INVERTED);
   
   /* Setup TDM output for the specified four input channels.
      Get the recorded data with AudioInputTDM on slots 0, 2, 4, 6.
@@ -144,7 +149,7 @@ public:
      on slots 8, 10, 12, 14. */
   bool setupTDM(INPUT_CHANNELS channel1, INPUT_CHANNELS channel2,
 		INPUT_CHANNELS channel3, INPUT_CHANNELS channel4,
-		bool offs=false, bool inverted=false);
+		bool offs=false, INVERSION inverted=NON_INVERTED);
   
   /* Setup TDM output for the specified four input channels.
      If offset, shift the recorded data by four slots.
@@ -153,7 +158,10 @@ public:
   bool setupTDM(InputTDM &tdm, INPUT_CHANNELS channel1,
 		INPUT_CHANNELS channel2, INPUT_CHANNELS channel3,
 		INPUT_CHANNELS channel4, bool offs=false,
-		bool inverted=false);
+		INVERSION inverted=NON_INVERTED);
+
+  /* The TDM bus on which this PCM186x chip transmits data. */
+  InputTDM::TDM_BUS TDMBus() const { return Bus; };
 
   /* Return the gain set for output channel adc in dB. */
   float gain(OUTPUT_CHANNELS adc);

@@ -328,7 +328,7 @@ void ControlPCM186x::channels(char *chans, bool swaplr,
 
 bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool inverted) {
+			      INVERSION inverted) {
   uint8_t fmt = 0x00;  // I2S
   DATA_BITS bits = BIT24;
   uint8_t val = fmt;   // FMT
@@ -349,7 +349,7 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool inverted) {
+			      INVERSION inverted) {
   // data format:
   uint8_t fmt = 0x00;   // I2S
   DATA_BITS bits = BIT24;
@@ -417,7 +417,7 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
 
 bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs, bool inverted) {
+			      bool offs, INVERSION inverted) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -447,9 +447,12 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs, bool inverted) {
+			      bool offs, INVERSION inverted) {
   if (setupTDM(channel1, channel2, offs, inverted)) {
-    tdm.setNChannels(Bus, offs ? 4 : 2);
+    if (offs)
+      tdm.setNChannels(Bus, tdm.nchannels(Bus) + 2);
+    else
+      tdm.setNChannels(Bus, 2);
     tdm.setResolution(32);
     setTDMChannelStr(tdm);
     return true;
@@ -462,7 +465,7 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs, bool inverted) {
+			      bool offs, INVERSION inverted) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -498,9 +501,12 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs, bool inverted) {
+			      bool offs, INVERSION inverted) {
   if (setupTDM(channel1, channel2, channel3, channel4, offs, inverted)) {
-    tdm.setNChannels(Bus, offs ? 8 : 4);
+    if (offs)
+      tdm.setNChannels(Bus, tdm.nchannels(Bus) + 4);
+    else
+      tdm.setNChannels(Bus, 4);
     tdm.setResolution(32);
     setTDMChannelStr(tdm);
     return true;
@@ -510,7 +516,7 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm,
 
 
 bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
-				bool inverted) {
+				INVERSION inverted) {
   // check and set channel:
   uint8_t val = 0;
   if (adc == ADC1L || adc == ADC2L) {
@@ -543,7 +549,7 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
   }
   // set bit 6 and 7:
   val += 0x40;    // RSV bit 6 always write 1
-  if (inverted)
+  if (inverted == INVERTED)
     val += 0x80;  // POL bit 7
   // set input channel for adc:
   if (adc == ADC1L) {
@@ -952,7 +958,9 @@ unsigned int ControlPCM186x::read(uint16_t address) {
     result = goToPage(page);
     result = goToPage(page);
     if (result != 0) {
+#ifdef DEBUG
       Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
+#endif
       return 0x0100;
     }
   }
@@ -961,7 +969,9 @@ unsigned int ControlPCM186x::read(uint16_t address) {
   I2CBus->write(reg);
   result = I2CBus->endTransmission(false);
   if (result != 0) {
+#ifdef DEBUG
     Serial.printf("ControlPCM186x: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
+#endif
     return 0x0200 + result;
   }
   if (I2CBus->requestFrom(I2CAddress, (uint8_t)1) < 1) {
@@ -991,7 +1001,9 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
     result = goToPage(page);
     result = goToPage(page);
     if (result != 0) {
+#ifdef DEBUG
       Serial.printf("ControlPCM186x: write() failed to go to page %02x, error = %02x\n", page, result);
+#endif
       return false;
     }
   }
@@ -1001,7 +1013,9 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
   I2CBus->write(val); delay(10);
   result = I2CBus->endTransmission();
   if (result != 0) {
+#ifdef DEBUG
     Serial.printf("ControlPCM186x: write() failed, error = %02x\n", result);
+#endif
     return false;
   }
   return true;
