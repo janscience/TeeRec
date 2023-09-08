@@ -22,9 +22,15 @@ typedef int16_t sample_t;
 // and the maximum number of channels per ADC (8)!
 // For Teensy 3.2 use n = 256*32 (16kB),
 // for Teensy 3.5/3.6 use n = 256*256 (128kB) or less.
+// for Teensy 4 you may use at least n = 512*256 (256kB).
 #define DATA_BUFFER(buffer, nbuffer, n) \
   static const size_t nbuffer = n;				   \
   static volatile sample_t __attribute__((aligned(32))) buffer[n]; \
+
+// Same as DATA_BUFFER but allocates the buffer in PSRAM (Teensy 4.1 only).
+#define EXT_DATA_BUFFER(buffer, nbuffer, n) \
+  static const size_t nbuffer = n;				   \
+  static volatile EXTMEM sample_t __attribute__((aligned(32))) buffer[n]; \
 
 
 class DataBuffer : public DataWorker {
