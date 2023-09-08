@@ -173,9 +173,8 @@ public:
   void gainStr(OUTPUT_CHANNELS adc, char *gains, float pregain=1.0);
 
   /* Set gain of one or more adc channels to gain in dB,
-     between -12 and 40 in steps of 0.5.
-     If smooth then smoothly ramp to the new gains. */
-  bool setGain(OUTPUT_CHANNELS adc, float gain, bool smooth=false);
+     between -12 and 40 in steps of 0.5. */
+  bool setGain(OUTPUT_CHANNELS adc, float gain);
   
   /* Return the gain set for all channels in dB. */
   virtual float gain();
@@ -187,6 +186,9 @@ public:
   /* Set gain of all channels to gain in dB. */
   virtual bool setGain(float gain);
 
+  /* If smooth then smoothly ramp to new gains. */
+  bool setSmoothGainChange(bool smooth=true);
+  
   /*! Setup digital low- and highpass filter.
       Highpass is belwo 10Hz. */
   bool setFilters(LOWPASS lowpass=FIR, bool highpass=true);

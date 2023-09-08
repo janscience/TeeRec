@@ -600,7 +600,7 @@ void ControlPCM186x::gainStr(OUTPUT_CHANNELS adc, char *gains, float pregain) {
 }
 
 
-bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain, bool smooth) {
+bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
   // check gain:
   if (gain < -12.0) {
     Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
@@ -610,13 +610,6 @@ bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain, bool smooth) {
     Serial.printf("ControlPCM186x: invalid gain %g > 40dB\n", gain);
     return false;
   }
-  // smooth gain change:
-  unsigned int val = read(PCM186x_PGA_CONTROL_REG);
-  val &= ~0x80;
-  if (smooth)
-    val |= 0x80;    // SMOOTH
-  if (!write(PCM186x_PGA_CONTROL_REG, val))
-    return false;
   // set gains:
   int8_t igain = (int8_t)(2*gain);
   if (adc == ADCLR) {
@@ -670,7 +663,18 @@ void ControlPCM186x::gainStr(char *gains, float pregain) {
 
 
 bool ControlPCM186x::setGain(float gain) {
-  return setGain(ADCLR, gain, false);
+  return setGain(ADCLR, gain);
+}
+
+
+bool ControlPCM186x::setSmoothGainChange(bool smooth) {
+  unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+  val &= ~0x80;
+  if (smooth)
+    val |= 0x80;    // SMOOTH
+  if (!write(PCM186x_PGA_CONTROL_REG, val))
+    return false;
+  return true;
 }
 
 
