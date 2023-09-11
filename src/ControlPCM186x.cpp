@@ -328,7 +328,7 @@ void ControlPCM186x::channels(char *chans, bool swaplr,
 
 bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      INVERSION inverted) {
+			      POLARITY polarity) {
   uint8_t fmt = 0x00;  // I2S
   DATA_BITS bits = BIT24;
   uint8_t val = fmt;   // FMT
@@ -336,9 +336,9 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
   val |= bits << 6;    // RX_WLEN
   if (!write(PCM186x_I2S_FMT_REG, val))
     return false;
-  if (!setChannel(ADC1L, channel1, inverted))
+  if (!setChannel(ADC1L, channel1, polarity))
     return false;
-  if (!setChannel(ADC1R, channel2, inverted))
+  if (!setChannel(ADC1R, channel2, polarity))
     return false;
   NChannels = 2;
   return true;  
@@ -349,7 +349,7 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      INVERSION inverted) {
+			      POLARITY polarity) {
   // data format:
   uint8_t fmt = 0x00;   // I2S
   DATA_BITS bits = BIT24;
@@ -365,13 +365,13 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
   if (!write(PCM186x_GPIO_FUNC_1_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1, inverted))
+  if (!setChannel(ADC1L, channel1, polarity))
     return false;
-  if (!setChannel(ADC1R, channel2, inverted))
+  if (!setChannel(ADC1R, channel2, polarity))
     return false;
-  if (!setChannel(ADC2L, channel3, inverted))
+  if (!setChannel(ADC2L, channel3, polarity))
     return false;
-  if (!setChannel(ADC2R, channel4, inverted))
+  if (!setChannel(ADC2R, channel4, polarity))
     return false;
   NChannels = 4;
   return true;  
@@ -417,7 +417,7 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
 
 bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs, INVERSION inverted) {
+			      bool offs, POLARITY polarity) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -435,9 +435,9 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1, inverted))
+  if (!setChannel(ADC1L, channel1, polarity))
     return false;
-  if (!setChannel(ADC1R, channel2, inverted))
+  if (!setChannel(ADC1R, channel2, polarity))
     return false;
   NChannels = 2;
   return true;  
@@ -447,8 +447,8 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
-			      bool offs, INVERSION inverted) {
-  if (setupTDM(channel1, channel2, offs, inverted)) {
+			      bool offs, POLARITY polarity) {
+  if (setupTDM(channel1, channel2, offs, polarity)) {
     if (offs)
       tdm.setNChannels(Bus, tdm.nchannels(Bus) + 2);
     else
@@ -465,7 +465,7 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs, INVERSION inverted) {
+			      bool offs, POLARITY polarity) {
   // data format:
   uint8_t fmt = 0x03;   // TDM
   DATA_BITS bits = BIT32;
@@ -483,13 +483,13 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
   // input channels:
-  if (!setChannel(ADC1L, channel1, inverted))
+  if (!setChannel(ADC1L, channel1, polarity))
     return false;
-  if (!setChannel(ADC1R, channel2, inverted))
+  if (!setChannel(ADC1R, channel2, polarity))
     return false;
-  if (!setChannel(ADC2L, channel3, inverted))
+  if (!setChannel(ADC2L, channel3, polarity))
     return false;
-  if (!setChannel(ADC2R, channel4, inverted))
+  if (!setChannel(ADC2R, channel4, polarity))
     return false;
   NChannels = 4;
   return true;  
@@ -501,8 +501,8 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm,
 			      INPUT_CHANNELS channel2,
 			      INPUT_CHANNELS channel3,
 			      INPUT_CHANNELS channel4,
-			      bool offs, INVERSION inverted) {
-  if (setupTDM(channel1, channel2, channel3, channel4, offs, inverted)) {
+			      bool offs, POLARITY polarity) {
+  if (setupTDM(channel1, channel2, channel3, channel4, offs, polarity)) {
     if (offs)
       tdm.setNChannels(Bus, tdm.nchannels(Bus) + 4);
     else
@@ -516,7 +516,7 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm,
 
 
 bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
-				INVERSION inverted) {
+				POLARITY polarity) {
   // check and set channel:
   uint8_t val = 0;
   if (adc == ADC1L || adc == ADC2L) {
@@ -549,7 +549,7 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
   }
   // set bit 6 and 7:
   val += 0x40;    // RSV bit 6 always write 1
-  if (inverted == INVERTED)
+  if (polarity == INVERTED)
     val += 0x80;  // POL bit 7
   // set input channel for adc:
   if (adc == ADC1L) {
