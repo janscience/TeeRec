@@ -108,13 +108,13 @@ protected:
   };
 
   // See https://exiftool.org/TagNames/RIFF.html#Info for valid info tags.
-  class InfoChunk : public Chunk {
+  template <size_t N=32> class InfoChunk : public Chunk {
   public:
     InfoChunk(const char *infoid, const char *text);
     void set(const char *text);
     void clear();
-    static const size_t MaxText = 127;
-    char Text[MaxText+1];
+    static const size_t MaxText = N-1;
+    char Text[N];
   };
 
   class DataChunk : public Chunk {
@@ -129,18 +129,18 @@ protected:
   ListChunk Riff;
   FormatChunk Format;
   ListChunk Info;
-  InfoChunk Bits;
-  InfoChunk DataBits;
-  InfoChunk Channels;
-  InfoChunk Averaging;
-  InfoChunk Conversion;
-  InfoChunk Sampling;
-  InfoChunk Reference;
-  InfoChunk Gain;
-  InfoChunk Board;
-  InfoChunk MAC;
-  InfoChunk DateTime;
-  InfoChunk Software;
+  InfoChunk<> Bits;
+  InfoChunk<> DataBits;
+  InfoChunk<256> Channels;
+  InfoChunk<> Averaging;
+  InfoChunk<> Conversion;
+  InfoChunk<> Sampling;
+  InfoChunk<> Reference;
+  InfoChunk<> Gain;
+  InfoChunk<> Board;
+  InfoChunk<> MAC;
+  InfoChunk<> DateTime;
+  InfoChunk<64> Software;
   DataChunk Data;
 
 };

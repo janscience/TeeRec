@@ -78,13 +78,15 @@ void WaveHeader::FormatChunk::set(uint8_t nchannels, uint32_t samplerate,
 }
 
 
-WaveHeader::InfoChunk::InfoChunk(const char *infoid, const char *text) :
+template <size_t N>
+WaveHeader::InfoChunk<N>::InfoChunk(const char *infoid, const char *text) :
   Chunk(infoid, 0) {
   set(text);
 }
 
 
-void WaveHeader::InfoChunk::set(const char *text) {
+template <size_t N>
+void WaveHeader::InfoChunk<N>::set(const char *text) {
   if (strlen(text) > MaxText)
     Serial.printf("ERROR in WaveHeader::InfoChunk(): string \"%s\" of len %d exceeds buffer size of %d!\n", text, strlen(text), MaxText);
   setSize(strlen(text));
@@ -94,7 +96,8 @@ void WaveHeader::InfoChunk::set(const char *text) {
 }
 
 
-void WaveHeader::InfoChunk::clear() {
+template <size_t N>
+void WaveHeader::InfoChunk<N>::clear() {
   setSize(0);
   Use = false;
 }
