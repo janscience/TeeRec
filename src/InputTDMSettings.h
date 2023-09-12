@@ -16,20 +16,23 @@ class InputTDMSettings : public Configurable {
 
 public:
 
-  // Constructor. Sets configuration name to "TDM".
-  InputTDMSettings(uint32_t rate=0, float gain=0);
+  // Constructor. Sets configuration name to "ADC".
+  InputTDMSettings(uint32_t rate=0, int nchannels=16, float gain=0);
 
   // Constructor. Provides an instance of a InputTDM and
   // sets configuration name to "ADC".
-  InputTDMSettings(InputTDM *tdm, uint32_t rate=0, float gain=0);
+  InputTDMSettings(InputTDM *tdm, uint32_t rate=0, int nchannels=16,
+		   float gain=0);
 
   // Constructor setting configuration name.
-  InputTDMSettings(const char *name, uint32_t rate=0, float gain=0);
+  InputTDMSettings(const char *name, uint32_t rate=0, int nchannels=16,
+		   float gain=0);
 
   // Constructor providing an instance of a InputTDM and
   // setting configuration name.
   InputTDMSettings(InputTDM *tdm, const char *name,
-		   uint32_t rate=0, float gain=0);
+		   uint32_t rate=0, int nchannels=16,
+		   float gain=0);
 
   // Return sampling rate per channel in Hertz.
   // If a InputTDM instance is provided via the constructor,
@@ -42,6 +45,14 @@ public:
   // the sampling rate is passed on to this instance by the configure()
   // function when parsing a configuration file.
   void setRate(uint32_t rate);
+
+  // Return number of channels.
+  // The number of channels is set from the configuration file
+  // but needs to be passed manually to appropriate Control instances.
+  uint8_t nchannels() const { return NChannels; };
+  
+  // Set the number of channels.
+  void setNChannels(uint8_t nchannels);
 
   // Return gain in dB.
   // The gain is set from the configuration file but needs to be passed
@@ -70,6 +81,7 @@ public:
 protected:
 
   uint32_t Rate;
+  uint8_t NChannels;
   float Gain;
   InputTDM *TDM;
   

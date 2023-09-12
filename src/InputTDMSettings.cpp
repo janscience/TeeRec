@@ -2,36 +2,40 @@
 #include <InputTDMSettings.h>
 
 
-InputTDMSettings::InputTDMSettings(uint32_t rate, float gain) :
+InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels, float gain) :
   Configurable("ADC"),
   Rate(rate),
+  NChannels(nchannels),
   Gain(gain),
   TDM(0) {
 }
 
 
-InputTDMSettings::InputTDMSettings(InputTDM *tdm, uint32_t rate,
+InputTDMSettings::InputTDMSettings(InputTDM *tdm, uint32_t rate, int nchannels,
 				   float gain) :
   Configurable("ADC"),
   Rate(rate),
+  NChannels(nchannels),
   Gain(gain),
   TDM(tdm) {
 }
 
 
 InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
-				   float gain) :
+				   int nchannels, float gain) :
   Configurable(name),
   Rate(rate),
+  NChannels(nchannels),
   Gain(gain),
   TDM(0) {
 }
 
 
 InputTDMSettings::InputTDMSettings(InputTDM *tdm, const char *name,
-				   uint32_t rate, float gain) :
+				   uint32_t rate, int nchannels, float gain) :
   Configurable(name),
   Rate(rate),
+  NChannels(nchannels),
   Gain(gain),
   TDM(tdm) {
 }
@@ -39,6 +43,11 @@ InputTDMSettings::InputTDMSettings(InputTDM *tdm, const char *name,
 
 void InputTDMSettings::setRate(uint32_t rate) {
   Rate = rate;
+}
+
+
+void InputTDMSettings::setNChannels(uint8_t nchannels) {
+  NChannels = nchannels;
 }
 
 
@@ -54,6 +63,10 @@ void InputTDMSettings::configure(const char *key, const char *val) {
     sprintf(pval, "%luHz", Rate);
     if (TDM != 0)
       TDM->setRate(rate());
+  }
+  else if (strcmp(key, "nchannels") == 0) {
+    setNChannels(atoi(val));
+    sprintf(pval, "%d", NChannels);
   }
   else if (strcmp(key, "gain") == 0) {
     setGain(atof(val));
@@ -73,7 +86,6 @@ void InputTDMSettings::configure(InputTDM *tdm) {
   if (tdm == 0)
     return;
   tdm->setRate(rate());
-  //tdm->setGain(gain());
 }
 
 
@@ -83,12 +95,12 @@ void InputTDMSettings::setConfiguration(InputTDM *tdm) {
   if (tdm == 0)
     return;
   setRate(tdm->rate());
-  //  setGain(tdm->gain());
 }
 
 
 void InputTDMSettings::report() const {
   Serial.printf("%s settings:\n", name());
-  Serial.printf("        %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  gain: %.1f\n", Gain);
+  Serial.printf("  samplingrate : %.1fkHz\n", 0.001*Rate);
+  Serial.printf("  nchannels    : %d\n", NChannels);
+  Serial.printf("  gain         : %.1f\n", Gain);
 }
