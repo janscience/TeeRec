@@ -26,6 +26,8 @@ if __name__ == '__main__':
         description='Take from each provided wave file one channel and merge them into a single wav file. That is, take from the first file the first channel, from the second file the second channel and so on.')
         #epilog='version %s by Benda-Lab (2015-%s)' % (__version__, __year__))
     #parser.add_argument('--version', action='version', version=__version__)
+    parser.add_argument('-v', dest='verbose', action='store_true', 
+                        help='print on console what is going on')
     parser.add_argument('-o', dest='outfile', default='merged.wav', type=str,
                         help='output file with the merged channels',
                         metavar='OUTFILE')
@@ -34,12 +36,17 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # options:
     outfile = args.outfile
+    verbose = args.verbose
     # read channels:
     data = None
     sampwidth = 0
     rate = 0
+    if verbose:
+        print('merge')
     for c in range(len(args.files)):
         fname = args.files[c]
+        if verbose:
+            print(f'  channel {c:2d} from {fname}')
         fdata, params = load_wave(fname)
         if data is None:
             data = fdata.copy()
@@ -62,6 +69,8 @@ if __name__ == '__main__':
                     "NONE", "not compressed"))
     wave.writeframesraw(data.reshape(-1, 1).tobytes())
     wave.close()
+    if verbose:
+        print(f'into file {outfile}')
 
     
         
