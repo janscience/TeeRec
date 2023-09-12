@@ -129,17 +129,17 @@ protected:
   ListChunk Riff;
   FormatChunk Format;
   ListChunk Info;
-  InfoChunk<> Bits;
-  InfoChunk<> DataBits;
+  InfoChunk<4> Bits;
+  InfoChunk<4> DataBits;
   InfoChunk<256> Channels;
-  InfoChunk<> Averaging;
-  InfoChunk<> Conversion;
-  InfoChunk<> Sampling;
-  InfoChunk<> Reference;
-  InfoChunk<> Gain;
-  InfoChunk<> Board;
-  InfoChunk<> MAC;
-  InfoChunk<> DateTime;
+  InfoChunk<4> Averaging;
+  InfoChunk<32> Conversion;
+  InfoChunk<32> Sampling;
+  InfoChunk<8> Reference;
+  InfoChunk<16> Gain;
+  InfoChunk<16> Board;
+  InfoChunk<32> MAC;
+  InfoChunk<32> DateTime;
   InfoChunk<64> Software;
   DataChunk Data;
 
