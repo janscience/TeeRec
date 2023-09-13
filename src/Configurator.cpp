@@ -27,12 +27,12 @@ Configurable *Configurator::configurable(const char *name) {
   char lname[strlen(name)+1];
   for (size_t k=0; k<strlen(name)+1; k++)
     lname[k] = tolower(name[k]);
-  for (size_t k=0; k<NConfigs; k++) {
-    char cname[strlen(Configs[k]->name())+1];
-    for (size_t k=0; k<strlen(Configs[k]->name())+1; k++)
-      cname[k] = tolower(Configs[k]->name()[k]);
+  for (size_t j=0; j<NConfigs; j++) {
+    char cname[strlen(Configs[j]->name())+1];
+    for (size_t k=0; k<strlen(Configs[j]->name())+1; k++)
+      cname[k] = tolower(Configs[j]->name()[k]);
     if (strcmp(cname, lname) == 0)
-      return Configs[k];
+      return Configs[j];
   }
   return NULL;
 }
@@ -45,7 +45,7 @@ void Configurator::setConfigFile(const char *fname) {
 
 void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
-  const size_t nline = 100;
+  const size_t nline = 128;
   char line[nline];
   File file = sd.openRead(ConfigFile);
   if (!file || file.available() < 10) {
