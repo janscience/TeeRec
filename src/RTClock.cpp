@@ -42,13 +42,16 @@ bool RTClock::check() {
 }
 
 
-bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
-  File file = sdcard.openRead(path);
-  if (!file)
-    return false;
-  char datetime[20];
-  file.read(datetime, sizeof(datetime));
-  file.close();
+void RTClock::set(time_t t) {
+  setTime(t);
+  if (RTCSource == 1)
+    RTC.set(t);
+  else
+    Teensy3Clock.set(t);
+}
+
+
+bool RTClock::set(char *datetime, bool from_start) {
   // parse date-time string YYYY-MM-DDTHH:MM:SS
   int sepi[6] = {4, 7, 10, 13, 16, 19};
   datetime[19] = '\0';
@@ -57,7 +60,7 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
 	datetime[sepi[k]] != 'T' &&
 	datetime[sepi[k]] != ':' &&
 	datetime[sepi[k]] != '\0') {
-      Serial.printf("File \"%s\" does not contain a valid date-time string.\n", path);
+      Serial.printf("String \"%s\" is not a valid date-time string.\n", datetime);
       return false;
     }
     else
@@ -70,27 +73,27 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
   int min = atoi(&datetime[14]);
   int sec = atoi(&datetime[17]);
   if (year < 2020) {
-    Serial.printf("Invalid year \"%s\" in file \"%s\".\n", datetime, path);
+    Serial.printf("Invalid year \"%s\".\n", datetime);
     return false;
   }
   if (month < 1 || month > 12) {
-    Serial.printf("Invalid month \"%s\" in file \"%s\".\n", &datetime[5], path);
+    Serial.printf("Invalid month \"%s\".\n", &datetime[5]);
     return false;
   }
   if (day < 1 || day > 31) {
-    Serial.printf("Invalid day \"%s\" in file \"%s\".\n", &datetime[8], path);
+    Serial.printf("Invalid day \"%s\".\n", &datetime[8]);
     return false;
   }
   if (hour < 0 || hour > 23) {
-    Serial.printf("Invalid hour \"%s\" in file \"%s\".\n", &datetime[11], path);
+    Serial.printf("Invalid hour \"%s\".\n", &datetime[11]);
     return false;
   }
   if (min < 0 || min > 59) {
-    Serial.printf("Invalid minute \"%s\" in file \"%s\".\n", &datetime[14], path);
+    Serial.printf("Invalid minute \"%s\".\n", &datetime[14]);
     return false;
   }
   if (sec < 0 || sec > 59) {
-    Serial.printf("Invalid second \"%s\" in file \"%s\".\n", &datetime[17], path);
+    Serial.printf("Invalid second \"%s\".\n", &datetime[17]);
     return false;
   }
   // set time:
@@ -104,11 +107,21 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
   time_t t = makeTime(tm);
   if (from_start)
     t += millis()/1000;
-  setTime(t);
-  if (RTCSource == 1)
-    RTC.set(t);
-  else
-    Teensy3Clock.set(t);
+  set(t);
+  return true;
+}
+
+
+bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
+  File file = sdcard.openRead(path);
+  if (!file)
+    return false;
+  char datetime[20];
+  file.read(datetime, sizeof(datetime));
+  file.close();
+  bool r = set(datetime, from_start);
+  if (! r)
+    return false;
   sdcard.remove(path);
   // get time:
   char times[20];

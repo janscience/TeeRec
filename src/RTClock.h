@@ -45,11 +45,20 @@ class RTClock {
   // If not print message to serial.
   bool check();
 
+  // Set real-time clock to t.
+  void set(time_t t);
+
+  // Set real-time clock to datetime string (YYYY-MM-DDTHH:MM:SS).
+  // If from_start is true, the time the sketch is already running is
+  // added to datetime.
+  // Return true if the time was successfully set.
+  bool set(char *datetime, bool from_start=false);
+
   // Set the current time from a file path on the sdcard.
   // If the file was found and the time set, the file is deleted.
   // If from_start is true, the time the sketch is already running is
   // added to the time found in the file to account for start-up delays.
-  // Return true if the time was set from the file.
+  // Return true if the time was successfully set from the file.
   // The file contains a single line with the time in the format
   // YYYY-MM-DDTHH:MM:SS
   bool setFromFile(SDCard &sdcard, const char *path="settime.cfg",
