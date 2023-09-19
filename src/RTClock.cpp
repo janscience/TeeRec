@@ -51,6 +51,50 @@ void RTClock::set(time_t t) {
 }
 
 
+bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
+		  bool from_start, bool check) {
+  if (check) {
+    if (year < 2020) {
+      Serial.printf("Invalid year %d.\n", year);
+      return false;
+    }
+    if (month < 1 || month > 12) {
+      Serial.printf("Invalid month %d.\n", month);
+      return false;
+    }
+    if (day < 1 || day > 31) {
+      Serial.printf("Invalid day %d.\n", day);
+      return false;
+    }
+    if (hour < 0 || hour > 23) {
+      Serial.printf("Invalid hour %d.\n", hour);
+      return false;
+    }
+    if (min < 0 || min > 59) {
+      Serial.printf("Invalid minute %d.\n", min);
+      return false;
+    }
+    if (sec < 0 || sec > 59) {
+      Serial.printf("Invalid second %d.\n", sec);
+      return false;
+    }
+  }
+  // set time:
+  tmElements_t tm;
+  tm.Year = year - 1970;
+  tm.Month = month;
+  tm.Day = day;
+  tm.Hour = hour;
+  tm.Minute = min;
+  tm.Second = sec;
+  time_t t = makeTime(tm);
+  if (from_start)
+    t += millis()/1000;
+  set(t);
+  return true;
+}
+
+
 bool RTClock::set(char *datetime, bool from_start) {
   // parse date-time string YYYY-MM-DDTHH:MM:SS
   int sepi[6] = {4, 7, 10, 13, 16, 19};
@@ -72,43 +116,7 @@ bool RTClock::set(char *datetime, bool from_start) {
   int hour = atoi(&datetime[11]);
   int min = atoi(&datetime[14]);
   int sec = atoi(&datetime[17]);
-  if (year < 2020) {
-    Serial.printf("Invalid year \"%s\".\n", datetime);
-    return false;
-  }
-  if (month < 1 || month > 12) {
-    Serial.printf("Invalid month \"%s\".\n", &datetime[5]);
-    return false;
-  }
-  if (day < 1 || day > 31) {
-    Serial.printf("Invalid day \"%s\".\n", &datetime[8]);
-    return false;
-  }
-  if (hour < 0 || hour > 23) {
-    Serial.printf("Invalid hour \"%s\".\n", &datetime[11]);
-    return false;
-  }
-  if (min < 0 || min > 59) {
-    Serial.printf("Invalid minute \"%s\".\n", &datetime[14]);
-    return false;
-  }
-  if (sec < 0 || sec > 59) {
-    Serial.printf("Invalid second \"%s\".\n", &datetime[17]);
-    return false;
-  }
-  // set time:
-  tmElements_t tm;
-  tm.Year = year - 1970;
-  tm.Month = month;
-  tm.Day = day;
-  tm.Hour = hour;
-  tm.Minute = min;
-  tm.Second = sec;
-  time_t t = makeTime(tm);
-  if (from_start)
-    t += millis()/1000;
-  set(t);
-  return true;
+  return set(year, month, day, hour, min, sec, from_start, true);
 }
 
 

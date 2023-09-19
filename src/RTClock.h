@@ -47,6 +47,14 @@ class RTClock {
 
   // Set real-time clock to t.
   void set(time_t t);
+  
+  // Set real-time clock to the given time.
+  // If from_start is true, the time the sketch is already running is
+  // added to the specified time.
+  // If check, then check if the given time is valid.
+  // Return true if the time was successfully set.
+  bool set(int year, int month, int day, int hour, int min, int sec,
+	   bool from_start, bool check);
 
   // Set real-time clock to datetime string (YYYY-MM-DDTHH:MM:SS).
   // If from_start is true, the time the sketch is already running is
