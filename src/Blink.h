@@ -44,64 +44,68 @@ class Blink {
 
   // Set a blinking pattern with a single blink, based on the timings
   // provided by setTiming().
-  void setSingle();
+  void setSingle(bool reset=true);
 
   // Set a blinking pattern with a double blink, based on the timings
   // provided by setTiming().
-  void setDouble();
+  void setDouble(bool reset=true);
 
   // Set a blinking pattern with a triple blink, based on the timings
   // provided by setTiming().
-  void setTriple();
+  void setTriple(bool reset=true);
 
   // One-shot single blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
   // setTiming(). After this single blink, the blinking pattern
   // provided by setSingle(), setDouble(), setTriple(), set() or
   // setDelayed() is resumed.
-  void blinkSingle(uint32_t intervalms=0, uint32_t onms=0);
+  void blinkSingle(uint32_t intervalms=0, uint32_t onms=0, bool reset=true);
 
   // One-shot double blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
   // setTiming(). After this single blink, the blinking pattern
   // provided by setSingle(), setDouble(), setTriple(), set() or
   // setDelayed() is resumed.
-  void blinkDouble(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0);
+  void blinkDouble(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0,
+		   bool reset=true);
 
   // One-shot triple blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
   // setTiming(). After this single blink, the blinking pattern
   // provided by setSingle(), setDouble(), setTriple(), set() or
   // setDelayed() is resumed.
-  void blinkTriple(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0);
+  void blinkTriple(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0,
+		   bool reset=true);
  
 
   // detailed level (requires update() to be called regularly):
 
   // Set simple blink interval. Every intervalms the LED is on for onms.
-  void set(uint32_t intervalms, uint32_t onms);
+  void set(uint32_t intervalms, uint32_t onms, bool reset=true);
 
   // Set arbitrary blink intervals that repeat periodically.
   // First interval is LED on. Null terminated.
-  void set(const uint32_t *times);
+  void set(const uint32_t *times, bool reset=true);
 
   // Set simple blink interval. Every intervalms the LED is on for onms,
   // starting after a delay of delayms milliseconds.
-  void setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms);
+  void setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms,
+		  bool reset=true);
 
   // Set arbitrary blink intervals that repeat periodically,
   // starting after a delay of delayms milliseconds.
   // First interval is LED on. Null terminated.
-  void setDelayed(uint32_t delayms, const uint32_t *times);
+  void setDelayed(uint32_t delayms, const uint32_t *times,
+		  bool reset=true);
   
   // One shot simple blink interval. The LED is on for onms.
   // After intervalms fall back to the default blinking defined by set().
-  void blink(uint32_t intervalms, uint32_t onms);
+  void blink(uint32_t intervalms, uint32_t onms, bool reset=true);
 
   // One shot sequence of blink intervals.
   // First interval is LED on. Null terminated.
   // After finishing fall back to the default blinking defined by set().
-  void blink(const uint32_t *times);
+  void blink(const uint32_t *times, bool reset=true);
 
   // Switch off all blinking and the LED.
   void clear();

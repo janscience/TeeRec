@@ -44,29 +44,31 @@ void Blink::setTiming(uint32_t intervalms, uint32_t onms, uint32_t offms) {
 }
 
 
-void Blink::setSingle() {
+void Blink::setSingle(bool reset) {
   Times[0][0] = OnTime;
   Times[0][1] = Interval - OnTime;
   Times[0][2] = 0;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::setDouble() {
+void Blink::setDouble(bool reset) {
   Times[0][0] = OnTime;
   Times[0][1] = OffTime;
   Times[0][2] = OnTime;
   Times[0][3] = Interval - 2*OnTime - OffTime;
   Times[0][4] = 0;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::setTriple() {
+void Blink::setTriple(bool reset) {
   Times[0][0] = OnTime;
   Times[0][1] = OffTime;
   Times[0][2] = OnTime;
@@ -75,12 +77,13 @@ void Blink::setTriple() {
   Times[0][5] = Interval - 3*OnTime - 2*OffTime;
   Times[0][6] = 0;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::blinkSingle(uint32_t intervalms, uint32_t onms) {
+void Blink::blinkSingle(uint32_t intervalms, uint32_t onms, bool reset) {
   if (intervalms == 0)
     intervalms = Interval;
   if (onms == 0)
@@ -90,12 +93,14 @@ void Blink::blinkSingle(uint32_t intervalms, uint32_t onms) {
   Times[1][2] = 0;
   State = 1;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::blinkDouble(uint32_t intervalms, uint32_t onms, uint32_t offms) {
+void Blink::blinkDouble(uint32_t intervalms, uint32_t onms, uint32_t offms,
+			bool reset) {
   if (intervalms == 0)
     intervalms = Interval;
   if (onms == 0)
@@ -109,12 +114,14 @@ void Blink::blinkDouble(uint32_t intervalms, uint32_t onms, uint32_t offms) {
   Times[1][4] = 0;
   State = 1;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::blinkTriple(uint32_t intervalms, uint32_t onms, uint32_t offms) {
+void Blink::blinkTriple(uint32_t intervalms, uint32_t onms, uint32_t offms,
+			bool reset) {
   if (intervalms == 0)
     intervalms = Interval;
   if (onms == 0)
@@ -130,67 +137,73 @@ void Blink::blinkTriple(uint32_t intervalms, uint32_t onms, uint32_t offms) {
   Times[1][6] = 0;
   State = 1;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::set(uint32_t intervalms, uint32_t onms) {
+void Blink::set(uint32_t intervalms, uint32_t onms, bool reset) {
   Times[0][0] = onms;
   Times[0][1] = intervalms - onms;
   Times[0][2] = 0;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::set(const uint32_t *times) {
+void Blink::set(const uint32_t *times, bool reset) {
   int n = 0;
   for ( ;n<MaxTimes-1 && times[n] != 0; n++)
     Times[0][n] = times[n];
   Times[0][n] = 0;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms) {
-  set(intervalms, onms);
+void Blink::setDelayed(uint32_t delayms, uint32_t intervalms, uint32_t onms,
+		       bool reset) {
+  set(intervalms, onms, reset);
   Delay = delayms;
   if (Delay > 0)
     switchOff();
 }
 
 
-void Blink::setDelayed(uint32_t delayms, const uint32_t *times) {
-  set(times);
+void Blink::setDelayed(uint32_t delayms, const uint32_t *times, bool reset) {
+  set(times, reset);
   Delay = delayms;
   if (Delay > 0)
     switchOff();
 }
 
 
-void Blink::blink(uint32_t intervalms, uint32_t onms) {
+void Blink::blink(uint32_t intervalms, uint32_t onms, bool reset) {
   Times[1][0] = onms;
   Times[1][1] = intervalms - onms;
   Times[1][2] = 0;
   State = 1;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
 
-void Blink::blink(const uint32_t *times) {
+void Blink::blink(const uint32_t *times, bool reset) {
   int n = 0;
   for ( ;n<MaxTimes-1 && times[n] != 0; n++)
     Times[1][n] = times[n];
   Times[1][n] = 0;
   State = 1;
   Index = 0;
-  Time = 0;
+  if (reset)
+    Time = 0;
   switchOn();
 }
 
@@ -207,7 +220,7 @@ void Blink::clear() {
 void Blink::update() {
   if (Delay > 0) {
     if (Time > Delay) {
-      Time = 0;
+      Time -= Delay;
       switchOn();
       Delay = 0;
     }
