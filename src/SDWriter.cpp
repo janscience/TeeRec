@@ -148,10 +148,20 @@ void SDCard::format(const char *path, bool erase_card) {
 String SDCard::incrementFileName(const String &fname) {
   if (! Available)
     return "";
+  int numinx = -1;
   bool num = false;
   bool anum = (fname.indexOf("ANUM") >= 0);
-  if (!anum)
-    num = (fname.indexOf("NUM") >= 0);
+  if (!anum) {
+    numinx = fname.indexOf("NUM");
+    num = (numinx >= 0);
+  }
+  int width = 2;
+  char nums[6] = "NUM";
+  if (num && numinx+4 < (int)fname.length() && isdigit(fname[numinx+3])) {
+      width = fname[numinx+3] - '0';
+      nums[3] = fname[numinx+3];
+      nums[4] = '\0';
+  }
   String aa("aa");
   if (num || anum) {
     String name;
@@ -169,13 +179,18 @@ String SDCard::incrementFileName(const String &fname) {
 	name.replace("ANUM", aa);
       }
       else if (num) {
-	if (NameCounter > 99) {
+	char nn[12];
+	int maxn = 1;
+	for (int w=0; w<width; w++)
+	  maxn *= 10;
+	maxn -= 1;
+	if (NameCounter > maxn) {
 	  Serial.println("WARNING: file name overflow");
 	  return "";
 	}
-	char nn[4];
-	sprintf(nn, "%02d", NameCounter);
-	name.replace("NUM", nn);
+	volatile int nn_size = sizeof(nn); // avoid truncation warning: https://stackoverflow.com/a/70938456
+	snprintf(nn, nn_size, "%0*d", width, NameCounter);
+	name.replace(nums, nn);
       }
     } while (exists(name.c_str()));
     return name;
