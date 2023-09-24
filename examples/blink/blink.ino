@@ -5,7 +5,8 @@ elapsedMillis Time;
 
 
 void setup() {
-  blink.setDouble();
+  //blink.setDouble();
+  blink.setMultiple(5);
 }
 
 

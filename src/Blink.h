@@ -54,29 +54,40 @@ class Blink {
   // provided by setTiming().
   void setTriple(bool reset=true);
 
+  // Set a blinking pattern with a n blinks separated by a longer pause,
+  // based on the timings provided by setTiming().
+  void setMultiple(int n, bool reset=true);
+
   // One-shot single blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming(). After this single blink, the blinking pattern
-  // provided by setSingle(), setDouble(), setTriple(), set() or
-  // setDelayed() is resumed.
+  // setTiming(). After this one-time single blink, the blinking
+  // pattern provided by setSingle(), setDouble(), setTriple(),
+  // setMultiple(), set() or setDelayed() is resumed.
   void blinkSingle(uint32_t intervalms=0, uint32_t onms=0, bool reset=true);
 
   // One-shot double blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming(). After this single blink, the blinking pattern
-  // provided by setSingle(), setDouble(), setTriple(), set() or
-  // setDelayed() is resumed.
+  // setTiming(). After this one-time double blink, the blinking
+  // pattern provided by setSingle(), setDouble(), setTriple(),
+  // setMultiple(), set() or setDelayed() is resumed.
   void blinkDouble(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0,
 		   bool reset=true);
 
   // One-shot triple blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
-  // setTiming(). After this single blink, the blinking pattern
-  // provided by setSingle(), setDouble(), setTriple(), set() or
-  // setDelayed() is resumed.
+  // setTiming(). After this one-time triple blink, the blinking pattern
+  // provided by setSingle(), setDouble(), setTriple(), setMultiple(),
+  // set() or setDelayed() is resumed.
   void blinkTriple(uint32_t intervalms=0, uint32_t onms=0, uint32_t offms=0,
 		   bool reset=true);
  
+  // One-shot multiple blink, based on the timings provided by
+  // setTiming(). Arguments larger than zero overwrite settings from
+  // setTiming(). After this one-time multiple blink, the blinking
+  // pattern provided by setSingle(), setDouble(), setTriple(),
+  // setMultiple(), set() or setDelayed() is resumed.
+  void blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
+		     uint32_t offms, bool reset);
 
   // detailed level (requires update() to be called regularly):
 
@@ -131,7 +142,7 @@ class Blink {
   int Pin;
   bool Invert;
   bool On;
-  static const int MaxTimes = 11;
+  static const int MaxTimes = 32;
   uint32_t Times[2][MaxTimes];
   uint32_t  Delay;
   int Index;

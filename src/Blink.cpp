@@ -45,37 +45,30 @@ void Blink::setTiming(uint32_t intervalms, uint32_t onms, uint32_t offms) {
 
 
 void Blink::setSingle(bool reset) {
-  Times[0][0] = OnTime;
-  Times[0][1] = Interval - OnTime;
-  Times[0][2] = 0;
-  Index = 0;
-  if (reset)
-    Time = 0;
-  switchOn();
+  setMultiple(1, reset);
 }
 
 
 void Blink::setDouble(bool reset) {
-  Times[0][0] = OnTime;
-  Times[0][1] = OffTime;
-  Times[0][2] = OnTime;
-  Times[0][3] = Interval - 2*OnTime - OffTime;
-  Times[0][4] = 0;
-  Index = 0;
-  if (reset)
-    Time = 0;
-  switchOn();
+  setMultiple(2, reset);
 }
 
 
 void Blink::setTriple(bool reset) {
-  Times[0][0] = OnTime;
-  Times[0][1] = OffTime;
-  Times[0][2] = OnTime;
-  Times[0][3] = OffTime;
-  Times[0][4] = OnTime;
-  Times[0][5] = Interval - 3*OnTime - 2*OffTime;
-  Times[0][6] = 0;
+  setMultiple(3, reset);
+}
+
+
+void Blink::setMultiple(int n, bool reset) {
+  for (int k=0; k<n; k++) {
+    Times[0][2*k+0] = OnTime;
+    Times[0][2*k+1] = OffTime;
+  }
+  if (Interval > n*OnTime + (n-1)*OffTime)
+    Times[0][2*n-1] = Interval - n*OnTime - (n-1)*OffTime;
+  else
+    Times[0][2*n-1] = 0;
+  Times[0][2*n] = 0;
   Index = 0;
   if (reset)
     Time = 0;
@@ -84,57 +77,39 @@ void Blink::setTriple(bool reset) {
 
 
 void Blink::blinkSingle(uint32_t intervalms, uint32_t onms, bool reset) {
-  if (intervalms == 0)
-    intervalms = Interval;
-  if (onms == 0)
-    onms = OnTime;
-  Times[1][0] = onms;
-  Times[1][1] = intervalms - onms;
-  Times[1][2] = 0;
-  State = 1;
-  Index = 0;
-  if (reset)
-    Time = 0;
-  switchOn();
+  blinkMultiple(1, intervalms, onms, OffTime, reset);
 }
 
 
 void Blink::blinkDouble(uint32_t intervalms, uint32_t onms, uint32_t offms,
 			bool reset) {
-  if (intervalms == 0)
-    intervalms = Interval;
-  if (onms == 0)
-    onms = OnTime;
-  if (offms == 0)
-    offms = OffTime;
-  Times[1][0] = onms;
-  Times[1][1] = offms;
-  Times[1][2] = onms;
-  Times[1][3] = intervalms - 2*onms - offms;
-  Times[1][4] = 0;
-  State = 1;
-  Index = 0;
-  if (reset)
-    Time = 0;
-  switchOn();
+  blinkMultiple(2, intervalms, onms, offms, reset);
 }
 
 
 void Blink::blinkTriple(uint32_t intervalms, uint32_t onms, uint32_t offms,
 			bool reset) {
+  blinkMultiple(3, intervalms, onms, offms, reset);
+}
+
+
+void Blink::blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
+			  uint32_t offms, bool reset) {
   if (intervalms == 0)
     intervalms = Interval;
   if (onms == 0)
     onms = OnTime;
   if (offms == 0)
     offms = OffTime;
-  Times[1][0] = onms;
-  Times[1][1] = offms;
-  Times[1][2] = onms;
-  Times[1][3] = offms;
-  Times[1][4] = onms;
-  Times[1][5] = intervalms - 3*onms - 2*offms;
-  Times[1][6] = 0;
+  for (int k=0; k<n; k++) {
+    Times[1][2*k+0] = OnTime;
+    Times[1][2*k+1] = OffTime;
+  }
+  if (Interval > n*OnTime + (n-1)*OffTime)
+    Times[1][2*n-1] = Interval - n*OnTime - (n-1)*OffTime;
+  else
+    Times[1][2*n-1] = 0;
+  Times[1][2*n] = 0;
   State = 1;
   Index = 0;
   if (reset)
