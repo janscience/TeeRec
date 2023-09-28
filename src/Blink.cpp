@@ -102,11 +102,11 @@ void Blink::blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
   if (offms == 0)
     offms = OffTime;
   for (int k=0; k<n; k++) {
-    Times[1][2*k+0] = OnTime;
-    Times[1][2*k+1] = OffTime;
+    Times[1][2*k+0] = onms;
+    Times[1][2*k+1] = offms;
   }
-  if (Interval > n*OnTime + (n-1)*OffTime)
-    Times[1][2*n-1] = Interval - n*OnTime - (n-1)*OffTime;
+  if (intervalms > n*onms + (n-1)*offms)
+    Times[1][2*n-1] = intervalms - n*onms - (n-1)*offms;
   else
     Times[1][2*n-1] = 0;
   Times[1][2*n] = 0;
