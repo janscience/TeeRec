@@ -57,7 +57,7 @@ public:
   // Return gain in dB.
   // The gain is set from the configuration file but needs to be passed
   // manually to appropriate Control instances.
-  uint32_t gain() const { return Gain; };
+  float gain() const { return Gain; };
   
   // Set gain in dB.
   // The gain is also set from the configuration file but needs to be passed
