@@ -255,3 +255,21 @@ void Blink::switchOff() {
   switchOn(false);
 }
 
+
+/////////////////// Random numbers //////////////////////////////////////
+
+// from https://forum.pjrc.com/threads/61125-Teensy-4-1-Random-Number-Generator?p=243895&viewfull=1#post243895 :
+
+static volatile uint64_t  prng_state;  /* Any nonzero state is valid! */
+
+uint32_t prng_u32(void) {
+  uint64_t  x = prng_state;
+  x ^= x >> 12;
+  x ^= x << 25;
+  x ^= x >> 27;
+  prng_state = x;
+  return (x * UINT64_C(2685821657736338717)) >> 32;
+}
+
+// Normal distrubuted random nunbers, see
+// https://forum.pjrc.com/threads/71225-Gaussian-Distributed-Random-Numbers-for-Teensy-4-1?p=313878&viewfull=1#post313878
