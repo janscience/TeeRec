@@ -3,7 +3,8 @@
 
 
 Blink::Blink() {
-  Pin = -1;
+  Pin1 = -1;
+  Pin2 = -1;
   Invert = false;
   On = false;
   memset(Times, 0, sizeof(Times));
@@ -16,9 +17,10 @@ Blink::Blink() {
 }
 
 
-Blink::Blink(int pin, bool invert) :
+Blink::Blink(int pin1, bool invert1, int pin2, bool invert2) :
   Blink() {
-  setPin(pin, invert);
+  setPin(pin1, invert1);
+  setPin2(pin2, invert2);
 }
 
 
@@ -28,10 +30,20 @@ Blink::~Blink() {
 
 
 void Blink::setPin(int pin, bool invert) {
-  Pin = pin;
+  Pin1 = pin;
   Invert = invert;
-  if (Pin >= 0) {
-    pinMode(Pin, OUTPUT);
+  if (Pin1 >= 0) {
+    pinMode(Pin1, OUTPUT);
+    switchOff();
+  }
+}
+
+
+void Blink::setPin2(int pin, bool invert) {
+  Pin2 = pin;
+  Invert = invert;
+  if (Pin2 >= 0) {
+    pinMode(Pin2, OUTPUT);
     switchOff();
   }
 }
@@ -230,8 +242,10 @@ void Blink::delay(uint32_t delayms) {
 
 void Blink::switchOn(bool on) {
   if (on != On) {
-    if (Pin >=0)
-      digitalWrite(Pin, Invert != on);
+    if (Pin1 >=0)
+      digitalWrite(Pin1, Invert != on);
+    if (Pin2 >=0)
+      digitalWrite(Pin2, Invert != on);
     On = on;
   }
 }

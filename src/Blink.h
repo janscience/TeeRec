@@ -15,17 +15,20 @@ class Blink {
  public:
 
   // Initialize Blink. At some point you need to specify the pin to be
-  // used for controling a LED via setPin().
+  // used for controling a LED via setPin() or setPin2().
   Blink();
 
-  // Control LED on pin. If invert, LOW is on.
-  Blink(int pin, bool invert=false);
+  // Control LEDs on pin1 and/or pin2. If invert, LOW is on.
+  Blink(int pin1, bool invert1=false, int pin2=-1, bool invert2=false);
 
   // Switch off LED.
   ~Blink();
 
-  // Set pin of LED. If invert, LOW is on.
+  // Set pin of primary LED. If invert, LOW is on.
   void setPin(int pin=LED_BUILTIN, bool invert=false);
+
+  // Set pin of secondary LED. If invert, LOW is on.
+  void setPin2(int pin=LED_BUILTIN, bool invert=false);
 
   // abstract level (requires update() to be called regularly):
 
@@ -139,7 +142,8 @@ class Blink {
   
  protected:
   
-  int Pin;
+  int Pin1;
+  int Pin2;
   bool Invert;
   bool On;
   static const int MaxTimes = 32;
