@@ -2,18 +2,22 @@
 #include "Blink.h"
 
 
-Blink::Blink() {
-  Pin1 = -1;
-  Pin2 = -1;
-  Invert = false;
-  On = false;
+volatile uint64_t Blink::PRNGState = 123456;
+
+
+Blink::Blink() :
+  Pin1(-1),
+  Pin2(-1),
+  Invert(false),
+  On(false),
+  Delay(0),
+  Random(false),
+  Index(0),
+  State(0),
+  Interval(2000),
+  OnTime(50),
+  OffTime(150) {
   memset(Times, 0, sizeof(Times));
-  Index = 0;
-  State = 0;
-  Delay = 0;
-  Interval = 2000;
-  OnTime = 50;
-  OffTime = 150;
 }
 
 
@@ -72,6 +76,7 @@ void Blink::setTriple(bool reset) {
 
 
 void Blink::setMultiple(int n, bool reset) {
+  Random = false;
   for (int k=0; k<n; k++) {
     Times[0][2*k+0] = OnTime;
     Times[0][2*k+1] = OffTime;
@@ -88,6 +93,18 @@ void Blink::setMultiple(int n, bool reset) {
 }
 
 
+void Blink::setRandom(bool reset) {
+  Random = true;
+  Times[0][0] = OnTime + urand()*(OffTime - OnTime);
+  Times[0][1] = OnTime + urand()*(OffTime - OnTime);
+  Times[0][2] = 0;
+  Index = 0;
+  if (reset)
+    Time = 0;
+  switchOn();
+}
+
+  
 void Blink::blinkSingle(uint32_t intervalms, uint32_t onms, bool reset) {
   blinkMultiple(1, intervalms, onms, OffTime, reset);
 }
@@ -131,6 +148,7 @@ void Blink::blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
 
 
 void Blink::set(uint32_t intervalms, uint32_t onms, bool reset) {
+  Random = false;
   Times[0][0] = onms;
   Times[0][1] = intervalms - onms;
   Times[0][2] = 0;
@@ -142,6 +160,7 @@ void Blink::set(uint32_t intervalms, uint32_t onms, bool reset) {
 
 
 void Blink::set(const uint32_t *times, bool reset) {
+  Random = false;
   int n = 0;
   for ( ;n<MaxTimes-1 && times[n] != 0; n++)
     Times[0][n] = times[n];
@@ -196,6 +215,7 @@ void Blink::blink(const uint32_t *times, bool reset) {
 
 
 void Blink::clear() {
+  Random = false;
   Times[0][0] = 0;
   State = 0;
   Index = 0;
@@ -225,6 +245,10 @@ void Blink::update() {
 	State = 0;
       }
       Index = 0;
+      if (Random) {
+	Times[0][0] = OnTime + urand()*(OffTime - OnTime);
+	Times[0][1] = OnTime + urand()*(OffTime - OnTime);
+      }
     }
   }
 }
@@ -256,20 +280,12 @@ void Blink::switchOff() {
 }
 
 
-/////////////////// Random numbers //////////////////////////////////////
-
-// from https://forum.pjrc.com/threads/61125-Teensy-4-1-Random-Number-Generator?p=243895&viewfull=1#post243895 :
-
-static volatile uint64_t  prng_state;  /* Any nonzero state is valid! */
-
-uint32_t prng_u32(void) {
-  uint64_t  x = prng_state;
+float Blink::urand(void) {
+  // modified from https://forum.pjrc.com/threads/61125-Teensy-4-1-Random-Number-Generator?p=243895&viewfull=1#post243895
+  uint64_t  x = PRNGState;
   x ^= x >> 12;
   x ^= x << 25;
   x ^= x >> 27;
-  prng_state = x;
-  return (x * UINT64_C(2685821657736338717)) >> 32;
+  PRNGState = x;
+  return float((x * UINT64_C(2685821657736338717)) >> 32) / float(0xFFFFFFFF);
 }
-
-// Normal distrubuted random nunbers, see
-// https://forum.pjrc.com/threads/71225-Gaussian-Distributed-Random-Numbers-for-Teensy-4-1?p=313878&viewfull=1#post313878

@@ -61,6 +61,10 @@ class Blink {
   // based on the timings provided by setTiming().
   void setMultiple(int n, bool reset=true);
 
+  // Set a andom blinking pattern with on and off times uniformly
+  // distributed between OnTime and OffTime.
+  void setRandom(bool reset=true);
+
   // One-shot single blink, based on the timings provided by
   // setTiming(). Arguments larger than zero overwrite settings from
   // setTiming(). After this one-time single blink, the blinking
@@ -139,6 +143,9 @@ class Blink {
   // Manually switch LED off.
   void switchOff();
 
+  // A random number between 0 and 1.
+  static float urand(void);
+  
   
  protected:
   
@@ -149,6 +156,7 @@ class Blink {
   static const int MaxTimes = 32;
   uint32_t Times[2][MaxTimes];
   uint32_t  Delay;
+  bool Random;
   int Index;
   int State;
   elapsedMillis Time;
@@ -156,6 +164,9 @@ class Blink {
   uint32_t Interval;
   uint32_t OnTime;
   uint32_t OffTime;
+
+  static volatile uint64_t PRNGState;  // any nonzero state is valid
+  
 };
 
 
