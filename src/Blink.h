@@ -94,7 +94,7 @@ class Blink {
   // pattern provided by setSingle(), setDouble(), setTriple(),
   // setMultiple(), set() or setDelayed() is resumed.
   void blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
-		     uint32_t offms, bool reset);
+		     uint32_t offms, bool reset=true);
 
   // detailed level (requires update() to be called regularly):
 
@@ -151,7 +151,8 @@ class Blink {
   
   int Pin1;
   int Pin2;
-  bool Invert;
+  bool Invert1;
+  bool Invert2;
   bool On;
   static const int MaxTimes = 32;
   uint32_t Times[2][MaxTimes];

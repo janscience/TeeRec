@@ -8,7 +8,8 @@ volatile uint64_t Blink::PRNGState = 123456;
 Blink::Blink() :
   Pin1(-1),
   Pin2(-1),
-  Invert(false),
+  Invert1(false),
+  Invert2(false),
   On(false),
   Delay(0),
   Random(false),
@@ -35,7 +36,7 @@ Blink::~Blink() {
 
 void Blink::setPin(int pin, bool invert) {
   Pin1 = pin;
-  Invert = invert;
+  Invert1 = invert;
   if (Pin1 >= 0) {
     pinMode(Pin1, OUTPUT);
     switchOff();
@@ -45,7 +46,7 @@ void Blink::setPin(int pin, bool invert) {
 
 void Blink::setPin2(int pin, bool invert) {
   Pin2 = pin;
-  Invert = invert;
+  Invert2 = invert;
   if (Pin2 >= 0) {
     pinMode(Pin2, OUTPUT);
     switchOff();
@@ -267,9 +268,9 @@ void Blink::delay(uint32_t delayms) {
 void Blink::switchOn(bool on) {
   if (on != On) {
     if (Pin1 >=0)
-      digitalWrite(Pin1, Invert != on);
+      digitalWrite(Pin1, Invert1 != on);
     if (Pin2 >=0)
-      digitalWrite(Pin2, Invert != on);
+      digitalWrite(Pin2, Invert2 != on);
     On = on;
   }
 }
