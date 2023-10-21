@@ -67,7 +67,7 @@ via the `TeeRec.h` header.
 - [Input](src/Input.h): Base class for all input streams.
 - [InputADC](src/InputADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/inputadc.md).
 - [InputTDM](src/InputTDM.h): Streaming TDM data into a single cyclic buffer.
-- [Control](src/Control.h): Minimum interface to classes controlling data acquisition.
+- [Control](src/Control.h): Minimum interface for classes controlling data acquisition.
 - [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
 
 ### Storage on SD card
@@ -78,7 +78,7 @@ via the `TeeRec.h` header.
 ### Configuration
 
 - [Configurable](src/Configurable.h): Base class for all configurable classes.
-- [TeensyADCSettings](src/TeensyADCSettings.h): Configuration settings for InputADC.
+- [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
