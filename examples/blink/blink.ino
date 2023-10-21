@@ -14,6 +14,7 @@ void loop() {
   blink.update();
   if (Time > 10000) {
     Time = 0;
-    blink.blinkTriple();
+    //blink.blinkTriple();
+    blink.blinkSingle();
   }
 }

@@ -33,6 +33,7 @@
 
 #include <InputADC.h>
 #include <SDWriter.h>
+#include <Blink.h>
 #include <Watchdog.h>
 // Install Watchdog library from Peter Polidoro via Library Manager.
 // https://github.com/janelia-arduino/Watchdog

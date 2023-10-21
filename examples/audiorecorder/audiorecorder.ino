@@ -200,7 +200,7 @@ void setup() {
   config.setConfigFile("teerec.cfg");
   config.configure(sdcard);
   setupStorage();
-  aidata.configure(aisettings);
+  aisettings.configure(&aidata);
   aidata.check();
   setupAudio();
   aidata.start();

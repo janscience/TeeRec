@@ -244,7 +244,7 @@ void setup() {
   config.setConfigFile("recorder.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
-  aidata.configure(aisettings);
+  aisettings.configure(&aidata);
   aidata.check();
   initScreen(screen);
   AIsplashScreen(screen, aidata, "TeeRec recorder");
