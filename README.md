@@ -77,6 +77,7 @@ via the `TeeRec.h` header.
 
 ### Configuration
 
+- [Parameter](src/Parameter.h): Key-value pairs of various types.
 - [Configurable](src/Configurable.h): Base class for all configurable classes.
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
