@@ -8,6 +8,7 @@
 
 
 #include <Configurable.h>
+#include <Parameter.h>
 
 
 class Settings : public Configurable {
@@ -18,10 +19,8 @@ public:
 	   const char *filename="SDATELNUM.wav", float filetime=10.0,
 	   float pulsefrequency=500.0, float displaytime=0.005,
 	   float initialdelay=0.0, float sensorsinterval=10.0);
-  
-  virtual void configure(const char *key, const char *val);
 
-  static const size_t MaxStr = 99;
+  static const size_t MaxStr = 127;
   char Path[MaxStr + 1];
   char FileName[MaxStr + 1];
   float FileTime;
@@ -29,6 +28,18 @@ public:
   float DisplayTime;
   float InitialDelay;
   float SensorsInterval;
+
+
+protected:
+
+  StringParameter PathP;
+  StringParameter FileNameP;
+  TimeParameter<float> FileTimeP;
+  FrequencyParameter<float> PulseFrequencyP;
+  TimeParameter<float> DisplayTimeP;
+  TimeParameter<float> InitialDelayP;
+  TimeParameter<float> SensorsIntervalP;
+  
 };
 
 #endif

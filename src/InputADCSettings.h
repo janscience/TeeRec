@@ -11,9 +11,76 @@
 #include <Arduino.h>
 #include <ADC.h>
 #include <Configurable.h>
+#include <Parameter.h>
 
 
 class InputADC;
+
+
+class ConversionSpeedParameter : public Parameter {
+  
+ public:
+  
+  /* Initialize parameter and add to cfg. */
+  ConversionSpeedParameter(Configurable *cfg, const char *key,
+			   ADC_CONVERSION_SPEED *speed);
+  
+  /* Parse the string val and set the value of this parameter accordingly. */
+  virtual void parseValue(const char *val);
+
+  /* Return the current value of this parameter as a string. */
+  virtual void valueStr(char *str);
+
+  
+ protected:
+
+  ADC_CONVERSION_SPEED *Speed;
+  
+};
+
+
+class SamplingSpeedParameter : public Parameter {
+  
+ public:
+  
+  /* Initialize parameter and add to cfg. */
+  SamplingSpeedParameter(Configurable *cfg, const char *key,
+			 ADC_SAMPLING_SPEED *speed);
+  
+  /* Parse the string val and set the value of this parameter accordingly. */
+  virtual void parseValue(const char *val);
+
+  /* Return the current value of this parameter as a string. */
+  virtual void valueStr(char *str);
+
+  
+ protected:
+
+  ADC_SAMPLING_SPEED *Speed;
+  
+};
+
+
+class ReferenceParameter : public Parameter {
+  
+ public:
+  
+  /* Initialize parameter and add to cfg. */
+  ReferenceParameter(Configurable *cfg, const char *key,
+		     ADC_REFERENCE *reference);
+  
+  /* Parse the string val and set the value of this parameter accordingly. */
+  virtual void parseValue(const char *val);
+
+  /* Return the current value of this parameter as a string. */
+  virtual void valueStr(char *str);
+
+  
+ protected:
+
+  ADC_REFERENCE *Reference;
+  
+};
 
 
 class InputADCSettings : public Configurable {
@@ -26,23 +93,8 @@ public:
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
 		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
-  // Constructor. Provides an instance of a InputADC and
-  // sets configuration name to "ADC".
-  InputADCSettings(InputADC *adc, uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
-		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
-
   // Constructor setting configuration name.
   InputADCSettings(const char *name, uint32_t rate=0,
-		   uint8_t bits=16, uint8_t averaging=4,
-		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
-
-  // Constructor. Provides an instance of a InputADC and
-  // sets configuration name.
-  InputADCSettings(InputADC *adc, const char *name, uint32_t rate=0,
 		   uint8_t bits=16, uint8_t averaging=4,
 		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
@@ -105,21 +157,12 @@ public:
 
   // The voltage reference.
   ADC_REFERENCE reference() const { return Reference; };
-  
-  // Configure ADC settings with the provided key-value pair.
-  // If an InputADC instance was provided to the constructor,
-  // the settings are also directly applied to this InputADC instance.
-  virtual void configure(const char *key, const char *val);
 
   // Apply ADC settings on adc.
-  // If no adc is provided, the one provided to the constructor is used.
-  void configure(InputADC *adc=0);
+  void configure(InputADC *adc);
 
   // Transfer ADC settings from adc to the InputADCSettings instance.
-  void setConfiguration(InputADC *adc=0);
-  
-  // Report current settings on Serial.
-  void report() const;
+  void setConfiguration(InputADC *adc);
 
     
 protected:
@@ -130,7 +173,13 @@ protected:
   ADC_CONVERSION_SPEED ConversionSpeed;
   ADC_SAMPLING_SPEED SamplingSpeed;
   ADC_REFERENCE Reference;
-  InputADC *ADC;
+
+  FrequencyParameter<uint32_t> RateP;
+  NumberParameter<uint8_t> BitsP;
+  NumberParameter<uint8_t> AveragingP;
+  ConversionSpeedParameter ConversionSpeedP;
+  SamplingSpeedParameter SamplingSpeedP;
+  ReferenceParameter ReferenceP;
 
 };
 

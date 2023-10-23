@@ -86,10 +86,10 @@ SDWriter file(sdcard, aidata);
 
 Configurator config;
 #if defined(TEENSYADC)
-InputADCSettings aisettings(&aidata, SAMPLING_RATE, BITS, AVERAGING,
+InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
 #elif defined(PCM186X)
-InputTDMSettings aisettings(&aidata, SAMPLING_RATE, 8, GAIN);
+InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
@@ -245,6 +245,7 @@ void setup() {
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
   setupTestSignals(signalPins, settings.PulseFrequency);
+  aisettings.configure(&aidata);
 #if defined(PCM186X)
   aidata.setSwapLR();
   I2C_BUS.begin();

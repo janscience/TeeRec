@@ -2,6 +2,60 @@
 #include <InputADCSettings.h>
 
 
+ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
+						   const char *key,
+						   ADC_CONVERSION_SPEED *speed) :
+  Parameter(cfg, "Conversion"),
+  Speed(speed) {
+}
+
+
+void ConversionSpeedParameter::parseValue(const char *val) {
+  *Speed = InputADC::conversionSpeedEnum(val);
+}
+
+
+void ConversionSpeedParameter::valueStr(char *str) {
+  strcpy(str, InputADC::conversionSpeedStr(*Speed));
+}
+
+
+SamplingSpeedParameter::SamplingSpeedParameter(Configurable *cfg,
+					       const char *key,
+					       ADC_SAMPLING_SPEED *speed) :
+  Parameter(cfg, "Sampling"),
+  Speed(speed) {
+}
+
+
+void SamplingSpeedParameter::parseValue(const char *val) {
+  *Speed = InputADC::samplingSpeedEnum(val);
+}
+
+
+void SamplingSpeedParameter::valueStr(char *str) {
+  strcpy(str, InputADC::samplingSpeedStr(*Speed));
+}
+
+
+ReferenceParameter::ReferenceParameter(Configurable *cfg,
+				       const char *key,
+				       ADC_REFERENCE *reference) :
+  Parameter(cfg, "Reference"),
+  Reference(reference) {
+}
+
+
+void ReferenceParameter::parseValue(const char *val) {
+  *Reference = InputADC::referenceEnum(val);
+}
+
+
+void ReferenceParameter::valueStr(char *str) {
+  strcpy(str, InputADC::referenceStr(*Reference));
+}
+
+
 InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   uint8_t averaging,
 				   ADC_CONVERSION_SPEED conversion_speed,
@@ -14,23 +68,12 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
   ConversionSpeed(conversion_speed),
   SamplingSpeed(sampling_speed),
   Reference(reference),
-  ADC(0) {
-}
-
-
-InputADCSettings::InputADCSettings(InputADC *adc, uint32_t rate,
-				   uint8_t bits, uint8_t averaging,
-				   ADC_CONVERSION_SPEED conversion_speed,
-				   ADC_SAMPLING_SPEED sampling_speed,
-				   ADC_REFERENCE reference) :
-  Configurable("ADC"),
-  Rate(rate),
-  Bits(bits),
-  Averaging(averaging),
-  ConversionSpeed(conversion_speed),
-  SamplingSpeed(sampling_speed),
-  Reference(reference),
-  ADC(adc) {
+  RateP(this, "SamplingRate", &Rate, "%lu"),
+  BitsP(this, "Resolution", &Bits, "%hu", "bits"),
+  AveragingP(this, "Averaging", &Averaging, "%hu"),
+  ConversionSpeedP(this, "Conversion", &ConversionSpeed),
+  SamplingSpeedP(this, "Sampling", &SamplingSpeed),
+  ReferenceP(this, "Reference", &Reference) {
 }
 
 
@@ -46,24 +89,12 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
   ConversionSpeed(conversion_speed),
   SamplingSpeed(sampling_speed),
   Reference(reference),
-  ADC(0) {
-}
-
-
-InputADCSettings::InputADCSettings(InputADC *adc, const char *name,
-				   uint32_t rate, uint8_t bits,
-				   uint8_t averaging,
-				   ADC_CONVERSION_SPEED conversion_speed,
-				   ADC_SAMPLING_SPEED sampling_speed,
-				   ADC_REFERENCE reference) :
-  Configurable(name),
-  Rate(rate),
-  Bits(bits),
-  Averaging(averaging),
-  ConversionSpeed(conversion_speed),
-  SamplingSpeed(sampling_speed),
-  Reference(reference),
-  ADC(adc) {
+  RateP(this, "SamplingRate", &Rate, "%.0f"),
+  BitsP(this, "Resolution", &Bits, "%hu", "bits"),
+  AveragingP(this, "Averaging", &Averaging, "%hu"),
+  ConversionSpeedP(this, "Conversion", &ConversionSpeed),
+  SamplingSpeedP(this, "Sampling", &SamplingSpeed),
+  ReferenceP(this, "Reference", &Reference) {
 }
 
 
@@ -97,55 +128,7 @@ void InputADCSettings::setReference(ADC_REFERENCE ref) {
 }
 
 
-void InputADCSettings::configure(const char *key, const char *val) {
-  char pval[30];
-  if (strcmp(key, "samplingrate") == 0) {
-    setRate(uint32_t(parseFrequency(val)));
-    sprintf(pval, "%luHz", Rate);
-    if (ADC != 0)
-      ADC->setRate(rate());
-  }
-  else if (strcmp(key, "resolution") == 0) {
-    setResolution(atoi(val));
-    sprintf(pval, "%hubits", Bits);
-    if (ADC != 0)
-      ADC->setResolution(resolution());
-  }
-  else if (strcmp(key, "averaging") == 0) {
-    setAveraging(atoi(val));
-    sprintf(pval, "%hu", Averaging);
-    if (ADC != 0)
-      ADC->setAveraging(averaging());
-  }
-  else if (strcmp(key, "conversion") == 0) {
-    setConversionSpeed(InputADC::conversionSpeedEnum(val));
-    strcpy(pval, InputADC::conversionSpeedStr(ConversionSpeed));
-    if (ADC != 0)
-      ADC->setConversionSpeed(conversionSpeed());
-  }
-  else if (strcmp(key, "sampling") == 0) {
-    setSamplingSpeed(InputADC::samplingSpeedEnum(val));
-    strcpy(pval, InputADC::samplingSpeedStr(SamplingSpeed));
-    if (ADC != 0)
-      ADC->setSamplingSpeed(samplingSpeed());
-  }
-  else if (strcmp(key, "reference") == 0) {
-    setReference(InputADC::referenceEnum(val));
-    strcpy(pval, InputADC::referenceStr(Reference));
-    if (ADC != 0)
-      ADC->setReference(reference());
-  }
-  else {
-    Serial.printf("  %s key \"%s\" not found.\n", name(), key);
-    return;
-  }
-  Serial.printf("  set %s-%s to %s\n", name(), key, pval);
-}
-
-
 void InputADCSettings::configure(InputADC *adc) {
-  if (adc == 0)
-    adc = ADC;
   if (adc == 0)
     return;
   adc->setRate(rate());
@@ -159,8 +142,6 @@ void InputADCSettings::configure(InputADC *adc) {
 
 void InputADCSettings::setConfiguration(InputADC *adc) {
   if (adc == 0)
-    adc = ADC;
-  if (adc == 0)
     return;
   setRate(adc->rate());
   setResolution(adc->resolution());
@@ -170,13 +151,3 @@ void InputADCSettings::setConfiguration(InputADC *adc) {
   setReference(adc->reference());
 }
 
-
-void InputADCSettings::report() const {
-  Serial.printf("%s settings:\n", name());
-  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  resolution: %dbits\n", Bits);
-  Serial.printf("  averaging:  %d\n", Averaging);
-  Serial.printf("  conversion: %s\n", InputADC::conversionSpeedStr(ConversionSpeed));
-  Serial.printf("  sampling:   %s\n", InputADC::samplingSpeedStr(SamplingSpeed));
-  Serial.printf("  reference:  %s\n", InputADC::referenceStr(Reference));
-}
