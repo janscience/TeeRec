@@ -32,7 +32,7 @@ public:
   // Return number of channels.
   // The number of channels is set from the configuration file
   // but needs to be passed manually to appropriate Control instances.
-  uint8_t nchannels() const { return NChannels; };
+  uint8_t nchannels() const { return NChannels.value(); };
   
   // Set the number of channels.
   void setNChannels(uint8_t nchannels);
@@ -40,7 +40,7 @@ public:
   // Return gain in dB.
   // The gain is set from the configuration file but needs to be passed
   // manually to appropriate Control instances.
-  float gain() const { return Gain; };
+  float gain() const { return Gain.value(); };
   
   // Set gain in dB.
   // The gain is also set from the configuration file but needs to be passed
@@ -57,12 +57,10 @@ public:
 protected:
 
   uint32_t Rate;
-  uint8_t NChannels;
-  float Gain;
 
   FrequencyParameter<uint32_t> RateP;
-  NumberParameter<uint8_t> NChannelsP;
-  NumberParameter<float> GainP;
+  NumberParameter<uint8_t> NChannels;
+  NumberParameter<float> Gain;
   
 };
 

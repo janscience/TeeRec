@@ -23,7 +23,7 @@ class ConversionSpeedParameter : public Parameter {
   
   /* Initialize parameter and add to cfg. */
   ConversionSpeedParameter(Configurable *cfg, const char *key,
-			   ADC_CONVERSION_SPEED *speed);
+			   ADC_CONVERSION_SPEED speed);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
@@ -31,11 +31,7 @@ class ConversionSpeedParameter : public Parameter {
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str);
 
-  
- protected:
-
-  ADC_CONVERSION_SPEED *Speed;
-  
+  ADC_CONVERSION_SPEED Value;
 };
 
 
@@ -45,7 +41,7 @@ class SamplingSpeedParameter : public Parameter {
   
   /* Initialize parameter and add to cfg. */
   SamplingSpeedParameter(Configurable *cfg, const char *key,
-			 ADC_SAMPLING_SPEED *speed);
+			 ADC_SAMPLING_SPEED speed);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
@@ -53,11 +49,7 @@ class SamplingSpeedParameter : public Parameter {
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str);
 
-  
- protected:
-
-  ADC_SAMPLING_SPEED *Speed;
-  
+  ADC_SAMPLING_SPEED Value;  
 };
 
 
@@ -67,19 +59,15 @@ class ReferenceParameter : public Parameter {
   
   /* Initialize parameter and add to cfg. */
   ReferenceParameter(Configurable *cfg, const char *key,
-		     ADC_REFERENCE *reference);
+		     ADC_REFERENCE reference);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str);
-
   
- protected:
-
-  ADC_REFERENCE *Reference;
-  
+  ADC_REFERENCE Value;
 };
 
 
@@ -107,14 +95,14 @@ public:
   void setRate(uint32_t rate);
 
   // Return ADC resolution in bits per sample.
-  uint8_t resolution() const { return Bits; };
+  uint8_t resolution() const { return Bits.value(); };
   
   // Set resolution of data acquisition in bits per sample
   // Valid values are 10, 12, or 16 bit.
   void setResolution(uint8_t bits);
 
   // Return the number of averages taken by each sample.
-  uint8_t averaging(void) const { return Averaging; };
+  uint8_t averaging(void) const { return Averaging.value(); };
 
   // Set the number of averages taken by each sample.
   // Valid values are 0, 4, 8, 16, or 32.
@@ -132,7 +120,7 @@ public:
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // The conversion speed.
-  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed; };
+  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed.Value; };
   
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
@@ -148,7 +136,7 @@ public:
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
   // The sampling speed.
-  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed; };
+  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed.Value; };
 
   // Set the voltage preference.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
@@ -156,7 +144,7 @@ public:
   void setReference(ADC_REFERENCE ref);
 
   // The voltage reference.
-  ADC_REFERENCE reference() const { return Reference; };
+  ADC_REFERENCE reference() const { return Reference.Value; };
 
   // Apply ADC settings on adc.
   void configure(InputADC *adc);
@@ -168,18 +156,13 @@ public:
 protected:
 
   uint32_t Rate;
-  uint8_t Bits;
-  uint8_t Averaging;
-  ADC_CONVERSION_SPEED ConversionSpeed;
-  ADC_SAMPLING_SPEED SamplingSpeed;
-  ADC_REFERENCE Reference;
 
   FrequencyParameter<uint32_t> RateP;
-  NumberParameter<uint8_t> BitsP;
-  NumberParameter<uint8_t> AveragingP;
-  ConversionSpeedParameter ConversionSpeedP;
-  SamplingSpeedParameter SamplingSpeedP;
-  ReferenceParameter ReferenceP;
+  NumberParameter<uint8_t> Bits;
+  NumberParameter<uint8_t> Averaging;
+  ConversionSpeedParameter ConversionSpeed;
+  SamplingSpeedParameter SamplingSpeed;
+  ReferenceParameter Reference;
 
 };
 

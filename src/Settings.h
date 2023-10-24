@@ -20,9 +20,14 @@ public:
 	   float pulsefrequency=500.0, float displaytime=0.005,
 	   float initialdelay=0.0, float sensorsinterval=10.0);
 
-  static const size_t MaxStr = 127;
-  char Path[MaxStr + 1];
-  char FileName[MaxStr + 1];
+  static const size_t MaxStr = 128;
+
+  /* Path on SD card where to store the data. */
+  const char *path() const { return Path.value(); };
+
+  /* File name to be used to save the recorded data. */
+  const char *fileName() const { return FileName.value(); };
+  
   float FileTime;
   float PulseFrequency;
   float DisplayTime;
@@ -32,8 +37,8 @@ public:
 
 protected:
 
-  StringParameter<MaxStr+1> PathP;
-  StringParameter<MaxStr+1> FileNameP;
+  StringParameter<MaxStr> Path;
+  StringParameter<MaxStr> FileName;
   TimeParameter<float> FileTimeP;
   FrequencyParameter<float> PulseFrequencyP;
   TimeParameter<float> DisplayTimeP;

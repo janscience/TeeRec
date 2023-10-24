@@ -12,6 +12,7 @@ Parameter::Parameter(Configurable *cfg, const char *key) :
 
 void Parameter::setKey(const char *key) {
   strncpy(Key, key, MaxKey);
+  Key[MaxKey-1] = '\0';
 }
 
 

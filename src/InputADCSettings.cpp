@@ -4,55 +4,55 @@
 
 ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
 						   const char *key,
-						   ADC_CONVERSION_SPEED *speed) :
+						   ADC_CONVERSION_SPEED speed) :
   Parameter(cfg, "Conversion"),
-  Speed(speed) {
+  Value(speed) {
 }
 
 
 void ConversionSpeedParameter::parseValue(const char *val) {
-  *Speed = InputADC::conversionSpeedEnum(val);
+  Value = InputADC::conversionSpeedEnum(val);
 }
 
 
 void ConversionSpeedParameter::valueStr(char *str) {
-  strcpy(str, InputADC::conversionSpeedStr(*Speed));
+  strcpy(str, InputADC::conversionSpeedStr(Value));
 }
 
 
 SamplingSpeedParameter::SamplingSpeedParameter(Configurable *cfg,
 					       const char *key,
-					       ADC_SAMPLING_SPEED *speed) :
+					       ADC_SAMPLING_SPEED speed) :
   Parameter(cfg, "Sampling"),
-  Speed(speed) {
+  Value(speed) {
 }
 
 
 void SamplingSpeedParameter::parseValue(const char *val) {
-  *Speed = InputADC::samplingSpeedEnum(val);
+  Value = InputADC::samplingSpeedEnum(val);
 }
 
 
 void SamplingSpeedParameter::valueStr(char *str) {
-  strcpy(str, InputADC::samplingSpeedStr(*Speed));
+  strcpy(str, InputADC::samplingSpeedStr(Value));
 }
 
 
 ReferenceParameter::ReferenceParameter(Configurable *cfg,
 				       const char *key,
-				       ADC_REFERENCE *reference) :
+				       ADC_REFERENCE reference) :
   Parameter(cfg, "Reference"),
-  Reference(reference) {
+  Value(reference) {
 }
 
 
 void ReferenceParameter::parseValue(const char *val) {
-  *Reference = InputADC::referenceEnum(val);
+  Value = InputADC::referenceEnum(val);
 }
 
 
 void ReferenceParameter::valueStr(char *str) {
-  strcpy(str, InputADC::referenceStr(*Reference));
+  strcpy(str, InputADC::referenceStr(Value));
 }
 
 
@@ -63,17 +63,12 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   ADC_REFERENCE reference) :
   Configurable("ADC"),
   Rate(rate),
-  Bits(bits),
-  Averaging(averaging),
-  ConversionSpeed(conversion_speed),
-  SamplingSpeed(sampling_speed),
-  Reference(reference),
   RateP(this, "SamplingRate", &Rate, "%lu"),
-  BitsP(this, "Resolution", &Bits, "%hu", "bits"),
-  AveragingP(this, "Averaging", &Averaging, "%hu"),
-  ConversionSpeedP(this, "Conversion", &ConversionSpeed),
-  SamplingSpeedP(this, "Sampling", &SamplingSpeed),
-  ReferenceP(this, "Reference", &Reference) {
+  Bits(this, "Resolution", bits, "%hu", "bits"),
+  Averaging(this, "Averaging", averaging, "%hu"),
+  ConversionSpeed(this, "Conversion", conversion_speed),
+  SamplingSpeed(this, "Sampling", sampling_speed),
+  Reference(this, "Reference", reference) {
 }
 
 
@@ -84,17 +79,12 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 				   ADC_REFERENCE reference) :
   Configurable(name),
   Rate(rate),
-  Bits(bits),
-  Averaging(averaging),
-  ConversionSpeed(conversion_speed),
-  SamplingSpeed(sampling_speed),
-  Reference(reference),
   RateP(this, "SamplingRate", &Rate, "%.0f"),
-  BitsP(this, "Resolution", &Bits, "%hu", "bits"),
-  AveragingP(this, "Averaging", &Averaging, "%hu"),
-  ConversionSpeedP(this, "Conversion", &ConversionSpeed),
-  SamplingSpeedP(this, "Sampling", &SamplingSpeed),
-  ReferenceP(this, "Reference", &Reference) {
+  Bits(this, "Resolution", bits, "%hu", "bits"),
+  Averaging(this, "Averaging", averaging, "%hu"),
+  ConversionSpeed(this, "Conversion", conversion_speed),
+  SamplingSpeed(this, "Sampling", sampling_speed),
+  Reference(this, "Reference", reference) {
 }
 
 
@@ -104,27 +94,27 @@ void InputADCSettings::setRate(uint32_t rate) {
 
 
 void InputADCSettings::setResolution(uint8_t bits) {
-  Bits = bits;
+  Bits.setValue(bits);
 }
 
 
 void InputADCSettings::setAveraging(uint8_t num) {
-  Averaging = num;
+  Averaging.setValue(num);
 }
 
 
 void InputADCSettings::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
-  ConversionSpeed = speed;
+  ConversionSpeed.Value = speed;
 }
 
 
 void InputADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
-  SamplingSpeed = speed;
+  SamplingSpeed.Value = speed;
 }
 
 
 void InputADCSettings::setReference(ADC_REFERENCE ref) {
-  Reference = ref;
+  Reference.Value = ref;
 }
 
 
