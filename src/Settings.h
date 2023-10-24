@@ -32,8 +32,8 @@ public:
 
 protected:
 
-  StringParameter PathP;
-  StringParameter FileNameP;
+  StringParameter<MaxStr+1> PathP;
+  StringParameter<MaxStr+1> FileNameP;
   TimeParameter<float> FileTimeP;
   FrequencyParameter<float> PulseFrequencyP;
   TimeParameter<float> DisplayTimeP;

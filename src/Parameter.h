@@ -58,13 +58,14 @@ class Parameter {
 };
 
 
+template<int N>
 class StringParameter : public Parameter {
   
  public:
   
   /* Initialize parameter with identifying key, pointer str to value variable
-     and maximum size n and add to cfg. */
-  StringParameter(Configurable *cfg, const char *key, char **str, size_t n);
+     and add to cfg. */
+  StringParameter(Configurable *cfg, const char *key, char (*str)[N]);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
@@ -75,8 +76,7 @@ class StringParameter : public Parameter {
   
  protected:
 
-  size_t MaxStr;
-  char **Str;
+  char (*Str)[N];
   
 };
 
@@ -153,6 +153,28 @@ class FrequencyParameter : public NumberParameter<T> {
   virtual void parseValue(const char *val);
   
 };
+
+
+template<int N>
+StringParameter<N>::StringParameter(Configurable *cfg, const char *key,
+				    char (*str)[N]) :
+  Parameter(cfg, key),
+  Str(str) {
+}
+
+
+template<int N>
+void StringParameter<N>::parseValue(const char *val) {
+  if (disabled())
+    return;
+  strncpy(*Str, val, N-1);
+}
+
+
+template<int N>
+void StringParameter<N>::valueStr(char *str) {
+  strncpy(str, *Str, N-1);
+}
 
 
 template<class T>
