@@ -43,6 +43,14 @@ void Configurator::setConfigFile(const char *fname) {
 }
 
 
+void Configurator::report() const {
+  for (size_t j=0; j<NConfigs; j++) {
+    Configs[j]->report();
+    Serial.println();
+  }
+}
+
+
 void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   const size_t nline = 128;
@@ -115,3 +123,15 @@ void Configurator::configure(SDCard &sd) {
   Serial.println();
 }
 
+
+void Configurator::save(SDCard &sd) const {
+  File file = sd.openWrite(ConfigFile);
+  if (!file) {
+    Serial.printf("Configuration file \"%s\" cannot be written.\n\n", ConfigFile);
+    return;
+  }
+  for (size_t j=0; j<NConfigs; j++) {
+    Configs[j]->save(file);
+    file.println();
+  }  
+}

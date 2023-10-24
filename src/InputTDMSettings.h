@@ -24,7 +24,7 @@ public:
 		   float gain=0);
 
   // Return sampling rate per channel in Hertz.
-  uint32_t rate() const { return Rate; };
+  uint32_t rate() const { return Rate.value(); };
   
   // Set sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
@@ -56,9 +56,7 @@ public:
     
 protected:
 
-  uint32_t Rate;
-
-  FrequencyParameter<uint32_t> RateP;
+  NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> NChannels;
   NumberParameter<float> Gain;
   

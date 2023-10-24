@@ -89,7 +89,7 @@ public:
 		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
 
   // Return sampling rate per channel in Hertz.
-  uint32_t rate() const { return Rate; };
+  uint32_t rate() const { return Rate.value(); };
   
   // Set sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
@@ -155,9 +155,7 @@ public:
     
 protected:
 
-  uint32_t Rate;
-
-  FrequencyParameter<uint32_t> RateP;
+  NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> Bits;
   NumberParameter<uint8_t> Averaging;
   ConversionSpeedParameter ConversionSpeed;

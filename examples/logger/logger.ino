@@ -136,12 +136,12 @@ bool openNextFile() {
 
 
 void setupStorage() {
-  if (settings.FileTime > 30)
+  if (settings.fileTime() > 30)
     blink.setTiming(5000);
   if (file.sdcard()->dataDir(settings.path()))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.path());
   file.setWriteInterval();
-  file.setMaxFileTime(settings.FileTime);
+  file.setMaxFileTime(settings.fileTime());
   file.start();
   openNextFile();
 }
@@ -244,7 +244,7 @@ void setup() {
   rtclock.report();
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
-  setupTestSignals(signalPins, settings.PulseFrequency);
+  setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
 #if defined(PCM186X)
   aidata.setSwapLR();
@@ -261,13 +261,13 @@ void setup() {
   aidata.check();
   aidata.start();
   aidata.report();
-  if (settings.InitialDelay >= 2.0) {
+  if (settings.initialDelay() >= 2.0) {
     delay(1000);
     blink.setDouble();
-    blink.delay(uint32_t(1000.0*settings.InitialDelay)-1000);
+    blink.delay(uint32_t(1000.0*settings.initialDelay())-1000);
   }
   else
-    delay(uint32_t(1000.0*settings.InitialDelay));
+    delay(uint32_t(1000.0*settings.initialDelay()));
   char gs[16];
 #if defined(TEENSYADC)
   aidata.gainStr(gs, PREGAIN);

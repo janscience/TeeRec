@@ -5,17 +5,12 @@ Settings::Settings(const char *path, const char *filename, float filetime,
 		   float pulsefrequency, float displaytime,
 		   float initialdelay, float sensorsinterval) :
   Configurable("Settings"),
-  FileTime(filetime),
-  PulseFrequency(pulsefrequency),
-  DisplayTime(displaytime),
-  InitialDelay(initialdelay),
-  SensorsInterval(sensorsinterval),
   Path(this, "Path", path),
   FileName(this, "FileName", filename),
-  FileTimeP(this, "FileTime", &FileTime, "%.0f"),
-  PulseFrequencyP(this, "PulseFreq", &PulseFrequency, "%.0f"),
-  DisplayTimeP(this, "DisplayTime", &DisplayTime, "%.3f"),
-  InitialDelayP(this, "InitialDelay", &InitialDelay, "%.0f"),
-  SensorsIntervalP(this, "SensorsInterval", &SensorsInterval, "%.1f")
+  FileTime(this, "FileTime", filetime, "%.0f", "s"),
+  PulseFrequency(this, "PulseFreq", pulsefrequency, "%.0f", "Hz"),
+  DisplayTime(this, "DisplayTime", displaytime, "%.3f", "s", "ms"),
+  InitialDelay(this, "InitialDelay", initialdelay, "%.0f", "s"),
+  SensorsInterval(this, "SensorsInterval", sensorsinterval, "%.1f", "s")
 {
 }

@@ -18,16 +18,29 @@ class Configurator {
 
  public:
 
+  /* Initialize. */
   Configurator();
 
+  /* Add config to this Configurator. */
   void add(Configurable *config);
 
+  /* Return pointer to Configurable instance with given name. */
   Configurable *configurable(const char *name);
 
+  /* Name of the configuration file. */
   void setConfigFile(const char *fname);
 
+  /* Report parameters of all configurables on serial. */
+  void report() const;
+
+  /* Read configuration file from SD card and pass key-value pairs to
+     the Configurables. */
   void configure(SDCard &sd);
 
+  /* Write current setting to configuration file on SD card. */
+  void save(SDCard &sd) const;
+
+  /* True if the configuration file has been read. */
   bool configured() const { return Configured; };
 
   static Configurator *Config;

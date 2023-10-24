@@ -45,15 +45,22 @@ class Parameter {
      size MaxVal. */
   virtual void valueStr(char *str) = 0;
 
+  /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
-  
 
+  /* Convert val with oldunit to newunit. */
+  static float changeUnit(float val, const char *oldunit, const char *newunit);
+  
  protected:
 
   static const size_t MaxKey = 64;
   char Key[MaxKey];
 
   bool Enabled;
+  
+  static const int NUnits = 50;
+  static char UnitPref[NUnits][6];
+  static float UnitFac[NUnits];
   
 };
 
@@ -127,19 +134,29 @@ class BaseNumberParameter : public Parameter {
   /* Initialize parameter with identifying key,
      format string, and unit and add to cfg. */
   BaseNumberParameter(Configurable *cfg, const char *key,
-		      const char *format, const char *unit=0);
+		      const char *format, const char *unit=0,
+		      const char *outunit=0);
 
   /* The format string for formatting a number. */
   const char *format() const { return Format; };
 
-  /* Set the format string to format. */
+  /* Set the format string to format.  If the number has a unit, then
+     this is a format for a float, irrespective of the type of the
+     number. Without a unit this is a format for the type of the number. */
   void setFormat(const char *format);
 
-  /* The unit string. */
+  /* The unit string of the internal unit of the value, i.e. value(). */
   const char *unit() const { return Unit; };
 
-  /* Set the unit string to unit. */
+  /* Set the internal unit string to unit. */
   void setUnit(const char *unit);
+
+  /* The unit string used forstring representations of the value,
+     i.e. valueStr(). */
+  const char *outunit() const { return OutUnit; };
+
+  /* Set the unit string for the string representation of the value to unit. */
+  void setOutUnit(const char *unit);
   
   
  protected:
@@ -149,6 +166,7 @@ class BaseNumberParameter : public Parameter {
   
   static const size_t MaxUnit = 16;
   char Unit[MaxUnit];
+  char OutUnit[MaxUnit];
   
 };
 
@@ -161,13 +179,20 @@ class NumberParameter : public BaseNumberParameter<T> {
   /* Initialize parameter with identifying key, pointer number to value,
      format string, and unit and add to cfg. */
   NumberParameter(Configurable *cfg, const char *key, T number,
-		  const char *format, const char *unit=0);
+		  const char *format, const char *unit=0,
+		  const char *outunit=0);
 
-  /* Return the value of the number. */
+  /* Return the value of the number in its unit(). */
   T value() const { return Value; };
+
+  /* Return the value of the number in an alternative unit. */
+  T value(const char *unit) const;
 
   /* Set the number to val. */
   void setValue(T val) { Value = val; };
+
+  /* Set the number to val unit. */
+  void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
@@ -191,13 +216,20 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   /* Initialize parameter with identifying key, pointer number to value,
      format string, and unit and add to cfg. */
   NumberPointerParameter(Configurable *cfg, const char *key, T *number,
-			 const char *format, const char *unit=0);
+			 const char *format, const char *unit=0,
+			 const char *outunit=0);
 
   /* Return the value of the number. */
   T value() const { return *Value; };
 
+  /* Return the value of the number in an alternative unit. */
+  T value(const char *unit) const;
+
   /* Set the number to val. */
   void setValue(T val) { *Value = val; };
+
+  /* Set the number to val unit. */
+  void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly. */
   virtual void parseValue(const char *val);
@@ -209,38 +241,6 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
  protected:
 
   T *Value;
-  
-};
-
-
-template<class T>
-class TimeParameter : public NumberPointerParameter<T> {
-  
- public:
-  
-  /* Initialize parameter with identifying key, pointer time to value variable,
-     and format and add to cfg. */
-  TimeParameter(Configurable *cfg, const char *key, T *time,
-		const char *format);
-  
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
-  
-};
-
-
-template<class T>
-class FrequencyParameter : public NumberPointerParameter<T> {
-  
- public:
-  
-  /* Initialize parameter with identifying key, pointer frequency to
-     value variable, and format and add to cfg. */
-  FrequencyParameter(Configurable *cfg, const char *key, T *frequency,
-		     const char *format);
-  
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
   
 };
 
@@ -300,10 +300,17 @@ void StringPointerParameter<N>::valueStr(char *str) {
 template<class T>
 BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *key,
 					    const char *format,
-					    const char *unit) :
-  Parameter(cfg, key) {
+					    const char *unit,
+					    const char *outunit) :
+  Parameter(cfg, key),
+  Format(""),
+  Unit(""),
+  OutUnit("") {
   setFormat(format);
   setUnit(unit);
+  setOutUnit(outunit);
+  if (strlen(OutUnit) == 0)
+    setOutUnit(unit);
 }
 
 
@@ -324,11 +331,34 @@ void BaseNumberParameter<T>::setUnit(const char *unit) {
 
 
 template<class T>
+void BaseNumberParameter<T>::setOutUnit(const char *unit) {
+  if (unit != NULL) {
+    strncpy(OutUnit, unit, MaxUnit);
+    OutUnit[MaxUnit-1] = '\0';
+  }
+}
+
+
+template<class T>
 NumberParameter<T>::NumberParameter(Configurable *cfg, const char *key,
 				    T number, const char *format,
-				    const char *unit) :
-  BaseNumberParameter<T>(cfg, key, format, unit),
+				    const char *unit, const char *outunit) :
+  BaseNumberParameter<T>(cfg, key, format, unit, outunit),
   Value(number) {
+}
+
+
+template<class T>
+T NumberParameter<T>::value(const char *unit) const {
+  float val = changeUnit((float)Value, this->Unit, unit);
+  return (T)val;
+}
+
+
+template<class T>
+void NumberParameter<T>::setValue(T val, const char *unit) {
+  float nv = changeUnit((float)val, unit, this->Unit);
+  Value = (T)nv;
 }
 
 
@@ -343,9 +373,14 @@ void NumberParameter<T>::parseValue(const char *val) {
 
 template<class T>
 void NumberParameter<T>::valueStr(char *str) {
-  sprintf(str, this->Format, Value);
-  if (this->Unit != 0)
-    strcat(str, this->Unit);
+  if (this->Unit != NULL && strlen(this->Unit) > 0) {
+    float val = this->changeUnit((float)Value, this->Unit, this->OutUnit);
+    sprintf(str, this->Format, val);
+    if (this->OutUnit != 0)
+      strcat(str, this->OutUnit);
+  }
+  else
+    sprintf(str, this->Format, Value);
 }
 
 
@@ -354,9 +389,24 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable *cfg,
 						  const char *key,
 						  T *number,
 						  const char *format,
-						  const char *unit) :
-  BaseNumberParameter<T>(cfg, key, format, unit),
+						  const char *unit,
+						  const char *outunit) :
+  BaseNumberParameter<T>(cfg, key, format, unit, outunit),
   Value(number) {
+}
+
+
+template<class T>
+T NumberPointerParameter<T>::value(const char *unit) const {
+  float val = changeUnit(*Value, this->Unit, unit);
+  return (T)val;
+}
+
+
+template<class T>
+void NumberPointerParameter<T>::setValue(T val, const char *unit) {
+  float nv = changeUnit((float)val, unit, this->Unit);
+  *Value = (T)nv;
 }
 
 
@@ -371,83 +421,15 @@ void NumberPointerParameter<T>::parseValue(const char *val) {
 
 template<class T>
 void NumberPointerParameter<T>::valueStr(char *str) {
-  sprintf(str, this->Format, *Value);
-  if (this->Unit != 0)
-    strcat(str, this->Unit);
-}
-
-
-template<class T>
-TimeParameter<T>::TimeParameter(Configurable *cfg, const char *key,
-				T *time, const char *format) :
-  NumberPointerParameter<T>(cfg, key, time, format, "s") {
-}
-
-
-template<class T>
-void TimeParameter<T>::parseValue(const char *val) {
-  if (this->disabled())
-    return;
-  float time = atof(val);
-  for (size_t k=0; k<strlen(val); k++) {
-    char c = tolower(val[k]);
-    if (c == 's')
-      break;
-    else if (c == 'h') {
-      time *= 60.0*60.0;
-      break;
-    }
-    else if (c == 'm' && k<strlen(val)-1 && tolower(val[k+1]) == 'i') {
-      time *= 60.0;
-      break;
-    }
-    else if (c == 'm' && k<strlen(val)-1 && tolower(val[k+1]) == 's') {
-      time *= 0.001;
-      break;
-    }
-    else if (c == 'u' && k<strlen(val)-1 && tolower(val[k+1]) == 's') {
-      time *= 1e-6;
-      break;
-    }
-    else if (c == 'n' && k<strlen(val)-1 && tolower(val[k+1]) == 's') {
-      time *= 1e-9;
-      break;
-    }
+  if (this->Unit != NULL && strlen(this->Unit) > 0) {
+    float val = this->changeUnit((float)(*Value), this->Unit, this->OutUnit);
+    sprintf(str, this->Format, val);
+    if (this->OutUnit != 0)
+      strcat(str, this->OutUnit);
   }
-  *(this->Value) = (T)time;
+  else
+    sprintf(str, this->Format, *Value);
 }
 
-
-template<class T>
-FrequencyParameter<T>::FrequencyParameter(Configurable *cfg, const char *key,
-					  T *frequency, const char *format) :
-  NumberPointerParameter<T>(cfg, key, frequency, format, "Hz") {
-}
-
-
-template<class T>
-void FrequencyParameter<T>::parseValue(const char *val) {
-  if (this->disabled())
-    return;
-  float freq = atof(val);
-  for (size_t k=0; k<strlen(val); k++) {
-    char c = tolower(val[k]);
-    if (c == 'h' && k<strlen(val)-1 && tolower(val[k+1]) == 'z')
-      break;
-    else if (c == 'k' && k<strlen(val)-1 && tolower(val[k+1]) == 'h') {
-      freq *= 1000.0;
-      break;
-    }
-    else if (val[k] == 'M' && k<strlen(val)-1 && tolower(val[k+1]) == 'h') {
-      freq *= 1e6;
-      break;
-    }
-    else if (c == 'm' && k<strlen(val)-1 && tolower(val[k+1]) == 'h') {
-      freq *= 0.001;
-      break;
-    }
-  }
-  *(this->Value) = (T)freq;
-}
 
 #endif

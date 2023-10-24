@@ -62,9 +62,8 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   ADC_SAMPLING_SPEED sampling_speed,
 				   ADC_REFERENCE reference) :
   Configurable("ADC"),
-  Rate(rate),
-  RateP(this, "SamplingRate", &Rate, "%lu"),
-  Bits(this, "Resolution", bits, "%hu", "bits"),
+  Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
+  Bits(this, "Resolution", bits, "%.0f", "bits"),
   Averaging(this, "Averaging", averaging, "%hu"),
   ConversionSpeed(this, "Conversion", conversion_speed),
   SamplingSpeed(this, "Sampling", sampling_speed),
@@ -78,9 +77,8 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 				   ADC_SAMPLING_SPEED sampling_speed,
 				   ADC_REFERENCE reference) :
   Configurable(name),
-  Rate(rate),
-  RateP(this, "SamplingRate", &Rate, "%.0f"),
-  Bits(this, "Resolution", bits, "%hu", "bits"),
+  Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
+  Bits(this, "Resolution", bits, "%.0f", "bits"),
   Averaging(this, "Averaging", averaging, "%hu"),
   ConversionSpeed(this, "Conversion", conversion_speed),
   SamplingSpeed(this, "Sampling", sampling_speed),
@@ -89,7 +87,7 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 
 
 void InputADCSettings::setRate(uint32_t rate) {
-  Rate = rate;
+  Rate.setValue(rate);
 }
 
 

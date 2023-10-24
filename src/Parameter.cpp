@@ -26,63 +26,67 @@ void Parameter::disable() {
 }
 
 
-/*
-// from https://github.com/relacs/relacs/blob/1facade622a80e9f51dbf8e6f8171ac74c27f100/options/src/parameter.cc#L1647-L1703
+char Parameter::UnitPref[NUnits][6] = {
+  "Deka", "deka", "Hekto", "hekto", "kilo", "Kilo", 
+  "Mega", "mega", "Giga", "giga", "Tera", "tera", 
+  "Peta", "peta", "Exa", "exa", 
+  "Dezi", "dezi", "Zenti", "centi", "Micro", "micro", 
+  "Milli", "milli", "Nano", "nano", "Piko", "piko", 
+  "Femto", "femto", "Atto", "atto", 
+  "da", "h", "K", "k", "M", "G", "T", "P", "E", 
+  "d", "c", "mu", "u", "m", "n", "p", "f", "a"
+};
 
-const int NUnits = 50;
-string UnitPref[NUnits] = { "Deka", "deka", "Hekto", "hekto", "kilo", "Kilo", 
-			    "Mega", "mega", "Giga", "giga", "Tera", "tera", 
-			    "Peta", "peta", "Exa", "exa", 
-			    "Dezi", "dezi", "Zenti", "centi", "Micro", "micro", 
-			    "Milli", "milli", "Nano", "nano", "Piko", "piko", 
-			    "Femto", "femto", "Atto", "atto", 
-			    "da", "h", "K", "k", "M", "G", "T", "P", "E", 
-			    "d", "c", "mu", "u", "m", "n", "p", "f", "a" };
-float UnitFac[NUnits] = {  1.0,  1.0,  2.0,  2.0,  3.0,  3.0,  
-			    6.0,  6.0,  9.0,  9.0,  12.0, 12.0, 
-			   15.0, 15.0, 18.0, 18.0,
-			   -1.0, -1.0, -2.0, -2.0, -6.0, -6.0, 
-			   -3.0, -3.0, -9.0, -9.0, -12.0, -12.0, 
-			  -15.0, -15.0, -18.0, -18.0, 
-			    1.0,  2.0,  3.0,  3.0,  6.0,  9.0, 12.0, 15.0, 18.0,
-			   -1.0, -2.0, -6.0, -6.0, -3.0, -9.0, -12.0, -15.0, -18.0 };
 
-float changeUnit(float val, const Str &oldunit, const Str &newunit) {
-  // disect oldUnit into value ov and unit ou:
-  double ov = oldunit.number( 1.0 );
-  string ou = oldunit.unit();
+float Parameter::UnitFac[NUnits] = {
+  1e1,  1e1,  1e2,  1e2,  1e3,  1e3,  
+  1e6,  1e6,  1e9,  1e9,  1e12, 1e12, 
+  1e15, 1e15, 1e18, 1e18,
+  1e-1, 1e-1, 1e-2, 1e-2, 1e-6, 1e-6, 
+  1e-3, 1e-3, 1e-9, 1e-9, 1e-12, 1e-12, 
+  1e-15, 1e-15, 1e-18, 1e-18, 
+  1e1,  1e2,  1e3,  1e3,  1e6,  1e9, 1e12, 1e15, 1e18,
+  1e-1, 1e-2, 1e-6, 1e-6, 1e-3, 1e-9, 1e-12, 1e-15, 1e-18
+};
 
-  // disect newUnit into value nv and unit nu:
-  double nv = newunit.number( 1.0 );
-  string nu = newunit.unit();
 
+float Parameter::changeUnit(float val, const char *oldunit,
+			    const char *newunit) {
+  // adapted from https://github.com/relacs/relacs/blob/1facade622a80e9f51dbf8e6f8171ac74c27f100/options/src/parameter.cc#L1647-L1703
+  
   // missing unit?
-  if ( nu.empty() || ou.empty() ) {
-    if ( newunit == "1" && oldunit == "%" )
-      nv = 100.0;
-    else if ( newunit == "%" && oldunit == "1" ) 
-      nv = 0.01;
-    return val*ov/nv;
-  }
+  if (newunit == 0 || strlen(newunit) == 0 ||
+      oldunit == 0 || strlen(oldunit) == 0)
+    return val;
 
   // find out order of old unit:
   int k = 0;
   for (k=0; k<NUnits; k++)
-    if (ou.find( UnitPref[k] ) == 0)
+    if (strncmp(oldunit, UnitPref[k], strlen(UnitPref[k])) == 0)
       break;
-  double e1 = 0.0;
-  if (k < NUnits && UnitPref[k].length() < ou.length())
-    e1 = UnitFac[k];
+  float f1 = 1.0;
+  if (k < NUnits && strlen(UnitPref[k]) < strlen(oldunit))
+    f1 = UnitFac[k];
+  else if (strcmp(oldunit, "%") == 0)
+    f1 = 0.01;
+  else if (strcmp(oldunit, "hour") == 0 || strcmp(oldunit, "h") == 0)
+    f1 = 60.0*60.0;
+  else if (strcmp(oldunit, "min") == 0)
+    f1 = 60.0;
 
   // find out order of new unit:
   for (k=0; k<NUnits; k++)
-    if (nu.find( UnitPref[k] ) == 0)
+    if (strncmp(newunit, UnitPref[k], strlen(UnitPref[k])) == 0)
       break;
-  double e2 = 0.0;
-  if (k < NUnits && UnitPref[k].length() < nu.length())
-    e2 = UnitFac[k];
+  float f2 = 1.0;
+  if (k < NUnits && strlen(UnitPref[k]) < strlen(newunit))
+    f2 = UnitFac[k];
+  else if (strcmp(newunit, "%") == 0)
+    f1 = 100.0;
+  else if (strcmp(newunit, "hour") == 0 || strcmp(newunit, "h") == 0)
+    f1 = 1.0/60.0/60.0;
+  else if (strcmp(newunit, "min") == 0)
+    f1 = 1.0/60.0;
 
-  return val * (ov/nv) * pow(10.0, e1-e2);
+  return val * f1/f2;
 }
-
-*/

@@ -27,23 +27,32 @@ public:
 
   /* File name to be used to save the recorded data. */
   const char *fileName() const { return FileName.value(); };
-  
-  float FileTime;
-  float PulseFrequency;
-  float DisplayTime;
-  float InitialDelay;
-  float SensorsInterval;
+
+  /* Time in seconds the files will record data. */
+  float fileTime() const { return FileTime.value(); };
+
+  /* Base frequency of generated test pulses. */
+  float pulseFrequency() const { return PulseFrequency.value(); };
+
+  /* Time in seconds after which the display will be updated. */
+  float displayTime() const { return DisplayTime.value(); };
+
+  /* Time in seconds until recording of data is started. */
+  float initialDelay() const { return InitialDelay.value(); };
+
+  /* Time in seconds between sensor readings. */
+  float sensorsInterval() const { return SensorsInterval.value(); };
 
 
 protected:
 
   StringParameter<MaxStr> Path;
   StringParameter<MaxStr> FileName;
-  TimeParameter<float> FileTimeP;
-  FrequencyParameter<float> PulseFrequencyP;
-  TimeParameter<float> DisplayTimeP;
-  TimeParameter<float> InitialDelayP;
-  TimeParameter<float> SensorsIntervalP;
+  NumberParameter<float> FileTime;
+  NumberParameter<float> PulseFrequency;
+  NumberParameter<float> DisplayTime;
+  NumberParameter<float> InitialDelay;
+  NumberParameter<float> SensorsInterval;
   
 };
 

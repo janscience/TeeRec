@@ -4,8 +4,7 @@
 
 InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels, float gain) :
   Configurable("ADC"),
-  Rate(rate),
-  RateP(this, "SamplingRate", &Rate, "%lu"),
+  Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
   NChannels(this, "NChannels", nchannels, "%hu"),
   Gain(this, "Gain", gain, "%.1f", "dB") {
 }
@@ -14,15 +13,14 @@ InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels, float gain) :
 InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
 				   int nchannels, float gain) :
   Configurable(name),
-  Rate(rate),
-  RateP(this, "SamplingRate", &Rate, "%lu"),
+  Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
   NChannels(this, "NChannels", nchannels, "%hu"),
   Gain(this, "Gain", gain, "%.1f", "dB") {
 }
 
 
 void InputTDMSettings::setRate(uint32_t rate) {
-  Rate = rate;
+  Rate.setValue(rate);
 }
 
 
