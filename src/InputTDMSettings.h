@@ -12,6 +12,9 @@
 #include <Parameter.h>
 
 
+class InputTDM;
+
+
 class InputTDMSettings : public Configurable {
 
 public:
