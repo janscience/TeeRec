@@ -10,6 +10,7 @@
 #include <Arduino.h>
 
 
+class File;
 class Configurable;
 
 
@@ -43,13 +44,24 @@ class Parameter {
 
   /* Return the current value of this parameter as a string of maximum
      size MaxVal. */
-  virtual void valueStr(char *str) = 0;
+  virtual void valueStr(char *str) const = 0;
+
+  /* Parse the string val, set the parameter accordingly and report
+     result together with name on Serial. */
+  void configure(const char *val, const char *name=0);
+
+  /* Report the parameter's key and value on Serial. */
+  void report(int w=0) const;
+
+  /* Save the parameter's key and value to file. */
+  void save(File &file, int w=0) const;
 
   /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
 
   /* Convert val with oldunit to newunit. */
   static float changeUnit(float val, const char *oldunit, const char *newunit);
+  
   
  protected:
 
@@ -85,7 +97,7 @@ class StringParameter : public Parameter {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
 
   
  protected:
@@ -116,7 +128,7 @@ class StringPointerParameter : public Parameter {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
 
   
  protected:
@@ -198,7 +210,7 @@ class NumberParameter : public BaseNumberParameter<T> {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
   
   
  protected:
@@ -235,7 +247,7 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
   
   
  protected:
@@ -264,7 +276,7 @@ void StringParameter<N>::parseValue(const char *val) {
 
 
 template<int N>
-void StringParameter<N>::valueStr(char *str) {
+void StringParameter<N>::valueStr(char *str) const {
   int n = MaxVal < N ? MaxVal : N;
   strncpy(str, Value, n);
   str[n-1] = '\0';
@@ -290,7 +302,7 @@ void StringPointerParameter<N>::parseValue(const char *val) {
 
 
 template<int N>
-void StringPointerParameter<N>::valueStr(char *str) {
+void StringPointerParameter<N>::valueStr(char *str) const {
   int n = MaxVal < N ? MaxVal : N;
   strncpy(str, *Value, n);
   str[n-1] = '\0';
@@ -367,12 +379,16 @@ void NumberParameter<T>::parseValue(const char *val) {
   if (this->disabled())
     return;
   float num = atof(val);
-  Value = (T)num;
+  const char *unit = val;
+  for (; *unit != '\0' && (isdigit(*unit) || *unit == '+' || *unit == '-' ||
+			   *unit == '.' || *unit == 'e'); ++unit);
+  float nv = this->changeUnit(num, unit, this->Unit);
+  Value = (T)nv;
 }
 
 
 template<class T>
-void NumberParameter<T>::valueStr(char *str) {
+void NumberParameter<T>::valueStr(char *str) const {
   if (this->Unit != NULL && strlen(this->Unit) > 0) {
     float val = this->changeUnit((float)Value, this->Unit, this->OutUnit);
     sprintf(str, this->Format, val);
@@ -415,12 +431,16 @@ void NumberPointerParameter<T>::parseValue(const char *val) {
   if (this->disabled())
     return;
   float num = atof(val);
-  *Value = (T)num;
+  const char *unit = val;
+  for (; *unit != '\0' && (isdigit(*unit) || *unit == '+' || *unit == '-' ||
+			   *unit == '.' || *unit == 'e'); ++unit);
+  float nv = this->changeUnit(num, unit, this->Unit);
+  *Value = (T)nv;
 }
 
 
 template<class T>
-void NumberPointerParameter<T>::valueStr(char *str) {
+void NumberPointerParameter<T>::valueStr(char *str) const {
   if (this->Unit != NULL && strlen(this->Unit) > 0) {
     float val = this->changeUnit((float)(*Value), this->Unit, this->OutUnit);
     sprintf(str, this->Format, val);

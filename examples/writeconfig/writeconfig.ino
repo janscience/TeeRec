@@ -6,31 +6,36 @@
 #include <Configurator.h>
 #include <Settings.h>
 #if defined(TEENSYADC)
-#include <InputADC.h>
-#include <InputADCSettings.h>
+  #include <InputADC.h>
+  #include <InputADCSettings.h>
 #elif defined(PCM186X)
-#include <InputTDMSettings.h>
+  #include <InputTDMSettings.h>
 #endif
 #include <Blink.h>
 
-#define SAMPLING_RATE  48000 // samples per second and channel in Hertz
-#if defined(TEENSYADC)
-#define BITS           12    // resolution: 10bit 12bit, or 16bit
-#define AVERAGING       8    // number of averages per sample: 0, 4, 8, 16, 32
-#define CONVERSION     ADC_CONVERSION_SPEED::HIGH_SPEED
-#define SAMPLING       ADC_SAMPLING_SPEED::HIGH_SPEED
-#define REFERENCE      ADC_REFERENCE::REF_3V3
-#elif defined(PCM186X)
-#define GAIN           20.0  // dB
-#endif
+// Adapt the following parameter values to your needs:
 
-#define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "rec1-NUM4.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-#define FILE_SAVE_TIME 10   // seconds
-#define INITIAL_DELAY  2.0  // seconds
+#define CFG_FILE        "teerec.cfg"   // name of configuration file
+
+// Settings:
+#define PATH            "recordings" // folder where to store the recordings
+#define FILENAME        "rec1-NUM4.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILE_SAVE_TIME  10   // seconds
+#define INITIAL_DELAY   2.0  // seconds
 #define PULSE_FREQUENCY 230 // Hertz
 
-const char *fname = "teerec.cfg";
+// Input XXXSettings:
+#define SAMPLING_RATE  48000 // samples per second and channel in Hertz
+#if defined(TEENSYADC)
+  #define BITS           12    // resolution: 10bit 12bit, or 16bit
+  #define AVERAGING       8    // number of averages per sample: 0, 4, 8, 16, 32
+  #define CONVERSION     ADC_CONVERSION_SPEED::HIGH_SPEED
+  #define SAMPLING       ADC_SAMPLING_SPEED::HIGH_SPEED
+  #define REFERENCE      ADC_REFERENCE::REF_3V3
+#elif defined(PCM186X)
+  #define GAIN           20.0  // dB
+#endif
+
 
 SDCard sdcard;
 Configurator config;
@@ -48,20 +53,25 @@ Blink blink(LED_BUILTIN);
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
+  // disable parameter that should not go into the configuration file here:
+  settings.disable("PulseFreq");
+  settings.disable("DisplayTime");
+  settings.disable("SensorsInterval");
   blink.switchOn();
   sdcard.begin();
-  config.setConfigFile(fname);
-  config.save(sdcard);
-  /*
-  if (n != m)
-    Serial.println("Failed to write config file.");
-  else {
-    */
-    Serial.printf("Wrote configuration file \"%s\".\n", fname);
+  config.setConfigFile(CFG_FILE);
+  config.report();
+  if (config.save(sdcard) ) {
+    Serial.printf("Wrote configuration file \"%s\" to SD card.\n", CFG_FILE);
     Serial.println();
     Serial.println("Rename and edit this file to your needs.");
-  //}
+  }
+  else
+    Serial.println("Failed to write config file.");
+  Serial.println();
   blink.switchOff();
+  // read the file in again:
+  config.configure(sdcard);
   sdcard.end();
 }
 

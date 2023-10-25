@@ -1,3 +1,4 @@
+#include <SDWriter.h>
 #include <Configurator.h>
 #include <Configurable.h>
 
@@ -18,7 +19,8 @@ void Configurable::setName(const char *name) {
 
 void Configurable::add(Parameter *param) {
   if (NParams >= MaxParams) {
-    Serial.printf("ERROR! Number of maximum Parameter exceeded in %s!\n", ConfigName);
+    Serial.printf("ERROR! Number of maximum Parameter exceeded in %s!\n",
+		  name());
     return;
   }
   Params[NParams++] = param;
@@ -62,28 +64,18 @@ void Configurable::report() const {
       w = strlen(Params[j]->key());
   }
   // write parameters to serial:
-  Serial.printf("%s settings:\n", name());
-  for (size_t j=0; j<NParams; j++) {
-    if (Params[j]->enabled()) {
-      char pval[Parameter::MaxVal];
-      Params[j]->valueStr(pval);
-      Serial.printf("  %-*s: %s\n", w, Params[j]->key(), pval);
-    }
-  }
+  Serial.printf("%s:\n", name());
+  for (size_t j=0; j<NParams; j++)
+    Params[j]->report(w);
 }
 
 
 void Configurable::configure(const char *key, const char *val) {
   Parameter *param = parameter(key);
-  if (param == NULL) {
+  if (param == NULL)
     Serial.printf("  %s key \"%s\" not found.\n", name(), key);
-  }
-  else {
-    param->parseValue(val);
-    char pval[Parameter::MaxVal];
-    param->valueStr(pval);
-    Serial.printf("  set %s-%s to %s\n", name(), key, pval);
-  }
+  else
+    param->configure(val, name());
 }
 
 
@@ -96,13 +88,8 @@ void Configurable::save(File &file) const {
   }
   // write parameters to file:
   file.printf("%s:\n", name());
-  for (size_t j=0; j<NParams; j++) {
-    if (Params[j]->enabled()) {
-      char pval[Parameter::MaxVal];
-      Params[j]->valueStr(pval);
-      file.printf("  %-*s: %s\n", w, Params[j]->key(), pval);
-    }
-  }
+  for (size_t j=0; j<NParams; j++)
+    Params[j]->save(file, w);
 }
 
 

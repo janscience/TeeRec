@@ -1,3 +1,4 @@
+#include <SDWriter.h>
 #include <Configurable.h>
 #include <Parameter.h>
 
@@ -23,6 +24,41 @@ void Parameter::enable() {
 
 void Parameter::disable() {
   Enabled = false;
+}
+
+
+void Parameter::configure(const char *val, const char *name) {
+  if (enabled()) {
+    parseValue(val);
+    char pval[MaxVal];
+    valueStr(pval);
+    char keyname[2*MaxKey];
+    keyname[0] = '\0';
+    if (name != 0 && strlen(name) > 0) {
+      strcat(keyname, name);
+      strcat(keyname, "-");
+    }
+    strcat(keyname, key());
+    Serial.printf("  set %s to %s\n", keyname, pval);
+  }
+}
+
+
+void Parameter::report(int w) const {
+  if (enabled()) {
+    char pval[MaxVal];
+    valueStr(pval);
+    Serial.printf("  %-*s: %s\n", w, key(), pval);
+  }
+}
+
+
+void Parameter::save(File &file, int w) const {
+  if (enabled()) {
+    char pval[MaxVal];
+    valueStr(pval);
+    file.printf("  %-*s: %s\n", w, key(), pval);
+  }
 }
 
 
@@ -53,7 +89,7 @@ float Parameter::UnitFac[NUnits] = {
 float Parameter::changeUnit(float val, const char *oldunit,
 			    const char *newunit) {
   // adapted from https://github.com/relacs/relacs/blob/1facade622a80e9f51dbf8e6f8171ac74c27f100/options/src/parameter.cc#L1647-L1703
-  
+
   // missing unit?
   if (newunit == 0 || strlen(newunit) == 0 ||
       oldunit == 0 || strlen(oldunit) == 0)
@@ -82,11 +118,12 @@ float Parameter::changeUnit(float val, const char *oldunit,
   if (k < NUnits && strlen(UnitPref[k]) < strlen(newunit))
     f2 = UnitFac[k];
   else if (strcmp(newunit, "%") == 0)
-    f1 = 100.0;
+    f2 = 100.0;
   else if (strcmp(newunit, "hour") == 0 || strcmp(newunit, "h") == 0)
-    f1 = 1.0/60.0/60.0;
+    f2 = 1.0/60.0/60.0;
   else if (strcmp(newunit, "min") == 0)
-    f1 = 1.0/60.0;
+    f2 = 1.0/60.0;
 
   return val * f1/f2;
 }
+

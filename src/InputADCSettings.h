@@ -29,7 +29,7 @@ class ConversionSpeedParameter : public Parameter {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
 
   ADC_CONVERSION_SPEED Value;
 };
@@ -47,7 +47,7 @@ class SamplingSpeedParameter : public Parameter {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
 
   ADC_SAMPLING_SPEED Value;  
 };
@@ -65,7 +65,7 @@ class ReferenceParameter : public Parameter {
   virtual void parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str);
+  virtual void valueStr(char *str) const;
   
   ADC_REFERENCE Value;
 };

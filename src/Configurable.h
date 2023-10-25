@@ -8,7 +8,9 @@
 
 
 #include <Parameter.h>
-#include <SDWriter.h>
+
+
+class File;
 
 
 class Configurable {

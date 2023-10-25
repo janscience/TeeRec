@@ -37,8 +37,9 @@ class Configurator {
      the Configurables. */
   void configure(SDCard &sd);
 
-  /* Write current setting to configuration file on SD card. */
-  void save(SDCard &sd) const;
+  /* Write current setting to configuration file on SD card.
+     Return true on success. */
+  bool save(SDCard &sd) const;
 
   /* True if the configuration file has been read. */
   bool configured() const { return Configured; };

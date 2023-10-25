@@ -15,7 +15,7 @@ void ConversionSpeedParameter::parseValue(const char *val) {
 }
 
 
-void ConversionSpeedParameter::valueStr(char *str) {
+void ConversionSpeedParameter::valueStr(char *str) const {
   strcpy(str, InputADC::conversionSpeedStr(Value));
 }
 
@@ -33,7 +33,7 @@ void SamplingSpeedParameter::parseValue(const char *val) {
 }
 
 
-void SamplingSpeedParameter::valueStr(char *str) {
+void SamplingSpeedParameter::valueStr(char *str) const {
   strcpy(str, InputADC::samplingSpeedStr(Value));
 }
 
@@ -51,7 +51,7 @@ void ReferenceParameter::parseValue(const char *val) {
 }
 
 
-void ReferenceParameter::valueStr(char *str) {
+void ReferenceParameter::valueStr(char *str) const {
   strcpy(str, InputADC::referenceStr(Value));
 }
 

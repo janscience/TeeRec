@@ -124,14 +124,16 @@ void Configurator::configure(SDCard &sd) {
 }
 
 
-void Configurator::save(SDCard &sd) const {
+bool Configurator::save(SDCard &sd) const {
   File file = sd.openWrite(ConfigFile);
   if (!file) {
     Serial.printf("Configuration file \"%s\" cannot be written.\n\n", ConfigFile);
-    return;
+    return false;
   }
   for (size_t j=0; j<NConfigs; j++) {
     Configs[j]->save(file);
     file.println();
-  }  
+  }
+  file.close();
+  return true;
 }
