@@ -27,6 +27,27 @@ void Parameter::disable() {
 }
 
 
+void Parameter::configure(Stream &stream, unsigned long timeout) {
+  if (disabled())
+    return;
+  int w = strlen(key());
+  if (w < 15)
+    w = 15;
+  char pval[MaxVal];
+  valueStr(pval);
+  stream.printf("%-*s: %s\n", w, key(), pval);
+  stream.printf("%-*s: ", w, "enter new value");
+  elapsedMillis time = 0;
+  while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
+    yield();
+  }
+  stream.readBytesUntil('\n', pval, MaxVal);
+  stream.println(pval);
+  parseValue(pval);
+  stream.println();
+}
+
+
 void Parameter::configure(const char *val, const char *name) {
   if (enabled()) {
     parseValue(val);
@@ -95,35 +116,40 @@ float Parameter::changeUnit(float val, const char *oldunit,
       oldunit == 0 || strlen(oldunit) == 0)
     return val;
 
-  // find out order of old unit:
-  int k = 0;
-  for (k=0; k<NUnits; k++)
-    if (strncmp(oldunit, UnitPref[k], strlen(UnitPref[k])) == 0)
-      break;
+  // parse old unit:
   float f1 = 1.0;
-  if (k < NUnits && strlen(UnitPref[k]) < strlen(oldunit))
-    f1 = UnitFac[k];
-  else if (strcmp(oldunit, "%") == 0)
+  if (strcmp(oldunit, "%") == 0)
     f1 = 0.01;
   else if (strcmp(oldunit, "hour") == 0 || strcmp(oldunit, "h") == 0)
     f1 = 60.0*60.0;
   else if (strcmp(oldunit, "min") == 0)
     f1 = 60.0;
-
-  // find out order of new unit:
-  for (k=0; k<NUnits; k++)
-    if (strncmp(newunit, UnitPref[k], strlen(UnitPref[k])) == 0)
-      break;
+  else {
+    int k = 0;
+    for (k=0; k<NUnits; k++)
+      if (strncmp(oldunit, UnitPref[k], strlen(UnitPref[k])) == 0)
+	break;
+    if (k < NUnits && strlen(UnitPref[k]) < strlen(oldunit))
+      f1 = UnitFac[k];
+  }
+  
+  // parse new unit:
   float f2 = 1.0;
-  if (k < NUnits && strlen(UnitPref[k]) < strlen(newunit))
-    f2 = UnitFac[k];
-  else if (strcmp(newunit, "%") == 0)
+  if (strcmp(newunit, "%") == 0)
     f2 = 100.0;
   else if (strcmp(newunit, "hour") == 0 || strcmp(newunit, "h") == 0)
     f2 = 1.0/60.0/60.0;
   else if (strcmp(newunit, "min") == 0)
     f2 = 1.0/60.0;
-
+  else {
+    int k = 0;
+    for (k=0; k<NUnits; k++)
+      if (strncmp(newunit, UnitPref[k], strlen(UnitPref[k])) == 0)
+	break;
+    if (k < NUnits && strlen(UnitPref[k]) < strlen(newunit))
+      f2 = UnitFac[k];
+  }
+  
   return val * f1/f2;
 }
 

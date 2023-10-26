@@ -70,6 +70,58 @@ void Configurable::report() const {
 }
 
 
+void Configurable::configure(Stream &stream, unsigned long timeout) {
+  int def = 0;
+  while (true) {
+    stream.printf("%s:\n", name());
+    char pval[Parameter::MaxVal];
+    size_t iparam[NParams];
+    size_t n = 0;
+    for (size_t j=0; j<NParams; j++) {
+      if (Params[j]->enabled()) {
+	Params[j]->valueStr(pval);
+	stream.printf("  %d) %s: %s\n", n+1, Params[j]->key(), pval);
+	iparam[n++] = j;
+      }
+    }
+    while (true) {
+      stream.printf("  Select [%d]: ", def + 1);
+      elapsedMillis time = 0;
+      while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
+	yield();
+      }
+      if (stream.available() == 0) {
+	// timeout:
+	stream.println('\n');
+	return;
+      }
+      char c = stream.read();
+      delay(2);
+      while (stream.available() > 0) {
+	stream.read();
+	delay(2);
+      }
+      if (c == '\n')
+	c = '1' + def;
+      stream.println(c);
+      if (isdigit(c)) {
+	size_t i = int(c - '1');
+	if (iparam[i] < NParams) {
+	  def = i;
+	  stream.println();
+	  Params[iparam[i]]->configure(stream, timeout);
+	  break;
+	}
+      }
+      else if (c == 'q') {
+	stream.println();
+	return;
+      }
+    }
+  }
+}
+
+
 void Configurable::configure(const char *key, const char *val) {
   Parameter *param = parameter(key);
   if (param == NULL)

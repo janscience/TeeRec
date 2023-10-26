@@ -33,6 +33,9 @@ class Configurator {
   /* Report parameters of all configurables on serial. */
   void report() const;
 
+  /* Interactive configuration via Serial stream. */
+  void configure(Stream &stream=Serial, unsigned long timeout=0);
+
   /* Read configuration file from SD card and pass key-value pairs to
      the Configurables. */
   void configure(SDCard &sd);

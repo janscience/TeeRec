@@ -60,7 +60,10 @@ void setup() {
   blink.switchOn();
   sdcard.begin();
   config.setConfigFile(CFG_FILE);
+  if (Serial)
+    config.configure(Serial);
   config.report();
+  /*
   if (config.save(sdcard) ) {
     Serial.printf("Wrote configuration file \"%s\" to SD card.\n", CFG_FILE);
     Serial.println();
@@ -69,9 +72,10 @@ void setup() {
   else
     Serial.println("Failed to write config file.");
   Serial.println();
-  blink.switchOff();
   // read the file in again:
   config.configure(sdcard);
+  */
+  blink.switchOff();
   sdcard.end();
 }
 

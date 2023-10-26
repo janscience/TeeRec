@@ -51,6 +51,47 @@ void Configurator::report() const {
 }
 
 
+void Configurator::configure(Stream &stream, unsigned long timeout) {
+  int def = 0;
+  while (true) {
+    stream.println("Configure:");
+    for (size_t j=0; j<NConfigs; j++)
+      stream.printf("  %d) %s\n", j+1, Configs[j]->name());
+    while (true) {
+      stream.printf("  Select [%d]: ", def + 1);
+      elapsedMillis time = 0;
+      while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
+	yield();
+      }
+      if (stream.available() == 0) {
+	// timeout:
+	stream.println('\n');
+	return;
+      }
+      char c = stream.read();
+      while (stream.available() > 0)
+	stream.read();
+      if (c == '\n')
+	c = '1' + def;
+      stream.println(c);
+      if (isdigit(c)) {
+	size_t i = int(c - '1');
+	if (i < NConfigs) {
+	  def = i;
+	  stream.println();
+	  Configs[i]->configure(stream, timeout);
+	  break;
+	}
+      }
+      else if (c == 'q') {
+	stream.println();
+	return;
+      }
+    }
+  }
+}
+
+
 void Configurator::configure(SDCard &sd) {
   Configurable *config = NULL;
   const size_t nline = 128;

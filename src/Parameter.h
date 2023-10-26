@@ -45,6 +45,9 @@ class Parameter {
   /* Return the current value of this parameter as a string of maximum
      size MaxVal. */
   virtual void valueStr(char *str) const = 0;
+  
+  /* Interactive configuration via Serial stream. */
+  void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Parse the string val, set the parameter accordingly and report
      result together with name on Serial. */
@@ -379,9 +382,15 @@ void NumberParameter<T>::parseValue(const char *val) {
   if (this->disabled())
     return;
   float num = atof(val);
-  const char *unit = val;
-  for (; *unit != '\0' && (isdigit(*unit) || *unit == '+' || *unit == '-' ||
-			   *unit == '.' || *unit == 'e'); ++unit);
+  const char *up = val;
+  for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
+			   *up == '.' || *up == 'e'); ++up);
+  char unit[this->MaxUnit] = "";
+  if (strlen(up) == 0 && strlen(this->OutUnit) > 0)
+    strncpy(unit, this->OutUnit, this->MaxUnit);
+  else
+    strncpy(unit, up, this->MaxUnit);
+  unit[this->MaxUnit-1] = '\0';
   float nv = this->changeUnit(num, unit, this->Unit);
   Value = (T)nv;
 }
@@ -431,9 +440,15 @@ void NumberPointerParameter<T>::parseValue(const char *val) {
   if (this->disabled())
     return;
   float num = atof(val);
-  const char *unit = val;
-  for (; *unit != '\0' && (isdigit(*unit) || *unit == '+' || *unit == '-' ||
-			   *unit == '.' || *unit == 'e'); ++unit);
+  const char *up = val;
+  for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
+			   *up == '.' || *up == 'e'); ++up);
+  char unit[this->MaxUnit] = "";
+  if (strlen(up) == 0 && strlen(this->OutUnit) > 0)
+    strncpy(unit, this->OutUnit, this->MaxUnit);
+  else
+    strncpy(unit, up, this->MaxUnit);
+  unit[this->MaxUnit-1] = '\0';
   float nv = this->changeUnit(num, unit, this->Unit);
   *Value = (T)nv;
 }

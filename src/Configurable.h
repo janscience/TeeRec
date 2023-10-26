@@ -40,13 +40,16 @@ class Configurable {
   void disable(const char *key);
 
   /* Report configuration settings on Serial. */
-  virtual void report() const;
+  void report() const;
+  
+  /* Interactive configuration via Serial stream. */
+  void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Configure the class with the provided key-value pair. */
-  virtual void configure(const char *key, const char *val);
+  void configure(const char *key, const char *val);
 
   /* Save current settings to file. */
-  virtual void save(File &file) const;
+  void save(File &file) const;
 
   /* True if this was configured from a file, for example. */
   bool configured() const { return Configured; };
