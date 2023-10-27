@@ -24,6 +24,11 @@ void InputTDMSettings::setRate(uint32_t rate) {
 }
 
 
+void InputTDMSettings::setRateSelection(uint32_t *selection, size_t n) {
+  Rate.setSelection(selection, n);
+}
+
+
 void InputTDMSettings::setNChannels(uint8_t nchannels) {
   NChannels.setValue(nchannels);
 }

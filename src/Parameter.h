@@ -39,12 +39,16 @@ class Parameter {
   /* Make this parameter non-configurable. */
   void disable();
 
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val) = 0;
+  /* Parse the string val and set the value of this parameter accordingly.
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(const char *val) = 0;
 
   /* Return the current value of this parameter as a string of maximum
      size MaxVal. */
   virtual void valueStr(char *str) const = 0;
+
+  /* List selection of valid values. */
+  virtual void listSelection(Stream &stream) const {};
   
   /* Interactive configuration via Serial stream. */
   void configure(Stream &stream=Serial, unsigned long timeout=0);
@@ -72,6 +76,8 @@ class Parameter {
   char Key[MaxKey];
 
   bool Enabled;
+
+  size_t NSelection;
   
   static const int NUnits = 50;
   static char UnitPref[NUnits][6];
@@ -80,8 +86,36 @@ class Parameter {
 };
 
 
+class BaseStringParameter : public Parameter {
+
+  /* Parameter with character array as value. */
+  
+ public:
+  
+  /* Initialize parameter with identifying key and add to cfg. */
+  BaseStringParameter(Configurable *cfg, const char *key);
+
+  /* Provide a selection of n input values. */
+  void setSelection(const char **selection, size_t n);
+
+  /* Check whether val matches a string of the selection. Return
+     index of matching selection, 0 when there is no selection, and -1
+     if no match was found. */
+  int checkSelection(const char *val);
+
+  /* List selection of valid values. */
+  virtual void listSelection(Stream &stream) const;
+
+  
+ protected:
+
+  const char **Selection;
+  
+};
+
+
 template<int N>
-class StringParameter : public Parameter {
+class StringParameter : public BaseStringParameter {
 
   /* Parameter owning a character array. */
   
@@ -93,11 +127,13 @@ class StringParameter : public Parameter {
   /* Return the string. */
   const char* value() const { return Value; };
 
-  /* Set the string to val. */
-  void setValue(const char *val) { parseValue(val); };
+  /* Set the string to val.
+     Return true if val was a valid string or the parameter was disabled. */
+  bool setValue(const char *val) { return parseValue(val); };
   
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  /* Parse the string val and set the value of this parameter accordingly.
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -111,7 +147,7 @@ class StringParameter : public Parameter {
 
 
 template<int N>
-class StringPointerParameter : public Parameter {
+class StringPointerParameter : public BaseStringParameter {
 
   /* Parameter with a pointer to a character array. */
 
@@ -124,11 +160,13 @@ class StringPointerParameter : public Parameter {
   /* Return the string. */
   const char* value() const { return *Value; };
 
-  /* Set the string to val. */
-  void setValue(const char *val) { parseValue(val); };
+  /* Set the string to val.
+     Return true if val was a valid string or the parameter was disabled. */
+  bool setValue(const char *val) { return parseValue(val); };
   
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  /* Parse the string val and set the value of this parameter accordingly.
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -172,6 +210,17 @@ class BaseNumberParameter : public Parameter {
 
   /* Set the unit string for the string representation of the value to unit. */
   void setOutUnit(const char *unit);
+
+  /* Provide a selection of n input values. */
+  void setSelection(const T *selection, size_t n);
+
+  /* Check whether val matches a string of the selection. Return
+     index of matching selection, 0 when there is no selection, and -1
+     if no match was found. */
+  int checkSelection(T val);
+
+  /* List selection of valid values. */
+  virtual void listSelection(Stream &stream) const;
   
   
  protected:
@@ -182,6 +231,8 @@ class BaseNumberParameter : public Parameter {
   static const size_t MaxUnit = 16;
   char Unit[MaxUnit];
   char OutUnit[MaxUnit];
+
+  const T *Selection;
   
 };
 
@@ -204,13 +255,14 @@ class NumberParameter : public BaseNumberParameter<T> {
   T value(const char *unit) const;
 
   /* Set the number to val. */
-  void setValue(T val) { Value = val; };
+  void setValue(T val);
 
   /* Set the number to val unit. */
   void setValue(T val, const char *unit);
   
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  /* Parse the string val and set the value of this parameter accordingly.
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
@@ -241,13 +293,14 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   T value(const char *unit) const;
 
   /* Set the number to val. */
-  void setValue(T val) { *Value = val; };
+  void setValue(T val);
 
   /* Set the number to val unit. */
   void setValue(T val, const char *unit);
   
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  /* Parse the string val and set the value of this parameter accordingly.
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
@@ -263,18 +316,21 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
 template<int N>
 StringParameter<N>::StringParameter(Configurable *cfg, const char *key,
 				    const char str[N]) :
-  Parameter(cfg, key) {
+  BaseStringParameter(cfg, key) {
   strncpy(Value, str, N);
   Value[N-1] = '\0';
 }
 
 
 template<int N>
-void StringParameter<N>::parseValue(const char *val) {
+bool StringParameter<N>::parseValue(const char *val) {
   if (disabled())
-    return;
+    return true;
+  if (checkSelection(val) < 0)
+    return false;
   strncpy(Value, val, N);
   Value[N-1] = '\0';
+  return true;
 }
 
 
@@ -290,17 +346,20 @@ template<int N>
 StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
 						  const char *key,
 						  char (*str)[N]) :
-  Parameter(cfg, key),
+  BaseStringParameter(cfg, key),
   Value(str) {
 }
 
 
 template<int N>
-void StringPointerParameter<N>::parseValue(const char *val) {
+bool StringPointerParameter<N>::parseValue(const char *val) {
   if (disabled())
-    return;
+    return true;
+  if (checkSelection(val) < 0)
+    return false;
   strncpy(*Value, val, N);
   (*Value)[N-1] = '\0';
+  return true;
 }
 
 
@@ -320,7 +379,8 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *key,
   Parameter(cfg, key),
   Format(""),
   Unit(""),
-  OutUnit("") {
+  OutUnit(""),
+  Selection(0) {
   setFormat(format);
   setUnit(unit);
   setOutUnit(outunit);
@@ -355,6 +415,42 @@ void BaseNumberParameter<T>::setOutUnit(const char *unit) {
 
 
 template<class T>
+void BaseNumberParameter<T>::setSelection(const T *selection, size_t n) {
+  NSelection = n;
+  Selection = selection;
+}
+
+
+template<class T>
+int BaseNumberParameter<T>::checkSelection(T val) {
+  if (NSelection == 0)
+    return 0;
+  for (size_t k=0; k<NSelection; k++)
+    if (abs(float(Selection[k]) - float(val)) < 1e-8)
+      return k;
+  return -1;
+}
+
+
+template<class T>
+void BaseNumberParameter<T>::listSelection(Stream &stream) const {
+  for (size_t k=0; k<NSelection; k++) {
+    char str[MaxVal];
+    if (this->Unit != NULL && strlen(this->Unit) > 0) {
+      float val = this->changeUnit((float)Selection[k],
+				   this->Unit, this->OutUnit);
+      sprintf(str, this->Format, val);
+      if (this->OutUnit != 0)
+	strcat(str, this->OutUnit);
+    }
+    else
+      sprintf(str, this->Format, Selection[k]);
+    stream.printf("  - %s\n", str);
+  }
+}
+
+
+template<class T>
 NumberParameter<T>::NumberParameter(Configurable *cfg, const char *key,
 				    T number, const char *format,
 				    const char *unit, const char *outunit) :
@@ -371,16 +467,26 @@ T NumberParameter<T>::value(const char *unit) const {
 
 
 template<class T>
+void NumberParameter<T>::setValue(T val) {
+  if (this->checkSelection(val) < 0)
+    return;
+  Value = val;
+}
+
+
+template<class T>
 void NumberParameter<T>::setValue(T val, const char *unit) {
   float nv = changeUnit((float)val, unit, this->Unit);
+  if (this->checkSelection(val) < 0)
+    return;
   Value = (T)nv;
 }
 
 
 template<class T>
-void NumberParameter<T>::parseValue(const char *val) {
+bool NumberParameter<T>::parseValue(const char *val) {
   if (this->disabled())
-    return;
+    return true;
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
@@ -392,7 +498,10 @@ void NumberParameter<T>::parseValue(const char *val) {
     strncpy(unit, up, this->MaxUnit);
   unit[this->MaxUnit-1] = '\0';
   float nv = this->changeUnit(num, unit, this->Unit);
+  if (this->checkSelection(nv) < 0)
+    return false;
   Value = (T)nv;
+  return true;
 }
 
 
@@ -429,16 +538,26 @@ T NumberPointerParameter<T>::value(const char *unit) const {
 
 
 template<class T>
+void NumberPointerParameter<T>::setValue(T val) {
+  if (this->checkSelection(val) < 0)
+    return;
+  *Value = val;
+}
+
+
+template<class T>
 void NumberPointerParameter<T>::setValue(T val, const char *unit) {
   float nv = changeUnit((float)val, unit, this->Unit);
+  if (this->checkSelection(nv) < 0)
+    return;
   *Value = (T)nv;
 }
 
 
 template<class T>
-void NumberPointerParameter<T>::parseValue(const char *val) {
+bool NumberPointerParameter<T>::parseValue(const char *val) {
   if (this->disabled())
-    return;
+    return true;
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
@@ -450,7 +569,10 @@ void NumberPointerParameter<T>::parseValue(const char *val) {
     strncpy(unit, up, this->MaxUnit);
   unit[this->MaxUnit-1] = '\0';
   float nv = this->changeUnit(num, unit, this->Unit);
+  if (this->checkSelection(nv) < 0)
+    return false;
   *Value = (T)nv;
+  return true;
 }
 
 

@@ -4,7 +4,8 @@
 
 
 Parameter::Parameter(Configurable *cfg, const char *key) :
-  Enabled(true) {
+  Enabled(true),
+  NSelection(0) {
   setKey(key);
   if (cfg != 0)
     cfg->add(this);
@@ -36,32 +37,40 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
   char pval[MaxVal];
   valueStr(pval);
   stream.printf("%-*s: %s\n", w, key(), pval);
-  stream.printf("%-*s: ", w, "enter new value");
-  elapsedMillis time = 0;
-  while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
-    yield();
+  while (true) {
+    stream.printf("%-*s: ", w, "enter new value");
+    elapsedMillis time = 0;
+    while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
+      yield();
+    }
+    stream.readBytesUntil('\n', pval, MaxVal);
+    stream.println(pval);
+    if (strcmp(pval, "l") == 0 && NSelection > 0)
+      listSelection(stream);
+    else if (parseValue(pval))
+      break;
   }
-  stream.readBytesUntil('\n', pval, MaxVal);
-  stream.println(pval);
-  parseValue(pval);
   stream.println();
 }
 
 
 void Parameter::configure(const char *val, const char *name) {
-  if (enabled()) {
-    parseValue(val);
+  if (disabled())
+    return;
+  char keyname[2*MaxKey];
+  keyname[0] = '\0';
+  if (name != 0 && strlen(name) > 0) {
+    strcat(keyname, name);
+    strcat(keyname, "-");
+  }
+  strcat(keyname, key());
+  if (parseValue(val)) {
     char pval[MaxVal];
     valueStr(pval);
-    char keyname[2*MaxKey];
-    keyname[0] = '\0';
-    if (name != 0 && strlen(name) > 0) {
-      strcat(keyname, name);
-      strcat(keyname, "-");
-    }
-    strcat(keyname, key());
     Serial.printf("  set %s to %s\n", keyname, pval);
   }
+  else
+    Serial.printf("  %s is not a valid value for %s\n", val, keyname);
 }
 
 
@@ -151,5 +160,33 @@ float Parameter::changeUnit(float val, const char *oldunit,
   }
   
   return val * f1/f2;
+}
+
+
+BaseStringParameter::BaseStringParameter(Configurable *cfg, const char *key) :
+  Parameter(cfg, key),
+  Selection(0) {
+}
+
+
+void BaseStringParameter::setSelection(const char **selection, size_t n) {
+  NSelection = n;
+  Selection = selection;
+}
+
+
+int BaseStringParameter::checkSelection(const char *val) {
+  if (NSelection == 0)
+    return 0;
+  for (size_t k=0; k<NSelection; k++)
+    if (strcmp(Selection[k], val) == 0)
+      return k;
+  return -1;
+}
+
+
+void BaseStringParameter::listSelection(Stream &stream) const {
+  for (size_t k=0; k<NSelection; k++)
+    stream.printf("  - %s\n", Selection[k]);
 }
 

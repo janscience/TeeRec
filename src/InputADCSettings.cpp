@@ -2,6 +2,11 @@
 #include <InputADCSettings.h>
 
 
+const uint8_t InputADCSettings::BitsSelection[InputADCSettings::NBitsSelection] = {10, 12, 16};
+  
+const uint8_t InputADCSettings::AveragingSelection[InputADCSettings::NAveragingSelection] = {0, 4, 8, 16, 32};
+
+
 ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
 						   const char *key,
 						   ADC_CONVERSION_SPEED speed) :
@@ -10,8 +15,9 @@ ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
 }
 
 
-void ConversionSpeedParameter::parseValue(const char *val) {
+bool ConversionSpeedParameter::parseValue(const char *val) {
   Value = InputADC::conversionSpeedEnum(val);
+  return true;
 }
 
 
@@ -28,8 +34,9 @@ SamplingSpeedParameter::SamplingSpeedParameter(Configurable *cfg,
 }
 
 
-void SamplingSpeedParameter::parseValue(const char *val) {
+bool SamplingSpeedParameter::parseValue(const char *val) {
   Value = InputADC::samplingSpeedEnum(val);
+  return true;
 }
 
 
@@ -46,8 +53,9 @@ ReferenceParameter::ReferenceParameter(Configurable *cfg,
 }
 
 
-void ReferenceParameter::parseValue(const char *val) {
+bool ReferenceParameter::parseValue(const char *val) {
   Value = InputADC::referenceEnum(val);
+  return true;
 }
 
 
@@ -68,6 +76,8 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
   ConversionSpeed(this, "Conversion", conversion_speed),
   SamplingSpeed(this, "Sampling", sampling_speed),
   Reference(this, "Reference", reference) {
+  Bits.setSelection(BitsSelection, NBitsSelection);
+  Averaging.setSelection(AveragingSelection, NAveragingSelection);
 }
 
 
@@ -83,6 +93,8 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
   ConversionSpeed(this, "Conversion", conversion_speed),
   SamplingSpeed(this, "Sampling", sampling_speed),
   Reference(this, "Reference", reference) {
+  Bits.setSelection(BitsSelection, NBitsSelection);
+  Averaging.setSelection(AveragingSelection, NAveragingSelection);
 }
 
 

@@ -26,7 +26,7 @@ class ConversionSpeedParameter : public Parameter {
 			   ADC_CONVERSION_SPEED speed);
   
   /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -44,7 +44,7 @@ class SamplingSpeedParameter : public Parameter {
 			 ADC_SAMPLING_SPEED speed);
   
   /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -62,7 +62,7 @@ class ReferenceParameter : public Parameter {
 		     ADC_REFERENCE reference);
   
   /* Parse the string val and set the value of this parameter accordingly. */
-  virtual void parseValue(const char *val);
+  virtual bool parseValue(const char *val);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -161,6 +161,12 @@ protected:
   ConversionSpeedParameter ConversionSpeed;
   SamplingSpeedParameter SamplingSpeed;
   ReferenceParameter Reference;
+
+  static const size_t NBitsSelection = 3;
+  static const uint8_t BitsSelection[NBitsSelection];
+  
+  static const size_t NAveragingSelection = 5;
+  static const uint8_t AveragingSelection[NAveragingSelection];
 
 };
 

@@ -32,6 +32,9 @@ public:
   // Set sampling rate per channel in Hertz.
   void setRate(uint32_t rate);
 
+  // Provide a list of valid sampling rates in Hz.
+  void setRateSelection(uint32_t *selection, size_t n);
+
   // Return number of channels.
   // The number of channels is set from the configuration file
   // but needs to be passed manually to appropriate Control instances.
