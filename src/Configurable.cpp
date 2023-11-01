@@ -95,25 +95,20 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 	stream.println('\n');
 	return;
       }
-      char c = stream.read();
-      delay(2);
-      while (stream.available() > 0) {
-	stream.read();
-	delay(2);
+      stream.readBytesUntil('\n', pval, Parameter::MaxVal);
+      if (strlen(pval) == 0)
+	sprintf(pval, "%d", def+1);
+      stream.println(pval);
+      char *end;
+      long i = strtol(pval, &end, 10) - 1;
+      if (end != pval && i >= 0 && i < (long)n &&
+	  iparam[i] < NParams) {
+	def = i;
+	stream.println();
+	Params[iparam[i]]->configure(stream, timeout);
+	break;
       }
-      if (c == '\n')
-	c = '1' + def;
-      stream.println(c);
-      if (isdigit(c)) {
-	size_t i = int(c - '1');
-	if (iparam[i] < NParams) {
-	  def = i;
-	  stream.println();
-	  Params[iparam[i]]->configure(stream, timeout);
-	  break;
-	}
-      }
-      else if (c == 'q') {
+      else if (strcmp(pval, "q") == 0) {
 	stream.println();
 	return;
       }

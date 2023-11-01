@@ -68,6 +68,30 @@ class InputADC : public Input {
   
   static const size_t MaxChannels = 8;
 
+#if defined(ADC_TEENSY_4)
+  static const size_t MaxConversions = 5;
+#else
+  static const size_t MaxConversions = 10;
+#endif
+  static const char *ConversionShortStrings[MaxConversions];
+  static const ADC_CONVERSION_SPEED ConversionEnums[MaxConversions];
+
+#if defined(ADC_TEENSY_4)
+  static const size_t MaxSamplings = 8;
+#else
+  static const size_t MaxSamplings = 5;
+#endif
+  static const char *SamplingShortStrings[MaxSamplings];
+  static const ADC_SAMPLING_SPEED SamplingEnums[MaxSamplings];
+
+#if defined(ADC_TEENSY_4)
+  static const size_t MaxReferences = 1;
+#else
+  static const size_t MaxReferences = 3;
+#endif
+  static const char *ReferenceStrings[MaxReferences];
+  static const ADC_REFERENCE ReferenceEnums[MaxReferences];
+
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   // Use channel0 on ADC0 and channel1 on ADC (see setChannel()).

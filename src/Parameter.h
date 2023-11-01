@@ -18,8 +18,9 @@ class Parameter {
 
  public:
 
-  /* Initialize parameter with identifying key and add it to cfg. */
-  Parameter(Configurable *cfg, const char *key);
+  /* Initialize parameter with identifying key, n selections
+     and add it to cfg. */
+  Parameter(Configurable *cfg, const char *key, size_t n=0);
 
   /* The key identifying the parameter. */
   const char *key() const { return Key; }
@@ -96,6 +97,11 @@ class BaseStringParameter : public Parameter {
   
   /* Initialize parameter with identifying key and add to cfg. */
   BaseStringParameter(Configurable *cfg, const char *key);
+  
+  /* Initialize parameter with identifying key, list of n selections,
+     and add to cfg. */
+  BaseStringParameter(Configurable *cfg, const char *key,
+		      const char **selection, size_t n);
 
   /* Provide a selection of n input values. */
   void setSelection(const char **selection, size_t n);
@@ -123,8 +129,11 @@ class StringParameter : public BaseStringParameter {
   
  public:
   
-  /* Initialize parameter with identifying key, value and add to cfg. */
-  StringParameter(Configurable *cfg, const char *key, const char str[N]);
+  /* Initialize parameter with identifying key, value, list of n
+     selections and add to cfg. */
+  StringParameter(Configurable *cfg, const char *key,
+		  const char str[N],
+		  const char **selection=0, size_t n=0);
 
   /* Return the string. */
   const char* value() const { return Value; };
@@ -157,9 +166,11 @@ class StringPointerParameter : public BaseStringParameter {
 
  public:
   
-  /* Initialize parameter with identifying key, pointer str to value variable
-     and add to cfg. */
-  StringPointerParameter(Configurable *cfg, const char *key, char (*str)[N]);
+  /* Initialize parameter with identifying key, pointer str to value
+     variable, list of n selections, and add to cfg. */
+  StringPointerParameter(Configurable *cfg, const char *key,
+			 char (*str)[N], const char **selection=0,
+			 size_t n=0);
 
   /* Return the string. */
   const char* value() const { return *Value; };
@@ -206,7 +217,7 @@ class BaseEnumParameter : public BaseStringParameter {
   T checkSelection(const char *val);
 
   /* Return string representation of enum value. */
-  const char *enumStr(T val);
+  const char *enumStr(T val) const;
 
   
  protected:
@@ -300,7 +311,8 @@ class BaseNumberParameter : public Parameter {
      format string, and unit and add to cfg. */
   BaseNumberParameter(Configurable *cfg, const char *key,
 		      const char *format, const char *unit=0,
-		      const char *outunit=0);
+		      const char *outunit=0, const T *selection=0,
+		      size_t n=0);
 
   /* The format string for formatting a number. */
   const char *format() const { return Format; };
@@ -362,7 +374,8 @@ class NumberParameter : public BaseNumberParameter<T> {
      format string, and unit and add to cfg. */
   NumberParameter(Configurable *cfg, const char *key, T number,
 		  const char *format, const char *unit=0,
-		  const char *outunit=0);
+		  const char *outunit=0, const T *selection=0,
+		  size_t n=0);
 
   /* Return the value of the number in its unit(). */
   T value() const { return Value; };
@@ -406,7 +419,8 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
      format string, and unit and add to cfg. */
   NumberPointerParameter(Configurable *cfg, const char *key, T *number,
 			 const char *format, const char *unit=0,
-			 const char *outunit=0);
+			 const char *outunit=0, const T *selection=0,
+			 size_t n=0);
 
   /* Return the value of the number. */
   T value() const { return *Value; };
@@ -443,8 +457,9 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
 
 template<int N>
 StringParameter<N>::StringParameter(Configurable *cfg, const char *key,
-				    const char str[N]) :
-  BaseStringParameter(cfg, key) {
+				    const char str[N],
+				    const char **selection, size_t n) :
+  BaseStringParameter(cfg, key, selection, n) {
   strncpy(Value, str, N);
   Value[N-1] = '\0';
 }
@@ -455,10 +470,15 @@ bool StringParameter<N>::parseValue(char *val, bool selection) {
   if (disabled())
     return true;
   if (selection && NSelection > 0) {
-    int i = atoi(val) - 1;
-    if (i < 0 || i >= (int)NSelection)
-      return false;
+    if (strcmp(val, "q") == 0) {
+      strncpy(val, Value, MaxVal);
+      val[MaxVal-1] = '\0';
+    }
     else {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)NSelection)
+	return false;
       strncpy(Value, Selection[i], N);
       Value[N-1] = '\0';
       strncpy(val, Selection[i], MaxVal);
@@ -486,8 +506,10 @@ void StringParameter<N>::valueStr(char *str) const {
 template<int N>
 StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
 						  const char *key,
-						  char (*str)[N]) :
-  BaseStringParameter(cfg, key),
+						  char (*str)[N],
+						  const char **selection,
+						  size_t n) :
+  BaseStringParameter(cfg, key, selection, n),
   Value(str) {
 }
 
@@ -497,14 +519,21 @@ bool StringPointerParameter<N>::parseValue(char *val, bool selection) {
   if (disabled())
     return true;
   if (selection && NSelection > 0) {
-    int i = atoi(val) - 1;
-    if (i < 0 || i >= (int)NSelection)
-      return false;
-    else {
-      strncpy(*Value, Selection[i], N);
-      (*Value)[N-1] = '\0';
-      strncpy(val, Selection[i], MaxVal);
+    if (strcmp(val, "q") == 0) {
+      strncpy(val, *Value, MaxVal);
       val[MaxVal-1] = '\0';
+    }
+    else {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)NSelection)
+	return false;
+      else {
+	strncpy(*Value, Selection[i], N);
+	(*Value)[N-1] = '\0';
+	strncpy(val, Selection[i], MaxVal);
+	val[MaxVal-1] = '\0';
+      }
     }
   }
   else {
@@ -531,7 +560,7 @@ BaseEnumParameter<T>::BaseEnumParameter(Configurable *cfg,
 					const T *enums,
 					const char **selection,
 					size_t n) :
-  BaseStringParameter(cfg, key),
+  BaseStringParameter(cfg, key, selection, n),
   Enums(enums) {
 }
 
@@ -563,7 +592,7 @@ T BaseEnumParameter<T>::checkSelection(const char *val) {
 
 
 template<class T>
-const char *BaseEnumParameter<T>::enumStr(T val) {
+const char *BaseEnumParameter<T>::enumStr(T val) const {
   for (size_t j=0; j<this->NSelection; j++) {
     if (val == Enums[j])
       return Selection[j];
@@ -593,10 +622,13 @@ bool EnumParameter<T>::setValue(T val) {
 template<class T>
 bool EnumParameter<T>::parseValue(char *val, bool selection) {
   if (selection) {
-    int i = atoi(val) - 1;
-    if (i < 0 || i >= (int)(this->NSelection))
-      return false;
-    Value = this->Enums[i];
+    if (strcmp(val, "q") != 0) {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)(this->NSelection))
+	return false;
+      Value = this->Enums[i];
+    }
   }
   else {
     T eval = this->checkSelection(val);
@@ -605,7 +637,7 @@ bool EnumParameter<T>::parseValue(char *val, bool selection) {
     for (size_t k=0; k<strlen(val)+1; k++)
       lval[k] = tolower(val[k]);
     // lower case enum string:
-    const char *es = enumStr(eval);
+    const char *es = this->enumStr(eval);
     char les[strlen(es)+1];
     for (size_t k=0; k<strlen(es)+1; k++)
       les[k] = tolower(es[k]);
@@ -620,7 +652,7 @@ bool EnumParameter<T>::parseValue(char *val, bool selection) {
 
 template<class T>
 void EnumParameter<T>::valueStr(char *str) const {
-  const char *es = enumStr(Value);
+  const char *es = this->enumStr(Value);
   strncpy(str, es, Parameter::MaxVal);
   str[Parameter::MaxVal-1] = '\0';
 }
@@ -649,10 +681,13 @@ bool EnumPointerParameter<T>::setValue(T val) {
 template<class T>
 bool EnumPointerParameter<T>::parseValue(char *val, bool selection) {
   if (selection) {
-    int i = atoi(val) - 1;
-    if (i < 0 || i >= (int)(this->NSelection))
-      return false;
-    *Value = this->Enums[i];
+    if (strcmp(val, "q") != 0) {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)(this->NSelection))
+	return false;
+      *Value = this->Enums[i];
+    }
   }
   else {
     T eval = this->checkSelection(val);
@@ -686,12 +721,14 @@ template<class T>
 BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *key,
 					    const char *format,
 					    const char *unit,
-					    const char *outunit) :
-  Parameter(cfg, key),
+					    const char *outunit,
+					    const T *selection,
+					    size_t n) :
+  Parameter(cfg, key, n),
   Format(""),
   Unit(""),
   OutUnit(""),
-  Selection(0) {
+  Selection(selection) {
   setFormat(format);
   setUnit(unit);
   setOutUnit(outunit);
@@ -769,8 +806,11 @@ void BaseNumberParameter<T>::valueStr(T val, char *str) const {
 template<class T>
 NumberParameter<T>::NumberParameter(Configurable *cfg, const char *key,
 				    T number, const char *format,
-				    const char *unit, const char *outunit) :
-  BaseNumberParameter<T>(cfg, key, format, unit, outunit),
+				    const char *unit,
+				    const char *outunit,
+				    const T *selection, size_t n) :
+  BaseNumberParameter<T>(cfg, key, format, unit, outunit,
+			 selection, n),
   Value(number) {
 }
 
@@ -803,6 +843,10 @@ template<class T>
 bool NumberParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled())
     return true;
+  if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
+    valueStr(val);
+    return true;
+  }
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
@@ -833,8 +877,11 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable *cfg,
 						  T *number,
 						  const char *format,
 						  const char *unit,
-						  const char *outunit) :
-  BaseNumberParameter<T>(cfg, key, format, unit, outunit),
+						  const char *outunit,
+						  const T *selection,
+						  size_t n) :
+  BaseNumberParameter<T>(cfg, key, format, unit, outunit,
+			 selection, n),
   Value(number) {
 }
 
@@ -867,6 +914,10 @@ template<class T>
 bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled())
     return true;
+  if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
+    valueStr(val);
+    return true;
+  }
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||

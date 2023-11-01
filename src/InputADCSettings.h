@@ -17,60 +17,6 @@
 class InputADC;
 
 
-class ConversionSpeedParameter : public Parameter {
-  
- public:
-  
-  /* Initialize parameter and add to cfg. */
-  ConversionSpeedParameter(Configurable *cfg, const char *key,
-			   ADC_CONVERSION_SPEED speed);
-  
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual bool parseValue(char *val, bool selection=false);
-
-  /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str) const;
-
-  ADC_CONVERSION_SPEED Value;
-};
-
-
-class SamplingSpeedParameter : public Parameter {
-  
- public:
-  
-  /* Initialize parameter and add to cfg. */
-  SamplingSpeedParameter(Configurable *cfg, const char *key,
-			 ADC_SAMPLING_SPEED speed);
-  
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual bool parseValue(char *val, bool selection=false);
-
-  /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str) const;
-
-  ADC_SAMPLING_SPEED Value;  
-};
-
-
-class ReferenceParameter : public Parameter {
-  
- public:
-  
-  /* Initialize parameter and add to cfg. */
-  ReferenceParameter(Configurable *cfg, const char *key,
-		     ADC_REFERENCE reference);
-  
-  /* Parse the string val and set the value of this parameter accordingly. */
-  virtual bool parseValue(char *val, bool selection=false);
-
-  /* Return the current value of this parameter as a string. */
-  virtual void valueStr(char *str) const;
-  
-  ADC_REFERENCE Value;
-};
-
-
 class InputADCSettings : public Configurable {
 
 public:
@@ -120,7 +66,7 @@ public:
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // The conversion speed.
-  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed.Value; };
+  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed.value(); };
   
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
@@ -136,7 +82,7 @@ public:
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
   // The sampling speed.
-  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed.Value; };
+  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed.value(); };
 
   // Set the voltage preference.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
@@ -144,7 +90,7 @@ public:
   void setReference(ADC_REFERENCE ref);
 
   // The voltage reference.
-  ADC_REFERENCE reference() const { return Reference.Value; };
+  ADC_REFERENCE reference() const { return Reference.value(); };
 
   // Apply ADC settings on adc.
   void configure(InputADC *adc);
@@ -158,9 +104,9 @@ protected:
   NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> Bits;
   NumberParameter<uint8_t> Averaging;
-  ConversionSpeedParameter ConversionSpeed;
-  SamplingSpeedParameter SamplingSpeed;
-  ReferenceParameter Reference;
+  EnumParameter<ADC_CONVERSION_SPEED> ConversionSpeed;
+  EnumParameter<ADC_SAMPLING_SPEED> SamplingSpeed;
+  EnumParameter<ADC_REFERENCE> Reference;
 
   static const size_t NBitsSelection = 3;
   static const uint8_t BitsSelection[NBitsSelection];

@@ -17,7 +17,102 @@ InputADC *InputADC::ADCC = 0;
 
 DMASetting InputADC::DMASettings[2][NMajors];
 
+const char *InputADC::ConversionShortStrings[MaxConversions] = {
+#if defined(ADC_TEENSY_4)
+#else
+  "verylow",
+#endif
+  "low",
+  "med",
+  "high",
+#if defined(ADC_TEENSY_4)
+#else
+  "veryhigh",
+#endif
+#if defined(ADC_TEENSY_4)
+  "adack10",
+  "adack20"
+#else
+  "high16",
+  "adack24",
+  "adack40",
+  "adack52",
+  "adack62"
+#endif
+};
 
+
+const ADC_CONVERSION_SPEED InputADC::ConversionEnums[MaxConversions] = {
+#if defined(ADC_TEENSY_4)
+#else
+  ADC_CONVERSION_SPEED::VERY_LOW_SPEED,
+#endif
+  ADC_CONVERSION_SPEED::LOW_SPEED,
+  ADC_CONVERSION_SPEED::MED_SPEED,
+  ADC_CONVERSION_SPEED::HIGH_SPEED,
+#if defined(ADC_TEENSY_4)
+#else
+  ADC_CONVERSION_SPEED::VERY_HIGH_SPEED,
+#endif
+#if defined(ADC_TEENSY_4)
+  ADC_CONVERSION_SPEED::ADACK_10,
+  ADC_CONVERSION_SPEED::ADACK_20
+#else
+  ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS,
+  ADC_CONVERSION_SPEED::ADACK_2_4,
+  ADC_CONVERSION_SPEED::ADACK_4_0,
+  ADC_CONVERSION_SPEED::ADACK_5_2,
+  ADC_CONVERSION_SPEED::ADACK_6_2
+#endif
+};
+
+
+const char *InputADC::SamplingShortStrings[MaxSamplings] = {
+  "verylow",
+  "low",
+  "med",
+  "high",
+  "veryhigh",
+#if defined(ADC_TEENSY_4) // Teensy 4
+  "lowmed",
+  "medhigh",
+  "highveryhigh"
+#endif
+};
+
+
+const ADC_SAMPLING_SPEED InputADC::SamplingEnums[MaxSamplings] = {
+  ADC_SAMPLING_SPEED::VERY_LOW_SPEED,
+  ADC_SAMPLING_SPEED::LOW_SPEED,
+  ADC_SAMPLING_SPEED::MED_SPEED,
+  ADC_SAMPLING_SPEED::HIGH_SPEED,
+  ADC_SAMPLING_SPEED::VERY_HIGH_SPEED,
+#if defined(ADC_TEENSY_4) // Teensy 4
+  ADC_SAMPLING_SPEED::LOW_MED_SPEED,
+  ADC_SAMPLING_SPEED::MED_HIGH_SPEED,
+  ADC_SAMPLING_SPEED::HIGH_VERY_HIGH_SPEED
+#endif
+};
+
+
+const char *InputADC::ReferenceStrings[MaxReferences] = {
+  "3.3V",
+#ifndef TEENSY4
+  "1.2V",
+  "EXT"
+#endif
+};
+
+
+const ADC_REFERENCE InputADC::ReferenceEnums[MaxReferences] = {
+  ADC_REFERENCE::REF_3V3,
+#ifndef TEENSY4
+  ADC_REFERENCE::REF_1V2,
+  ADC_REFERENCE::REF_EXT
+#endif
+};
+
+  
 InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
 		   int8_t channel0, int8_t channel1) :
   Input(buffer, nbuffer, MajorSize) {
@@ -229,40 +324,9 @@ const char *InputADC::conversionSpeedStr() const {
 
 
 const char *InputADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) {
-  switch (speed) {
-#if defined(ADC_TEENSY_4)
-#else
-    case ADC_CONVERSION_SPEED::VERY_LOW_SPEED:
-      return (const char *)"verylow";
-#endif
-    case ADC_CONVERSION_SPEED::LOW_SPEED:
-      return (const char *)"low";
-    case ADC_CONVERSION_SPEED::MED_SPEED:
-      return (const char *)"med";
-    case ADC_CONVERSION_SPEED::HIGH_SPEED:
-      return (const char *)"high";
-#if defined(ADC_TEENSY_4)
-#else
-    case ADC_CONVERSION_SPEED::VERY_HIGH_SPEED:
-      return (const char *)"veryhigh";
-#endif
-#if defined(ADC_TEENSY_4)
-    case ADC_CONVERSION_SPEED::ADACK_10:
-      return (const char *)"adack10";
-    case ADC_CONVERSION_SPEED::ADACK_20:
-      return (const char *)"adack20";
-#else
-    case ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS:
-      return (const char *)"high16";
-    case ADC_CONVERSION_SPEED::ADACK_2_4:
-      return (const char *)"adack24";
-    case ADC_CONVERSION_SPEED::ADACK_4_0:
-      return (const char *)"adack40";
-    case ADC_CONVERSION_SPEED::ADACK_5_2:
-      return (const char *)"adack52";
-    case ADC_CONVERSION_SPEED::ADACK_6_2:
-      return (const char *)"adack62";
-#endif
+  for (size_t j=0; j<MaxConversions; j++) {
+    if (ConversionEnums[j] == speed)
+      return ConversionShortStrings[j];
   }
   return (const char *)"none";
 }
@@ -277,38 +341,11 @@ ADC_CONVERSION_SPEED InputADC::conversionSpeedEnum(const char *conversion) {
   char str[strlen(conversion)+1];
   for (size_t k=0; k<strlen(conversion)+1; k++)
     str[k] = tolower(conversion[k]);
-  if (strcmp(str, "low") == 0)
-    return ADC_CONVERSION_SPEED::LOW_SPEED;
-  else if (strcmp(str, "med") == 0)
-    return ADC_CONVERSION_SPEED::MED_SPEED;
-  else if (strcmp(str, "high") == 0)
-    return ADC_CONVERSION_SPEED::HIGH_SPEED;
-#if defined(ADC_TEENSY_4)
-#else
-  else if (strcmp(str, "verylow") == 0)
-    return ADC_CONVERSION_SPEED::VERY_LOW_SPEED;
-  else if (strcmp(str, "veryhigh") == 0)
-    return ADC_CONVERSION_SPEED::VERY_HIGH_SPEED;
-#endif
-#if defined(ADC_TEENSY_4)
-  else if (strcmp(str, "adack10") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_10;
-  else if (strcmp(str, "adack20") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_20;
-#else
-  else if (strcmp(str, "high16") == 0)
-    return ADC_CONVERSION_SPEED::HIGH_SPEED_16BITS;
-  else if (strcmp(str, "adack24") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_2_4;
-  else if (strcmp(str, "adack40") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_4_0;
-  else if (strcmp(str, "adack52") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_5_2;
-  else if (strcmp(str, "adack62") == 0)
-    return ADC_CONVERSION_SPEED::ADACK_6_2;
-#endif
-  else
-    return ADC_CONVERSION_SPEED::HIGH_SPEED;
+  for (size_t j=0; j<MaxConversions; j++) {
+    if (strcmp(str, ConversionShortStrings[j]) == 0)
+      return ConversionEnums[j];
+  }
+  return ADC_CONVERSION_SPEED::HIGH_SPEED;
 }
 
 
@@ -328,25 +365,9 @@ const char *InputADC::samplingSpeedStr() const {
 
 
 const char *InputADC::samplingSpeedShortStr(ADC_SAMPLING_SPEED speed) {
-  switch (speed) {
-  case ADC_SAMPLING_SPEED::VERY_LOW_SPEED:
-    return (const char *)"verylow";
-  case ADC_SAMPLING_SPEED::LOW_SPEED:
-    return (const char *)"low";
-  case ADC_SAMPLING_SPEED::MED_SPEED:
-    return (const char *)"med";
-  case ADC_SAMPLING_SPEED::HIGH_SPEED:
-    return (const char *)"high";
-  case ADC_SAMPLING_SPEED::VERY_HIGH_SPEED:
-    return (const char *)"veryhigh";
-#if defined(ADC_TEENSY_4) // Teensy 4
-  case ADC_SAMPLING_SPEED::LOW_MED_SPEED:
-    return (const char *)"lowmed";
-  case ADC_SAMPLING_SPEED::MED_HIGH_SPEED:
-    return (const char *)"medhigh";
-  case ADC_SAMPLING_SPEED::HIGH_VERY_HIGH_SPEED:
-    return (const char *)"highveryhigh";
-#endif
+  for (size_t j=0; j<MaxSamplings; j++) {
+    if (speed == SamplingEnums[j])
+      return SamplingShortStrings[j];
   }
   return (const char *)"NONE";
 }
@@ -361,26 +382,11 @@ ADC_SAMPLING_SPEED InputADC::samplingSpeedEnum(const char *sampling) {
   char str[strlen(sampling)+1];
   for (size_t k=0; k<strlen(sampling)+1; k++)
     str[k] = tolower(sampling[k]);
-  if (strcmp(str, "verylow") == 0)
-    return ADC_SAMPLING_SPEED::VERY_LOW_SPEED;
-  else if (strcmp(str, "low") == 0)
-    return ADC_SAMPLING_SPEED::LOW_SPEED;
-  else if (strcmp(str, "med") == 0)
-    return ADC_SAMPLING_SPEED::MED_SPEED;
-  else if (strcmp(str, "high") == 0)
-    return ADC_SAMPLING_SPEED::HIGH_SPEED;
-  else if (strcmp(str, "veryhigh") == 0)
-    return ADC_SAMPLING_SPEED::VERY_HIGH_SPEED;
-#if defined(ADC_TEENSY_4) // Teensy 4
-  else if (strcmp(str, "lowmed") == 0)
-    return ADC_SAMPLING_SPEED::LOW_MED_SPEED;
-  else if (strcmp(str, "medhigh") == 0)
-    return ADC_SAMPLING_SPEED::MED_HIGH_SPEED;
-  else if (strcmp(str, "highveryhigh") == 0)
-    return ADC_SAMPLING_SPEED::HIGH_VERY_HIGH_SPEED;
-#endif
-  else
-    return ADC_SAMPLING_SPEED::HIGH_SPEED;
+  for (size_t j=0; j<MaxSamplings; j++) {
+    if (strcmp(str, SamplingShortStrings[j]) == 0)
+      return SamplingEnums[j];
+  }
+  return ADC_SAMPLING_SPEED::HIGH_SPEED;
 }
 
 
@@ -390,16 +396,11 @@ void InputADC::setReference(ADC_REFERENCE ref) {
 
 
 const char *InputADC::referenceStr(ADC_REFERENCE ref) {
-  if (ref == ADC_REFERENCE::REF_3V3)
-    return (const char *)"3.3V";
-#ifndef TEENSY4
-  else if (ref == ADC_REFERENCE::REF_1V2)
-    return (const char *)"1.2V";
-  else if (ref == ADC_REFERENCE::REF_EXT)
-    return (const char *)"EXT";
-#endif
-  else
-    return (const char *)"NONE";
+  for (size_t j=0; j<MaxReferences; j++) {
+    if (ref == ReferenceEnums[j])
+      return ReferenceStrings[j];
+  }
+  return (const char *)"NONE";
 }
 
 
@@ -411,17 +412,12 @@ const char *InputADC::referenceStr() const {
 ADC_REFERENCE InputADC::referenceEnum(const char *reference) {
   char str[strlen(reference)+1];
   for (size_t k=0; k<strlen(reference)+1; k++)
-    str[k] = tolower(reference[k]);
-  if (strcmp(str, "3.3V") == 0)
-    return ADC_REFERENCE::REF_3V3;
-#ifndef TEENSY4
-  else if (strcmp(str, "1.2V") == 0)
-    return ADC_REFERENCE::REF_1V2;
-  else if (strcmp(str, "EXT") == 0)
-    return ADC_REFERENCE::REF_EXT;
-#endif
-  else
-    return ADC_REFERENCE::REF_3V3;
+    str[k] = toupper(reference[k]);
+  for (size_t j=0; j<MaxReferences; j++) {
+    if (strcmp(str, ReferenceStrings[j]) == 0)
+      return ReferenceEnums[j];
+  }
+  return ADC_REFERENCE::REF_3V3;
 }
 
 

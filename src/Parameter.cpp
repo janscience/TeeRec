@@ -3,9 +3,9 @@
 #include <Parameter.h>
 
 
-Parameter::Parameter(Configurable *cfg, const char *key) :
+Parameter::Parameter(Configurable *cfg, const char *key, size_t n) :
   Enabled(true),
-  NSelection(0) {
+  NSelection(n) {
   setKey(key);
   if (cfg != 0)
     cfg->add(this);
@@ -172,6 +172,15 @@ float Parameter::changeUnit(float val, const char *oldunit,
 BaseStringParameter::BaseStringParameter(Configurable *cfg, const char *key) :
   Parameter(cfg, key),
   Selection(0) {
+}
+
+
+BaseStringParameter::BaseStringParameter(Configurable *cfg,
+					 const char *key,
+					 const char **selection,
+					 size_t n) :
+  Parameter(cfg, key, n),
+  Selection(selection) {
 }
 
 

@@ -7,63 +7,6 @@ const uint8_t InputADCSettings::BitsSelection[InputADCSettings::NBitsSelection] 
 const uint8_t InputADCSettings::AveragingSelection[InputADCSettings::NAveragingSelection] = {0, 4, 8, 16, 32};
 
 
-ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
-						   const char *key,
-						   ADC_CONVERSION_SPEED speed) :
-  Parameter(cfg, "Conversion"),
-  Value(speed) {
-}
-
-
-bool ConversionSpeedParameter::parseValue(char *val, bool selection) {
-  Value = InputADC::conversionSpeedEnum(val);
-  return true;
-}
-
-
-void ConversionSpeedParameter::valueStr(char *str) const {
-  strcpy(str, InputADC::conversionSpeedStr(Value));
-}
-
-
-SamplingSpeedParameter::SamplingSpeedParameter(Configurable *cfg,
-					       const char *key,
-					       ADC_SAMPLING_SPEED speed) :
-  Parameter(cfg, "Sampling"),
-  Value(speed) {
-}
-
-
-bool SamplingSpeedParameter::parseValue(char *val, bool selection) {
-  Value = InputADC::samplingSpeedEnum(val);
-  return true;
-}
-
-
-void SamplingSpeedParameter::valueStr(char *str) const {
-  strcpy(str, InputADC::samplingSpeedStr(Value));
-}
-
-
-ReferenceParameter::ReferenceParameter(Configurable *cfg,
-				       const char *key,
-				       ADC_REFERENCE reference) :
-  Parameter(cfg, "Reference"),
-  Value(reference) {
-}
-
-
-bool ReferenceParameter::parseValue(char *val, bool selection) {
-  Value = InputADC::referenceEnum(val);
-  return true;
-}
-
-
-void ReferenceParameter::valueStr(char *str) const {
-  strcpy(str, InputADC::referenceStr(Value));
-}
-
-
 InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   uint8_t averaging,
 				   ADC_CONVERSION_SPEED conversion_speed,
@@ -71,13 +14,22 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   ADC_REFERENCE reference) :
   Configurable("ADC"),
   Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
-  Bits(this, "Resolution", bits, "%.0f", "bits"),
-  Averaging(this, "Averaging", averaging, "%hu"),
-  ConversionSpeed(this, "Conversion", conversion_speed),
-  SamplingSpeed(this, "Sampling", sampling_speed),
-  Reference(this, "Reference", reference) {
-  Bits.setSelection(BitsSelection, NBitsSelection);
-  Averaging.setSelection(AveragingSelection, NAveragingSelection);
+  Bits(this, "Resolution", bits, "%.0f", "bits", "",
+       BitsSelection, NBitsSelection),
+  Averaging(this, "Averaging", averaging, "%hu", "", "",
+	    AveragingSelection, NAveragingSelection),
+  ConversionSpeed(this, "Conversion", conversion_speed,
+		  InputADC::ConversionEnums,
+		  InputADC::ConversionShortStrings,
+		  InputADC::MaxConversions),
+  SamplingSpeed(this, "Sampling", sampling_speed,
+		InputADC::SamplingEnums,
+		InputADC::SamplingShortStrings,
+		InputADC::MaxSamplings),
+  Reference(this, "Reference", reference,
+	    InputADC::ReferenceEnums,
+	    InputADC::ReferenceStrings,
+	    InputADC::MaxReferences) {
 }
 
 
@@ -88,13 +40,22 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 				   ADC_REFERENCE reference) :
   Configurable(name),
   Rate(this, "SamplingRate", rate, "%.1f", "Hz", "kHz"),
-  Bits(this, "Resolution", bits, "%.0f", "bits"),
-  Averaging(this, "Averaging", averaging, "%hu"),
-  ConversionSpeed(this, "Conversion", conversion_speed),
-  SamplingSpeed(this, "Sampling", sampling_speed),
-  Reference(this, "Reference", reference) {
-  Bits.setSelection(BitsSelection, NBitsSelection);
-  Averaging.setSelection(AveragingSelection, NAveragingSelection);
+  Bits(this, "Resolution", bits, "%.0f", "bits", "",
+       BitsSelection, NBitsSelection),
+  Averaging(this, "Averaging", averaging, "%hu", "", "",
+	    AveragingSelection, NAveragingSelection),
+  ConversionSpeed(this, "Conversion", conversion_speed,
+		  InputADC::ConversionEnums,
+		  InputADC::ConversionShortStrings,
+		  InputADC::MaxConversions),
+  SamplingSpeed(this, "Sampling", sampling_speed,
+		InputADC::SamplingEnums,
+		InputADC::SamplingShortStrings,
+		InputADC::MaxSamplings),
+  Reference(this, "Reference", reference,
+	    InputADC::ReferenceEnums,
+	    InputADC::ReferenceStrings,
+	    InputADC::MaxReferences) {
 }
 
 
@@ -114,17 +75,17 @@ void InputADCSettings::setAveraging(uint8_t num) {
 
 
 void InputADCSettings::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
-  ConversionSpeed.Value = speed;
+  ConversionSpeed.setValue(speed);
 }
 
 
 void InputADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
-  SamplingSpeed.Value = speed;
+  SamplingSpeed.setValue(speed);
 }
 
 
 void InputADCSettings::setReference(ADC_REFERENCE ref) {
-  Reference.Value = ref;
+  Reference.setValue(ref);
 }
 
 
