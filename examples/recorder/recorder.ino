@@ -89,7 +89,7 @@ PushButtons buttons;
 
 bool openNextFile() {
   time_t t = now();
-  String name = rtclock.makeStr(settings.FileName, t, true);
+  String name = rtclock.makeStr(settings.fileName(), t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -122,9 +122,9 @@ bool openNextFile() {
 
 void setupStorage() {
   if (file.available())
-    file.sdcard()->dataDir(settings.Path);
+    file.sdcard()->dataDir(settings.path());
   file.setWriteInterval();
-  file.setMaxFileTime(settings.FileTime);
+  file.setMaxFileTime(settings.fileTime());
 }
 
 
@@ -140,7 +140,7 @@ void startWrite(int id) {
 
 void stopWrite(int id) {
   // on button release:
-  file.setMaxFileTime(settings.FileTime);
+  file.setMaxFileTime(settings.fileTime());
 }
 
 
@@ -179,7 +179,7 @@ void plotData() {   // 85ms
     }
     screen.clearPlots();   // 16ms
     file.write();
-    size_t n = aidata.frames(settings.DisplayTime);
+    size_t n = aidata.frames(settings.displayTime());
     float data[n];
     size_t start = aidata.currentSample(n);
     for (int k=0; k<aidata.nchannels(); k++) {
@@ -241,9 +241,14 @@ void setup() {
   prevname = "";
   setupButtons();
   sdcard.begin();
-  config.setConfigFile("recorder.cfg");
+  settings.disable("InitialDelay");
+  settings.disable("SensorsInterval");
+  config.setConfigFile("teerec.cfg");
   config.configure(sdcard);
-  setupTestSignals(signalPins, settings.PulseFrequency);
+  if (Serial)
+    config.configure(Serial);
+  config.report();
+  setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
   aidata.check();
   initScreen(screen);

@@ -70,7 +70,7 @@ void setupAudio() {
 
 String makeFileName() {
   time_t t = now();
-  String name = rtclock.makeStr(settings.FileName, t, true);
+  String name = rtclock.makeStr(settings.fileName(), t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -138,12 +138,12 @@ void setupButtons() {
 
 void setupStorage() {
   prevname = "";
-  if (settings.FileTime > 30)
+  if (settings.fileTime() > 30)
     blink.setTiming(5000);
-  if (file.sdcard()->dataDir(settings.Path))
-    Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.Path);
+  if (file.sdcard()->dataDir(settings.path()))
+    Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.path());
   file.setWriteInterval();
-  file.setMaxFileTime(settings.FileTime);
+  file.setMaxFileTime(settings.fileTime());
   file.header().setSoftware("TeeRec audiorecorder");
 }
 
@@ -177,7 +177,7 @@ void storeData() {
       if (samples == -3) {
         aidata.stop();
         file.closeWave();
-        char mfs[20];
+        char mfs[30];
         sprintf(mfs, "error%d-%d.msg", restarts+1, -samples);
         File mf = sdcard.openWrite(mfs);
         mf.close();
@@ -197,8 +197,14 @@ void setup() {
   rtclock.report();
   setupButtons();
   sdcard.begin();
+  settings.disable("InitialDelay");
+  settings.disable("DisplayTime");
+  settings.disable("SensorsInterval");
   config.setConfigFile("teerec.cfg");
   config.configure(sdcard);
+  if (Serial)
+    config.configure(Serial);
+  config.report();
   setupStorage();
   aisettings.configure(&aidata);
   aidata.check();

@@ -85,14 +85,14 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
+Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
+                  0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
 #elif defined(PCM186X)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
-Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
-                  0.0, INITIAL_DELAY);
 RTClock rtclock;
 String prevname; // previous file name
 Blink blink(LED_BUILTIN);
@@ -242,8 +242,13 @@ void setup() {
   sdcard.begin();
   rtclock.setFromFile(sdcard);
   rtclock.report();
+  settings.disable("DisplayTime");
+  settings.disable("SensorsInterval");
   config.setConfigFile("logger.cfg");
   config.configure(sdcard);
+  if (Serial)
+    config.configure(Serial);
+  config.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
 #if defined(PCM186X)
