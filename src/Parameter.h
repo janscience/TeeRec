@@ -214,14 +214,18 @@ class BaseNumberParameter : public Parameter {
   /* Provide a selection of n input values. */
   void setSelection(const T *selection, size_t n);
 
-  /* Check whether val matches a string of the selection. Return
-     index of matching selection, 0 when there is no selection, and -1
-     if no match was found. */
+  /* Check whether val matches a selection.
+     Return index of matching selection, 0 when there is no selection,
+     and -1 if no match was found. */
   int checkSelection(T val);
 
   /* List selection of valid values. */
   virtual void listSelection(Stream &stream) const;
-  
+
+  /* Return for val a properly formatted string of maximum size MaxVal
+     with outUnit appended. */
+  virtual void valueStr(T val, char *str) const;
+
   
  protected:
 
@@ -267,6 +271,10 @@ class NumberParameter : public BaseNumberParameter<T> {
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
   
+  /* Return for val a properly formatted string of maximum size MaxVal
+     with outUnit appended. */
+  virtual void valueStr(T val, char *str) const { BaseNumberParameter<T>::valueStr(val, str); };
+  
   
  protected:
 
@@ -304,6 +312,10 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
 
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
+  
+  /* Return for val a properly formatted string of maximum size MaxVal
+     with outUnit appended. */
+  virtual void valueStr(T val, char *str) const { BaseNumberParameter<T>::valueStr(val, str); };
   
   
  protected:
@@ -436,17 +448,22 @@ template<class T>
 void BaseNumberParameter<T>::listSelection(Stream &stream) const {
   for (size_t k=0; k<NSelection; k++) {
     char str[MaxVal];
-    if (this->Unit != NULL && strlen(this->Unit) > 0) {
-      float val = this->changeUnit((float)Selection[k],
-				   this->Unit, this->OutUnit);
-      sprintf(str, this->Format, val);
-      if (this->OutUnit != 0)
-	strcat(str, this->OutUnit);
-    }
-    else
-      sprintf(str, this->Format, Selection[k]);
+    valueStr(Selection[k], str);
     stream.printf("  - %s\n", str);
   }
+}
+
+
+template<class T>
+void BaseNumberParameter<T>::valueStr(T val, char *str) const {
+  if (this->Unit != NULL && strlen(this->Unit) > 0) {
+    float value = this->changeUnit((float)val, this->Unit, this->OutUnit);
+    sprintf(str, this->Format, value);
+    if (this->OutUnit != 0)
+      strcat(str, this->OutUnit);
+  }
+  else
+    sprintf(str, this->Format, val);
 }
 
 
@@ -507,14 +524,7 @@ bool NumberParameter<T>::parseValue(const char *val) {
 
 template<class T>
 void NumberParameter<T>::valueStr(char *str) const {
-  if (this->Unit != NULL && strlen(this->Unit) > 0) {
-    float val = this->changeUnit((float)Value, this->Unit, this->OutUnit);
-    sprintf(str, this->Format, val);
-    if (this->OutUnit != 0)
-      strcat(str, this->OutUnit);
-  }
-  else
-    sprintf(str, this->Format, Value);
+  valueStr(Value, str);
 }
 
 
@@ -578,14 +588,7 @@ bool NumberPointerParameter<T>::parseValue(const char *val) {
 
 template<class T>
 void NumberPointerParameter<T>::valueStr(char *str) const {
-  if (this->Unit != NULL && strlen(this->Unit) > 0) {
-    float val = this->changeUnit((float)(*Value), this->Unit, this->OutUnit);
-    sprintf(str, this->Format, val);
-    if (this->OutUnit != 0)
-      strcat(str, this->OutUnit);
-  }
-  else
-    sprintf(str, this->Format, *Value);
+  valueStr(*Value, str);
 }
 
 
