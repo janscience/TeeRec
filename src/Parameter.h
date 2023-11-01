@@ -186,6 +186,112 @@ class StringPointerParameter : public BaseStringParameter {
 
 
 template<class T>
+class BaseEnumParameter : public BaseStringParameter {
+
+  /* Parameter with enum as value. */
+  
+ public:
+  
+  /* Initialize parameter with identifying key, list of n enum values
+     and coresponding string representations, and add to cfg. */
+  BaseEnumParameter(Configurable *cfg, const char *key,
+		    const T *enums, const char **selection, size_t n);
+
+  /* Provide a selection of n enums with corresponding string
+     representations. */
+  void setSelection(const T *enums, const char **selection, size_t n);
+
+  /* Check whether val matches a string of the selection. Return
+     corresponding enum alue. */
+  T checkSelection(const char *val);
+
+  /* Return string representation of enum value. */
+  const char *enumStr(T val);
+
+  
+ protected:
+
+  const T *Enums;
+  
+};
+
+
+template<class T>
+class EnumParameter : public BaseEnumParameter<T> {
+
+  /* Parameter owning an enum . */
+  
+ public:
+  
+  /* Initialize parameter with identifying key, value, list of n enum
+     values and coresponding string representations, and add to
+     cfg. */
+  EnumParameter(Configurable *cfg, const char *key, T val,
+		const T *enums, const char **selection, size_t n);
+
+  /* Return the enum value. */
+  T value() const { return Value; };
+
+  /* Set the enum to val.
+     Return false if the parameter was disabled. */
+  bool setValue(T val);
+  
+  /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(char *val, bool selection=false);
+
+  /* Return the current value of this parameter as a string. */
+  virtual void valueStr(char *str) const;
+
+  
+ protected:
+
+  T Value;
+  
+};
+
+
+template<class T>
+class EnumPointerParameter : public BaseEnumParameter<T> {
+
+  /* Parameter with a pointer to an enum . */
+  
+ public:
+  
+  /* Initialize parameter with identifying key, value, list of n enum
+     values and coresponding string representations, and add to
+     cfg. */
+  EnumPointerParameter(Configurable *cfg, const char *key, T *val,
+		       const T *enums, const char **selection,
+		       size_t n);
+
+  /* Return the enum value. */
+  T value() const { return *Value; };
+
+  /* Set the enum to val.
+     Return false if the parameter was disabled. */
+  bool setValue(T val);
+  
+  /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
+     Return true if val was a valid string or the parameter was disabled. */
+  virtual bool parseValue(char *val, bool selection=false);
+
+  /* Return the current value of this parameter as a string. */
+  virtual void valueStr(char *str) const;
+
+  
+ protected:
+
+  T *Value;
+  
+};
+
+
+template<class T>
 class BaseNumberParameter : public Parameter {
   
  public:
@@ -416,6 +522,163 @@ void StringPointerParameter<N>::valueStr(char *str) const {
   int n = MaxVal < N ? MaxVal : N;
   strncpy(str, *Value, n);
   str[n-1] = '\0';
+}
+
+
+template<class T>
+BaseEnumParameter<T>::BaseEnumParameter(Configurable *cfg,
+					const char *key,
+					const T *enums,
+					const char **selection,
+					size_t n) :
+  BaseStringParameter(cfg, key),
+  Enums(enums) {
+}
+
+
+template<class T>
+void BaseEnumParameter<T>::setSelection(const T *enums,
+					const char **selection,
+					size_t n) {
+  NSelection = n;
+  Selection = selection;
+  Enums = enums;
+}
+
+
+template<class T>
+T BaseEnumParameter<T>::checkSelection(const char *val) {
+  char lval[strlen(val)+1];
+  for (size_t k=0; k<strlen(val)+1; k++)
+    lval[k] = tolower(val[k]);
+  for (size_t j=0; j<NSelection; j++) {
+    char cval[strlen(Selection[j])+1];
+    for (size_t k=0; k<strlen(Selection[j])+1; k++)
+      cval[k] = tolower(Selection[j][k]);
+    if (strcmp(cval, lval) == 0)
+      return Enums[j];
+  }
+  return Enums[0];
+}
+
+
+template<class T>
+const char *BaseEnumParameter<T>::enumStr(T val) {
+  for (size_t j=0; j<this->NSelection; j++) {
+    if (val == Enums[j])
+      return Selection[j];
+  }
+  return Selection[0];
+}
+
+
+template<class T>
+EnumParameter<T>::EnumParameter(Configurable *cfg, const char *key,
+				T val, const T *enums,
+				const char **selection, size_t n) :
+  BaseEnumParameter<T>(cfg, key, enums, selection, n),
+  Value(val) {
+}
+
+
+template<class T>
+bool EnumParameter<T>::setValue(T val) {
+  if (this->disabled())
+    return false;
+  Value = val;
+  return true;
+}
+
+  
+template<class T>
+bool EnumParameter<T>::parseValue(char *val, bool selection) {
+  if (selection) {
+    int i = atoi(val) - 1;
+    if (i < 0 || i >= (int)(this->NSelection))
+      return false;
+    Value = this->Enums[i];
+  }
+  else {
+    T eval = this->checkSelection(val);
+    // lower case input string:
+    char lval[strlen(val)+1];
+    for (size_t k=0; k<strlen(val)+1; k++)
+      lval[k] = tolower(val[k]);
+    // lower case enum string:
+    const char *es = enumStr(eval);
+    char les[strlen(es)+1];
+    for (size_t k=0; k<strlen(es)+1; k++)
+      les[k] = tolower(es[k]);
+    if (strcmp(lval, les) != 0)
+      return false;
+    Value = eval;
+  }
+  valueStr(val);
+  return true;
+}
+
+
+template<class T>
+void EnumParameter<T>::valueStr(char *str) const {
+  const char *es = enumStr(Value);
+  strncpy(str, es, Parameter::MaxVal);
+  str[Parameter::MaxVal-1] = '\0';
+}
+
+
+template<class T>
+EnumPointerParameter<T>::EnumPointerParameter(Configurable *cfg,
+					      const char *key,
+					      T *val, const T *enums,
+					      const char **selection,
+					      size_t n) :
+  BaseEnumParameter<T>(cfg, key, enums, selection, n),
+  Value(val) {
+}
+
+
+template<class T>
+bool EnumPointerParameter<T>::setValue(T val) {
+  if (this->disabled())
+    return false;
+  *Value = val;
+  return true;
+}
+
+  
+template<class T>
+bool EnumPointerParameter<T>::parseValue(char *val, bool selection) {
+  if (selection) {
+    int i = atoi(val) - 1;
+    if (i < 0 || i >= (int)(this->NSelection))
+      return false;
+    *Value = this->Enums[i];
+  }
+  else {
+    T eval = this->checkSelection(val);
+    // lower case input string:
+    char lval[strlen(val)+1];
+    for (size_t k=0; k<strlen(val)+1; k++)
+      lval[k] = tolower(val[k]);
+    // lower case enum string:
+    const char *es = enumStr(eval);
+    char les[strlen(es)+1];
+    for (size_t k=0; k<strlen(es)+1; k++)
+      les[k] = tolower(es[k]);
+    if (strcmp(lval, les) != 0)
+      return false;
+    *Value = eval;
+  }
+  valueStr(val);
+  return true;
+}
+
+
+template<class T>
+void EnumPointerParameter<T>::valueStr(char *str) const {
+  const char *es = enumStr(*Value);
+  strncpy(str, es, Parameter::MaxVal);
+  str[Parameter::MaxVal-1] = '\0';
 }
 
 
