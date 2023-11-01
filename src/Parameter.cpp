@@ -32,23 +32,27 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
   if (disabled())
     return;
   int w = strlen(key());
-  if (w < 15)
-    w = 15;
+  if (w < 16)
+    w = 16;
   char pval[MaxVal];
   valueStr(pval);
   stream.printf("%-*s: %s\n", w, key(), pval);
+  listSelection(stream);
   while (true) {
-    stream.printf("%-*s: ", w, "enter new value");
+    if (NSelection > 0)
+      stream.printf("%-*s: ", w, "select new value");
+    else
+      stream.printf("%-*s: ", w, "enter new value");
     elapsedMillis time = 0;
     while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
       yield();
     }
     stream.readBytesUntil('\n', pval, MaxVal);
-    stream.println(pval);
-    if (strcmp(pval, "l") == 0 && NSelection > 0)
-      listSelection(stream);
-    else if (parseValue(pval))
+    if (parseValue(pval, NSelection > 0)) {
+      stream.println(pval);
       break;
+    }
+    stream.println(pval);
   }
   stream.println();
 }
@@ -64,8 +68,10 @@ void Parameter::configure(const char *val, const char *name) {
     strcat(keyname, "-");
   }
   strcat(keyname, key());
-  if (parseValue(val)) {
-    char pval[MaxVal];
+  char pval[MaxVal];
+  strncpy(pval, val, MaxVal);
+  pval[MaxVal-1] = '\0';
+  if (parseValue(pval, false)) {
     valueStr(pval);
     Serial.printf("  set %s to %s\n", keyname, pval);
   }
@@ -187,6 +193,6 @@ int BaseStringParameter::checkSelection(const char *val) {
 
 void BaseStringParameter::listSelection(Stream &stream) const {
   for (size_t k=0; k<NSelection; k++)
-    stream.printf("  - %s\n", Selection[k]);
+    stream.printf("  - %d) %s\n", k+1, Selection[k]);
 }
 

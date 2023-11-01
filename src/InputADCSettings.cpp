@@ -15,7 +15,7 @@ ConversionSpeedParameter::ConversionSpeedParameter(Configurable *cfg,
 }
 
 
-bool ConversionSpeedParameter::parseValue(const char *val) {
+bool ConversionSpeedParameter::parseValue(char *val, bool selection) {
   Value = InputADC::conversionSpeedEnum(val);
   return true;
 }
@@ -34,7 +34,7 @@ SamplingSpeedParameter::SamplingSpeedParameter(Configurable *cfg,
 }
 
 
-bool SamplingSpeedParameter::parseValue(const char *val) {
+bool SamplingSpeedParameter::parseValue(char *val, bool selection) {
   Value = InputADC::samplingSpeedEnum(val);
   return true;
 }
@@ -53,7 +53,7 @@ ReferenceParameter::ReferenceParameter(Configurable *cfg,
 }
 
 
-bool ReferenceParameter::parseValue(const char *val) {
+bool ReferenceParameter::parseValue(char *val, bool selection) {
   Value = InputADC::referenceEnum(val);
   return true;
 }

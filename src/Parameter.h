@@ -40,8 +40,10 @@ class Parameter {
   void disable();
 
   /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
      Return true if val was a valid string or the parameter was disabled. */
-  virtual bool parseValue(const char *val) = 0;
+  virtual bool parseValue(char *val, bool selection=false) = 0;
 
   /* Return the current value of this parameter as a string of maximum
      size MaxVal. */
@@ -129,11 +131,13 @@ class StringParameter : public BaseStringParameter {
 
   /* Set the string to val.
      Return true if val was a valid string or the parameter was disabled. */
-  bool setValue(const char *val) { return parseValue(val); };
+  bool setValue(char *val) { return parseValue(val, false); };
   
   /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
      Return true if val was a valid string or the parameter was disabled. */
-  virtual bool parseValue(const char *val);
+  virtual bool parseValue(char *val, bool selection=false);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -162,11 +166,13 @@ class StringPointerParameter : public BaseStringParameter {
 
   /* Set the string to val.
      Return true if val was a valid string or the parameter was disabled. */
-  bool setValue(const char *val) { return parseValue(val); };
+  bool setValue(char *val) { return parseValue(val, false); };
   
   /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
      Return true if val was a valid string or the parameter was disabled. */
-  virtual bool parseValue(const char *val);
+  virtual bool parseValue(char *val, bool selection=false);
 
   /* Return the current value of this parameter as a string. */
   virtual void valueStr(char *str) const;
@@ -265,8 +271,10 @@ class NumberParameter : public BaseNumberParameter<T> {
   void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
      Return true if val was a valid string or the parameter was disabled. */
-  virtual bool parseValue(const char *val);
+  virtual bool parseValue(char *val, bool selection=false);
 
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
@@ -307,8 +315,10 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly.
+     If selection, then val is the input in response to an offered
+     selection (i.e. it might be an index to the selection).
      Return true if val was a valid string or the parameter was disabled. */
-  virtual bool parseValue(const char *val);
+  virtual bool parseValue(char *val, bool selection=false);
 
   /* Return the current value of this parameter as a string */
   virtual void valueStr(char *str) const;
@@ -335,13 +345,26 @@ StringParameter<N>::StringParameter(Configurable *cfg, const char *key,
 
 
 template<int N>
-bool StringParameter<N>::parseValue(const char *val) {
+bool StringParameter<N>::parseValue(char *val, bool selection) {
   if (disabled())
     return true;
-  if (checkSelection(val) < 0)
-    return false;
-  strncpy(Value, val, N);
-  Value[N-1] = '\0';
+  if (selection && NSelection > 0) {
+    int i = atoi(val) - 1;
+    if (i < 0 || i >= (int)NSelection)
+      return false;
+    else {
+      strncpy(Value, Selection[i], N);
+      Value[N-1] = '\0';
+      strncpy(val, Selection[i], MaxVal);
+      val[MaxVal-1] = '\0';
+    }
+  }
+  else {
+    if (checkSelection(val) < 0)
+      return false;
+    strncpy(Value, val, N);
+    Value[N-1] = '\0';
+  }
   return true;
 }
 
@@ -364,13 +387,26 @@ StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
 
 
 template<int N>
-bool StringPointerParameter<N>::parseValue(const char *val) {
+bool StringPointerParameter<N>::parseValue(char *val, bool selection) {
   if (disabled())
     return true;
-  if (checkSelection(val) < 0)
-    return false;
-  strncpy(*Value, val, N);
-  (*Value)[N-1] = '\0';
+  if (selection && NSelection > 0) {
+    int i = atoi(val) - 1;
+    if (i < 0 || i >= (int)NSelection)
+      return false;
+    else {
+      strncpy(*Value, Selection[i], N);
+      (*Value)[N-1] = '\0';
+      strncpy(val, Selection[i], MaxVal);
+      val[MaxVal-1] = '\0';
+    }
+  }
+  else {
+    if (checkSelection(val) < 0)
+      return false;
+    strncpy(*Value, val, N);
+    (*Value)[N-1] = '\0';
+  }
   return true;
 }
 
@@ -501,7 +537,7 @@ void NumberParameter<T>::setValue(T val, const char *unit) {
 
 
 template<class T>
-bool NumberParameter<T>::parseValue(const char *val) {
+bool NumberParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled())
     return true;
   float num = atof(val);
@@ -565,7 +601,7 @@ void NumberPointerParameter<T>::setValue(T val, const char *unit) {
 
 
 template<class T>
-bool NumberPointerParameter<T>::parseValue(const char *val) {
+bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled())
     return true;
   float num = atof(val);
