@@ -368,6 +368,7 @@ void Display::writeText(uint8_t area, const char *text) {
     return;
   drawText(area, text);
   strncpy(Text[area][TextHead[area]], text, MaxChars);
+  Text[area][TextHead[area]][MaxChars-1] = '\0';
   TextS[area] = (TextCanvas[area]->getCursorX() > TextW[area]);
   TextI[area] = 0;
 }

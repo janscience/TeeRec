@@ -20,7 +20,7 @@ public:
   static const int MaxActions = 8;
   
   // Maximum characters of a menu entry.
-  static const int MaxText = 31;
+  static const int MaxText = 32;
 
   // Function type for menu actions.
   typedef void (*Action)(int);
@@ -107,14 +107,14 @@ protected:
   Action CheckedAction;
   bool CheckedReturns;
   int NActions;
-  char Texts[MaxActions][MaxText + 1];
+  char Texts[MaxActions][MaxText];
   Action Actions[MaxActions];
   int8_t Checked[MaxActions];
   bool RadioButton[MaxActions];
   Menu *Menus[MaxActions];
   int IDs[MaxActions];
   uint16_t YPos[MaxActions];
-  char Title[MaxText + 1];
+  char Title[MaxText];
   GFXcanvas1 *Canvas;
   uint16_t Baseline;
   uint16_t ActionHeight;

@@ -60,8 +60,8 @@ class Configurable {
 
 protected:
 
-  static const size_t MaxName = 63;
-  char ConfigName[MaxName+1];
+  static const size_t MaxName = 64;
+  char ConfigName[MaxName];
   bool Configured;
   static const size_t MaxParams = 32;
   size_t NParams;

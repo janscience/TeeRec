@@ -336,7 +336,7 @@ class Display {
   uint16_t TextColor[MaxAreas];
   // Text stack:
   static const uint8_t MaxTexts = 4;
-  static const size_t MaxChars = 50;
+  static const size_t MaxChars = 64;
   char Text[MaxAreas][MaxTexts][MaxChars];
   int TextHead[MaxAreas];
   GFXcanvas1 *TextCanvas[MaxAreas];

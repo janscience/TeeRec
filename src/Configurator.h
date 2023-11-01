@@ -56,8 +56,8 @@ class Configurator {
   size_t NConfigs;
   Configurable *Configs[MaxConfigs];
 
-  static const size_t MaxFile = 99;
-  char ConfigFile[MaxFile + 1];
+  static const size_t MaxFile = 128;
+  char ConfigFile[MaxFile];
 
   bool Configured;
 

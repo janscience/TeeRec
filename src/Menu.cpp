@@ -68,6 +68,7 @@ void Menu::setDisplay(Display *screen) {
 
 void Menu::setTitle(const char *title) {
   strncpy(Title, title, MaxText);
+  Title[MaxText-1] = '\0';
 }
 
 
@@ -75,6 +76,7 @@ int Menu::addAction(const char *text, Action action, int id) {
   if (id < 0)
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
+  Texts[NActions][MaxText-1] = '\0';
   Actions[NActions] = action;
   Checked[NActions] = -1;
   RadioButton[NActions] = false;
@@ -94,6 +96,7 @@ int Menu::addCheckable(const char *text, bool checked, int id) {
   if (id < 0)
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
+  Texts[NActions][MaxText-1] = '\0';
   Actions[NActions] = 0;
   Checked[NActions] = checked ? 1 : 0;
   RadioButton[NActions] = false;
@@ -108,6 +111,7 @@ int Menu::addRadioButton(const char *text, bool checked, int id) {
   if (id < 0)
     id = NActions;
   strncpy(Texts[NActions], text, MaxText);
+  Texts[NActions][MaxText-1] = '\0';
   Actions[NActions] = 0;
   Checked[NActions] = checked ? 1 : 0;
   RadioButton[NActions] = true;
@@ -126,6 +130,7 @@ int Menu::addRadioButton(const char *text, bool checked, int id) {
 
 void Menu::addMenu(const char *text, Menu &menu) {
   strncpy(Texts[NActions], text, MaxText);
+  Texts[NActions][MaxText-1] = '\0';
   Actions[NActions] = 0;
   Checked[NActions] = -1;
   RadioButton[NActions] = false;

@@ -10,6 +10,7 @@ Configurator::Configurator() {
   Config = this;
   NConfigs = 0;
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
+  ConfigFile[MaxFile-1] = '\0';
   Configured = false;
 }
 
@@ -40,6 +41,7 @@ Configurable *Configurator::configurable(const char *name) {
 
 void Configurator::setConfigFile(const char *fname) {
   strncpy(ConfigFile, fname, MaxFile);
+  ConfigFile[MaxFile-1] = '\0';
 }
 
 

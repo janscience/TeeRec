@@ -92,6 +92,7 @@ void WaveHeader::InfoChunk<N>::set(const char *text) {
   setSize(strlen(text));
   NBuffer = sizeof(Header) + Header.Size;
   strncpy(Text, text, MaxText);
+  Text[MaxText-1] = '\0';
   Use = (strlen(text) > 0);
 }
 

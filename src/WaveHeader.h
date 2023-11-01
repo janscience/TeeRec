@@ -113,7 +113,7 @@ protected:
     InfoChunk(const char *infoid, const char *text);
     void set(const char *text);
     void clear();
-    static const size_t MaxText = N-1;
+    static const size_t MaxText = N;
     char Text[N];
   };
 

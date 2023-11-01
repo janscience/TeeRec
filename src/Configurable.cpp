@@ -13,7 +13,8 @@ Configurable::Configurable(const char *name) :
 
 
 void Configurable::setName(const char *name) {
-  strncpy(ConfigName, name, MaxName-1);
+  strncpy(ConfigName, name, MaxName);
+  ConfigName[MaxName-1] = '\0';
 }
 
 
