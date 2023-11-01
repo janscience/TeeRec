@@ -140,7 +140,7 @@ class StringParameter : public BaseStringParameter {
 
   /* Set the string to val.
      Return true if val was a valid string or the parameter was disabled. */
-  bool setValue(char *val) { return parseValue(val, false); };
+  bool setValue(const char *val) { return parseValue(const_cast<char *>(val), false); };
   
   /* Parse the string val and set the value of this parameter accordingly.
      If selection, then val is the input in response to an offered
@@ -177,7 +177,7 @@ class StringPointerParameter : public BaseStringParameter {
 
   /* Set the string to val.
      Return true if val was a valid string or the parameter was disabled. */
-  bool setValue(char *val) { return parseValue(val, false); };
+  bool setValue(const char *val) { return parseValue(const_cast<char *>(val), false); };
   
   /* Parse the string val and set the value of this parameter accordingly.
      If selection, then val is the input in response to an offered
