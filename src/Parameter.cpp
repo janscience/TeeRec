@@ -84,7 +84,7 @@ void Parameter::report(int w) const {
   if (enabled()) {
     char pval[MaxVal];
     valueStr(pval);
-    Serial.printf("  %-*s: %s\n", w, key(), pval);
+    Serial.printf("  %s:%*s %s\n", key(), w - strlen(key()), "", pval);
   }
 }
 
@@ -93,7 +93,7 @@ void Parameter::save(File &file, int w) const {
   if (enabled()) {
     char pval[MaxVal];
     valueStr(pval);
-    file.printf("  %-*s: %s\n", w, key(), pval);
+    file.printf("  %s:%*s %s\n", key(), w - strlen(key()), "", pval);
   }
 }
 
