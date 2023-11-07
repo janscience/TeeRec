@@ -7,7 +7,7 @@
 #define Configurable_h
 
 
-#include <Parameter.h>
+#include <Action.h>
 
 
 class File;
@@ -26,24 +26,24 @@ class Configurable {
   /* Set name of the configurable to name. */
   void setName(const char *name);
 
-  /* Add a parameter to this Configurable. */
-  void add(Parameter *param);
+  /* Add an action to this Configurable. */
+  void add(Action *action);
 
-  /* Return the Parameter matching key. */
-  Parameter *parameter(const char *key);
+  /* Return the Action matching name. */
+  Action *action(const char *name);
 
-  /* Enable the parameter matching key. */
-  void enable(const char *key);
+  /* Enable the parameter matching name. */
+  void enable(const char *name);
 
-  /* Disable the parameter matching key, i.e. it will not be configured
+  /* Disable the parameter matching name, i.e. it will not be configured
      or written into a configuration file. */
-  void disable(const char *key);
+  void disable(const char *name);
   
   /* Interactive configuration via Serial stream. */
   void configure(Stream &stream=Serial, unsigned long timeout=0);
 
-  /* Configure the class with the provided key-value pair. */
-  void configure(const char *key, const char *val);
+  /* Configure the class with the provided name-value pair. */
+  void configure(const char *name, const char *val);
 
   /* Report configuration settings on Serial. */
   void report(size_t indent=0) const;
@@ -63,9 +63,9 @@ protected:
   static const size_t MaxName = 64;
   char ConfigName[MaxName];
   bool Configured;
-  static const size_t MaxParams = 32;
-  size_t NParams;
-  Parameter *Params[MaxParams];
+  static const size_t MaxActions = 32;
+  size_t NActions;
+  Action *Actions[MaxActions];
 
 };
 

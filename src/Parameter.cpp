@@ -3,40 +3,41 @@
 #include <Parameter.h>
 
 
-Parameter::Parameter(Configurable *cfg, const char *key, size_t n) :
-  Enabled(true),
+Parameter::Parameter(Configurable *cfg, const char *name, size_t n) :
+  Action(cfg, name),
   NSelection(n) {
-  setKey(key);
-  if (cfg != 0)
-    cfg->add(this);
 }
 
 
-void Parameter::setKey(const char *key) {
-  strncpy(Key, key, MaxKey);
-  Key[MaxKey-1] = '\0';
+void Parameter::report(size_t indent, size_t w) const {
+  if (enabled()) {
+    char pval[MaxVal];
+    valueStr(pval);
+    size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
+    Serial.printf("%*s%s:%*s %s\n", indent, "", name(), kw, "", pval);
+  }
 }
 
 
-void Parameter::enable() {
-  Enabled = true;
-}
-
-
-void Parameter::disable() {
-  Enabled = false;
+void Parameter::save(File &file, size_t indent, size_t w) const {
+  if (enabled()) {
+    char pval[MaxVal];
+    valueStr(pval);
+    size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
+    file.printf("%*s%s:%*s %s\n", indent, "", name(), kw, "", pval);
+  }
 }
 
 
 void Parameter::configure(Stream &stream, unsigned long timeout) {
   if (disabled())
     return;
-  int w = strlen(key());
+  int w = strlen(name());
   if (w < 16)
     w = 16;
   char pval[MaxVal];
   valueStr(pval);
-  stream.printf("%-*s: %s\n", w, key(), pval);
+  stream.printf("%-*s: %s\n", w, name(), pval);
   listSelection(stream);
   while (true) {
     if (NSelection > 0)
@@ -61,13 +62,13 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
 void Parameter::configure(const char *val, const char *name) {
   if (disabled())
     return;
-  char keyname[2*MaxKey];
+  char keyname[2*MaxName];
   keyname[0] = '\0';
   if (name != 0 && strlen(name) > 0) {
     strcat(keyname, name);
     strcat(keyname, "-");
   }
-  strcat(keyname, key());
+  strcat(keyname, this->name());
   char pval[MaxVal];
   strncpy(pval, val, MaxVal);
   pval[MaxVal-1] = '\0';
@@ -77,26 +78,6 @@ void Parameter::configure(const char *val, const char *name) {
   }
   else
     Serial.printf("  %s is not a valid value for %s\n", val, keyname);
-}
-
-
-void Parameter::report(size_t indent, size_t w) const {
-  if (enabled()) {
-    char pval[MaxVal];
-    valueStr(pval);
-    size_t kw = w >= strlen(key()) ? w - strlen(key()) : 0;
-    Serial.printf("%*s%s:%*s %s\n", indent, "", key(), kw, "", pval);
-  }
-}
-
-
-void Parameter::save(File &file, size_t indent, size_t w) const {
-  if (enabled()) {
-    char pval[MaxVal];
-    valueStr(pval);
-    size_t kw = w >= strlen(key()) ? w - strlen(key()) : 0;
-    file.printf("%*s%s:%*s %s\n", indent, "", key(), kw, "", pval);
-  }
 }
 
 
@@ -171,17 +152,17 @@ float Parameter::changeUnit(float val, const char *oldunit,
 }
 
 
-BaseStringParameter::BaseStringParameter(Configurable *cfg, const char *key) :
-  Parameter(cfg, key),
+BaseStringParameter::BaseStringParameter(Configurable *cfg, const char *name) :
+  Parameter(cfg, name),
   Selection(0) {
 }
 
 
 BaseStringParameter::BaseStringParameter(Configurable *cfg,
-					 const char *key,
+					 const char *name,
 					 const char **selection,
 					 size_t n) :
-  Parameter(cfg, key, n),
+  Parameter(cfg, name, n),
   Selection(selection) {
 }
 

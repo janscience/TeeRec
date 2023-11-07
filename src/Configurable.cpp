@@ -4,7 +4,7 @@
 
 
 Configurable::Configurable(const char *name) :
-  NParams(0) {
+  NActions(0) {
   setName(name);
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
@@ -18,42 +18,42 @@ void Configurable::setName(const char *name) {
 }
 
 
-void Configurable::add(Parameter *param) {
-  if (NParams >= MaxParams) {
-    Serial.printf("ERROR! Number of maximum Parameter exceeded in %s!\n",
+void Configurable::add(Action *act) {
+  if (NActions >= MaxActions) {
+    Serial.printf("ERROR! Number of maximum Actions exceeded in %s!\n",
 		  name());
     return;
   }
-  Params[NParams++] = param;
+  Actions[NActions++] = act;
 }
 
 
-Parameter *Configurable::parameter(const char *key) {
-  char lkey[strlen(key)+1];
-  for (size_t k=0; k<strlen(key)+1; k++)
-    lkey[k] = tolower(key[k]);
-  for (size_t j=0; j<NParams; j++) {
-    char ckey[strlen(Params[j]->key())+1];
-    for (size_t k=0; k<strlen(Params[j]->key())+1; k++)
-      ckey[k] = tolower(Params[j]->key()[k]);
-    if (strcmp(ckey, lkey) == 0)
-      return Params[j];
+Action *Configurable::action(const char *name) {
+  char lname[strlen(name)+1];
+  for (size_t k=0; k<strlen(name)+1; k++)
+    lname[k] = tolower(name[k]);
+  for (size_t j=0; j<NActions; j++) {
+    char cname[strlen(Actions[j]->name())+1];
+    for (size_t k=0; k<strlen(Actions[j]->name())+1; k++)
+      cname[k] = tolower(Actions[j]->name()[k]);
+    if (strcmp(cname, lname) == 0)
+      return Actions[j];
   }
   return NULL;
 }
 
 
-void Configurable::enable(const char *key) {
-  Parameter *param = parameter(key);
-  if (param != NULL)
-    param->enable();
+void Configurable::enable(const char *name) {
+  Action *act = action(name);
+  if (act != NULL)
+    act->enable();
 }
 
 
-void Configurable::disable(const char *key) {
-  Parameter *param = parameter(key);
-  if (param != NULL)
-    param->disable();
+void Configurable::disable(const char *name) {
+  Action *act = action(name);
+  if (act != NULL)
+    act->disable();
 }
 
 
@@ -61,13 +61,13 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
   int def = 0;
   while (true) {
     stream.printf("%s:\n", name());
-    size_t iparam[NParams];
+    size_t iaction[NActions];
     size_t n = 0;
-    for (size_t j=0; j<NParams; j++) {
-      if (Params[j]->enabled()) {
+    for (size_t j=0; j<NActions; j++) {
+      if (Actions[j]->enabled()) {
 	stream.printf("  %d) ", n+1);
-	Params[j]->report();
-	iparam[n++] = j;
+	Actions[j]->report();
+	iaction[n++] = j;
       }
     }
     while (true) {
@@ -81,18 +81,18 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 	stream.println('\n');
 	return;
       }
-      char pval[Parameter::MaxVal];
-      stream.readBytesUntil('\n', pval, Parameter::MaxVal);
+      char pval[16];
+      stream.readBytesUntil('\n', pval, 16);
       if (strlen(pval) == 0)
 	sprintf(pval, "%d", def+1);
       stream.println(pval);
       char *end;
       long i = strtol(pval, &end, 10) - 1;
       if (end != pval && i >= 0 && i < (long)n &&
-	  iparam[i] < NParams) {
+	  iaction[i] < NActions) {
 	def = i;
 	stream.println();
-	Params[iparam[i]]->configure(stream, timeout);
+	Actions[iaction[i]]->configure(stream, timeout);
 	break;
       }
       else if (strcmp(pval, "q") == 0) {
@@ -104,40 +104,40 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void Configurable::configure(const char *key, const char *val) {
-  Parameter *param = parameter(key);
-  if (param == NULL)
-    Serial.printf("  %s key \"%s\" not found.\n", name(), key);
+void Configurable::configure(const char *name, const char *val) {
+  Action *act = action(name);
+  if (act == NULL)
+    Serial.printf("  %s name \"%s\" not found.\n", this->name(), name);
   else
-    param->configure(val, name());
+    act->configure(val, this->name());
 }
 
 
 void Configurable::report(size_t indent) const {
-  // longest key:
+  // longest name:
   size_t w = 0;
-  for (size_t j=0; j<NParams; j++) {
-    if (Params[j]->enabled() && strlen(Params[j]->key()) > w)
-      w = strlen(Params[j]->key());
+  for (size_t j=0; j<NActions; j++) {
+    if (Actions[j]->enabled() && strlen(Actions[j]->name()) > w)
+      w = strlen(Actions[j]->name());
   }
-  // write parameters to serial:
+  // write actions to serial:
   Serial.printf("%*s%s:\n", indent, "", name());
-  for (size_t j=0; j<NParams; j++)
-    Params[j]->report(indent + 2, w);
+  for (size_t j=0; j<NActions; j++)
+    Actions[j]->report(indent + 2, w);
 }
 
 
 void Configurable::save(File &file, size_t indent) const {
-  // longest key:
+  // longest name:
   size_t w = 0;
-  for (size_t j=0; j<NParams; j++) {
-    if (Params[j]->enabled() && strlen(Params[j]->key()) > w)
-      w = strlen(Params[j]->key());
+  for (size_t j=0; j<NActions; j++) {
+    if (Actions[j]->enabled() && strlen(Actions[j]->name()) > w)
+      w = strlen(Actions[j]->name());
   }
-  // write parameters to file:
+  // write actions to file:
   file.printf("%*s%s:\n", indent, "", name());
-  for (size_t j=0; j<NParams; j++)
-    Params[j]->save(file, indent + 2, w);
+  for (size_t j=0; j<NActions; j++)
+    Actions[j]->save(file, indent + 2, w);
 }
 
 

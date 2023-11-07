@@ -1,5 +1,5 @@
 /*
-  Parameter - base class for a configurable key-value pair.
+  Parameter - Actions for configurable name-value pairs.
   Created by Jan Benda, October 22, 2023.
 */
 
@@ -7,38 +7,33 @@
 #define Parameter_h
 
 
-#include <Arduino.h>
+#include <Action.h>
 
 
 class File;
 class Configurable;
 
 
-class Parameter {
+class Parameter : public Action {
 
  public:
 
-  /* Initialize parameter with identifying key, n selections
+  /* Initialize parameter with identifying name, n selections
      and add it to cfg. */
-  Parameter(Configurable *cfg, const char *key, size_t n=0);
+  Parameter(Configurable *cfg, const char *name, size_t n=0);
 
-  /* The key identifying the parameter. */
-  const char *key() const { return Key; }
+  /* Report the parameter's key and value on Serial. */
+  virtual void report(size_t indent=0, size_t w=0) const;
 
-  /* Set the key identifying the parameter to key. */
-  void setKey(const char *key);
+  /* Save the parameter's key and value to file. */
+  virtual void save(File &file, size_t indent=0, size_t w=0) const;
+  
+  /* Interactive configuration via Serial stream. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 
-  /* True if this parameter is enabled for being configured. */
-  bool enabled() const { return Enabled; };
-
-  /* True if this parameter is disabled for being configured. */
-  bool disabled() const { return !Enabled; };
-
-  /* Make this parameter configurable (default). */
-  void enable();
-
-  /* Make this parameter non-configurable. */
-  void disable();
+  /* Parse the string val, set the parameter accordingly and report
+     result together with name on Serial. */
+  virtual void configure(const char *val, const char *name=0);
 
   /* Parse the string val and set the value of this parameter accordingly.
      If selection, then val is the input in response to an offered
@@ -52,19 +47,6 @@ class Parameter {
 
   /* List selection of valid values. */
   virtual void listSelection(Stream &stream) const {};
-  
-  /* Interactive configuration via Serial stream. */
-  void configure(Stream &stream=Serial, unsigned long timeout=0);
-
-  /* Parse the string val, set the parameter accordingly and report
-     result together with name on Serial. */
-  void configure(const char *val, const char *name=0);
-
-  /* Report the parameter's key and value on Serial. */
-  void report(size_t indent=0, size_t w=0) const;
-
-  /* Save the parameter's key and value to file. */
-  void save(File &file, size_t indent=0, size_t w=0) const;
 
   /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
@@ -74,11 +56,6 @@ class Parameter {
   
   
  protected:
-
-  static const size_t MaxKey = 64;
-  char Key[MaxKey];
-
-  bool Enabled;
 
   size_t NSelection;
   
@@ -95,12 +72,12 @@ class BaseStringParameter : public Parameter {
   
  public:
   
-  /* Initialize parameter with identifying key and add to cfg. */
-  BaseStringParameter(Configurable *cfg, const char *key);
+  /* Initialize parameter with identifying name and add to cfg. */
+  BaseStringParameter(Configurable *cfg, const char *name);
   
-  /* Initialize parameter with identifying key, list of n selections,
+  /* Initialize parameter with identifying name, list of n selections,
      and add to cfg. */
-  BaseStringParameter(Configurable *cfg, const char *key,
+  BaseStringParameter(Configurable *cfg, const char *name,
 		      const char **selection, size_t n);
 
   /* Provide a selection of n input values. */
@@ -129,9 +106,9 @@ class StringParameter : public BaseStringParameter {
   
  public:
   
-  /* Initialize parameter with identifying key, value, list of n
+  /* Initialize parameter with identifying name, value, list of n
      selections and add to cfg. */
-  StringParameter(Configurable *cfg, const char *key,
+  StringParameter(Configurable *cfg, const char *name,
 		  const char str[N],
 		  const char **selection=0, size_t n=0);
 
@@ -166,9 +143,9 @@ class StringPointerParameter : public BaseStringParameter {
 
  public:
   
-  /* Initialize parameter with identifying key, pointer str to value
+  /* Initialize parameter with identifying name, pointer str to value
      variable, list of n selections, and add to cfg. */
-  StringPointerParameter(Configurable *cfg, const char *key,
+  StringPointerParameter(Configurable *cfg, const char *name,
 			 char (*str)[N], const char **selection=0,
 			 size_t n=0);
 
@@ -203,9 +180,9 @@ class BaseEnumParameter : public BaseStringParameter {
   
  public:
   
-  /* Initialize parameter with identifying key, list of n enum values
+  /* Initialize parameter with identifying name, list of n enum values
      and coresponding string representations, and add to cfg. */
-  BaseEnumParameter(Configurable *cfg, const char *key,
+  BaseEnumParameter(Configurable *cfg, const char *name,
 		    const T *enums, const char **selection, size_t n);
 
   /* Provide a selection of n enums with corresponding string
@@ -234,10 +211,10 @@ class EnumParameter : public BaseEnumParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying key, value, list of n enum
+  /* Initialize parameter with identifying name, value, list of n enum
      values and coresponding string representations, and add to
      cfg. */
-  EnumParameter(Configurable *cfg, const char *key, T val,
+  EnumParameter(Configurable *cfg, const char *name, T val,
 		const T *enums, const char **selection, size_t n);
 
   /* Return the enum value. */
@@ -271,10 +248,10 @@ class EnumPointerParameter : public BaseEnumParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying key, value, list of n enum
+  /* Initialize parameter with identifying name, value, list of n enum
      values and coresponding string representations, and add to
      cfg. */
-  EnumPointerParameter(Configurable *cfg, const char *key, T *val,
+  EnumPointerParameter(Configurable *cfg, const char *name, T *val,
 		       const T *enums, const char **selection,
 		       size_t n);
 
@@ -307,9 +284,9 @@ class BaseNumberParameter : public Parameter {
   
  public:
   
-  /* Initialize parameter with identifying key,
+  /* Initialize parameter with identifying name,
      format string, and unit and add to cfg. */
-  BaseNumberParameter(Configurable *cfg, const char *key,
+  BaseNumberParameter(Configurable *cfg, const char *name,
 		      const char *format, const char *unit=0,
 		      const char *outunit=0, const T *selection=0,
 		      size_t n=0);
@@ -370,9 +347,9 @@ class NumberParameter : public BaseNumberParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying key, pointer number to value,
+  /* Initialize parameter with identifying name, pointer number to value,
      format string, and unit and add to cfg. */
-  NumberParameter(Configurable *cfg, const char *key, T number,
+  NumberParameter(Configurable *cfg, const char *name, T number,
 		  const char *format, const char *unit=0,
 		  const char *outunit=0, const T *selection=0,
 		  size_t n=0);
@@ -415,9 +392,9 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying key, pointer number to value,
+  /* Initialize parameter with identifying name, pointer number to value,
      format string, and unit and add to cfg. */
-  NumberPointerParameter(Configurable *cfg, const char *key, T *number,
+  NumberPointerParameter(Configurable *cfg, const char *name, T *number,
 			 const char *format, const char *unit=0,
 			 const char *outunit=0, const T *selection=0,
 			 size_t n=0);
@@ -456,10 +433,10 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
 
 
 template<int N>
-StringParameter<N>::StringParameter(Configurable *cfg, const char *key,
+StringParameter<N>::StringParameter(Configurable *cfg, const char *name,
 				    const char str[N],
 				    const char **selection, size_t n) :
-  BaseStringParameter(cfg, key, selection, n) {
+  BaseStringParameter(cfg, name, selection, n) {
   strncpy(Value, str, N);
   Value[N-1] = '\0';
 }
@@ -505,11 +482,11 @@ void StringParameter<N>::valueStr(char *str) const {
 
 template<int N>
 StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
-						  const char *key,
+						  const char *name,
 						  char (*str)[N],
 						  const char **selection,
 						  size_t n) :
-  BaseStringParameter(cfg, key, selection, n),
+  BaseStringParameter(cfg, name, selection, n),
   Value(str) {
 }
 
@@ -556,11 +533,11 @@ void StringPointerParameter<N>::valueStr(char *str) const {
 
 template<class T>
 BaseEnumParameter<T>::BaseEnumParameter(Configurable *cfg,
-					const char *key,
+					const char *name,
 					const T *enums,
 					const char **selection,
 					size_t n) :
-  BaseStringParameter(cfg, key, selection, n),
+  BaseStringParameter(cfg, name, selection, n),
   Enums(enums) {
 }
 
@@ -602,10 +579,10 @@ const char *BaseEnumParameter<T>::enumStr(T val) const {
 
 
 template<class T>
-EnumParameter<T>::EnumParameter(Configurable *cfg, const char *key,
+EnumParameter<T>::EnumParameter(Configurable *cfg, const char *name,
 				T val, const T *enums,
 				const char **selection, size_t n) :
-  BaseEnumParameter<T>(cfg, key, enums, selection, n),
+  BaseEnumParameter<T>(cfg, name, enums, selection, n),
   Value(val) {
 }
 
@@ -660,11 +637,11 @@ void EnumParameter<T>::valueStr(char *str) const {
 
 template<class T>
 EnumPointerParameter<T>::EnumPointerParameter(Configurable *cfg,
-					      const char *key,
+					      const char *name,
 					      T *val, const T *enums,
 					      const char **selection,
 					      size_t n) :
-  BaseEnumParameter<T>(cfg, key, enums, selection, n),
+  BaseEnumParameter<T>(cfg, name, enums, selection, n),
   Value(val) {
 }
 
@@ -718,13 +695,13 @@ void EnumPointerParameter<T>::valueStr(char *str) const {
 
 
 template<class T>
-BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *key,
+BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *name,
 					    const char *format,
 					    const char *unit,
 					    const char *outunit,
 					    const T *selection,
 					    size_t n) :
-  Parameter(cfg, key, n),
+  Parameter(cfg, name, n),
   Format(""),
   Unit(""),
   OutUnit(""),
@@ -804,12 +781,12 @@ void BaseNumberParameter<T>::valueStr(T val, char *str) const {
 
 
 template<class T>
-NumberParameter<T>::NumberParameter(Configurable *cfg, const char *key,
+NumberParameter<T>::NumberParameter(Configurable *cfg, const char *name,
 				    T number, const char *format,
 				    const char *unit,
 				    const char *outunit,
 				    const T *selection, size_t n) :
-  BaseNumberParameter<T>(cfg, key, format, unit, outunit,
+  BaseNumberParameter<T>(cfg, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
 }
@@ -873,14 +850,14 @@ void NumberParameter<T>::valueStr(char *str) const {
 
 template<class T>
 NumberPointerParameter<T>::NumberPointerParameter(Configurable *cfg,
-						  const char *key,
+						  const char *name,
 						  T *number,
 						  const char *format,
 						  const char *unit,
 						  const char *outunit,
 						  const T *selection,
 						  size_t n) :
-  BaseNumberParameter<T>(cfg, key, format, unit, outunit,
+  BaseNumberParameter<T>(cfg, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
 }
