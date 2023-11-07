@@ -38,9 +38,6 @@ class Configurable {
   /* Disable the parameter matching key, i.e. it will not be configured
      or written into a configuration file. */
   void disable(const char *key);
-
-  /* Report configuration settings on Serial. */
-  void report() const;
   
   /* Interactive configuration via Serial stream. */
   void configure(Stream &stream=Serial, unsigned long timeout=0);
@@ -48,8 +45,11 @@ class Configurable {
   /* Configure the class with the provided key-value pair. */
   void configure(const char *key, const char *val);
 
+  /* Report configuration settings on Serial. */
+  void report(size_t indent=0) const;
+
   /* Save current settings to file. */
-  void save(File &file) const;
+  void save(File &file, size_t indent=0) const;
 
   /* True if this was configured from a file, for example. */
   bool configured() const { return Configured; };

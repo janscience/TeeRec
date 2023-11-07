@@ -57,20 +57,6 @@ void Configurable::disable(const char *key) {
 }
 
 
-void Configurable::report() const {
-  // longest key:
-  size_t w = 0;
-  for (size_t j=0; j<NParams; j++) {
-    if (Params[j]->enabled() && strlen(Params[j]->key()) > w)
-      w = strlen(Params[j]->key());
-  }
-  // write parameters to serial:
-  Serial.printf("%s:\n", name());
-  for (size_t j=0; j<NParams; j++)
-    Params[j]->report(2, w);
-}
-
-
 void Configurable::configure(Stream &stream, unsigned long timeout) {
   int def = 0;
   while (true) {
@@ -127,7 +113,21 @@ void Configurable::configure(const char *key, const char *val) {
 }
 
 
-void Configurable::save(File &file) const {
+void Configurable::report(size_t indent) const {
+  // longest key:
+  size_t w = 0;
+  for (size_t j=0; j<NParams; j++) {
+    if (Params[j]->enabled() && strlen(Params[j]->key()) > w)
+      w = strlen(Params[j]->key());
+  }
+  // write parameters to serial:
+  Serial.printf("%*s%s:\n", indent, "", name());
+  for (size_t j=0; j<NParams; j++)
+    Params[j]->report(indent + 2, w);
+}
+
+
+void Configurable::save(File &file, size_t indent) const {
   // longest key:
   size_t w = 0;
   for (size_t j=0; j<NParams; j++) {
@@ -135,9 +135,9 @@ void Configurable::save(File &file) const {
       w = strlen(Params[j]->key());
   }
   // write parameters to file:
-  file.printf("%s:\n", name());
+  file.printf("%*s%s:\n", indent, "", name());
   for (size_t j=0; j<NParams; j++)
-    Params[j]->save(file, 2, w);
+    Params[j]->save(file, indent + 2, w);
 }
 
 
