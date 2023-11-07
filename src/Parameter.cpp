@@ -80,20 +80,22 @@ void Parameter::configure(const char *val, const char *name) {
 }
 
 
-void Parameter::report(int w) const {
+void Parameter::report(size_t indent, size_t w) const {
   if (enabled()) {
     char pval[MaxVal];
     valueStr(pval);
-    Serial.printf("  %s:%*s %s\n", key(), w - strlen(key()), "", pval);
+    size_t kw = w >= strlen(key()) ? w - strlen(key()) : 0;
+    Serial.printf("%*s%s:%*s %s\n", indent, "", key(), kw, "", pval);
   }
 }
 
 
-void Parameter::save(File &file, int w) const {
+void Parameter::save(File &file, size_t indent, size_t w) const {
   if (enabled()) {
     char pval[MaxVal];
     valueStr(pval);
-    file.printf("  %s:%*s %s\n", key(), w - strlen(key()), "", pval);
+    size_t kw = w >= strlen(key()) ? w - strlen(key()) : 0;
+    file.printf("%*s%s:%*s %s\n", indent, "", key(), kw, "", pval);
   }
 }
 

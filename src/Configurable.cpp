@@ -67,7 +67,7 @@ void Configurable::report() const {
   // write parameters to serial:
   Serial.printf("%s:\n", name());
   for (size_t j=0; j<NParams; j++)
-    Params[j]->report(w);
+    Params[j]->report(2, w);
 }
 
 
@@ -75,13 +75,12 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
   int def = 0;
   while (true) {
     stream.printf("%s:\n", name());
-    char pval[Parameter::MaxVal];
     size_t iparam[NParams];
     size_t n = 0;
     for (size_t j=0; j<NParams; j++) {
       if (Params[j]->enabled()) {
-	Params[j]->valueStr(pval);
-	stream.printf("  %d) %s: %s\n", n+1, Params[j]->key(), pval);
+	stream.printf("  %d) ", n+1);
+	Params[j]->report();
 	iparam[n++] = j;
       }
     }
@@ -96,6 +95,7 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 	stream.println('\n');
 	return;
       }
+      char pval[Parameter::MaxVal];
       stream.readBytesUntil('\n', pval, Parameter::MaxVal);
       if (strlen(pval) == 0)
 	sprintf(pval, "%d", def+1);
@@ -137,7 +137,7 @@ void Configurable::save(File &file) const {
   // write parameters to file:
   file.printf("%s:\n", name());
   for (size_t j=0; j<NParams; j++)
-    Params[j]->save(file, w);
+    Params[j]->save(file, 2, w);
 }
 
 

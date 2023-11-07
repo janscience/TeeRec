@@ -61,10 +61,10 @@ class Parameter {
   void configure(const char *val, const char *name=0);
 
   /* Report the parameter's key and value on Serial. */
-  void report(int w=0) const;
+  void report(size_t indent=0, size_t w=0) const;
 
   /* Save the parameter's key and value to file. */
-  void save(File &file, int w=0) const;
+  void save(File &file, size_t indent=0, size_t w=0) const;
 
   /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
