@@ -18,6 +18,9 @@ class Action {
 
  public:
 
+  /* Initialize action with name. */
+  Action(const char *name);
+
   /* Initialize action with name and add it to cfg. */
   Action(Configurable *cfg, const char *name);
 
@@ -39,8 +42,9 @@ class Action {
   /* Make this action non-configurable. */
   void disable();
 
-  /* Report the action's name and potential values or infos on Serial. */
-  virtual void report(size_t indent=0, size_t w=0) const {};
+  /* Report the action's name and potential values or infos on Serial.
+     If descend, also display children. */
+  virtual void report(size_t indent=0, size_t w=0, bool descend=true) const;
 
   /* Save the actions's name and potential value to file. */
   virtual void save(File &file, size_t indent=0, size_t w=0) const {};

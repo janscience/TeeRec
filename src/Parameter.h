@@ -23,7 +23,7 @@ class Parameter : public Action {
   Parameter(Configurable *cfg, const char *name, size_t n=0);
 
   /* Report the parameter's key and value on Serial. */
-  virtual void report(size_t indent=0, size_t w=0) const;
+  virtual void report(size_t indent=0, size_t w=0, bool descend=true) const;
 
   /* Save the parameter's key and value to file. */
   virtual void save(File &file, size_t indent=0, size_t w=0) const;

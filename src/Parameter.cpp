@@ -9,7 +9,7 @@ Parameter::Parameter(Configurable *cfg, const char *name, size_t n) :
 }
 
 
-void Parameter::report(size_t indent, size_t w) const {
+void Parameter::report(size_t indent, size_t w, bool descend) const {
   if (enabled()) {
     char pval[MaxVal];
     valueStr(pval);

@@ -4,17 +4,11 @@
 
 
 Configurable::Configurable(const char *name) :
+  Action(name),
   NActions(0) {
-  setName(name);
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
   Configured = false;
-}
-
-
-void Configurable::setName(const char *name) {
-  strncpy(ConfigName, name, MaxName);
-  ConfigName[MaxName-1] = '\0';
 }
 
 
@@ -57,6 +51,38 @@ void Configurable::disable(const char *name) {
 }
 
 
+void Configurable::report(size_t indent, size_t w, bool descend) const {
+  // write actions to serial:
+  if (descend) {
+    // longest name:
+    size_t ww = 0;
+    for (size_t j=0; j<NActions; j++) {
+      if (Actions[j]->enabled() && strlen(Actions[j]->name()) > ww)
+	ww = strlen(Actions[j]->name());
+    }
+    Serial.printf("%*s%s:\n", indent, "", name());
+    for (size_t j=0; j<NActions; j++)
+      Actions[j]->report(indent + 2, ww, descend);
+  }
+  else
+    Serial.printf("%*s%s\n", indent, "", name());
+}
+
+
+void Configurable::save(File &file, size_t indent, size_t w) const {
+  // longest name:
+  size_t ww = 0;
+  for (size_t j=0; j<NActions; j++) {
+    if (Actions[j]->enabled() && strlen(Actions[j]->name()) > ww)
+      ww = strlen(Actions[j]->name());
+  }
+  // write actions to file:
+  file.printf("%*s%s:\n", indent, "", name());
+  for (size_t j=0; j<NActions; j++)
+    Actions[j]->save(file, indent + 2, ww);
+}
+
+
 void Configurable::configure(Stream &stream, unsigned long timeout) {
   int def = 0;
   while (true) {
@@ -66,7 +92,7 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
     for (size_t j=0; j<NActions; j++) {
       if (Actions[j]->enabled()) {
 	stream.printf("  %d) ", n+1);
-	Actions[j]->report();
+	Actions[j]->report(0, 0, false);
 	iaction[n++] = j;
       }
     }
@@ -111,33 +137,4 @@ void Configurable::configure(const char *name, const char *val) {
   else
     act->configure(val, this->name());
 }
-
-
-void Configurable::report(size_t indent) const {
-  // longest name:
-  size_t w = 0;
-  for (size_t j=0; j<NActions; j++) {
-    if (Actions[j]->enabled() && strlen(Actions[j]->name()) > w)
-      w = strlen(Actions[j]->name());
-  }
-  // write actions to serial:
-  Serial.printf("%*s%s:\n", indent, "", name());
-  for (size_t j=0; j<NActions; j++)
-    Actions[j]->report(indent + 2, w);
-}
-
-
-void Configurable::save(File &file, size_t indent) const {
-  // longest name:
-  size_t w = 0;
-  for (size_t j=0; j<NActions; j++) {
-    if (Actions[j]->enabled() && strlen(Actions[j]->name()) > w)
-      w = strlen(Actions[j]->name());
-  }
-  // write actions to file:
-  file.printf("%*s%s:\n", indent, "", name());
-  for (size_t j=0; j<NActions; j++)
-    Actions[j]->save(file, indent + 2, w);
-}
-
 
