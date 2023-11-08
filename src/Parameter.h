@@ -22,8 +22,9 @@ class Parameter : public Action {
      and add it to cfg. */
   Parameter(Configurable *cfg, const char *name, size_t n=0);
 
-  /* Report the parameter's key and value on Serial. */
-  virtual void report(size_t indent=0, size_t w=0, bool descend=true) const;
+  /* Report the parameter's name and value on serial stream. */
+  virtual void report(Stream &stream=Serial, size_t indent=0,
+		      size_t w=0, bool descend=true) const;
 
   /* Save the parameter's key and value to file. */
   virtual void save(File &file, size_t indent=0, size_t w=0) const;
@@ -31,9 +32,11 @@ class Parameter : public Action {
   /* Interactive configuration via Serial stream. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 
-  /* Parse the string val, set the parameter accordingly and report
-     result together with name on Serial. */
-  virtual void configure(const char *val, const char *name=0);
+  /* Parse the string val and set the parameter accordingly.  If
+     StreamOutput is enabled, report the new value together with name
+     on stream. */
+  virtual void configure(const char *val, const char *name=0,
+			 Stream &stream=Serial);
 
   /* Parse the string val and set the value of this parameter accordingly.
      If selection, then val is the input in response to an offered

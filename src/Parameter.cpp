@@ -9,18 +9,19 @@ Parameter::Parameter(Configurable *cfg, const char *name, size_t n) :
 }
 
 
-void Parameter::report(size_t indent, size_t w, bool descend) const {
-  if (enabled()) {
+void Parameter::report(Stream &stream, size_t indent,
+		       size_t w, bool descend) const {
+  if (enabled(StreamOutput)) {
     char pval[MaxVal];
     valueStr(pval);
     size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
-    Serial.printf("%*s%s:%*s %s\n", indent, "", name(), kw, "", pval);
+    stream.printf("%*s%s:%*s %s\n", indent, "", name(), kw, "", pval);
   }
 }
 
 
 void Parameter::save(File &file, size_t indent, size_t w) const {
-  if (enabled()) {
+  if (enabled(FileOutput)) {
     char pval[MaxVal];
     valueStr(pval);
     size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
@@ -30,7 +31,7 @@ void Parameter::save(File &file, size_t indent, size_t w) const {
 
 
 void Parameter::configure(Stream &stream, unsigned long timeout) {
-  if (disabled())
+  if (disabled(SetValue | StreamIO))
     return;
   int w = strlen(name());
   if (w < 16)
@@ -59,9 +60,7 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void Parameter::configure(const char *val, const char *name) {
-  if (disabled())
-    return;
+void Parameter::configure(const char *val, const char *name, Stream &stream) {
   char keyname[2*MaxName];
   keyname[0] = '\0';
   if (name != 0 && strlen(name) > 0) {
@@ -69,15 +68,26 @@ void Parameter::configure(const char *val, const char *name) {
     strcat(keyname, "-");
   }
   strcat(keyname, this->name());
+  if (disabled(SetValue)) {
+    if (enabled(StreamOutput))
+      stream.printf("%*ssetting a new value for %s is disabled\n",
+		    indentation(), "", keyname);
+    return;
+  }
   char pval[MaxVal];
   strncpy(pval, val, MaxVal);
   pval[MaxVal-1] = '\0';
-  if (parseValue(pval, false)) {
+  bool r = parseValue(pval, false);
+  if (disabled(StreamOutput))
+    return;
+  if (r) {
     valueStr(pval);
-    Serial.printf("  set %s to %s\n", keyname, pval);
+    stream.printf("%*sset %s to %s\n",
+		  indentation(), "", keyname, pval);
   }
   else
-    Serial.printf("  %s is not a valid value for %s\n", val, keyname);
+    stream.printf("%*s%s is not a valid value for %s\n",
+		  indentation(), "", val, keyname);
 }
 
 

@@ -3,14 +3,16 @@
 #include <Action.h>
 
 
-Action::Action(const char *name) :
-  Enabled(true) {
+Action::Action(const char *name, int roles) :
+  SupportedRoles(roles),
+  Roles(roles),
+  Indentation(2) {
   setName(name);
 }
 
 
-Action::Action(Configurable *cfg, const char *name) :
-  Action(name) {
+Action::Action(Configurable *cfg, const char *name, int roles) :
+  Action(name, roles) {
   if (cfg != 0)
     cfg->add(this);
 }
@@ -22,17 +24,34 @@ void Action::setName(const char *name) {
 }
 
 
-void Action::enable() {
-  Enabled = true;
+bool Action::enabled(int roles) const {
+  roles &= SupportedRoles;
+  return (Roles & roles == roles);
 }
 
 
-void Action::disable() {
-  Enabled = false;
+void Action::enable(int roles) {
+  roles &= SupportedRoles;
+  Roles |= roles;
 }
 
 
-void Action::report(size_t indent, size_t w, bool descend) const {
-  Serial.printf("%*s%s\n", indent, "", name());
+void Action::disable(int roles) {
+  roles &= SupportedRoles;
+  Roles &= ~roles;
+}
+
+
+void Action::disableSupported(int roles) {
+  roles &= SupportedRoles;
+  SupportedRoles &= ~roles;
+  Roles = SupportedRoles;
+}
+
+
+void Action::report(Stream &stream, size_t indent,
+		    size_t w, bool descend) const {
+  if (enabled(StreamOutput))
+    Serial.printf("%*s%s ...\n", indent, "", name());
 }
 
