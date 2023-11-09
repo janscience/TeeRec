@@ -7,59 +7,43 @@
 #define Configurator_h
 
 
-#include <Arduino.h>
+#include <Configurable.h>
 
 
-class Configurable;
 class SDCard;
 
 
-class Configurator {
+class Configurator : public Configurable {
 
  public:
 
-  /* Initialize. */
+  /* Initialize with default name "Configure". */
   Configurator();
 
-  /* Add config to this Configurator. */
-  void add(Configurable *config);
-
-  /* Return pointer to Configurable instance with given name. */
-  Configurable *configurable(const char *name);
+  /* Initialize. */
+  Configurator(const char *name);
 
   /* Name of the configuration file. */
   void setConfigFile(const char *fname);
-
-  /* Report parameters of all configurables on serial. */
-  void report() const;
+  
+  /* Save current setting to configuration file on SD card.
+     Return true on success. */
+  bool save(SDCard &sd) const;
 
   /* Interactive configuration via Serial stream. */
   void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Read configuration file from SD card and pass key-value pairs to
-     the Configurables. */
+     the Actions. */
   void configure(SDCard &sd);
-
-  /* Write current setting to configuration file on SD card.
-     Return true on success. */
-  bool save(SDCard &sd) const;
-
-  /* True if the configuration file has been read. */
-  bool configured() const { return Configured; };
 
   static Configurator *Config;
 
   
  private:
 
-  static const size_t MaxConfigs = 10;
-  size_t NConfigs;
-  Configurable *Configs[MaxConfigs];
-
   static const size_t MaxFile = 128;
   char ConfigFile[MaxFile];
-
-  bool Configured;
 
 };
 

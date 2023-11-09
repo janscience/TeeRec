@@ -24,9 +24,27 @@ void Action::setName(const char *name) {
 }
 
 
+Action *Action::action(const char *name) {
+  char lname[strlen(name)+1];
+  for (size_t k=0; k<strlen(name)+1; k++)
+    lname[k] = tolower(name[k]);
+  char cname[strlen(Name)+1];
+  for (size_t k=0; k<strlen(Name)+1; k++)
+    cname[k] = tolower(Name[k]);
+  if (strcmp(cname, lname) == 0)
+    return this;
+  return NULL;
+}
+
+
 bool Action::enabled(int roles) const {
   roles &= SupportedRoles;
-  return (Roles & roles == roles);
+  return ((Roles & roles) == roles);
+}
+
+
+bool Action::disabled(int roles) const {
+  return !enabled(roles);
 }
 
 
@@ -52,6 +70,6 @@ void Action::disableSupported(int roles) {
 void Action::report(Stream &stream, size_t indent,
 		    size_t w, bool descend) const {
   if (enabled(StreamOutput))
-    Serial.printf("%*s%s ...\n", indent, "", name());
+    stream.printf("%*s%s ...\n", indent, "", name());
 }
 

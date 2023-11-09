@@ -10,6 +10,7 @@
 #include <Action.h>
 
 
+class SDCard;
 class File;
 
 
@@ -24,7 +25,7 @@ class Configurable : public Action {
   void add(Action *action);
 
   /* Return the Action matching name. */
-  Action *action(const char *name);
+  virtual Action *action(const char *name);
 
   /* Enable the roles of the action matching name. */
   void enable(const char *name, int roles=AllRoles);
@@ -39,6 +40,10 @@ class Configurable : public Action {
 
   /* Save current settings to file. */
   virtual void save(File &file, size_t indent=0, size_t w=0) const;
+
+  /* Save current setting to configuration file on SD card.
+     Return true on success. */
+  bool save(SDCard &sd, const char *filename) const;
   
   /* Interactive configuration via Serial stream. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
@@ -48,19 +53,21 @@ class Configurable : public Action {
   virtual void configure(const char *name, const char *val,
 			 Stream &stream=Serial);
 
-  /* True if this was configured from a file, for example. */
-  bool configured() const { return Configured; };
+  /* Read configuration file from SD card and configure all actions
+     accordingly. */
+  void configure(SDCard &sd, const char *filename);
 
-  /* Called from Configurator when this configurable is configured. */
-  void setConfigured() { Configured = true; };
+  /* Set default title for menus to title. */
+  void setMenuTitle(const char *title);
 
 
 protected:
 
-  bool Configured;
   static const size_t MaxActions = 32;
   size_t NActions;
   Action *Actions[MaxActions];
+
+  static char MenuTitle[MaxName];
 
 };
 

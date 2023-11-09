@@ -447,7 +447,7 @@ StringParameter<N>::StringParameter(Configurable *cfg, const char *name,
 
 template<int N>
 bool StringParameter<N>::parseValue(char *val, bool selection) {
-  if (disabled())
+  if (disabled(Action::SetValue))
     return true;
   if (selection && NSelection > 0) {
     if (strcmp(val, "q") == 0) {
@@ -496,7 +496,7 @@ StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
 
 template<int N>
 bool StringPointerParameter<N>::parseValue(char *val, bool selection) {
-  if (disabled())
+  if (disabled(Action::SetValue))
     return true;
   if (selection && NSelection > 0) {
     if (strcmp(val, "q") == 0) {
@@ -592,7 +592,7 @@ EnumParameter<T>::EnumParameter(Configurable *cfg, const char *name,
 
 template<class T>
 bool EnumParameter<T>::setValue(T val) {
-  if (this->disabled())
+  if (this->disabled(Action::SetValue))
     return false;
   Value = val;
   return true;
@@ -651,7 +651,7 @@ EnumPointerParameter<T>::EnumPointerParameter(Configurable *cfg,
 
 template<class T>
 bool EnumPointerParameter<T>::setValue(T val) {
-  if (this->disabled())
+  if (this->disabled(Action::SetValue))
     return false;
   *Value = val;
   return true;
@@ -821,12 +821,14 @@ void NumberParameter<T>::setValue(T val, const char *unit) {
 
 template<class T>
 bool NumberParameter<T>::parseValue(char *val, bool selection) {
-  if (this->disabled())
+  if (this->disabled(Action::SetValue))
     return true;
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
   }
+  if (strlen(val) == 0)
+    return true;
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
@@ -892,12 +894,14 @@ void NumberPointerParameter<T>::setValue(T val, const char *unit) {
 
 template<class T>
 bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
-  if (this->disabled())
+  if (this->disabled(Action::SetValue))
     return true;
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
   }
+  if (strlen(val) == 0)
+    return true;
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||

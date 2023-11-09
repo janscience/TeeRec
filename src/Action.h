@@ -44,11 +44,14 @@ class Action {
   /* Set the name identifying the action to name. */
   void setName(const char *name);
 
+  /* Return this Action if name matches it name. */
+  virtual Action *action(const char *name);
+
   /* True if the specified roles are enabled. */
   bool enabled(int roles=AllRoles) const;
 
   /* True if the specified roles are not enabled. */
-  bool disabled(int roles=AllRoles) const { return !enabled(); };
+  bool disabled(int roles=AllRoles) const;
 
   /* Enable the specified roles for this action, if supported. */
   void enable(int roles=AllRoles);

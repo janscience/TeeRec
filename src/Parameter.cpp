@@ -65,7 +65,7 @@ void Parameter::configure(const char *val, const char *name, Stream &stream) {
   keyname[0] = '\0';
   if (name != 0 && strlen(name) > 0) {
     strcat(keyname, name);
-    strcat(keyname, "-");
+    strcat(keyname, ">");
   }
   strcat(keyname, this->name());
   if (disabled(SetValue)) {

@@ -51,28 +51,28 @@ Blink blink(LED_BUILTIN);
 
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial && millis() < 2000) {};
   // disable parameter that should not go into the configuration file here:
   settings.disable("PulseFreq");
   settings.disable("DisplayTime");
   settings.disable("SensorsInterval");
+
+  Serial.begin(9600);
+  while (!Serial && millis() < 2000) {};
+  Serial.println();
   blink.switchOn();
   sdcard.begin();
   config.setConfigFile(CFG_FILE);
+  config.configure(sdcard);
   if (Serial)
     config.configure(Serial);
   config.report();
+  Serial.println();
   if (config.save(sdcard) ) {
     Serial.printf("Wrote configuration file \"%s\" to SD card.\n", CFG_FILE);
-    Serial.println();
-    Serial.println("Rename and edit this file to your needs.");
   }
   else
     Serial.println("Failed to write config file.");
   Serial.println();
-  // read the file in again:
-  config.configure(sdcard);
   blink.switchOff();
   sdcard.end();
 }
