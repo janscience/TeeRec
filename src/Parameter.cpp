@@ -144,11 +144,11 @@ float Parameter::changeUnit(float val, const char *oldunit,
   // parse new unit:
   float f2 = 1.0;
   if (strcmp(newunit, "%") == 0)
-    f2 = 100.0;
+    f2 = 0.01;
   else if (strcmp(newunit, "hour") == 0 || strcmp(newunit, "h") == 0)
-    f2 = 1.0/60.0/60.0;
+    f2 = 60.0*60.0;
   else if (strcmp(newunit, "min") == 0)
-    f2 = 1.0/60.0;
+    f2 = 60.0;
   else {
     int k = 0;
     for (k=0; k<NUnits; k++)
