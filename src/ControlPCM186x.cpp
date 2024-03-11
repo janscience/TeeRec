@@ -596,7 +596,7 @@ void ControlPCM186x::gainStr(OUTPUT_CHANNELS adc, char *gains, float pregain) {
   float g = gain(adc);
   if (g < -500.0)
     return;
-  sprintf(gains, "%.2fmV/V", 0.5*3300/pregain/pow(10.0, g/20.0));
+  sprintf(gains, "%.2fmV", 0.5*3300/pregain/pow(10.0, g/20.0));
 }
 
 
