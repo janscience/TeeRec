@@ -10,7 +10,7 @@ try:
 except ImportError:
     has_thunderfish = False
 try:
-    from audioio import metadata_wave
+    from audioio import metadata
     has_audioio = True
 except ImportError:
     has_audioio = False
@@ -85,7 +85,7 @@ def plot_psds(path, channel, maxfreq, maxdb, mindb, thresh, unwrapd, nrows, save
     #data = np.array(data, dtype=np.double)
     pins = []
     if has_audioio:
-        metadata, cues = metadata_wave(path)
+        metadata = metadata(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
             if 'PINS' in info:

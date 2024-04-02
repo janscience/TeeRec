@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import wave
 try:
-    from audioio import metadata_wave
+    from audioio import metadata
     has_audioio = True
 except ImportError:
     has_audioio = False
@@ -82,7 +82,7 @@ def plot_traces(path, channel, toffs, tmax, step, gain, unwrapd, raw,
     title = basename
     gains = ''
     if has_audioio:
-        metadata, cues = metadata_wave(path)
+        metadata = metadata(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
             if 'PINS' in info:

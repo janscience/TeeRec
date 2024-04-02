@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 import wave
 try:
-    from audioio import metadata_wave
+    from audioio import metadata
     has_audioio = True
 except ImportError:
     has_audioio = False
@@ -58,7 +58,7 @@ def plot_hist(path, header, widh=30, gain=None, scale_bits=False,
     sampls = '-'
     avrgs = -1
     if has_audioio:
-        metadata, cues = metadata_wave(path)
+        metadata = metadata(path)
         if 'INFO' in metadata:
             info = metadata['INFO']
             if 'PINS' in info:
