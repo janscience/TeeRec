@@ -10,8 +10,7 @@ it!
 Update your [Arduino IDE](https://www.arduino.cc/en/software) to
 version 2 and install Teensy support.
 
-Follow the instructions for [Arduino IDE 2.0.0 Teensy
-Support](https://www.pjrc.com/arduino-ide-2-0-0-teensy-support/):
+Follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/td_download.html):
 
 1. Install the latest Arduino IDE provided on
    [arduino.cc](https://www.arduino.cc/en/software).
@@ -59,7 +58,7 @@ manually.
 
 _Note_: If you upgraded from an older Arduino IDE, make sure that none
 of these librariers are located in your `Arduino/libraries` folder. In
-particular, `SdFat` and `Bounce2.
+particular, `SdFat` and `Bounce2`.
 
 The only library that needs to be installed is
 
