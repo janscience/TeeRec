@@ -94,3 +94,12 @@ touch .development
 Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
 
+
+## Upload new TeeRec version to Arduino library manager
+
+See [Arduino Library Manager list](https://github.com/arduino/library-registry).
+
+1. Make sure arduino-lint was successful (by pushing something onto the repository)
+2. Update the version in `library.properties`.
+3. Make git tag for this version.
+4. The library indexer will detect this new version about once an hour.
