@@ -2,7 +2,7 @@
 #include <SDWriter.h>
 
 
-#define DEBUG 1
+//#define DEBUG 1
 
 
 SDCard::SDCard() {
