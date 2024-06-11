@@ -101,5 +101,7 @@ See [Arduino Library Manager list](https://github.com/arduino/library-registry).
 
 1. Make sure arduino-lint was successful (by pushing something onto the repository)
 2. Update the version in `library.properties`.
-3. Make git tag for this version.
-4. The library indexer will detect this new version about once an hour.
+3. Make git tag for this version: `git tag v0.9.0`
+4. Push the tag to the repository: `git push origin v0.9.0`
+5. On github make a new release for this tag.
+6. The library indexer will detect this new version about once an hour.
