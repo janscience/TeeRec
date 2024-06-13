@@ -226,9 +226,9 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) {
 
 
 void RTClock::report() {
-  char source[10];
+  char source[22];
   if (RTCSource == 1)
-    strcpy(source, "DS1307");
+    strcpy(source, "DS1307/DS1337/DS3231");
   else
     strcpy(source, "on-board");
   char times[20];

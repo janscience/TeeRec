@@ -3,12 +3,13 @@
   Created by Jan Benda, June 3rd, 2021.
   Based on https://github.com/PaulStoffregen/Time
   and on contributions from Stefan Mucha and Lydia Federman.
-  See also https://www.pjrc.com/teensy/td_libs_Time.html .
+  See also https://www.pjrc.com/teensy/td_libs_Time.html 
+  and https://www.pjrc.com/teensy/td_libs_DS1307RTC.html.
 
-  If a DS1307 chip is present, it is used as the source for getting
-  real time.  Without such a chip the Teensy on-board real-time clock
-  is used - you just need to attach a 3V battery to VBAT to make it
-  work.
+  If a DS1307, DS1337 or DS3231 chip is present, it is used as the
+  source for getting real time.  Without such a chip the Teensy
+  on-board real-time clock is used - you just need to attach a 3.3V
+  battery to VBAT to make it work.
 */
 
 #ifndef RTClock_h

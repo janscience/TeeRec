@@ -99,7 +99,12 @@ via the `TeeRec.h` header.
 
 - [Display](src/Display.h): Display data on a TFT monitor.
 - [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
-- [RTClock](src/RTClock.h): Time and date strings from the real time clock.
+- [RTClock](src/RTClock.h): Time and date strings from the real time
+  clock. Both the [onboard
+  RTC](https://www.pjrc.com/teensy/td_libs_Time.html) as well as
+  external [DS1307, DS1337 and DS3231
+  chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html) are
+  supported.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [Menu](src/Menu.h): Select actions from a menu.
