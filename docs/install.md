@@ -91,6 +91,7 @@ git clone https://github.com/janscience/TeeRec.git
 For later updates, change into the `Arduino/libraries/TeeRec` directory
 and pull the updates from the directoy:
 ```sh
+cd Arduino/libraries/TeeRec
 git pull origin main
 ```
 
@@ -107,7 +108,7 @@ If you want to edit the TeeRec files, mark the library as developmental:
 cd Arduino/libraries/TeeRec
 touch .development
 ```
-other wise the Arduino IDE complains.
+otherwise the Arduino IDE complains.
 
 Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
