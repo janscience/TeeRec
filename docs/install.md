@@ -34,6 +34,11 @@ FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/t
    [udev rules](https://www.pjrc.com/teensy/00-teensy.rules)
    to `/etc/udev/rules.d/`.
 
+5. If you are updating from Teensyduino < 1.56, make sure that you
+   remove `SdFat` and `Bounce2` from your `Arduino/libraries`
+   folder. They are now part of the new
+   [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html).
+
 
 ## Installation of TeeRec from github repository
 
