@@ -4,13 +4,17 @@ You can install the TeeRec library via the Library manager of the
 Arduino IDE (Tools menu). Let it install all its dependencies. That's
 it!
 
+Make sure that you have a recent Arduino IDE (version > 2.0) and the
+corresponding Teensy support (> 1.58). The next section gives some
+hints for updating/installing the Arduino IDE.
 
-## Requirements
+
+## Arduino IDE and Teensyduino
 
 Update your [Arduino IDE](https://www.arduino.cc/en/software) to
 version 2 and install Teensy support.
 
-Follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/td_download.html):
+FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/td_download.html):
 
 1. Install the latest Arduino IDE provided on
    [arduino.cc](https://www.arduino.cc/en/software).
@@ -31,15 +35,17 @@ Follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/td_downloa
    to `/etc/udev/rules.d/`.
 
 
-## Installation from github repository
+## Installation of TeeRec from github repository
 
-For a manual installation from the [TeeRec github
+For an installation from the [TeeRec github
 repository](https://github.com/janscience/TeeRec), install all the
 libraries TeeRec is depending on and then clone the repository, as
-described in the following.
+described in the following. This is preferred over the installation
+via the library manager if you need the latest developments or if you
+need to change a few things in the library.
 
 
-## Dependencies
+### Dependencies
 
 TeeRec is based on the following libraries, which are part of the core
 libraries of the Teensy boards:
@@ -64,11 +70,11 @@ The only library that needs to be installed is
 
 - [Adafruit-GFX](https://github.com/adafruit/Adafruit-GFX-Library)
 
-Install it from the library manager of the Arduino IDE (Tools > Manage
-libraries). Search for the library and install it.
+Install this library from the library manager of the Arduino IDE
+(Tools > Manage libraries). Search for the library and install it.
 
 
-## TeeRec installation from github
+### Download TeeRec from github
 
 Clone the [TeeRec](https://github.com/janscience/TeeRec) repository
 directly into 'Arduino/libraries':
@@ -77,9 +83,15 @@ cd Arduino/libraries
 git clone https://github.com/janscience/TeeRec.git
 ```
 
+For later updates, change into the `Arduino/libraries/TeeRec` directory
+and pull the updates from the directoy:
+```sh
+git pull origin main
+```
+
 Alternatively, download the whole repository as a zip archive (open
 https://github.com/janscience/TeeRec in your browser and click on the
-green "Code" button). Unpack the zip file:
+green "Code" button). Then unpack the zip file:
 ```sh
 cd Arduino/libraries
 unzip ~/Downloads/TeeRec-main.zip
@@ -90,6 +102,7 @@ If you want to edit the TeeRec files, mark the library as developmental:
 cd Arduino/libraries/TeeRec
 touch .development
 ```
+other wise the Arduino IDE complains.
 
 Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
