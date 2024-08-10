@@ -1,5 +1,5 @@
 /*
-  Configurable - base class for all configurable classes.
+  Configurable - A collection of Actions
   Created by Jan Benda, July 8th, 2021.
 */
 

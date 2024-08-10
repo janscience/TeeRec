@@ -59,6 +59,9 @@ class Action {
   /* Disable the specified roles, if supported. */
   void disable(int roles=AllRoles);
 
+  /* Disable the specified roles from the supported roles. */
+  void disableSupported(int roles);
+
   /* The number of spaces to be used for each indentation level. */
   size_t indentation() const { return Indentation; };
 
@@ -76,8 +79,9 @@ class Action {
   virtual void save(File &file, size_t indent=0, size_t w=0) const {};
   
   /* Interactive configuration of this action via serial stream.
-     StreamInput and StreamOutput must be enabled. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0) {};
+     StreamInput and StreamOutput must be enabled.
+     Default implementation calls execute(). */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Parse the string val and configure the action accordingly.
      SetValue must be enabled. If StreamOutput is enabled,
@@ -85,11 +89,11 @@ class Action {
   virtual void configure(const char *val, const char *name=0,
 			 Stream &stream=Serial) {};
 
+  /* When activated, execute this function. */
+  virtual void execute() {};
+
   
  protected:
-
-  /* Disable the specified roles from the supported roles. */
-  void disableSupported(int roles);
 
   static const size_t MaxName = 64;
   char Name[MaxName];

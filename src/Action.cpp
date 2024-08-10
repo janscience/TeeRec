@@ -73,3 +73,7 @@ void Action::report(Stream &stream, size_t indent,
     stream.printf("%*s%s ...\n", indent, "", name());
 }
 
+
+void Action::configure(Stream &stream, unsigned long timeout) {
+  execute();
+}

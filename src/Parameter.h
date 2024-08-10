@@ -1,5 +1,5 @@
 /*
-  Parameter - Actions for configurable name-value pairs.
+  Parameter - Actions with configurable name-value pairs of various types.
   Created by Jan Benda, October 22, 2023.
 */
 

@@ -78,8 +78,8 @@ via the `TeeRec.h` header.
 ### Configuration
 
 - [Action](src/Action.h): Base class for configurable menu entries.
-- [Parameter](src/Parameter.h): Configurable name-value pairs of various types.
-- [Configurable](src/Configurable.h): Base class for all configurable classes.
+- [Parameter](src/Parameter.h): Actions with configurable name-value pairs of various types.
+- [Configurable](src/Configurable.h): A collection of Actions.
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
