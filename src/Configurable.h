@@ -48,7 +48,8 @@ class Configurable : public Action {
      Return true on success. */
   bool save(SDCard &sd, const char *filename) const;
   
-  /* Interactive configuration via Serial stream. */
+  /* Interactive configuration via Serial stream.
+     Returns from initial menu after timeout milliseconds. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Configure the class with the provided name-value pair

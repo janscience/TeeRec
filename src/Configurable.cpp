@@ -149,8 +149,10 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
       if (stream.available() == 0) {
 	// timeout:
 	stream.println('\n');
+	stream.printf("Timeout! Exit %s now.\n\n", name());
 	return;
       }
+      timeout = 0;
       char pval[16];
       stream.readBytesUntil('\n', pval, 16);
       if (strlen(pval) == 0)
@@ -162,7 +164,7 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 	  iaction[i] < NActions) {
 	def = i;
 	stream.println();
-	Actions[iaction[i]]->configure(stream, timeout);
+	Actions[iaction[i]]->configure(stream, 0);
 	break;
       }
       else if (strcmp(pval, "q") == 0) {

@@ -67,7 +67,7 @@ void setup() {
   config.setConfigFile(CFG_FILE);
   config.configure(sdcard);
   if (Serial)
-    config.configure(Serial);
+    config.configure(Serial, 5000);
   config.report();
   Serial.println();
   if (config.save(sdcard) ) {
