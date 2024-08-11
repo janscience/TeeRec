@@ -11,15 +11,30 @@
 
 
 class SDCard;
-class Configurator;
+
+
+class ConfigureAction : public Configurable {
+
+ public:
+
+  /* Initialize and add to default configurator. */
+  ConfigureAction(const char *name);
+  
+  /* Initialize and add to config. */
+  ConfigureAction(const char *name, Configurable &config);
+  
+};
 
 
 class ReportAction : public Action {
 
  public:
 
-  /* Initialize with name "Print configuration". */
-  ReportAction(const Configurator *config);
+  /* Initialize. */
+  ReportAction(const char *name);
+
+  /* Initialize. */
+  ReportAction(const char *name, Configurable &config);
 
   /* Report the configuration settings. */
   virtual void execute();
@@ -27,7 +42,7 @@ class ReportAction : public Action {
 
  private:
 
-  const Configurator *Config;
+  Configurable *Config;
   
 };
 
@@ -36,8 +51,11 @@ class SaveAction : public Action {
 
  public:
 
-  /* Initialize with name "Save configuration". */
-  SaveAction(const Configurator *config);
+  /* Initialize. */
+  SaveAction(const char *name, SDCard &sd);
+
+  /* Initialize. */
+  SaveAction(const char *name, SDCard &sd, Configurable &config);
 
   /* Save the configuration settings. */
   virtual void execute();
@@ -45,7 +63,8 @@ class SaveAction : public Action {
 
  private:
 
-  const Configurator *Config;
+  Configurable *Config;
+  SDCard *SDC;
   
 };
 
@@ -54,26 +73,22 @@ class Configurator : public Configurable {
 
  public:
 
-  /* Initialize with default name "Configure". */
+  /* Initialize with default name "Menu". */
   Configurator();
 
   /* Initialize. */
   Configurator(const char *name);
 
   /* Name of the configuration file. */
-  const char *configFile() { return ConfigFile; };
+  const char *configFile() const { return ConfigFile; };
 
   /* Set name of the configuration file. */
   void setConfigFile(const char *fname);
 
-  /* Add Configurable for configuration and move all Actions into it. */
-  void addConfigure();
-
-  /* Add action that shows all configuration settings. */
-  void addReport();
-
-  /* Add action that saves all configuration settings to SD card. */
-  void addSave();
+  /* Report name on stream. If descend, also display name and values
+     of children. */
+  virtual void report(Stream &stream=Serial, size_t indent=0,
+		      size_t w=0, bool descend=true) const;
   
   /* Save current setting to configuration file on SD card.
      Return true on success. */
@@ -93,12 +108,6 @@ class Configurator : public Configurable {
 
   static const size_t MaxFile = 128;
   char ConfigFile[MaxFile];
-
-  size_t MActions;
-  
-  Configurable ConfigureAct;
-  ReportAction ReportAct;
-  SaveAction SaveAct;
 
 };
 

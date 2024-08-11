@@ -18,8 +18,11 @@ class Configurable : public Action {
 
  public:
 
-  /* Initialize configuration section name. */
+  /* Initialize configuration section name and add it to Configurator. */
   Configurable(const char *name);
+
+  /* Initialize configuration section name and add it to config. */
+  Configurable(Configurable *config, const char *name);
 
   /* Add an action to this Configurable. */
   void add(Action *action);
@@ -57,17 +60,12 @@ class Configurable : public Action {
      accordingly. */
   void configure(SDCard &sd, const char *filename);
 
-  /* Set default title for menus to title. */
-  void setMenuTitle(const char *title);
-
 
 protected:
 
   static const size_t MaxActions = 32;
   size_t NActions;
   Action *Actions[MaxActions];
-
-  static char MenuTitle[MaxName];
 
 };
 

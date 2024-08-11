@@ -3,15 +3,19 @@
 #include <Configurable.h>
 
 
-char Configurable::MenuTitle[MaxName] = "Menu";
-
-
 Configurable::Configurable(const char *name) :
   Action(name),
   NActions(0) {
-  disableSupported(SetValue);
   if (Configurator::Config != NULL)
     Configurator::Config->add(this);
+}
+
+
+Configurable::Configurable(Configurable *config, const char *name) :
+  Action(name),
+  NActions(0) {
+  if (config != NULL)
+    config->add(this);
 }
 
 
@@ -65,33 +69,27 @@ void Configurable::disable(const char *name, int roles) {
 }
 
 
-void Configurable::setMenuTitle(const char *title) {
-  strncpy(MenuTitle, title, MaxName);
-  MenuTitle[MaxName-1] = '\0';
-}
-
-
 void Configurable::report(Stream &stream, size_t indent,
 			  size_t w, bool descend) const {
-  if (disabled(StreamOutput))
+  if (disabled(StreamIO))
     return;
   // write actions to serial:
   if (descend) {
+    if (enabled(StreamOutput)) {
+      stream.printf("%*s%s:\n", indent, "", name());
+      indent += indentation();
+    }
     // longest name:
     size_t ww = 0;
     for (size_t j=0; j<NActions; j++) {
       if (Actions[j]->enabled(StreamOutput) && strlen(Actions[j]->name()) > ww)
 	ww = strlen(Actions[j]->name());
     }
-    if (strlen(name()) > 0) {
-      stream.printf("%*s%s:\n", indent, "", name());
-      indent += indentation();
-    }
     for (size_t j=0; j<NActions; j++)
       Actions[j]->report(stream, indent, ww, descend);
   }
-  else if (strlen(name()) > 0)
-    stream.printf("%*s%s\n", indent, "", name());
+  else
+    stream.printf("%*s%s ...\n", indent, "", name());
 }
 
 
@@ -128,18 +126,15 @@ bool Configurable::save(SDCard &sd, const char *filename) const {
 
 
 void Configurable::configure(Stream &stream, unsigned long timeout) {
-  if (disabled(StreamIO))
+  if (disabled(StreamInput))
     return;
   int def = 0;
   while (true) {
-    if (strlen(name()) > 0)
-      stream.printf("%s:\n", name());
-    else
-      stream.printf("%s:\n", MenuTitle);
+    stream.printf("%s:\n", name());
     size_t iaction[NActions];
     size_t n = 0;
     for (size_t j=0; j<NActions; j++) {
-      if (Actions[j]->enabled(StreamIO)) {
+      if (Actions[j]->enabled(StreamInput)) {
 	stream.printf("  %d) ", n+1);
 	Actions[j]->report(stream, 0, 0, false);
 	iaction[n++] = j;

@@ -21,7 +21,7 @@
 #define PATH            "recordings" // folder where to store the recordings
 #define FILENAME        "rec1-NUM4.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME  10   // seconds
-#define INITIAL_DELAY   2.0  // seconds
+#define INITIAL_DELAY   10.0  // seconds
 #define PULSE_FREQUENCY 230 // Hertz
 
 // Input XXXSettings:
@@ -39,6 +39,9 @@
 
 SDCard sdcard;
 Configurator config;
+ConfigureAction configure_act("Configure");
+ReportAction report_act("Print configuration", config);
+SaveAction save_act("Save configuration", sdcard, config);
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)

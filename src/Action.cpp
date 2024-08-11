@@ -39,6 +39,8 @@ Action *Action::action(const char *name) {
 
 bool Action::enabled(int roles) const {
   roles &= SupportedRoles;
+  if (roles == 0)
+    return false;
   return ((Roles & roles) == roles);
 }
 

@@ -2,30 +2,54 @@
 #include <Configurator.h>
 
 
-ReportAction::ReportAction(const Configurator *config) :
-  Action("Print configuration", AllRoles),
-  Config(config) {
-  disableSupported(SetValue);  // Parameters should set this, and AllRoles should not include this.
+ConfigureAction::ConfigureAction(const char *name) :
+  ConfigureAction(name, *Configurator::Config) {
+}
+
+
+ConfigureAction::ConfigureAction(const char *name, Configurable &config) :
+  Configurable(NULL, name) {
+  config.add(this);
+  Configurator::Config = this;
+  disableSupported(FileIO);
+  disableSupported(StreamOutput);
+}
+
+
+ReportAction::ReportAction(const char *name) :
+  ReportAction(name, *Configurator::Config) {
+}
+
+
+ReportAction::ReportAction(const char *name, Configurable &config) :
+  Action(name, StreamIO),
+  Config(&config) {
+  Config->add(this);
 }
 
 
 void ReportAction::execute() {
-  Config->Config->report(); // TODO: this should call a Configurator::report() function that then takes care on its own what to report.
+  Config->report();
   Serial.println();
 }
 
 
-SaveAction::SaveAction(const Configurator *config) :
-  // TODO: need to add SDCard
-  Action("Save configuration", AllRoles),
-  Config(config) {
-  disableSupported(SetValue);
+SaveAction::SaveAction(const char *name, SDCard &sd) :
+  SaveAction("Save configuration", sd, *Configurator::Config) {
+}
+
+
+SaveAction::SaveAction(const char *name, SDCard &sd, Configurable &config) :
+  Action("Save configuration", StreamIO),
+  Config(&config),
+  SDC(&sd) {
+  Config->add(this);
 }
 
 
 void SaveAction::execute() {
-  Serial.printf("Save configuration to '%s' ...", Config->configFile());
-  //Config->save(SDC);
+  Serial.print("Save configuration to SD card ...");
+  //Config->save(*SDC);
   Serial.println();
 }
 
@@ -34,20 +58,16 @@ Configurable *Configurator::Config = NULL;
 
 
 Configurator::Configurator() :
-  Configurator("") {
+  Configurator("Menu") {
 }
 
 
 Configurator::Configurator(const char *name) :
-  Configurable(name),
-  MActions(0),
-  ConfigureAct("Configure"),
-  ReportAct(this),
-  SaveAct(this) {
+  Configurable(name) {
   Config = this;
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
   ConfigFile[MaxFile-1] = '\0';
-  ConfigureAct.disableSupported(SetValue);
+  disableSupported(StreamOutput);
 }
 
 
@@ -57,39 +77,9 @@ void Configurator::setConfigFile(const char *fname) {
 }
 
 
-void Configurator::addConfigure() {
-  for (size_t k=MActions; k<NActions; k++)
-    ConfigureAct.add(Actions[k]);
-  NActions = MActions;
-  add(&ConfigureAct);
-  MActions++;
-  Config = &ConfigureAct;
-}
-
-
-void Configurator::addReport() {
-  if (NActions >= MaxActions) {
-    Serial.printf("ERROR! Number of maximum Actions exceeded in %s!\n",
-		  name());
-    return;
-  }
-  for (size_t k=NActions; k>MActions; k--)
-    Actions[k] = Actions[k - 1];
-  NActions++;
-  Actions[MActions++] = &ReportAct;
-}
-
-
-void Configurator::addSave() {
-  if (NActions >= MaxActions) {
-    Serial.printf("ERROR! Number of maximum Actions exceeded in %s!\n",
-		  name());
-    return;
-  }
-  for (size_t k=NActions; k>MActions; k--)
-    Actions[k] = Actions[k - 1];
-  NActions++;
-  Actions[MActions++] = &SaveAct;
+void Configurator::report(Stream &stream, size_t indent,
+			  size_t w, bool descend) const {
+  Config->report(stream, indent, w, descend);
 }
 
 

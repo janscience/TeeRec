@@ -29,7 +29,7 @@ class Action {
     // DisplayUpDownButtons,
     // DisplayTouch,
     // whatever input/output device
-    AllRoles = SetValue | FileIO | StreamIO
+    AllRoles = FileIO | StreamIO
   };
 
   /* Initialize action with name and supported roles. */

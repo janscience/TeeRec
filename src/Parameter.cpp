@@ -4,7 +4,7 @@
 
 
 Parameter::Parameter(Configurable *cfg, const char *name, size_t n) :
-  Action(cfg, name),
+  Action(cfg, name, SetValue | AllRoles),
   NSelection(n) {
 }
 
