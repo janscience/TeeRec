@@ -94,8 +94,6 @@ void Configurable::report(Stream &stream, size_t indent,
 
 
 void Configurable::save(File &file, size_t indent, size_t w) const {
-  if (disabled(FileOutput))
-    return;
   // longest name:
   size_t ww = 0;
   for (size_t j=0; j<NActions; j++) {
@@ -103,7 +101,7 @@ void Configurable::save(File &file, size_t indent, size_t w) const {
       ww = strlen(Actions[j]->name());
   }
   // write actions to file:
-  if (strlen(name()) > 0) {
+  if (enabled(FileOutput) && strlen(name()) > 0) {
     file.printf("%*s%s:\n", indent, "", name());
     indent += indentation();
   }
@@ -130,6 +128,8 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
   int def = 0;
+  if (timeout > 0)
+    def = -1;
   while (true) {
     stream.printf("%s:\n", name());
     size_t iaction[NActions];
@@ -142,7 +142,10 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
       }
     }
     while (true) {
-      stream.printf("  Select [%d]: ", def + 1);
+      if (def >= 0)
+	stream.printf("  Select [%d]: ", def + 1);
+      else
+	stream.printf("  Select: ");
       elapsedMillis time = 0;
       while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
 	yield();
@@ -154,11 +157,15 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 	return;
       }
       timeout = 0;
-      char pval[16];
-      stream.readBytesUntil('\n', pval, 16);
-      if (strlen(pval) == 0)
-	sprintf(pval, "%d", def+1);
+      char pval[32];
+      stream.readBytesUntil('\n', pval, 32);
+      if (strlen(pval) == 0 && def >= 0)
+	sprintf(pval, "%d", def + 1);
       stream.println(pval);
+      if (strlen(pval) == 0 && def < 0) {
+	def = 0;
+	continue;
+      }
       char *end;
       long i = strtol(pval, &end, 10) - 1;
       if (end != pval && i >= 0 && i < (long)n &&

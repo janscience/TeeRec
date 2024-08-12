@@ -71,6 +71,29 @@ class SaveAction : public Action {
 };
 
 
+class LoadAction : public Action {
+
+ public:
+
+  /* Initialize. */
+  LoadAction(const char *name, SDCard &sd, Configurator &config);
+
+  /* Initialize. */
+  LoadAction(const char *name, SDCard &sd, Configurator &config,
+	     Configurable &menu);
+
+  /* Load the configuration settings. */
+  virtual void execute();
+
+
+ private:
+
+  Configurator *Config;
+  SDCard *SDC;
+  
+};
+
+
 class Configurator : public Configurable {
 
  public:
@@ -88,7 +111,8 @@ class Configurator : public Configurable {
   void setConfigFile(const char *fname);
 
   /* Report configuration menu on stream. */
-  virtual void report(Stream &stream=Serial) const;
+  virtual void report(Stream &stream=Serial, size_t indent=0,
+		      size_t w=0, bool descend=true) const;
   
   /* Save current setting to configuration file on SD card.
      Return true on success. */

@@ -42,6 +42,7 @@ Configurator config;
 ConfigureAction configure_act("Configure");
 ReportAction report_act("Print configuration", config);
 SaveAction save_act("Save configuration", sdcard, config, config);
+LoadAction load_act("Load configuration", sdcard, config, config);
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)
@@ -67,14 +68,8 @@ void setup() {
   config.setConfigFile(CFG_FILE);
   config.configure(sdcard);
   if (Serial)
-    config.configure(Serial, 5000);
+    config.configure(Serial, 10000);
   config.report();
-  Serial.println();
-  if (config.save(sdcard) ) {
-    Serial.printf("Wrote configuration file \"%s\" to SD card.\n", CFG_FILE);
-  }
-  else
-    Serial.println("Failed to write config file.");
   Serial.println();
   blink.switchOff();
   sdcard.end();

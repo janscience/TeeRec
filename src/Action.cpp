@@ -3,6 +3,28 @@
 #include <Action.h>
 
 
+bool Action::yesno(const char *request, bool defval, Stream &stream) {
+  while (true) {
+    stream.print(request);
+    if (defval)
+      stream.print(" [Y/n] ");
+    else
+      stream.print(" [y/N] ");
+    while (stream.available() == 0)
+      yield();
+    char pval[8];
+    stream.readBytesUntil('\n', pval, 8);
+    stream.println(pval);
+    if (strlen(pval) == 0)
+      return defval;
+    if (tolower(pval[0]) == 'y')
+      return true;
+    if (tolower(pval[0]) == 'n')
+      return false;
+  }
+}
+
+
 Action::Action(const char *name, int roles) :
   SupportedRoles(roles),
   Roles(roles),

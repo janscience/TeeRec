@@ -29,18 +29,18 @@ ReportAction::ReportAction(const char *name, Configurable &config) :
 
 
 void ReportAction::execute() {
-  Config->report();
+  Config->report(Serial);
   Serial.println();
 }
 
 
 SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config) :
-  SaveAction("Save configuration", sd, config, *Configurator::Config) {
+  SaveAction(name, sd, config, *Configurator::Config) {
 }
 
 SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config,
 		       Configurable &menu) :
-  Action("Save configuration", StreamIO),
+  Action(name, StreamIO),
   Config(&config),
   SDC(&sd) {
   menu.add(this);
@@ -52,6 +52,30 @@ void SaveAction::execute() {
     Serial.printf("Saved configuration to file \"%s\" on SD card.\n",
 		  Config->configFile());
   Serial.println();
+}
+
+
+LoadAction::LoadAction(const char *name, SDCard &sd, Configurator &config) :
+  LoadAction(name, sd, config, *Configurator::Config) {
+}
+
+LoadAction::LoadAction(const char *name, SDCard &sd, Configurator &config,
+		       Configurable &menu) :
+  Action(name, StreamIO),
+  Config(&config),
+  SDC(&sd) {
+  menu.add(this);
+}
+
+
+void LoadAction::execute() {
+  if (disabled(StreamInput))
+    return;
+  bool r = Action::yesno("Do you really want to reload the configuration file?",
+			 true, Serial);
+  Serial.println();
+  if (r)
+    Config->configure(*SDC);
 }
 
 
@@ -69,6 +93,7 @@ Configurator::Configurator(const char *name) :
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
   ConfigFile[MaxFile-1] = '\0';
   disableSupported(StreamOutput);
+  disableSupported(FileIO);
 }
 
 
@@ -78,13 +103,14 @@ void Configurator::setConfigFile(const char *fname) {
 }
 
 
-void Configurator::report(Stream &stream) const {
-  Config->report(stream, 0, 0, true);
+void Configurator::report(Stream &stream, size_t indent,
+			  size_t w, bool descend) const {
+  Config->Configurable::report(stream, indent, w, descend);
 }
 
 
 bool Configurator::save(SDCard &sd) const {
-  return Config->save(sd, ConfigFile);
+  return Config->Configurable::save(sd, ConfigFile);
 }
 
 
@@ -94,6 +120,6 @@ void Configurator::configure(Stream &stream, unsigned long timeout) {
 
 
 void Configurator::configure(SDCard &sd) {
-  Configurable::configure(sd, ConfigFile);
+  Config->Configurable::configure(sd, ConfigFile);
 }
 
