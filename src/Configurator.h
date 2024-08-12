@@ -87,10 +87,8 @@ class Configurator : public Configurable {
   /* Set name of the configuration file. */
   void setConfigFile(const char *fname);
 
-  /* Report name on stream. If descend, also display name and values
-     of children. */
-  virtual void report(Stream &stream=Serial, size_t indent=0,
-		      size_t w=0, bool descend=true) const;
+  /* Report configuration menu on stream. */
+  virtual void report(Stream &stream=Serial) const;
   
   /* Save current setting to configuration file on SD card.
      Return true on success. */

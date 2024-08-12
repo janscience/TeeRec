@@ -82,9 +82,9 @@ def plot_traces(path, channel, toffs, tmax, step, gain, unwrapd, raw,
     title = basename
     gains = ''
     if has_audioio:
-        metadata = metadata(path)
-        if 'INFO' in metadata:
-            info = metadata['INFO']
+        meta_data = metadata(path)
+        if 'INFO' in meta_data:
+            info = meta_data['INFO']
             if 'PINS' in info:
                 pins = info['PINS'].split(',')
             if 'GAIN' in info:

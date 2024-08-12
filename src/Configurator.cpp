@@ -78,9 +78,8 @@ void Configurator::setConfigFile(const char *fname) {
 }
 
 
-void Configurator::report(Stream &stream, size_t indent,
-			  size_t w, bool descend) const {
-  Config->report(stream, indent, w, descend);
+void Configurator::report(Stream &stream) const {
+  Config->report(stream, 0, 0, true);
 }
 
 
