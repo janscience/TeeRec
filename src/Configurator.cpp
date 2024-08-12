@@ -34,22 +34,23 @@ void ReportAction::execute() {
 }
 
 
-SaveAction::SaveAction(const char *name, SDCard &sd) :
-  SaveAction("Save configuration", sd, *Configurator::Config) {
+SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config) :
+  SaveAction("Save configuration", sd, config, *Configurator::Config) {
 }
 
-
-SaveAction::SaveAction(const char *name, SDCard &sd, Configurable &config) :
+SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config,
+		       Configurable &menu) :
   Action("Save configuration", StreamIO),
   Config(&config),
   SDC(&sd) {
-  Config->add(this);
+  menu.add(this);
 }
 
 
 void SaveAction::execute() {
-  Serial.print("Save configuration to SD card ...");
-  //Config->save(*SDC);
+  if (Config->save(*SDC))
+    Serial.printf("Saved configuration to file \"%s\" on SD card.\n",
+		  Config->configFile());
   Serial.println();
 }
 
@@ -84,7 +85,7 @@ void Configurator::report(Stream &stream, size_t indent,
 
 
 bool Configurator::save(SDCard &sd) const {
-  return Configurable::save(sd, ConfigFile);
+  return Config->save(sd, ConfigFile);
 }
 
 

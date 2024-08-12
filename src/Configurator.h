@@ -11,6 +11,7 @@
 
 
 class SDCard;
+class Configurator;
 
 
 class ConfigureAction : public Configurable {
@@ -52,10 +53,11 @@ class SaveAction : public Action {
  public:
 
   /* Initialize. */
-  SaveAction(const char *name, SDCard &sd);
+  SaveAction(const char *name, SDCard &sd, Configurator &config);
 
   /* Initialize. */
-  SaveAction(const char *name, SDCard &sd, Configurable &config);
+  SaveAction(const char *name, SDCard &sd, Configurator &config,
+	     Configurable &menu);
 
   /* Save the configuration settings. */
   virtual void execute();
@@ -63,7 +65,7 @@ class SaveAction : public Action {
 
  private:
 
-  Configurable *Config;
+  Configurator *Config;
   SDCard *SDC;
   
 };

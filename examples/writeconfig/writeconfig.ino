@@ -41,7 +41,7 @@ SDCard sdcard;
 Configurator config;
 ConfigureAction configure_act("Configure");
 ReportAction report_act("Print configuration", config);
-SaveAction save_act("Save configuration", sdcard, config);
+SaveAction save_act("Save configuration", sdcard, config, config);
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)

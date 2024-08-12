@@ -115,8 +115,9 @@ void Configurable::save(File &file, size_t indent, size_t w) const {
 bool Configurable::save(SDCard &sd, const char *filename) const {
   File file = sd.openWrite(filename);
   if (!file) {
-    Serial.printf("Configuration file \"%s\" cannot be written.\n\n",
+    Serial.printf("ERROR! Configuration file \"%s\" cannot be written to SD card.\n",
 		  filename);
+    Serial.println("       SD not inserted or SD card full.");
     return false;
   }
   save(file);
