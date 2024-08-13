@@ -42,13 +42,6 @@
 RTClock rtclock;
 SDCard sdcard;
 Configurator config;
-ConfigureAction configure_act("Configure");
-ReportConfigAction report_act("Print configuration", config);
-SaveConfigAction save_act("Save configuration", sdcard, config);
-LoadConfigAction load_act("Load configuration", sdcard, config);
-RemoveConfigAction remove_act("Erase configuration", sdcard, config);
-ReportRTCAction report_rtc_act("Print date & time", rtclock, config);
-SetRTCAction set_rtc_act("Set date & time", rtclock, config);
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)
@@ -57,6 +50,15 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 #elif defined(PCM186X)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
+Configurable datetime_menu("Date & time");
+ReportRTCAction report_rtc_act("Print date & time", rtclock, datetime_menu);
+SetRTCAction set_rtc_act("Set date & time", rtclock, datetime_menu);
+Configurable config_menu("Configuration");
+ReportConfigAction report_act("Print configuration", config_menu);
+SaveConfigAction save_act("Save configuration", sdcard, config_menu);
+LoadConfigAction load_act("Load configuration", sdcard, config_menu);
+RemoveConfigAction remove_act("Erase configuration", sdcard, config_menu);
+
 Blink blink(LED_BUILTIN);
 
 
