@@ -82,6 +82,40 @@ void LoadConfigAction::execute() {
 }
 
 
+RemoveConfigAction::RemoveConfigAction(const char *name, SDCard &sd) :
+  RemoveConfigAction(name, sd, *Configurator::Config) {
+}
+
+
+RemoveConfigAction::RemoveConfigAction(const char *name, SDCard &sd,
+				       Configurable &menu) :
+  SDCardAction(name, sd) {
+  menu.add(this);
+}
+
+
+void RemoveConfigAction::execute() {
+  if (disabled(StreamInput))
+    return;
+  if (!SDC.exists(Configurator::MainConfig->configFile())) {
+    Serial.printf("Configuration file \"%s\" does not exist on SD card.\n\n",
+		  Configurator::MainConfig->configFile());
+    return;
+  }
+  if (Action::yesno("Do you really want to remove the configuration file?",
+		    true, Serial)) {
+    if (SDC.remove(Configurator::MainConfig->configFile()))
+      Serial.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
+		    Configurator::MainConfig->configFile());
+    else
+      Serial.printf("\nERROR! Failed to remove configuration file \"%s\" from SD card.\n\n",
+		    Configurator::MainConfig->configFile());
+  }
+  else
+    Serial.println();
+}
+
+
 Configurable *Configurator::Config = NULL;
 Configurator *Configurator::MainConfig = NULL;
 

@@ -86,6 +86,21 @@ class LoadConfigAction : public SDCardAction {
 };
 
 
+class RemoveConfigAction : public SDCardAction {
+
+ public:
+
+  /* Initialize. */
+  RemoveConfigAction(const char *name, SDCard &sd);
+
+  /* Initialize. */
+  RemoveConfigAction(const char *name, SDCard &sd, Configurable &menu);
+
+  /* Remove the configuration file from SD card. */
+  virtual void execute();
+};
+
+
 class Configurator : public Configurable {
 
  public:
