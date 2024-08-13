@@ -84,6 +84,7 @@ via the `TeeRec.h` header.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
+- [ToolActions](src/ToolActions.h): Actions for handling the configuration file and the real-time clock.
 
 ### Audio monitor
 

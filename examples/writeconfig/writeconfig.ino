@@ -5,6 +5,7 @@
 #include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
+#include <ToolActions.h>
 #include <Settings.h>
 #if defined(TEENSYADC)
   #include <InputADC.h>
