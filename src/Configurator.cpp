@@ -7,79 +7,83 @@ ConfigureAction::ConfigureAction(const char *name) :
 }
 
 
-ConfigureAction::ConfigureAction(const char *name, Configurable &config) :
+ConfigureAction::ConfigureAction(const char *name, Configurable &menu) :
   Configurable(NULL, name) {
-  config.add(this);
+  menu.add(this);
   Configurator::Config = this;
   disableSupported(FileIO);
   disableSupported(StreamOutput);
 }
 
 
-ReportAction::ReportAction(const char *name) :
-  ReportAction(name, *Configurator::Config) {
+ReportConfigAction::ReportConfigAction(const char *name) :
+  ReportConfigAction(name, *Configurator::Config) {
 }
 
 
-ReportAction::ReportAction(const char *name, Configurable &config) :
-  Action(name, StreamIO),
-  Config(&config) {
-  Config->add(this);
-}
-
-
-void ReportAction::execute() {
-  Config->report(Serial);
-  Serial.println();
-}
-
-
-SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config) :
-  SaveAction(name, sd, config, *Configurator::Config) {
-}
-
-SaveAction::SaveAction(const char *name, SDCard &sd, Configurator &config,
-		       Configurable &menu) :
-  Action(name, StreamIO),
-  Config(&config),
-  SDC(&sd) {
+ReportConfigAction::ReportConfigAction(const char *name, Configurable &menu) :
+  Action(name, StreamIO) {
   menu.add(this);
 }
 
 
-void SaveAction::execute() {
-  if (Config->save(*SDC))
+void ReportConfigAction::execute() {
+  Configurator::MainConfig->report(Serial);
+  Serial.println();
+}
+
+
+SDCardAction::SDCardAction(const char *name, SDCard &sd) : 
+  Action(name, StreamIO),
+  SDC(sd) {
+}
+
+
+SaveConfigAction::SaveConfigAction(const char *name, SDCard &sd) :
+  SaveConfigAction(name, sd, *Configurator::Config) {
+}
+
+
+SaveConfigAction::SaveConfigAction(const char *name, SDCard &sd,
+				   Configurable &menu) :
+  SDCardAction(name, sd) {
+  menu.add(this);
+}
+
+
+void SaveConfigAction::execute() {
+  if (Configurator::MainConfig->save(SDC))
     Serial.printf("Saved configuration to file \"%s\" on SD card.\n",
-		  Config->configFile());
+		  Configurator::MainConfig->configFile());
   Serial.println();
 }
 
 
-LoadAction::LoadAction(const char *name, SDCard &sd, Configurator &config) :
-  LoadAction(name, sd, config, *Configurator::Config) {
+LoadConfigAction::LoadConfigAction(const char *name, SDCard &sd) :
+  LoadConfigAction(name, sd, *Configurator::Config) {
 }
 
-LoadAction::LoadAction(const char *name, SDCard &sd, Configurator &config,
-		       Configurable &menu) :
-  Action(name, StreamIO),
-  Config(&config),
-  SDC(&sd) {
+
+LoadConfigAction::LoadConfigAction(const char *name, SDCard &sd,
+				   Configurable &menu) :
+  SDCardAction(name, sd) {
   menu.add(this);
 }
 
 
-void LoadAction::execute() {
+void LoadConfigAction::execute() {
   if (disabled(StreamInput))
     return;
   bool r = Action::yesno("Do you really want to reload the configuration file?",
 			 true, Serial);
   Serial.println();
   if (r)
-    Config->configure(*SDC);
+    Configurator::MainConfig->configure(SDC);
 }
 
 
 Configurable *Configurator::Config = NULL;
+Configurator *Configurator::MainConfig = NULL;
 
 
 Configurator::Configurator() :
@@ -90,6 +94,7 @@ Configurator::Configurator() :
 Configurator::Configurator(const char *name) :
   Configurable(name) {
   Config = this;
+  MainConfig = this;
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
   ConfigFile[MaxFile-1] = '\0';
   disableSupported(StreamOutput);

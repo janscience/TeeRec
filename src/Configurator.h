@@ -21,76 +21,68 @@ class ConfigureAction : public Configurable {
   /* Initialize and add to default configurator. */
   ConfigureAction(const char *name);
   
-  /* Initialize and add to config. */
-  ConfigureAction(const char *name, Configurable &config);
+  /* Initialize and add to configuration menu. */
+  ConfigureAction(const char *name, Configurable &menu);
   
 };
 
 
-class ReportAction : public Action {
+class ReportConfigAction : public Action {
 
  public:
 
   /* Initialize. */
-  ReportAction(const char *name);
+  ReportConfigAction(const char *name);
 
-  /* Initialize. */
-  ReportAction(const char *name, Configurable &config);
+  /* Initialize and add to configuration menu. */
+  ReportConfigAction(const char *name, Configurable &menu);
 
   /* Report the configuration settings. */
   virtual void execute();
-
-
- private:
-
-  Configurable *Config;
   
 };
 
 
-class SaveAction : public Action {
+class SDCardAction : public Action {
 
  public:
 
   /* Initialize. */
-  SaveAction(const char *name, SDCard &sd, Configurator &config);
+  SDCardAction(const char *name, SDCard &sd);
 
-  /* Initialize. */
-  SaveAction(const char *name, SDCard &sd, Configurator &config,
-	     Configurable &menu);
+ protected:
 
-  /* Save the configuration settings. */
-  virtual void execute();
-
-
- private:
-
-  Configurator *Config;
-  SDCard *SDC;
-  
+  SDCard &SDC; 
 };
 
 
-class LoadAction : public Action {
+class SaveConfigAction : public SDCardAction {
 
  public:
 
   /* Initialize. */
-  LoadAction(const char *name, SDCard &sd, Configurator &config);
+  SaveConfigAction(const char *name, SDCard &sd);
 
   /* Initialize. */
-  LoadAction(const char *name, SDCard &sd, Configurator &config,
-	     Configurable &menu);
+  SaveConfigAction(const char *name, SDCard &sd, Configurable &menu);
 
-  /* Load the configuration settings. */
+  /* Save the configuration settings to configuration file. */
   virtual void execute();
+};
 
 
- private:
+class LoadConfigAction : public SDCardAction {
 
-  Configurator *Config;
-  SDCard *SDC;
-  
+ public:
+
+  /* Initialize. */
+  LoadConfigAction(const char *name, SDCard &sd);
+
+  /* Initialize. */
+  LoadConfigAction(const char *name, SDCard &sd, Configurable &menu);
+
+  /* Load the configuration settings from configuration file. */
+  virtual void execute();
 };
 
 
@@ -125,6 +117,10 @@ class Configurator : public Configurable {
      the Actions. */
   void configure(SDCard &sd);
 
+  /* The main menu, i.e. pointer to the last Configurator instance. */
+  static Configurator *MainConfig;
+
+  /* The menu where Configurables are automatically added to. */
   static Configurable *Config;
 
   
