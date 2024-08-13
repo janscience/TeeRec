@@ -11,11 +11,10 @@ Configurable::Configurable(const char *name) :
 }
 
 
-Configurable::Configurable(Configurable *config, const char *name) :
+Configurable::Configurable(const char *name, Configurable &menu) :
   Action(name),
   NActions(0) {
-  if (config != NULL)
-    config->add(this);
+  menu.add(this);
 }
 
 

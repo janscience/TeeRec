@@ -10,8 +10,7 @@ ConfigureAction::ConfigureAction(const char *name) :
 
 
 ConfigureAction::ConfigureAction(const char *name, Configurable &menu) :
-  Configurable(NULL, name) {
-  menu.add(this);
+  Configurable(name, menu) {
   Configurator::Config = this;
   disableSupported(FileIO);
   disableSupported(StreamOutput);

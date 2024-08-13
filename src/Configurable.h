@@ -18,11 +18,11 @@ class Configurable : public Action {
 
  public:
 
-  /* Initialize configuration section name and add it to Configurator. */
+  /* Initialize configuration section name and add it to default menu. */
   Configurable(const char *name);
 
-  /* Initialize configuration section name and add it to config. */
-  Configurable(Configurable *config, const char *name);
+  /* Initialize configuration section name and add it to menu. */
+  Configurable(const char *name, Configurable &menu);
 
   /* Add an action to this Configurable. */
   void add(Action *action);
