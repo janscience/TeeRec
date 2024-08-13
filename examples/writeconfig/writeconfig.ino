@@ -2,6 +2,7 @@
 #define TEENSYADC     // data are recorded from Teensy internal ADCs
 //#define PCM186X     // data are recorded by TI PCM186x chip via TDM
 
+#include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
 #include <Settings.h>
@@ -37,6 +38,7 @@
 #endif
 
 
+RTClock rtclock;
 SDCard sdcard;
 Configurator config;
 ConfigureAction configure_act("Configure");
@@ -44,6 +46,8 @@ ReportConfigAction report_act("Print configuration", config);
 SaveConfigAction save_act("Save configuration", sdcard, config);
 LoadConfigAction load_act("Load configuration", sdcard, config);
 RemoveConfigAction remove_act("Erase configuration", sdcard, config);
+ReportRTCAction report_rtc_act("Print date & time", rtclock, config);
+SetRTCAction set_rtc_act("Set date & time", rtclock, config);
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)

@@ -11,19 +11,18 @@
 
 
 class SDCard;
-class Configurator;
+class RTClock;
 
 
 class ConfigureAction : public Configurable {
 
  public:
 
-  /* Initialize and add to default configurator. */
+  /* Initialize and add to default menu. */
   ConfigureAction(const char *name);
   
   /* Initialize and add to configuration menu. */
-  ConfigureAction(const char *name, Configurable &menu);
-  
+  ConfigureAction(const char *name, Configurable &menu);  
 };
 
 
@@ -31,15 +30,14 @@ class ReportConfigAction : public Action {
 
  public:
 
-  /* Initialize. */
+  /* Initialize and add to default menu. */
   ReportConfigAction(const char *name);
 
   /* Initialize and add to configuration menu. */
   ReportConfigAction(const char *name, Configurable &menu);
 
   /* Report the configuration settings. */
-  virtual void execute();
-  
+  virtual void execute();  
 };
 
 
@@ -47,8 +45,11 @@ class SDCardAction : public Action {
 
  public:
 
-  /* Initialize. */
+  /* Initialize and add to default menu. */
   SDCardAction(const char *name, SDCard &sd);
+
+  /* Initialize and add to configuration menu. */
+  SDCardAction(const char *name, SDCard &sd, Configurable &menu);
 
  protected:
 
@@ -60,11 +61,7 @@ class SaveConfigAction : public SDCardAction {
 
  public:
 
-  /* Initialize. */
-  SaveConfigAction(const char *name, SDCard &sd);
-
-  /* Initialize. */
-  SaveConfigAction(const char *name, SDCard &sd, Configurable &menu);
+  using SDCardAction::SDCardAction;
 
   /* Save the configuration settings to configuration file. */
   virtual void execute();
@@ -75,11 +72,7 @@ class LoadConfigAction : public SDCardAction {
 
  public:
 
-  /* Initialize. */
-  LoadConfigAction(const char *name, SDCard &sd);
-
-  /* Initialize. */
-  LoadConfigAction(const char *name, SDCard &sd, Configurable &menu);
+  using SDCardAction::SDCardAction;
 
   /* Load the configuration settings from configuration file. */
   virtual void execute();
@@ -90,13 +83,47 @@ class RemoveConfigAction : public SDCardAction {
 
  public:
 
-  /* Initialize. */
-  RemoveConfigAction(const char *name, SDCard &sd);
-
-  /* Initialize. */
-  RemoveConfigAction(const char *name, SDCard &sd, Configurable &menu);
+  using SDCardAction::SDCardAction;
 
   /* Remove the configuration file from SD card. */
+  virtual void execute();
+};
+
+
+class RTCAction : public Action {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  RTCAction(const char *name, RTClock &rtclock);
+
+  /* Initialize and add to configuration menu. */
+  RTCAction(const char *name, RTClock &rtclock, Configurable &menu);
+
+ protected:
+
+  RTClock &RTC;
+};
+
+
+class ReportRTCAction : public RTCAction {
+
+ public:
+
+  using RTCAction::RTCAction;
+
+  /* Report the real-time clock. */
+  virtual void execute();
+};
+
+
+class SetRTCAction : public RTCAction {
+
+ public:
+
+  using RTCAction::RTCAction;
+
+  /* Set the real-time clock. */
   virtual void execute();
 };
 

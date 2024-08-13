@@ -57,11 +57,15 @@ class RTClock {
   bool set(int year, int month, int day, int hour, int min, int sec,
 	   bool from_start=false, bool check=true);
 
-  // Set real-time clock to datetime string (YYYY-MM-DDTHH:MM:SS).
+  // Set real-time clock to datetime string (YYYY-MM-DDThh:mm:ss).
   // If from_start is true, the time the sketch is already running is
   // added to datetime.
   // Return true if the time was successfully set.
   bool set(char *datetime, bool from_start=false);
+
+  // Set real-time clock interactively from stream.
+  // Return true if the time was successfully set.
+  bool set(Stream &stream=Serial);
 
   // Set the current time from a file path on the sdcard.
   // If the file was found and the time set, the file is deleted.
@@ -99,8 +103,8 @@ class RTClock {
   String makeStr(const String &str, time_t time=0, bool dash=false);
 
   // Write out current time, real time provider, and potential error message
-  // on serial.
-  void report();
+  // on stream.
+  void report(Stream &stream=Serial);
 
 private:
 

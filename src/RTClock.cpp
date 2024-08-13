@@ -96,20 +96,54 @@ bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
 
 
 bool RTClock::set(char *datetime, bool from_start) {
-  // parse date-time string YYYY-MM-DDTHH:MM:SS
-  int sepi[6] = {4, 7, 10, 13, 16, 19};
+  // parse date-time string YYYY-MM-DDThh:mm:ss
+  int sepdt[6] = {4, 7, 10, 13, 16, 19};
+  int nelements = 6;
   datetime[19] = '\0';
   for (int k=0; k<6; k++) {
-    if (datetime[sepi[k]] != '-' &&
-	datetime[sepi[k]] != 'T' &&
-	datetime[sepi[k]] != ':' &&
-	datetime[sepi[k]] != '\0') {
-      Serial.printf("String \"%s\" is not a valid date-time string.\n", datetime);
-      return false;
+    if (datetime[sepdt[k]] != '-' &&
+	datetime[sepdt[k]] != 'T' &&
+	datetime[sepdt[k]] != ':' &&
+	datetime[sepdt[k]] != '\0') {
+      nelements = k;
+      break;
     }
-    else
-      datetime[sepi[k]] = '\0';
   }
+  if (nelements < 6) {
+    if (nelements == 3) {
+      // valid date string, add current time:
+      char times[10];
+      time(times);
+      datetime[sepdt[2]] = 'T';
+      strcpy(datetime + sepdt[2] + 1, times);
+    }
+    else {
+      // parse time string hh:mm:ss
+      int sept[3] = {2, 5, 8};
+      nelements = 3;
+      for (int k=0; k<3; k++) {
+	if (datetime[sept[k]] != ':' &&
+	    datetime[sept[k]] != '\0') {
+	  nelements = k;
+	  break;
+	}
+      }
+      if (nelements == 3) {
+	// valid time string, add current date:
+	char dates[32];
+	date(dates);
+	dates[sepdt[2]] = 'T';
+	strcpy(dates + sepdt[2] + 1, datetime);
+	strcpy(datetime, dates);
+      }
+      else {
+	Serial.printf("String \"%s\" is not a valid date-time string.\n", datetime);
+	return false;
+      }
+    }
+  }
+  for (int k=0; k<6; k++)
+    datetime[sepdt[k]] = '\0';
   int year = atoi(datetime);
   int month = atoi(&datetime[5]);
   int day = atoi(&datetime[8]);
@@ -117,6 +151,27 @@ bool RTClock::set(char *datetime, bool from_start) {
   int min = atoi(&datetime[14]);
   int sec = atoi(&datetime[17]);
   return set(year, month, day, hour, min, sec, from_start, true);
+}
+
+
+bool RTClock::set(Stream &stream) {
+  while (true) {
+    stream.print("Enter date and time in ISO format (YYYY-MM-DDThh:mm:dd): ");
+    while (stream.available() == 0)
+      yield();
+    char datetime[32];
+    stream.readBytesUntil('\n', datetime, 32);
+    stream.println(datetime);
+    if (strlen(datetime) == 0 || datetime[0] == 'q')
+      return false;
+    memset(datetime + strlen(datetime), '\0', 32 - strlen(datetime));
+    if (set(datetime)) {
+      char times[20];
+      dateTime(times);
+      stream.printf("\nSuccessfully set real-time clock to: %s\n", times);
+      return true;
+    }
+  }
 }
 
 
@@ -225,7 +280,7 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) {
 }
 
 
-void RTClock::report() {
+void RTClock::report(Stream &stream) {
   char source[22];
   if (RTCSource == 1)
     strcpy(source, "DS1307/DS1337/DS3231");
@@ -233,12 +288,13 @@ void RTClock::report() {
     strcpy(source, "on-board");
   char times[20];
   dateTime(times);
-  Serial.printf("RTC (%s) current time: %s\n", source, times);
+  stream.printf("RTC (%s) current time: %s\n", source, times);
   if (timeStatus() != timeSet) {
     if (timeStatus() == timeNotSet)
-      Serial.println("  time has never been set!");
+      stream.println("  time has never been set!");
     else if (timeStatus() == timeNeedsSync)
-      Serial.println("  unable to sync time with RTC!");
+      stream.println("  unable to sync time with RTC!");
   }
-  Serial.println();
+  stream.println();
 }
+

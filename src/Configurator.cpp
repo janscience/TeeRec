@@ -1,3 +1,4 @@
+#include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
 
@@ -33,20 +34,14 @@ void ReportConfigAction::execute() {
 }
 
 
-SDCardAction::SDCardAction(const char *name, SDCard &sd) : 
+SDCardAction::SDCardAction(const char *name, SDCard &sd) :
+  SDCardAction(name, sd, *Configurator::Config) {
+}
+
+
+SDCardAction::SDCardAction(const char *name, SDCard &sd, Configurable &menu) : 
   Action(name, StreamIO),
   SDC(sd) {
-}
-
-
-SaveConfigAction::SaveConfigAction(const char *name, SDCard &sd) :
-  SaveConfigAction(name, sd, *Configurator::Config) {
-}
-
-
-SaveConfigAction::SaveConfigAction(const char *name, SDCard &sd,
-				   Configurable &menu) :
-  SDCardAction(name, sd) {
   menu.add(this);
 }
 
@@ -59,18 +54,6 @@ void SaveConfigAction::execute() {
 }
 
 
-LoadConfigAction::LoadConfigAction(const char *name, SDCard &sd) :
-  LoadConfigAction(name, sd, *Configurator::Config) {
-}
-
-
-LoadConfigAction::LoadConfigAction(const char *name, SDCard &sd,
-				   Configurable &menu) :
-  SDCardAction(name, sd) {
-  menu.add(this);
-}
-
-
 void LoadConfigAction::execute() {
   if (disabled(StreamInput))
     return;
@@ -79,18 +62,6 @@ void LoadConfigAction::execute() {
   Serial.println();
   if (r)
     Configurator::MainConfig->configure(SDC);
-}
-
-
-RemoveConfigAction::RemoveConfigAction(const char *name, SDCard &sd) :
-  RemoveConfigAction(name, sd, *Configurator::Config) {
-}
-
-
-RemoveConfigAction::RemoveConfigAction(const char *name, SDCard &sd,
-				       Configurable &menu) :
-  SDCardAction(name, sd) {
-  menu.add(this);
 }
 
 
@@ -113,6 +84,32 @@ void RemoveConfigAction::execute() {
   }
   else
     Serial.println();
+}
+
+
+RTCAction::RTCAction(const char *name, RTClock &rtclock) :
+  RTCAction(name, rtclock, *Configurator::Config) {
+}
+
+
+RTCAction::RTCAction(const char *name, RTClock &rtclock,
+		     Configurable &menu) :
+  Action(name, StreamIO),
+  RTC(rtclock) {
+  menu.add(this);
+}
+
+
+void ReportRTCAction::execute() {
+  char times[20];
+  RTC.dateTime(times);
+  Serial.printf("Current time: %s\n\n", times);
+}
+
+
+void SetRTCAction::execute() {
+  RTC.set(Serial);
+  Serial.println();
 }
 
 
