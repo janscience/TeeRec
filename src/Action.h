@@ -12,6 +12,7 @@
 
 class File;
 class Configurable;
+class Configurator;
 
 
 class Action {
@@ -48,7 +49,16 @@ class Action {
   /* Set the name identifying the action to name. */
   void setName(const char *name);
 
-  /* Return this Action if name matches it name. */
+  /* The parent menu of this action. */
+  Configurable *parent() const { return Parent; };
+
+  /* Set the parent of this action. */
+  void setParent(Configurable *parent) { Parent = parent; };
+
+  /* The root menu of this action. */
+  Configurator *root();
+
+  /* Return this Action if name matches its name. */
   virtual Action *action(const char *name);
 
   /* True if the specified roles are enabled. */
@@ -102,6 +112,8 @@ class Action {
   int Roles;
 
   size_t Indentation;
+
+  Configurable *Parent;
   
 };
 

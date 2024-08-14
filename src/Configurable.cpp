@@ -24,6 +24,7 @@ void Configurable::add(Action *act) {
     return;
   }
   Actions[NActions++] = act;
+  act->setParent(this);
 }
 
 

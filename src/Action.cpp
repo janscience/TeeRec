@@ -1,5 +1,6 @@
 #include <SDWriter.h>
 #include <Configurable.h>
+#include <Configurator.h>
 #include <Action.h>
 
 
@@ -28,7 +29,8 @@ bool Action::yesno(const char *request, bool defval, Stream &stream) {
 Action::Action(const char *name, int roles) :
   SupportedRoles(roles),
   Roles(roles),
-  Indentation(2) {
+  Indentation(2),
+  Parent(NULL) {
   setName(name);
 }
 
@@ -42,6 +44,14 @@ Action::Action(Configurable &menu, const char *name, int roles) :
 void Action::setName(const char *name) {
   strncpy(Name, name, MaxName);
   Name[MaxName-1] = '\0';
+}
+
+
+Configurator *Action::root() {
+  Action *act = this;
+  while (act->parent() != NULL)
+    act = act->parent();
+  return static_cast<Configurator*>(act);
 }
 
 

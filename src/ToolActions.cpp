@@ -12,7 +12,7 @@ ConfigureAction::ConfigureAction(const char *name, int roles) :
 ConfigureAction::ConfigureAction(Configurable &menu, const char *name,
 				 int roles) :
   Configurable(menu, name, roles) {
-  Configurator::MainConfig->Config = this;
+  root()->Config = this;
 }
 
 
@@ -27,7 +27,7 @@ ReportConfigAction::ReportConfigAction(Configurable &menu, const char *name) :
 
 
 void ReportConfigAction::configure(Stream &stream, unsigned long timeout) {
-  Configurator::MainConfig->report(stream);
+  root()->report(stream);
   stream.println();
 }
 
@@ -44,9 +44,16 @@ SDCardAction::SDCardAction(Configurable &menu, const char *name, SDCard &sd) :
 
 
 void SaveConfigAction::configure(Stream &stream, unsigned long timeout) {
-  if (Configurator::MainConfig->save(SDC))
+  bool save = true;
+  if (SDC.exists(root()->configFile())) {
+    stream.printf("Configuration file \"%s\" already exists on SD card.\n",
+		  root()->configFile());
+    save = Action::yesno("Do you want to overwrite the configuration file?",
+			 true, stream);
+  }
+  if (save && root()->save(SDC))
     stream.printf("Saved configuration to file \"%s\" on SD card.\n",
-		  Configurator::MainConfig->configFile());
+		  root()->configFile());
   stream.println();
 }
 
@@ -54,30 +61,36 @@ void SaveConfigAction::configure(Stream &stream, unsigned long timeout) {
 void LoadConfigAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
+  if (!SDC.exists(root()->configFile())) {
+    stream.printf("Configuration file \"%s\" not found on SD card.\n\n",
+		  root()->configFile());
+    return;
+  }
+  stream.println("Reloading the configuration file will discard all changes.");
   bool r = Action::yesno("Do you really want to reload the configuration file?",
 			 true, stream);
   stream.println();
   if (r)
-    Configurator::MainConfig->load(SDC);
+    root()->load(SDC);
 }
 
 
 void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
-  if (!SDC.exists(Configurator::MainConfig->configFile())) {
+  if (!SDC.exists(root()->configFile())) {
     stream.printf("Configuration file \"%s\" does not exist on SD card.\n\n",
-		  Configurator::MainConfig->configFile());
+		  root()->configFile());
     return;
   }
   if (Action::yesno("Do you really want to remove the configuration file?",
 		    true, stream)) {
-    if (SDC.remove(Configurator::MainConfig->configFile()))
+    if (SDC.remove(root()->configFile()))
       stream.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
-		    Configurator::MainConfig->configFile());
+		    root()->configFile());
     else
       stream.printf("\nERROR! Failed to remove configuration file \"%s\" from SD card.\n\n",
-		    Configurator::MainConfig->configFile());
+		    root()->configFile());
   }
   else
     stream.println();
@@ -85,7 +98,7 @@ void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
 
 
 RTCAction::RTCAction(const char *name, RTClock &rtclock) :
-  RTCAction(*Configurator::MainConfig->Config, name, rtclock) {
+  RTCAction(*root()->Config, name, rtclock) {
 }
 
 
