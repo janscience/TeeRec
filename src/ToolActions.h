@@ -12,6 +12,7 @@
 
 
 class SDCard;
+class Settings;
 class RTClock;
 
 
@@ -87,6 +88,59 @@ class RemoveConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Remove the configuration file from SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class SDInfoAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* Report sectors and size of SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class SDFormatAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* Erase and format SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class SDListAction : public SDCardAction {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  SDListAction(const char *name, SDCard &sd, Settings &settings);
+
+  /* Initialize and add to configuration menu. */
+  SDListAction(Configurable &menu, const char *name, SDCard &sd,
+		 Settings &settings);
+
+  /* List all recordings on SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+
+ protected:
+  
+  Settings &SettingsMenu;
+};
+
+
+class SDRemoveAction : public SDListAction {
+
+ public:
+
+  using SDListAction::SDListAction;
+
+  /* Remove all recordings from SD card. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 

@@ -62,15 +62,22 @@ class SDCard : public SDClass {
   // Call it, whenever the filename changes, for example, because of a new date.
   void resetFileCounter();
 
+  // List all files in path (non-recursively).
+  void listFiles(const char *path, Stream &stream=Serial);
+
   // Remove all files in path (non-recursively).
-  void removeFiles(const char *path);
+  void removeFiles(const char *path, Stream &stream=Serial);
+
+  // Report sectors and capacity of SD card.
+  void report(Stream &stream=Serial);
 
   // Flash erase all data.
-  void erase();
+  void erase(Stream &stream=Serial);
   
   // Format the SD card, but keep the specified (small) file.
   // If erase_card, flash erase all data first.
-  void format(const char *path=0, bool erase_card=false);
+  void format(const char *path=0, bool erase_card=false,
+	      Stream &stream=Serial);
 
   // Open file on SD card for reading.
   File openRead(const char *path);

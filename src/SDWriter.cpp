@@ -61,65 +61,104 @@ bool SDCard::rootDir() {
 }
 
 
-void SDCard::removeFiles(const char *path) {
+void SDCard::listFiles(const char *path, Stream &stream) {
   SdFile file;
   if (! Available)
     return;
   SdFile dir;
-  if (!dir.open(path))
+  if (!dir.open(path)) {
+    stream.printf("! ERROR: Folder \"%s\" does not exist.\n", path);
     return;
-  Serial.printf("Removing all files in %s:\n", path);
+  }
+  stream.printf("Files in \"%s\":\n", path);
+  while (file.openNext(&dir, O_WRITE)) {
+    if (!file.isDir()) {
+      char fname[200];
+      file.getName(fname, 200);
+      stream.print("  ");
+      stream.println(fname);
+    }
+  }
+}
+
+
+void SDCard::removeFiles(const char *path, Stream &stream) {
+  SdFile file;
+  if (! Available)
+    return;
+  SdFile dir;
+  if (!dir.open(path)) {
+    stream.printf("! ERROR: Folder \"%s\" does not exist.\n", path);
+    return;
+  }
+  stream.printf("Removing all files in \"%s\":\n", path);
   while (file.openNext(&dir, O_WRITE)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
       if (file.remove()) {
-	Serial.print("  ");
-	Serial.println(fname);
+	stream.print("  ");
+	stream.println(fname);
       }
       else {
-	Serial.print("  Failed to remove file ");
-	Serial.println(fname);
+	stream.print("  Failed to remove file ");
+	stream.println(fname);
       }
     }
   }
-  Serial.println("done");
+  stream.println("done");
 }
 
-// flash erase all data
-void SDCard::erase() {
+
+void SDCard::report(Stream &stream) {
+  uint32_t nsectors = 0;
+  nsectors = sdfs.card()->sectorCount();
+  if (!nsectors) {
+    stream.println("! ERROR: Failed to get sector count of SD card.");
+    return;
+  }
+  stream.println("SD card size:");
+  stream.printf("  Number of sectors: %d\n", nsectors);
+  stream.printf("  Capacity         : %.3f GB\n", nsectors * 5.12e-7);
+  stream.println();
+}
+
+
+void SDCard::erase(Stream &stream) {
   uint32_t const ERASE_SIZE = 262144L;
-  uint32_t card_sector_count = 0;
+  uint32_t nsectors = 0;
   uint32_t first_block = 0;
   uint32_t last_block;
   uint16_t n = 0;
   
-  Serial.println("Erase SD card");
-  card_sector_count = sdfs.card()->sectorCount();
+  stream.println("Erase SD card:");
+  nsectors = sdfs.card()->sectorCount();
   do {
     last_block = first_block + ERASE_SIZE - 1;
-    if (last_block >= card_sector_count) {
-      last_block = card_sector_count - 1;
+    if (last_block >= nsectors) {
+      last_block = nsectors - 1;
     }
     if (!sdfs.card()->erase(first_block, last_block)) {
-      Serial.println("erase failed");
+      stream.println("erase failed");
       break;
     }
-    Serial.print('.');
+    stream.print('.');
     if ((n++)%64 == 63)
-      Serial.println();
+      stream.println();
     first_block += ERASE_SIZE;
-  } while (first_block < card_sector_count);
-  Serial.println();
-  Serial.println("done.");
+  } while (first_block < nsectors);
+  stream.println();
+  stream.println("done.");
+  stream.println();
 }
 
 
-void SDCard::format(const char *path, bool erase_card) {
+void SDCard::format(const char *path, bool erase_card, Stream &stream) {
   File file;
   size_t n = 10;
   // read file:
   if (path != 0) {
+    stream.printf("Read file \"%s\" ...\n", path);
     rootDir();
     file = openRead(path);
     n = file.available();
@@ -128,19 +167,32 @@ void SDCard::format(const char *path, bool erase_card) {
   if (path != 0) {
     file.read(buffer, n);
     file.close();
+    stream.println();
   }
   // erase SD card:
   if (erase_card)
     erase();
   // format SD card:
-  Serial.println("Format SD card:");
-  SDClass::format(0, '.', Serial);
-  Serial.println();
+  stream.println("Format SD card:");
+  uint32_t nsectors = sdfs.card()->sectorCount();
+  uint8_t sector_buffer[512];
+  if (nsectors > 67108864) {   // larger than 32GB
+    stream.println("Using ExFAT formatter");
+    ExFatFormatter exfat_formatter;
+    exfat_formatter.format(sdfs.card(), sector_buffer, &stream);
+  }
+  else {
+    stream.println("Using FAT formatter");
+    FatFormatter fat_formatter;
+    fat_formatter.format(sdfs.card(), sector_buffer, &stream);
+  }
+  stream.println();
   // write file:
   if (path != 0) {
     file = openWrite(path);
     file.write(buffer, n);
     file.close();
+    stream.printf("Restored file \"%s\".\n", path);
   }
 }
 

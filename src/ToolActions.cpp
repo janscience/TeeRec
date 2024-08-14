@@ -1,6 +1,7 @@
 #include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
+#include <Settings.h>
 #include <ToolActions.h>
 
 
@@ -94,6 +95,65 @@ void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
   }
   else
     stream.println();
+}
+
+
+void SDInfoAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.report(stream);
+}
+
+
+void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  stream.println("Formatting will destroy all data on the SD card.");
+  if (Action::yesno("Do you really want to erase and format the SD card?",
+		    true, stream)) {
+    bool keep = false;
+    if (SDC.exists(root()->configFile()))
+      keep = Action::yesno("Should the configuration file be kept?",
+			   true, stream);
+    stream.println();
+    const char *path = NULL;
+    if (keep)
+      path = root()->configFile();
+    SDC.format(path, true, stream);
+    stream.println();
+  }
+}
+
+
+SDListAction::SDListAction(const char *name, SDCard &sd,
+			   Settings &settings) :
+  SDCardAction(name, sd),
+  SettingsMenu(settings) {
+}
+
+
+SDListAction::SDListAction(Configurable &menu, const char *name,
+			   SDCard &sd, Settings &settings) : 
+  SDCardAction(menu, name, sd),
+  SettingsMenu(settings) {
+}
+
+
+void SDListAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.listFiles(SettingsMenu.path(), stream);
+  stream.println();
+}
+
+
+void SDRemoveAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  if (Action::yesno("Do you really want to erase all recordings?",
+		    true, stream))
+    SDC.removeFiles(SettingsMenu.path(), stream);
+  stream.println();
 }
 
 
