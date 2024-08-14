@@ -3,8 +3,8 @@
 #include <Parameter.h>
 
 
-Parameter::Parameter(Configurable *cfg, const char *name, size_t n) :
-  Action(cfg, name, SetValue | AllRoles),
+Parameter::Parameter(Configurable &menu, const char *name, size_t n) :
+  Action(menu, name, SetValue | AllRoles),
   NSelection(n) {
 }
 
@@ -82,7 +82,7 @@ void Parameter::configure(const char *val, const char *name, Stream &stream) {
     return;
   if (r) {
     valueStr(pval);
-    stream.printf("%*sset %s to %s\n",
+    stream.printf("%*sset %-25s to %s\n",
 		  indentation(), "", keyname, pval);
   }
   else
@@ -162,17 +162,17 @@ float Parameter::changeUnit(float val, const char *oldunit,
 }
 
 
-BaseStringParameter::BaseStringParameter(Configurable *cfg, const char *name) :
-  Parameter(cfg, name),
+BaseStringParameter::BaseStringParameter(Configurable &menu, const char *name) :
+  Parameter(menu, name),
   Selection(0) {
 }
 
 
-BaseStringParameter::BaseStringParameter(Configurable *cfg,
+BaseStringParameter::BaseStringParameter(Configurable &menu,
 					 const char *name,
 					 const char **selection,
 					 size_t n) :
-  Parameter(cfg, name, n),
+  Parameter(menu, name, n),
   Selection(selection) {
 }
 

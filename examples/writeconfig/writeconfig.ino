@@ -50,14 +50,14 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 #elif defined(PCM186X)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
-Configurable datetime_menu("Date & time");
-ReportRTCAction report_rtc_act("Print date & time", rtclock, datetime_menu);
-SetRTCAction set_rtc_act("Set date & time", rtclock, datetime_menu);
-Configurable config_menu("Configuration");
-ReportConfigAction report_act("Print configuration", config_menu);
-SaveConfigAction save_act("Save configuration", sdcard, config_menu);
-LoadConfigAction load_act("Load configuration", sdcard, config_menu);
-RemoveConfigAction remove_act("Erase configuration", sdcard, config_menu);
+Configurable datetime_menu("Date & time", Action::StreamInput);
+ReportRTCAction report_rtc_act(datetime_menu, "Print date & time", rtclock);
+SetRTCAction set_rtc_act(datetime_menu, "Set date & time", rtclock);
+Configurable config_menu("Configuration", Action::StreamInput);
+ReportConfigAction report_act(config_menu, "Print configuration");
+SaveConfigAction save_act(config_menu,"Save configuration", sdcard);
+LoadConfigAction load_act(config_menu, "Load configuration", sdcard);
+RemoveConfigAction remove_act(config_menu,"Erase configuration", sdcard);
 
 Blink blink(LED_BUILTIN);
 
@@ -74,7 +74,7 @@ void setup() {
   blink.switchOn();
   sdcard.begin();
   config.setConfigFile(CFG_FILE);
-  config.configure(sdcard);
+  config.load(sdcard);
   if (Serial)
     config.configure(Serial, 10000);
   config.report();

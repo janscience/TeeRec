@@ -20,10 +20,10 @@ class ConfigureAction : public Configurable {
  public:
 
   /* Initialize and add to default menu. */
-  ConfigureAction(const char *name);
+  ConfigureAction(const char *name, int roles=StreamInput);
   
   /* Initialize and add to configuration menu. */
-  ConfigureAction(const char *name, Configurable &menu);  
+  ConfigureAction(Configurable &menu, const char *name, int roles=StreamInput);
 };
 
 
@@ -35,10 +35,10 @@ class ReportConfigAction : public Action {
   ReportConfigAction(const char *name);
 
   /* Initialize and add to configuration menu. */
-  ReportConfigAction(const char *name, Configurable &menu);
+  ReportConfigAction(Configurable &menu, const char *name);
 
   /* Report the configuration settings. */
-  virtual void execute();  
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
 };
 
 
@@ -50,7 +50,7 @@ class SDCardAction : public Action {
   SDCardAction(const char *name, SDCard &sd);
 
   /* Initialize and add to configuration menu. */
-  SDCardAction(const char *name, SDCard &sd, Configurable &menu);
+  SDCardAction(Configurable &menu, const char *name, SDCard &sd);
 
  protected:
 
@@ -65,7 +65,7 @@ class SaveConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Save the configuration settings to configuration file. */
-  virtual void execute();
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
 
@@ -76,7 +76,7 @@ class LoadConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Load the configuration settings from configuration file. */
-  virtual void execute();
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
 
@@ -87,7 +87,7 @@ class RemoveConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Remove the configuration file from SD card. */
-  virtual void execute();
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
 
@@ -99,7 +99,7 @@ class RTCAction : public Action {
   RTCAction(const char *name, RTClock &rtclock);
 
   /* Initialize and add to configuration menu. */
-  RTCAction(const char *name, RTClock &rtclock, Configurable &menu);
+  RTCAction(Configurable &menu, const char *name, RTClock &rtclock);
 
  protected:
 
@@ -114,7 +114,7 @@ class ReportRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Report the real-time clock. */
-  virtual void execute();
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
 
@@ -125,7 +125,7 @@ class SetRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Set the real-time clock. */
-  virtual void execute();
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
 

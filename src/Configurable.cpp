@@ -3,18 +3,17 @@
 #include <Configurable.h>
 
 
-Configurable::Configurable(const char *name) :
-  Action(name),
+Configurable::Configurable(const char *name, int roles) :
+  Action(name, roles),
   NActions(0) {
-  if (Configurator::Config != NULL)
-    Configurator::Config->add(this);
+  if (Configurator::MainConfig != NULL)
+    Configurator::MainConfig->Config->add(this);
 }
 
 
-Configurable::Configurable(const char *name, Configurable &menu) :
-  Action(name),
+Configurable::Configurable(Configurable &menu, const char *name, int roles) :
+  Action(menu, name, roles),
   NActions(0) {
-  menu.add(this);
 }
 
 
@@ -123,80 +122,7 @@ bool Configurable::save(SDCard &sd, const char *filename) const {
 }
 
 
-void Configurable::configure(Stream &stream, unsigned long timeout) {
-  if (disabled(StreamInput))
-    return;
-  int def = 0;
-  if (timeout > 0)
-    def = -1;
-  while (true) {
-    stream.printf("%s:\n", name());
-    size_t iaction[NActions];
-    size_t n = 0;
-    for (size_t j=0; j<NActions; j++) {
-      if (Actions[j]->enabled(StreamInput)) {
-	stream.printf("  %d) ", n+1);
-	Actions[j]->report(stream, 0, 0, false);
-	iaction[n++] = j;
-      }
-    }
-    while (true) {
-      if (def >= 0)
-	stream.printf("  Select [%d]: ", def + 1);
-      else
-	stream.printf("  Select: ");
-      elapsedMillis time = 0;
-      while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
-	yield();
-      }
-      if (stream.available() == 0) {
-	// timeout:
-	stream.println('\n');
-	stream.printf("Timeout! Exit %s now.\n\n", name());
-	return;
-      }
-      timeout = 0;
-      char pval[32];
-      stream.readBytesUntil('\n', pval, 32);
-      if (strlen(pval) == 0 && def >= 0)
-	sprintf(pval, "%d", def + 1);
-      stream.println(pval);
-      if (strlen(pval) == 0 && def < 0) {
-	def = 0;
-	continue;
-      }
-      char *end;
-      long i = strtol(pval, &end, 10) - 1;
-      if (end != pval && i >= 0 && i < (long)n &&
-	  iaction[i] < NActions) {
-	def = i;
-	stream.println();
-	Actions[iaction[i]]->configure(stream, 0);
-	break;
-      }
-      else if (strcmp(pval, "q") == 0) {
-	stream.println();
-	return;
-      }
-    }
-  }
-}
-
-
-void Configurable::configure(const char *name, const char *val,
-			     Stream &stream) {
-  Action *act = action(name);
-  if (act == NULL) {
-    if (enabled(StreamOutput))
-	stream.printf("%*s%s name \"%s\" not found.\n",
-		      indentation(), "", this->name(), name);
-  }
-  else
-    act->configure(val, this->name());
-}
-
-
-void Configurable::configure(SDCard &sd, const char *filename) {
+void Configurable::load(SDCard &sd, const char *filename) {
   Action *act = NULL;
   const size_t nline = 128;
   char line[nline];
@@ -300,3 +226,77 @@ void Configurable::configure(SDCard &sd, const char *filename) {
   file.close();
   Serial.println();
 }
+
+
+void Configurable::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  int def = 0;
+  if (timeout > 0)
+    def = -1;
+  while (true) {
+    stream.printf("%s:\n", name());
+    size_t iaction[NActions];
+    size_t n = 0;
+    for (size_t j=0; j<NActions; j++) {
+      if (Actions[j]->enabled(StreamInput)) {
+	stream.printf("  %d) ", n+1);
+	Actions[j]->report(stream, 0, 0, false);
+	iaction[n++] = j;
+      }
+    }
+    while (true) {
+      if (def >= 0)
+	stream.printf("  Select [%d]: ", def + 1);
+      else
+	stream.printf("  Select: ");
+      elapsedMillis time = 0;
+      while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
+	yield();
+      }
+      if (stream.available() == 0) {
+	// timeout:
+	stream.println('\n');
+	stream.printf("Timeout! Exit %s now.\n\n", name());
+	return;
+      }
+      timeout = 0;
+      char pval[32];
+      stream.readBytesUntil('\n', pval, 32);
+      if (strlen(pval) == 0 && def >= 0)
+	sprintf(pval, "%d", def + 1);
+      stream.println(pval);
+      if (strlen(pval) == 0 && def < 0) {
+	def = 0;
+	continue;
+      }
+      char *end;
+      long i = strtol(pval, &end, 10) - 1;
+      if (end != pval && i >= 0 && i < (long)n &&
+	  iaction[i] < NActions) {
+	def = i;
+	stream.println();
+	Actions[iaction[i]]->configure(stream, 0);
+	break;
+      }
+      else if (strcmp(pval, "q") == 0) {
+	stream.println();
+	return;
+      }
+    }
+  }
+}
+
+
+void Configurable::configure(const char *name, const char *val,
+			     Stream &stream) {
+  Action *act = action(name);
+  if (act == NULL) {
+    if (enabled(StreamOutput))
+	stream.printf("%*s%s name \"%s\" not found.\n",
+		      indentation(), "", this->name(), name);
+  }
+  else
+    act->configure(val, this->name());
+}
+

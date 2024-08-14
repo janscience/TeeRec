@@ -33,10 +33,9 @@ Action::Action(const char *name, int roles) :
 }
 
 
-Action::Action(Configurable *cfg, const char *name, int roles) :
+Action::Action(Configurable &menu, const char *name, int roles) :
   Action(name, roles) {
-  if (cfg != 0)
-    cfg->add(this);
+  menu.add(this);
 }
 
 
@@ -93,11 +92,10 @@ void Action::disableSupported(int roles) {
 
 void Action::report(Stream &stream, size_t indent,
 		    size_t w, bool descend) const {
-  if (enabled(StreamOutput))
+  if (enabled(StreamOutput) || enabled(StreamInput))
     stream.printf("%*s%s ...\n", indent, "", name());
 }
 
 
 void Action::configure(Stream &stream, unsigned long timeout) {
-  execute();
 }

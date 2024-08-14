@@ -19,10 +19,10 @@ class Configurable : public Action {
  public:
 
   /* Initialize configuration section name and add it to default menu. */
-  Configurable(const char *name);
+  Configurable(const char *name, int roles=AllRoles);
 
   /* Initialize configuration section name and add it to menu. */
-  Configurable(const char *name, Configurable &menu);
+  Configurable(Configurable &menu, const char *name, int roles=AllRoles);
 
   /* Add an action to this Configurable. */
   void add(Action *action);
@@ -47,6 +47,10 @@ class Configurable : public Action {
   /* Save current setting to configuration file on SD card.
      Return true on success. */
   bool save(SDCard &sd, const char *filename) const;
+
+  /* Read configuration file from SD card and configure all actions
+     accordingly. */
+  void load(SDCard &sd, const char *filename);
   
   /* Interactive configuration via Serial stream.
      Returns from initial menu after timeout milliseconds. */
@@ -56,10 +60,6 @@ class Configurable : public Action {
      and report on stream. */
   virtual void configure(const char *name, const char *val,
 			 Stream &stream=Serial);
-
-  /* Read configuration file from SD card and configure all actions
-     accordingly. */
-  void configure(SDCard &sd, const char *filename);
 
 
 protected:

@@ -39,8 +39,8 @@ class Action {
   /* Initialize action with name and supported roles. */
   Action(const char *name, int roles=AllRoles);
 
-  /* Initialize action with name and supported roles and add it to cfg. */
-  Action(Configurable *cfg, const char *name, int roles=AllRoles);
+  /* Initialize action with name and supported roles and add it to menu. */
+  Action(Configurable &menu, const char *name, int roles=AllRoles);
 
   /* The name identifying the action. */
   const char *name() const { return Name; }
@@ -83,8 +83,7 @@ class Action {
   virtual void save(File &file, size_t indent=0, size_t w=0) const {};
   
   /* Interactive configuration of this action via serial stream.
-     StreamInput and StreamOutput must be enabled.
-     Default implementation calls execute(). */
+     StreamInput and StreamOutput must be enabled. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* Parse the string val and configure the action accordingly.
@@ -92,9 +91,6 @@ class Action {
      report the new value together with name on stream. */
   virtual void configure(const char *val, const char *name=0,
 			 Stream &stream=Serial) {};
-
-  /* When activated, execute this function. */
-  virtual void execute() {};
 
   
  protected:

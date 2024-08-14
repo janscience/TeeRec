@@ -34,18 +34,18 @@ class Configurator : public Configurable {
      Return true on success. */
   bool save(SDCard &sd) const;
 
-  /* Interactive configuration via Serial stream. */
-  void configure(Stream &stream=Serial, unsigned long timeout=0);
-
   /* Read configuration file from SD card and pass key-value pairs to
      the Actions. */
-  void configure(SDCard &sd);
+  void load(SDCard &sd);
+
+  /* Interactive configuration via Serial stream. */
+  void configure(Stream &stream=Serial, unsigned long timeout=0);
 
   /* The main menu, i.e. pointer to the last Configurator instance. */
   static Configurator *MainConfig;
 
-  /* The menu where Configurables are automatically added to. */
-  static Configurable *Config;
+  /* The submenu where Configurables are automatically added to. */
+  Configurable *Config;
 
   
  private:

@@ -4,111 +4,106 @@
 #include <ToolActions.h>
 
 
-ConfigureAction::ConfigureAction(const char *name) :
-  ConfigureAction(name, *Configurator::Config) {
+ConfigureAction::ConfigureAction(const char *name, int roles) :
+  ConfigureAction(*Configurator::MainConfig->Config, name, roles) {
 }
 
 
-ConfigureAction::ConfigureAction(const char *name, Configurable &menu) :
-  Configurable(name, menu) {
-  Configurator::Config = this;
-  disableSupported(FileIO);
-  disableSupported(StreamOutput);
+ConfigureAction::ConfigureAction(Configurable &menu, const char *name,
+				 int roles) :
+  Configurable(menu, name, roles) {
+  Configurator::MainConfig->Config = this;
 }
 
 
 ReportConfigAction::ReportConfigAction(const char *name) :
-  ReportConfigAction(name, *Configurator::Config) {
+  ReportConfigAction(*Configurator::MainConfig->Config, name) {
 }
 
 
-ReportConfigAction::ReportConfigAction(const char *name, Configurable &menu) :
-  Action(name, StreamIO) {
-  menu.add(this);
+ReportConfigAction::ReportConfigAction(Configurable &menu, const char *name) :
+  Action(menu, name, StreamInput) {
 }
 
 
-void ReportConfigAction::execute() {
-  Configurator::MainConfig->report(Serial);
-  Serial.println();
+void ReportConfigAction::configure(Stream &stream, unsigned long timeout) {
+  Configurator::MainConfig->report(stream);
+  stream.println();
 }
 
 
 SDCardAction::SDCardAction(const char *name, SDCard &sd) :
-  SDCardAction(name, sd, *Configurator::Config) {
+  SDCardAction(*Configurator::MainConfig->Config, name, sd) {
 }
 
 
-SDCardAction::SDCardAction(const char *name, SDCard &sd, Configurable &menu) : 
-  Action(name, StreamIO),
+SDCardAction::SDCardAction(Configurable &menu, const char *name, SDCard &sd) : 
+  Action(menu, name, StreamInput),
   SDC(sd) {
-  menu.add(this);
 }
 
 
-void SaveConfigAction::execute() {
+void SaveConfigAction::configure(Stream &stream, unsigned long timeout) {
   if (Configurator::MainConfig->save(SDC))
-    Serial.printf("Saved configuration to file \"%s\" on SD card.\n",
+    stream.printf("Saved configuration to file \"%s\" on SD card.\n",
 		  Configurator::MainConfig->configFile());
-  Serial.println();
+  stream.println();
 }
 
 
-void LoadConfigAction::execute() {
+void LoadConfigAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
   bool r = Action::yesno("Do you really want to reload the configuration file?",
-			 true, Serial);
-  Serial.println();
+			 true, stream);
+  stream.println();
   if (r)
-    Configurator::MainConfig->configure(SDC);
+    Configurator::MainConfig->load(SDC);
 }
 
 
-void RemoveConfigAction::execute() {
+void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
   if (!SDC.exists(Configurator::MainConfig->configFile())) {
-    Serial.printf("Configuration file \"%s\" does not exist on SD card.\n\n",
+    stream.printf("Configuration file \"%s\" does not exist on SD card.\n\n",
 		  Configurator::MainConfig->configFile());
     return;
   }
   if (Action::yesno("Do you really want to remove the configuration file?",
-		    true, Serial)) {
+		    true, stream)) {
     if (SDC.remove(Configurator::MainConfig->configFile()))
-      Serial.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
+      stream.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
 		    Configurator::MainConfig->configFile());
     else
-      Serial.printf("\nERROR! Failed to remove configuration file \"%s\" from SD card.\n\n",
+      stream.printf("\nERROR! Failed to remove configuration file \"%s\" from SD card.\n\n",
 		    Configurator::MainConfig->configFile());
   }
   else
-    Serial.println();
+    stream.println();
 }
 
 
 RTCAction::RTCAction(const char *name, RTClock &rtclock) :
-  RTCAction(name, rtclock, *Configurator::Config) {
+  RTCAction(*Configurator::MainConfig->Config, name, rtclock) {
 }
 
 
-RTCAction::RTCAction(const char *name, RTClock &rtclock,
-		     Configurable &menu) :
-  Action(name, StreamIO),
+RTCAction::RTCAction(Configurable &menu, const char *name, RTClock &rtclock) :
+  Action(menu, name, StreamInput),
   RTC(rtclock) {
-  menu.add(this);
 }
 
 
-void ReportRTCAction::execute() {
+void ReportRTCAction::configure(Stream &stream, unsigned long timeout) {
   char times[20];
   RTC.dateTime(times);
-  Serial.printf("Current time: %s\n\n", times);
+  stream.printf("Current time: %s\n\n", times);
 }
 
 
-void SetRTCAction::execute() {
-  RTC.set(Serial);
-  Serial.println();
+void SetRTCAction::configure(Stream &stream, unsigned long timeout) {
+  RTC.set(stream);
+  stream.println();
 }
 

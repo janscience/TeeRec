@@ -19,8 +19,8 @@ class Parameter : public Action {
  public:
 
   /* Initialize parameter with identifying name, n selections
-     and add it to cfg. */
-  Parameter(Configurable *cfg, const char *name, size_t n=0);
+     and add it to menu. */
+  Parameter(Configurable &menu, const char *name, size_t n=0);
 
   /* Report the parameter's name and value on serial stream. */
   virtual void report(Stream &stream=Serial, size_t indent=0,
@@ -75,12 +75,12 @@ class BaseStringParameter : public Parameter {
   
  public:
   
-  /* Initialize parameter with identifying name and add to cfg. */
-  BaseStringParameter(Configurable *cfg, const char *name);
+  /* Initialize parameter with identifying name and add it to menu. */
+  BaseStringParameter(Configurable &menu, const char *name);
   
   /* Initialize parameter with identifying name, list of n selections,
-     and add to cfg. */
-  BaseStringParameter(Configurable *cfg, const char *name,
+     and add it to menu. */
+  BaseStringParameter(Configurable &menu, const char *name,
 		      const char **selection, size_t n);
 
   /* Provide a selection of n input values. */
@@ -110,8 +110,8 @@ class StringParameter : public BaseStringParameter {
  public:
   
   /* Initialize parameter with identifying name, value, list of n
-     selections and add to cfg. */
-  StringParameter(Configurable *cfg, const char *name,
+     selections and add it to menu. */
+  StringParameter(Configurable &menu, const char *name,
 		  const char str[N],
 		  const char **selection=0, size_t n=0);
 
@@ -147,8 +147,8 @@ class StringPointerParameter : public BaseStringParameter {
  public:
   
   /* Initialize parameter with identifying name, pointer str to value
-     variable, list of n selections, and add to cfg. */
-  StringPointerParameter(Configurable *cfg, const char *name,
+     variable, list of n selections, and add it to menu. */
+  StringPointerParameter(Configurable &menu, const char *name,
 			 char (*str)[N], const char **selection=0,
 			 size_t n=0);
 
@@ -184,8 +184,8 @@ class BaseEnumParameter : public BaseStringParameter {
  public:
   
   /* Initialize parameter with identifying name, list of n enum values
-     and coresponding string representations, and add to cfg. */
-  BaseEnumParameter(Configurable *cfg, const char *name,
+     and coresponding string representations, and add it to menu. */
+  BaseEnumParameter(Configurable &menu, const char *name,
 		    const T *enums, const char **selection, size_t n);
 
   /* Provide a selection of n enums with corresponding string
@@ -216,8 +216,8 @@ class EnumParameter : public BaseEnumParameter<T> {
   
   /* Initialize parameter with identifying name, value, list of n enum
      values and coresponding string representations, and add to
-     cfg. */
-  EnumParameter(Configurable *cfg, const char *name, T val,
+     menu. */
+  EnumParameter(Configurable &menu, const char *name, T val,
 		const T *enums, const char **selection, size_t n);
 
   /* Return the enum value. */
@@ -253,8 +253,8 @@ class EnumPointerParameter : public BaseEnumParameter<T> {
   
   /* Initialize parameter with identifying name, value, list of n enum
      values and coresponding string representations, and add to
-     cfg. */
-  EnumPointerParameter(Configurable *cfg, const char *name, T *val,
+     menu. */
+  EnumPointerParameter(Configurable &menu, const char *name, T *val,
 		       const T *enums, const char **selection,
 		       size_t n);
 
@@ -288,8 +288,8 @@ class BaseNumberParameter : public Parameter {
  public:
   
   /* Initialize parameter with identifying name,
-     format string, and unit and add to cfg. */
-  BaseNumberParameter(Configurable *cfg, const char *name,
+     format string, and unit and add it to menu. */
+  BaseNumberParameter(Configurable &menu, const char *name,
 		      const char *format, const char *unit=0,
 		      const char *outunit=0, const T *selection=0,
 		      size_t n=0);
@@ -351,8 +351,8 @@ class NumberParameter : public BaseNumberParameter<T> {
  public:
   
   /* Initialize parameter with identifying name, pointer number to value,
-     format string, and unit and add to cfg. */
-  NumberParameter(Configurable *cfg, const char *name, T number,
+     format string, and unit and add it to menu. */
+  NumberParameter(Configurable &menu, const char *name, T number,
 		  const char *format, const char *unit=0,
 		  const char *outunit=0, const T *selection=0,
 		  size_t n=0);
@@ -396,8 +396,8 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
  public:
   
   /* Initialize parameter with identifying name, pointer number to value,
-     format string, and unit and add to cfg. */
-  NumberPointerParameter(Configurable *cfg, const char *name, T *number,
+     format string, and unit and add it to menu. */
+  NumberPointerParameter(Configurable &menu, const char *name, T *number,
 			 const char *format, const char *unit=0,
 			 const char *outunit=0, const T *selection=0,
 			 size_t n=0);
@@ -436,10 +436,10 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
 
 
 template<int N>
-StringParameter<N>::StringParameter(Configurable *cfg, const char *name,
+StringParameter<N>::StringParameter(Configurable &menu, const char *name,
 				    const char str[N],
 				    const char **selection, size_t n) :
-  BaseStringParameter(cfg, name, selection, n) {
+  BaseStringParameter(menu, name, selection, n) {
   strncpy(Value, str, N);
   Value[N-1] = '\0';
 }
@@ -484,12 +484,12 @@ void StringParameter<N>::valueStr(char *str) const {
 
 
 template<int N>
-StringPointerParameter<N>::StringPointerParameter(Configurable *cfg,
+StringPointerParameter<N>::StringPointerParameter(Configurable &menu,
 						  const char *name,
 						  char (*str)[N],
 						  const char **selection,
 						  size_t n) :
-  BaseStringParameter(cfg, name, selection, n),
+  BaseStringParameter(menu, name, selection, n),
   Value(str) {
 }
 
@@ -535,12 +535,12 @@ void StringPointerParameter<N>::valueStr(char *str) const {
 
 
 template<class T>
-BaseEnumParameter<T>::BaseEnumParameter(Configurable *cfg,
+BaseEnumParameter<T>::BaseEnumParameter(Configurable &menu,
 					const char *name,
 					const T *enums,
 					const char **selection,
 					size_t n) :
-  BaseStringParameter(cfg, name, selection, n),
+  BaseStringParameter(menu, name, selection, n),
   Enums(enums) {
 }
 
@@ -582,10 +582,10 @@ const char *BaseEnumParameter<T>::enumStr(T val) const {
 
 
 template<class T>
-EnumParameter<T>::EnumParameter(Configurable *cfg, const char *name,
+EnumParameter<T>::EnumParameter(Configurable &menu, const char *name,
 				T val, const T *enums,
 				const char **selection, size_t n) :
-  BaseEnumParameter<T>(cfg, name, enums, selection, n),
+  BaseEnumParameter<T>(menu, name, enums, selection, n),
   Value(val) {
 }
 
@@ -639,12 +639,12 @@ void EnumParameter<T>::valueStr(char *str) const {
 
 
 template<class T>
-EnumPointerParameter<T>::EnumPointerParameter(Configurable *cfg,
+EnumPointerParameter<T>::EnumPointerParameter(Configurable &menu,
 					      const char *name,
 					      T *val, const T *enums,
 					      const char **selection,
 					      size_t n) :
-  BaseEnumParameter<T>(cfg, name, enums, selection, n),
+  BaseEnumParameter<T>(menu, name, enums, selection, n),
   Value(val) {
 }
 
@@ -698,13 +698,14 @@ void EnumPointerParameter<T>::valueStr(char *str) const {
 
 
 template<class T>
-BaseNumberParameter<T>::BaseNumberParameter(Configurable *cfg, const char *name,
+BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
+					    const char *name,
 					    const char *format,
 					    const char *unit,
 					    const char *outunit,
 					    const T *selection,
 					    size_t n) :
-  Parameter(cfg, name, n),
+  Parameter(menu, name, n),
   Format(""),
   Unit(""),
   OutUnit(""),
@@ -784,12 +785,12 @@ void BaseNumberParameter<T>::valueStr(T val, char *str) const {
 
 
 template<class T>
-NumberParameter<T>::NumberParameter(Configurable *cfg, const char *name,
+NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
 				    T number, const char *format,
 				    const char *unit,
 				    const char *outunit,
 				    const T *selection, size_t n) :
-  BaseNumberParameter<T>(cfg, name, format, unit, outunit,
+  BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
 }
@@ -854,7 +855,7 @@ void NumberParameter<T>::valueStr(char *str) const {
 
 
 template<class T>
-NumberPointerParameter<T>::NumberPointerParameter(Configurable *cfg,
+NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
 						  const char *name,
 						  T *number,
 						  const char *format,
@@ -862,7 +863,7 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable *cfg,
 						  const char *outunit,
 						  const T *selection,
 						  size_t n) :
-  BaseNumberParameter<T>(cfg, name, format, unit, outunit,
+  BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
 }

@@ -1,7 +1,6 @@
 #include <Configurator.h>
 
 
-Configurable *Configurator::Config = NULL;
 Configurator *Configurator::MainConfig = NULL;
 
 
@@ -11,8 +10,8 @@ Configurator::Configurator() :
 
 
 Configurator::Configurator(const char *name) :
-  Configurable(name) {
-  Config = this;
+  Configurable(name),
+  Config(this) {
   MainConfig = this;
   strncpy(ConfigFile, "teerec.cfg", MaxFile);
   ConfigFile[MaxFile-1] = '\0';
@@ -38,12 +37,12 @@ bool Configurator::save(SDCard &sd) const {
 }
 
 
-void Configurator::configure(Stream &stream, unsigned long timeout) {
-  Configurable::configure(stream, timeout);
+void Configurator::load(SDCard &sd) {
+  Config->Configurable::load(sd, ConfigFile);
 }
 
 
-void Configurator::configure(SDCard &sd) {
-  Config->Configurable::configure(sd, ConfigFile);
+void Configurator::configure(Stream &stream, unsigned long timeout) {
+  Configurable::configure(stream, timeout);
 }
 
