@@ -71,14 +71,20 @@ void SDCard::listFiles(const char *path, Stream &stream) {
     return;
   }
   stream.printf("Files in \"%s\":\n", path);
+  int n = 0;
   while (file.openNext(&dir, O_WRITE)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
       stream.print("  ");
       stream.println(fname);
+      n++;
     }
   }
+  if (n > 0)
+    stream.printf("%d files found.\n");
+  else
+    stream.printf("No files found.\n");
 }
 
 
@@ -92,6 +98,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     return;
   }
   stream.printf("Removing all files in \"%s\":\n", path);
+  int n = 0;
   while (file.openNext(&dir, O_WRITE)) {
     if (!file.isDir()) {
       char fname[200];
@@ -99,6 +106,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
       if (file.remove()) {
 	stream.print("  ");
 	stream.println(fname);
+	n++;
       }
       else {
 	stream.print("  Failed to remove file ");
@@ -106,7 +114,10 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
       }
     }
   }
-  stream.println("done");
+  if (n == 0)
+    stream.println("No files found.");
+  else
+    stream.println("Done.");
 }
 
 
