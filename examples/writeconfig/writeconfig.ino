@@ -63,6 +63,11 @@ SDInfoAction sdinfo_act(sdcard_menu, "SD card info", sdcard);
 SDFormatAction format_act(sdcard_menu, "Format SD card", sdcard);
 SDListAction list_act(sdcard_menu, "List all recordings", sdcard, settings);
 SDRemoveAction erase_act(sdcard_menu, "Erase all recordings", sdcard, settings);
+#ifdef FIRMWARE_UPDATE
+Configurable firmware_menu("Firmware", Action::StreamInput);
+ListFirmwareAction listfirmware_act(firmware_menu, "List available updates", sdcard);
+UpdateFirmwareAction updatefirmware_act(firmware_menu, "Update firmware", sdcard);
+#endif
 
 Blink blink(LED_BUILTIN);
 

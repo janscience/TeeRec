@@ -125,6 +125,26 @@ void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
+#ifdef FIRMWARE_UPDATE
+
+void ListFirmwareAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  listFirmware(SDC, stream);
+  stream.println();
+}
+
+
+void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  updateFirmware(SDC, stream);
+  stream.println();
+}
+
+#endif
+
+
 SDListAction::SDListAction(const char *name, SDCard &sd,
 			   Settings &settings) :
   SDCardAction(name, sd),

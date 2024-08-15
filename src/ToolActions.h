@@ -9,6 +9,7 @@
 
 #include <Action.h>
 #include <Configurable.h>
+#include <FirmwareUpdate.h>
 
 
 class SDCard;
@@ -112,6 +113,32 @@ class SDFormatAction : public SDCardAction {
   /* Erase and format SD card. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
+
+
+#ifdef FIRMWARE_UPDATE
+
+class ListFirmwareAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* List firmware hex files found on SD card */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class UpdateFirmwareAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* Upload firmware from SD card */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+#endif
 
 
 class SDListAction : public SDCardAction {
