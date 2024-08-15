@@ -68,6 +68,15 @@ class SDCard : public SDClass {
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path, Stream &stream=Serial);
 
+  // Write the card type in types, that should hold at least 8 characters.
+  void cardType(char *types);
+
+  // Capacity of the card in Bytes.
+  float capacity();
+
+  // Free space of the card in Bytes.
+  float free();
+
   // Report sectors and capacity of SD card.
   void report(Stream &stream=Serial);
 

@@ -150,6 +150,11 @@ void SDListAction::configure(Stream &stream, unsigned long timeout) {
 void SDRemoveAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
+  if (! SDC.exists(SettingsMenu.path())) {
+    stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());
+    return;
+  }
+  stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
   if (Action::yesno("Do you really want to erase all recordings?",
 		    true, stream))
     SDC.removeFiles(SettingsMenu.path(), stream);

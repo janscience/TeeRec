@@ -110,16 +110,66 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
 }
 
 
+void SDCard::cardType(char *types) {
+  switch (sdfs.card()->type()) {
+    case SD_CARD_TYPE_SD1:
+      strcpy(types, "SD1");
+      break;
+
+    case SD_CARD_TYPE_SD2:
+      strcpy(types, "SD2");
+      break;
+
+    case SD_CARD_TYPE_SDHC:
+      csd_t m_csd;
+      sdfs.card()->readCSD(&m_csd);
+      if (sdCardCapacity(&m_csd) < 70000000)
+	strcpy(types, "SDHC");
+      else
+	strcpy(types, "SDXC");
+      break;
+
+    default:
+      strcpy(types, "unknown");
+  }
+}
+
+
+float SDCard::capacity() {
+  csd_t m_csd;
+  if (!sdfs.card()->readCSD(&m_csd))
+    return 0.0;
+  return 512.0 * sdCardCapacity(&m_csd); // sectors a 512 byte
+}
+
+
+float SDCard::free() {
+  return 512.0 * sdfs.freeClusterCount() * sdfs.sectorsPerCluster();
+}
+
+
 void SDCard::report(Stream &stream) {
-  uint32_t nsectors = 0;
-  nsectors = sdfs.card()->sectorCount();
-  if (!nsectors) {
+  char types[10];
+  cardType(types);
+
+  char files[10];
+  int ft = sdfs.fatType();
+  if (ft > 32)
+    strcpy(files, "exFAT");
+  else
+    sprintf(files, "FAT%d", ft);
+  
+  float cap = capacity();
+  if (cap < 1.0) {
     stream.println("! ERROR: Failed to get sector count of SD card.");
     return;
   }
-  stream.println("SD card size:");
-  stream.printf("  Number of sectors: %d\n", nsectors);
-  stream.printf("  Capacity         : %.3f GB\n", nsectors * 5.12e-7);
+  
+  stream.println("SD card:");
+  stream.printf("  Type       : %s\n", types);
+  stream.printf("  File system: %s\n", files);
+  stream.printf("  Capacity   : %.3f GB\n", 1e-9 * cap);
+  stream.printf("  Available  : %.3f GB\n", 1e-9 * free());
   stream.println();
 }
 
