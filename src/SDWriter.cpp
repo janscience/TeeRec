@@ -82,7 +82,7 @@ void SDCard::listFiles(const char *path, Stream &stream) {
     }
   }
   if (n > 0)
-    stream.printf("%d files found.\n");
+    stream.printf("%d files found.\n", n);
   else
     stream.printf("No files found.\n");
 }
@@ -117,7 +117,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
   if (n == 0)
     stream.println("No files found.");
   else
-    stream.println("Done.");
+    stream.printf("Removed %d files.", n);
 }
 
 
