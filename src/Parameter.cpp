@@ -60,7 +60,7 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void Parameter::configure(const char *val, const char *name, Stream &stream) {
+void Parameter::set(const char *val, const char *name, Stream &stream) {
   char keyname[2*MaxName];
   keyname[0] = '\0';
   if (name != 0 && strlen(name) > 0) {

@@ -99,8 +99,8 @@ class Action {
   /* Parse the string val and configure the action accordingly.
      SetValue must be enabled. If StreamOutput is enabled,
      report the new value together with name on stream. */
-  virtual void configure(const char *val, const char *name=0,
-			 Stream &stream=Serial) {};
+  virtual void set(const char *val, const char *name=0,
+		   Stream &stream=Serial) {};
 
   
  protected:

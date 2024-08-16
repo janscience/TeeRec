@@ -35,8 +35,8 @@ class Parameter : public Action {
   /* Parse the string val and set the parameter accordingly.  If
      StreamOutput is enabled, report the new value together with name
      on stream. */
-  virtual void configure(const char *val, const char *name=0,
-			 Stream &stream=Serial);
+  virtual void set(const char *val, const char *name=0,
+		   Stream &stream=Serial);
 
   /* Parse the string val and set the value of this parameter accordingly.
      If selection, then val is the input in response to an offered

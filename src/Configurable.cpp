@@ -220,7 +220,7 @@ void Configurable::load(SDCard &sd, const char *filename) {
 	    break;
 	  }
 	}
-	act->configure(key, val);
+	act->set(val, key);
       }
     }
   }
@@ -289,8 +289,8 @@ void Configurable::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void Configurable::configure(const char *name, const char *val,
-			     Stream &stream) {
+void Configurable::set(const char *val, const char *name,
+		       Stream &stream) {
   Action *act = action(name);
   if (act == NULL) {
     if (enabled(StreamOutput))
@@ -298,6 +298,6 @@ void Configurable::configure(const char *name, const char *val,
 		      indentation(), "", this->name(), name);
   }
   else
-    act->configure(val, this->name());
+    act->set(val, this->name());
 }
 
