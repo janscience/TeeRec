@@ -72,7 +72,7 @@ void SDCard::listFiles(const char *path, Stream &stream) {
   }
   stream.printf("Files in \"%s\":\n", path);
   int n = 0;
-  while (file.openNext(&dir, O_WRITE)) {
+  while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);

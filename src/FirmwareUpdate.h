@@ -14,8 +14,11 @@
 class SDCard;
 
 
-void listFirmware(SDCard &sdcard, Stream &stream=Serial);
+// List hex files on SD card.
+int listFirmware(SDCard &sdcard, Stream &stream=Serial, bool number=false);
 
+// Update firmware from hex file on SD card.
+// Uses https://github.com/joepasquariello/FlasherX
 void updateFirmware(SDCard &sdcard, Stream &stream=Serial);
 
 
