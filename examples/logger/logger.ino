@@ -245,9 +245,9 @@ void setup() {
   settings.disable("DisplayTime");
   settings.disable("SensorsInterval");
   config.setConfigFile("logger.cfg");
-  config.configure(sdcard);
+  config.load(sdcard);
   if (Serial)
-    config.configure(Serial);
+    config.configure(Serial, 10000);
   config.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);

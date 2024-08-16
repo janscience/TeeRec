@@ -244,9 +244,9 @@ void setup() {
   settings.disable("InitialDelay");
   settings.disable("SensorsInterval");
   config.setConfigFile("teerec.cfg");
-  config.configure(sdcard);
+  config.load(sdcard);
   if (Serial)
-    config.configure(Serial);
+    config.configure(Serial, 10000);
   config.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
