@@ -44,6 +44,32 @@ bool SDCard::isBusy() {
 }
 
 
+bool SDCard::check(float minfree, Stream &stream) {
+  if (! Available) {
+    stream.println("! ERROR: No SD card present.\n");
+    return false;
+  }
+  if (minfree < 512)
+    minfree = 512.0;
+  if (free() < minfree) {
+    stream.println("! WARNING: No space left on SD card.\n");
+    return false;
+  }
+  File tf = open("testit.wrt", FILE_WRITE);
+  if (! tf) {
+    stream.println("! ERROR: Can not write onto SD card.\n");
+    return false;
+  }
+  tf.close();
+  if (! remove("testit.wrt")) {
+    stream.println("! ERROR: Failed to remove test file.\n");
+    return false;
+  }
+  stream.println("SD card present and writable.\n");
+  return true;
+}
+
+
 bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;

@@ -43,6 +43,10 @@ class SDCard : public SDClass {
   // True if SD card is busy.
   bool isBusy();
 
+  // Check, whether SD card is available, has enough free space (in Bytes)
+  // and it can be written.
+  bool check(float minfree=1024*1024, Stream &stream=Serial);
+
   // Make directory if it does not exist and
   // make it the currrent working directory.
   // Return true on succes.

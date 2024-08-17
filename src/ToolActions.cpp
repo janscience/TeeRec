@@ -85,7 +85,7 @@ void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
     return;
   }
   if (Action::yesno("Do you really want to remove the configuration file?",
-		    true, stream)) {
+		    false, stream)) {
     if (SDC.remove(root()->configFile()))
       stream.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
 		    root()->configFile());

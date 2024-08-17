@@ -81,9 +81,10 @@ void setup() {
 
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  Serial.println();
+  Serial.println("\n=================================================================\n");
   blink.switchOn();
   sdcard.begin();
+  sdcard.check();
   config.setConfigFile(CFG_FILE);
   config.load(sdcard);
   if (Serial)
