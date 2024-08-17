@@ -74,7 +74,7 @@ void Configurable::report(Stream &stream, size_t indent,
     return;
   // write actions to serial:
   if (descend) {
-    if (enabled(StreamOutput)) {
+    if (enabled(StreamOutput) && strlen(name()) > 0) {
       stream.printf("%*s%s:\n", indent, "", name());
       indent += indentation();
     }
@@ -84,8 +84,10 @@ void Configurable::report(Stream &stream, size_t indent,
       if (Actions[j]->enabled(StreamOutput) && strlen(Actions[j]->name()) > ww)
 	ww = strlen(Actions[j]->name());
     }
-    for (size_t j=0; j<NActions; j++)
-      Actions[j]->report(stream, indent, ww, descend);
+    for (size_t j=0; j<NActions; j++) {
+      if (Actions[j]->enabled(StreamOutput))
+	Actions[j]->report(stream, indent, ww, descend);
+    }
   }
   else
     stream.printf("%*s%s ...\n", indent, "", name());
