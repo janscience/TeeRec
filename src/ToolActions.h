@@ -110,6 +110,21 @@ class SDFormatAction : public SDCardAction {
 
   using SDCardAction::SDCardAction;
 
+  /* Format SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+
+ protected:
+
+  void format(const char *erases, bool erase, Stream &stream);
+};
+
+
+class SDEraseFormatAction : public SDFormatAction {
+
+ public:
+
+  using SDFormatAction::SDFormatAction;
+
   /* Erase and format SD card. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };

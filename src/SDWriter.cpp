@@ -254,6 +254,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
     file.write(buffer, n);
     file.close();
     stream.printf("Restored file \"%s\".\n", path);
+    stream.println();
   }
 }
 

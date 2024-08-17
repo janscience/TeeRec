@@ -105,23 +105,41 @@ void SDInfoAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
-  if (disabled(StreamInput))
-    return;
-  stream.println("Formatting will destroy all data on the SD card.");
-  if (Action::yesno("Do you really want to erase and format the SD card?",
-		    true, stream)) {
+void SDFormatAction::format(const char *erases, bool erase, Stream &stream) {
+  char request[64];
+  sprintf(request, "Do you really want to%s format the SD card?", erases);
+  if (Action::yesno(request, false, stream)) {
     bool keep = false;
-    if (SDC.exists(root()->configFile()))
-      keep = Action::yesno("Should the configuration file be kept?",
-			   true, stream);
+    if (SDC.exists(root()->configFile())) {
+      char request[256];
+      sprintf(request, "Should the configuration file \"%s\" be kept?",
+	      root()->configFile());
+      keep = Action::yesno(request, true, stream);
+    }
     stream.println();
     const char *path = NULL;
     if (keep)
       path = root()->configFile();
-    SDC.format(path, true, stream);
-    stream.println();
+    SDC.format(path, erase, stream);
   }
+  else
+    stream.println();
+}
+
+
+void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  stream.println("Formatting will destroy all data on the SD card.");
+  format("", false, stream);
+}
+
+
+void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  stream.println("Erasing and formatting will destroy all data on the SD card.");
+  format(" erase and", true, stream);
 }
 
 

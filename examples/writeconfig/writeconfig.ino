@@ -61,6 +61,7 @@ RemoveConfigAction remove_act(config_menu, "Erase configuration", sdcard);
 Configurable sdcard_menu("SD card", Action::StreamInput);
 SDInfoAction sdinfo_act(sdcard_menu, "SD card info", sdcard);
 SDFormatAction format_act(sdcard_menu, "Format SD card", sdcard);
+SDEraseFormatAction eraseformat_act(sdcard_menu, "Erase and format SD card", sdcard);
 SDListAction list_act(sdcard_menu, "List all recordings", sdcard, settings);
 SDRemoveAction erase_act(sdcard_menu, "Erase all recordings", sdcard, settings);
 #ifdef FIRMWARE_UPDATE
