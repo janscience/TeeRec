@@ -160,6 +160,11 @@ float SDCard::free() {
 
 
 void SDCard::report(Stream &stream) {
+  if (! Available) {
+    stream.println("! ERROR: SD card not initialized or present.");
+    return;
+  }
+  
   char types[10];
   cardType(types);
 
