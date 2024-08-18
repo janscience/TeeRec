@@ -85,10 +85,10 @@ class InputTDM : public Input {
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
   // If successfull, you may remove this check from your code.
-  virtual bool check();
+  virtual bool check(Stream &stream=Serial);
 
   // Print current settings on Serial.
-  virtual void report();
+  virtual void report(Stream &stream=Serial);
  
   // Add metadata to the header of a wave file holding the data of the
   // buffer.

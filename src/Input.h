@@ -29,10 +29,10 @@ class Input : public DataBuffer {
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
   // If successfull, you may remove this check from your code.
-  virtual bool check() = 0;
+  virtual bool check(Stream &stream=Serial) = 0;
 
   // Print current settings on Serial.
-  virtual void report() = 0;
+  virtual void report(Stream &stream=Serial) = 0;
 
   // Start the acquisition based on the channel, rate, and buffer settings.
   virtual void start() = 0;

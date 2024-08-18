@@ -445,36 +445,36 @@ void InputADC::pinAssignment() {
 }
 
 
-bool InputADC::check() {
+bool InputADC::check(Stream &stream) {
   if ( Rate < 1 ) {
-    Serial.println("ERROR: no sampling rate specfied.");
+    stream.println("ERROR: no sampling rate specfied.");
     ADCUse = 0;
     return false;
   }
   if ( NBuffer < NMajors*MajorSize ) {
-    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
+    stream.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
     ADCUse = 0;
     return false;
   }
   if (bufferTime() < 0.1)
-    Serial.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
+    stream.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
 		  1000.0*bufferTime());
   for (uint8_t adc=0; adc<2; adc++) {
     if ( (ADCUse & (adc+1)) == adc+1 ) {
       if (NChans[adc] == 0) {
-	Serial.println("ERROR: no channels supplied.");
+	stream.println("ERROR: no channels supplied.");
 	ADCUse = 0;
 	return false;
       }
       if ((NChans[adc] & (NChans[adc]-1)) > 0) {
-	Serial.printf("ERROR: number of channels (%d) on ADC%d must be a power of two.\n",
+	stream.printf("ERROR: number of channels (%d) on ADC%d must be a power of two.\n",
 		      NChans[adc], adc);
 	ADCUse = 0;
 	return false;
       }
       for(uint8_t i=0; i<NChans[adc]; i++) {
 	if ( ! ADConv.adc[adc]->checkPin(Channels[adc][i]) ) {
-	  Serial.printf("ERROR: invalid channel at index %d at ADC%d\n", i, adc);
+	  stream.printf("ERROR: invalid channel at index %d at ADC%d\n", i, adc);
 	  ADCUse = 0;
 	  return false;
 	}
@@ -482,19 +482,19 @@ bool InputADC::check() {
     }
   }
   if ( (ADCUse & 3) == 3 && NChans[0] != NChans[1] ) {
-    Serial.printf("ERROR: number of channels on both ADCs must be the same. ADC0: %d, ADC1: %d\n", NChans[0], NChans[1]);
+    stream.printf("ERROR: number of channels on both ADCs must be the same. ADC0: %d, ADC1: %d\n", NChans[0], NChans[1]);
     ADCUse = 0;
     return false;
   }
   if ((Averaging & (Averaging-1)) > 0 || Averaging == 2 || Averaging > 32) {
-    Serial.printf("ERROR: averaging must be one of 0, 1, 4, 8, 16, 32\n");
+    stream.printf("ERROR: averaging must be one of 0, 1, 4, 8, 16, 32\n");
     return false;
   }
   return true;
 }
 
   
-void InputADC::report() {
+void InputADC::report(Stream &stream) {
   char chans0[50];
   char chans1[50];
   channels(0, chans0);
@@ -512,18 +512,18 @@ void InputADC::report() {
   float dt = DMABufferTime();
   char dts[20];
   sprintf(dts, "%.1fms", 1000.0*dt);
-  Serial.println("ADC settings:");
-  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  resolution: %dbits\n", Bits);
-  Serial.printf("  averaging:  %d\n", Averaging);
-  Serial.printf("  conversion: %s\n", conversionSpeedStr());
-  Serial.printf("  sampling:   %s\n", samplingSpeedStr());
-  Serial.printf("  reference:  %s\n", referenceStr());
-  Serial.printf("  ADC0:       %s\n", chans0);
-  Serial.printf("  ADC1:       %s\n", chans1);
-  Serial.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
-  Serial.printf("  DMA time:   %s\n", dts);
-  Serial.println();
+  stream.println("ADC settings:");
+  stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  stream.printf("  resolution: %dbits\n", Bits);
+  stream.printf("  averaging:  %d\n", Averaging);
+  stream.printf("  conversion: %s\n", conversionSpeedStr());
+  stream.printf("  sampling:   %s\n", samplingSpeedStr());
+  stream.printf("  reference:  %s\n", referenceStr());
+  stream.printf("  ADC0:       %s\n", chans0);
+  stream.printf("  ADC1:       %s\n", chans1);
+  stream.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
+  stream.printf("  DMA time:   %s\n", dts);
+  stream.println();
 }
 
 

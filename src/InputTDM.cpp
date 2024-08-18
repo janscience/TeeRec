@@ -121,24 +121,24 @@ size_t InputTDM::counter(TDM_BUS bus) const {
 }
 
 
-bool InputTDM::check() {
+bool InputTDM::check(Stream &stream) {
   if ( Rate < 1 ) {
-    Serial.println("ERROR: no sampling rate specfied.");
+    stream.println("ERROR: no sampling rate specfied.");
     Rate = 0;
     NChannels = 0;
     return false;
   }
   if ( NBuffer < TDM_FRAMES*8 ) {
-    Serial.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
+    stream.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
     Rate = 0;
     NChannels = 0;
     return false;
   }
   if (bufferTime() < 0.1)
-    Serial.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
+    stream.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
 		  1000.0*bufferTime());
   if ( NChannels < 1 ) {
-    Serial.println("ERROR: no channels specified.");
+    stream.println("ERROR: no channels specified.");
     Rate = 0;
     NChannels = 0;
     return false;
@@ -147,7 +147,7 @@ bool InputTDM::check() {
 }
 
   
-void InputTDM::report() {
+void InputTDM::report(Stream &stream) {
   float bt = bufferTime();
   char bts[20];
   if (bt < 1.0)
@@ -157,14 +157,14 @@ void InputTDM::report() {
   float dt = DMABufferTime();
   char dts[20];
   sprintf(dts, "%.1fms", 1000.0*dt);
-  Serial.println("TDM settings:");
-  Serial.printf("  rate:       %.1fkHz\n", 0.001*Rate);
-  Serial.printf("  resolution: %dbits\n", Bits);
-  Serial.printf("  channels:   %d\n", NChannels);
-  Serial.printf("  swap l/r:   %d\n", SwapLR);
-  Serial.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
-  Serial.printf("  DMA time:   %s\n", dts);
-  Serial.println();
+  stream.println("TDM settings:");
+  stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
+  stream.printf("  resolution: %dbits\n", Bits);
+  stream.printf("  channels:   %d\n", NChannels);
+  stream.printf("  swap l/r:   %d\n", SwapLR);
+  stream.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
+  stream.printf("  DMA time:   %s\n", dts);
+  stream.println();
 }
 
 

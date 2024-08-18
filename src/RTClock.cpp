@@ -30,13 +30,13 @@ void RTClock::setSync() {
 }
 
 
-bool RTClock::check() {
+bool RTClock::check(Stream &stream) {
   bool status = (timeStatus() == timeSet);
   if (!status) {
     if (timeStatus() == timeNotSet)
-      Serial.println("RTC: time has never been set!");
+      stream.println("RTC: time has never been set!");
     else if (timeStatus() == timeNeedsSync)
-      Serial.println("RTC: unable to sync time with RTC!");
+      stream.println("RTC: unable to sync time with RTC!");
   }
   return status;
 }

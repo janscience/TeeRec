@@ -43,8 +43,8 @@ class RTClock {
   void setSync();
 
   // Check whether clock is available and set.
-  // If not print message to serial.
-  bool check();
+  // If not print message to stream.
+  bool check(Stream &stream=Serial);
 
   // Set real-time clock to t.
   void set(time_t t);
