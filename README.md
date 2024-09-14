@@ -52,6 +52,7 @@ library](https://github.com/janscience/ESensors).
 - [Performance of Teensy ADC](docs/inputadc.md)
 - [Audio output](docs/audioout.md): hardware for audio output.
 - [Audio input](docs/audioin.md): hardware for audio input (microphones).
+- [Data rates](docs/datarates.md): data rates for a range of sampling rates and channels.
 
 
 ## Libraries
