@@ -55,14 +55,16 @@ def format_seconds(secs):
 
 def days_table(bits=16):
     for r in sampling_rates:
+        print(f'### {r}kHz sampling rate')
+        print()
         s = f'| {"capacity":8s} |'
         for c  in channels:
-            cs = f'{c} channels @ {r}kHz'
-            s += f' {cs:>21s} |'
+            cs = f'{c} channels'
+            s += f' {cs:>12s} |'
         print(s)
         s = f'| {":":->8s} |'
         for c  in channels:
-            s += f' {":":->21s} |'
+            s += f' {":":->12s} |'
         print(s)
         for p  in capacities:
             ps = format_capacity(p)
@@ -70,7 +72,7 @@ def days_table(bits=16):
             for c  in channels:
                 data_rate = bits/8*c*r*1000
                 days = format_seconds(p*1e9/data_rate)
-                s += f' {days:>21s} |'
+                s += f' {days:>12s} |'
             print(s)
         print()
 
@@ -88,12 +90,13 @@ for b in bits:
     print()
     rate_table(b)
     print()
+print()
 
 print('''## SD card capacities
 
 Data rates are mostly not that high (<10MB/s). Class 10 cards (min
 10MB/s) or UHS-I cards with U1 speed class (10MB/s) should be
-sufficient.
+sufficient. See column "data rate" in the tables above.
 
 ''')
 days_table(16)

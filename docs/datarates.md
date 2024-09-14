@@ -258,54 +258,67 @@ write speeds of SD cards.
 |      256 |   32 |        192kHz |   197MB/s |    708GB |    17TB |
 
 
+
 ## SD card capacities
 
 Data rates are mostly not that high (<10MB/s). Class 10 cards (min
 10MB/s) or UHS-I cards with U1 speed class (10MB/s) should be
-sufficient.
+sufficient. See column "data rate" in the tables above.
 
 
-| capacity |     1 channels @ 8kHz |     2 channels @ 8kHz |     4 channels @ 8kHz |     8 channels @ 8kHz |    16 channels @ 8kHz |    32 channels @ 8kHz |    64 channels @ 8kHz |   128 channels @ 8kHz |   256 channels @ 8kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |                 17.4h |                  8.7h |
-|    256GB |             185.2days |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |                 17.4h |
-|    512GB |             370.4days |             185.2days |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |
-|      1TB |             740.7days |             370.4days |             185.2days |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |
+### 8kHz sampling rate
 
-| capacity |    1 channels @ 16kHz |    2 channels @ 16kHz |    4 channels @ 16kHz |    8 channels @ 16kHz |   16 channels @ 16kHz |   32 channels @ 16kHz |   64 channels @ 16kHz |  128 channels @ 16kHz |  256 channels @ 16kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |                 17.4h |                  8.7h |                  4.3h |
-|    256GB |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |                 17.4h |                  8.7h |
-|    512GB |             185.2days |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |                 17.4h |
-|      1TB |             370.4days |             185.2days |              92.6days |              46.3days |              23.1days |              11.6days |               5.8days |               2.9days |               1.4days |
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |        17.4h |         8.7h |
+|    256GB |    185.2days |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |        17.4h |
+|    512GB |    370.4days |    185.2days |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |
+|      1TB |    740.7days |    370.4days |    185.2days |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |
 
-| capacity |    1 channels @ 24kHz |    2 channels @ 24kHz |    4 channels @ 24kHz |    8 channels @ 24kHz |   16 channels @ 24kHz |   32 channels @ 24kHz |   64 channels @ 24kHz |  128 channels @ 24kHz |  256 channels @ 24kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |
-|    256GB |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |
-|    512GB |             123.5days |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |
-|      1TB |             246.9days |             123.5days |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |
+### 16kHz sampling rate
 
-| capacity |    1 channels @ 48kHz |    2 channels @ 48kHz |    4 channels @ 48kHz |    8 channels @ 48kHz |   16 channels @ 48kHz |   32 channels @ 48kHz |   64 channels @ 48kHz |  128 channels @ 48kHz |  256 channels @ 48kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |
-|    256GB |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |
-|    512GB |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |
-|      1TB |             123.5days |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |        17.4h |         8.7h |         4.3h |
+|    256GB |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |        17.4h |         8.7h |
+|    512GB |    185.2days |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |        17.4h |
+|      1TB |    370.4days |    185.2days |     92.6days |     46.3days |     23.1days |     11.6days |      5.8days |      2.9days |      1.4days |
 
-| capacity |    1 channels @ 96kHz |    2 channels @ 96kHz |    4 channels @ 96kHz |    8 channels @ 96kHz |   16 channels @ 96kHz |   32 channels @ 96kHz |   64 channels @ 96kHz |  128 channels @ 96kHz |  256 channels @ 96kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |               43.4min |
-|    256GB |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |
-|    512GB |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |
-|      1TB |              61.7days |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |
+### 24kHz sampling rate
 
-| capacity |   1 channels @ 192kHz |   2 channels @ 192kHz |   4 channels @ 192kHz |   8 channels @ 192kHz |  16 channels @ 192kHz |  32 channels @ 192kHz |  64 channels @ 192kHz | 128 channels @ 192kHz | 256 channels @ 192kHz |
-| -------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: | --------------------: |
-|    128GB |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |               43.4min |               21.7min |
-|    256GB |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |               43.4min |
-|    512GB |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |                  1.4h |
-|      1TB |              30.9days |              15.4days |               7.7days |               3.9days |               1.9days |                 23.1h |                 11.6h |                  5.8h |                  2.9h |
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |
+|    256GB |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |
+|    512GB |    123.5days |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |
+|      1TB |    246.9days |    123.5days |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |
+
+### 48kHz sampling rate
+
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |
+|    256GB |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |
+|    512GB |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |
+|      1TB |    123.5days |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |
+
+### 96kHz sampling rate
+
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |      43.4min |
+|    256GB |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |
+|    512GB |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |
+|      1TB |     61.7days |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |
+
+### 192kHz sampling rate
+
+| capacity |   1 channels |   2 channels |   4 channels |   8 channels |  16 channels |  32 channels |  64 channels | 128 channels | 256 channels |
+| -------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: | -----------: |
+|    128GB |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |      43.4min |      21.7min |
+|    256GB |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |      43.4min |
+|    512GB |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |         1.4h |
+|      1TB |     30.9days |     15.4days |      7.7days |      3.9days |      1.9days |        23.1h |        11.6h |         5.8h |         2.9h |
 
 
 ## SD card prices
