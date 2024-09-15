@@ -5,6 +5,18 @@ dependence on bit resolution, number of channels, and sampling rate.
 Use these numbers for selecting appropriate storing capacities and
 write speeds of SD cards.
 
+Keep in mind, that data rates are also limited by the bus used to
+access the SD card. The Teensy 4.1 builtin SD card slot is accessed
+via an SDIO bus that writes 4 bits per clock cylce at once. Data
+rates of more than 20MB/s are possible with this bus.
+
+When using an external SD card slot that is accessed via SPI bus, then
+only one bit per clock cycle is written. Consequently, the maximum
+data rate goes down by a factor of four. In addition, because of bad
+cables etc. the maximum clock rate might also need to go down to
+ensure reliable data transmission. In the end, on a SPI driven SD
+card, maximum data rates are not more than 5MHz/s.
+
 
 ## 16 bit resolution
 
@@ -261,10 +273,6 @@ write speeds of SD cards.
 
 ## SD card capacities
 
-Data rates are mostly not that high (<10MB/s). Class 10 cards (min
-10MB/s) or UHS-I cards with U1 speed class (10MB/s) should be
-sufficient. See column "data rate" in the tables above.
-
 
 ### 8kHz sampling rate
 
@@ -330,5 +338,11 @@ sufficient. See column "data rate" in the tables above.
 | 512GB    |  46 €  |
 |   1TB    | 100 €  |
 
-(prices from 2024)
+(prices from 2024 for U1 speed class)
+
+In most configurations of sampling rates and channel counts, data
+rates are not that high (<10MB/s). Class 10 cards (min 10MB/s) or
+UHS-I cards with U1 speed class (10MB/s) should be sufficient. See
+column "data rate" in the tables above.
+
 

@@ -25,7 +25,7 @@ class SDCard : public SDClass {
   virtual ~SDCard();
 
 #ifdef BUILTIN_SDCARD
-  // Initialize built in SD card.
+  // Initialize built in SD card on SDIO bus.
   // Return true on success.
   bool begin();
 #endif
@@ -33,6 +33,16 @@ class SDCard : public SDClass {
   // Initialize SD card on specified SPI chip select pin.
   // Return true on success.
   bool begin(uint8_t csPin);
+  
+  // Initialize SD card on SPI bus.
+  // cs is the chip select pin,
+  // opt is DEDICATED_SPI (fast) or SHARED_SPI (a bit slower),
+  // clock is the clock frequency in MHZ (max 50),
+  // spi is the SPI bus, &SPI or &SPI1.
+  // e.g. for the first SPI bus use:
+  //   begin(10, DEDICATED_SPI, 24, &SPI);
+  // Return true on success.
+  bool begin(uint8_t cs, uint8_t opt, uint32_t clock, SPIClass* spi);
   
   // End usage of SD card.
   void end();

@@ -2,6 +2,11 @@
 #define TEENSYADC     // data are recorded from Teensy internal ADCs
 //#define PCM186X     // data are recorded by TI PCM186x chip via TDM
 
+// select SD card:
+#define SDCARD_BUILTIN
+//#define SDCARD_SPI0
+//#define SDCARD_SPI1
+
 #include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
@@ -83,7 +88,13 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   Serial.println("\n=================================================================\n");
   blink.switchOn();
+#if defined(SDCARD_BUILTIN)
   sdcard.begin();
+#elif defined(SDCARD_SPI0)
+  sdcard.begin(10, DEDICATED_SPI, 20, &SPI);
+#elif defined(SDCARD_SPI1)
+  sdcard.begin(0, DEDICATED_SPI, 20, &SPI1);
+#endif
   sdcard.check();
   config.setConfigFile(CFG_FILE);
   config.load(sdcard);
