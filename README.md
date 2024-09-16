@@ -38,6 +38,7 @@ forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-cha
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
+- Read out a device identifier.
 - Simple menu for selecting actions.
 - Feedback by blinking the LED.
 - Configurable via config file on SD card.
@@ -109,6 +110,7 @@ via the `TeeRec.h` header.
   supported.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
+- [DeviceID](src/DeviceID.h): Read out a device identifier.
 - [Menu](src/Menu.h): Select actions from a menu.
 - [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
 - [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
@@ -152,6 +154,7 @@ Demonstrate the usage of some of the provided libraries.
 
 - [blink](examples/blink): Demonstrate usage of Blink class.
 - [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
+- [deviceid](examples/deviceid): Demonstrate usage of DeviceID class.
 - [menu](examples/menu): Demonstrate usage of Menu class.
 
 

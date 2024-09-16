@@ -13,11 +13,6 @@ PushButtons::PushButtons() :
 }
 
 
-PushButtons::~PushButtons() {
-  NButtons = 0;
-}
-
-
 int PushButtons::add(int pin, int mode,
 		     Callback onpress, Callback onrelease) {
   if (pin < 0)

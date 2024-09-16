@@ -24,8 +24,8 @@ public:
   typedef void (*Callback)(int);
 
 
+  // Initialize the PushButtons class.
   PushButtons();
-  ~PushButtons();
 
   // Add a button at a pin (if pin >= 0) and mode (INPUT or INPUT_PULLUP).
   // Optionally install callbacks that are called on press and release events. 
