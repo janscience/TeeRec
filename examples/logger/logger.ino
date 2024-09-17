@@ -16,6 +16,7 @@
 #endif
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <DeviceID.h>
 #include <Blink.h>
 #include <TestSignals.h>
 #include <Configurator.h>
@@ -50,11 +51,12 @@
   #define PREGAIN 1.0           // gain factor of a preamplifier.
 #endif
 
-#define PATH          "recordings" // folder where to store the recordings
+#define PATH          "recordings"  // folder where to store the recordings
+#define DEVICEID      1             // may be used for naming files
 #ifdef SINGLE_FILE_MTP
 #define FILENAME      "recNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #else
-#define FILENAME      "SDATELNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "loggerID-SDATELNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #endif
 #define FILE_SAVE_TIME 10   // seconds
 
@@ -94,6 +96,7 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
 RTClock rtclock;
+DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 Blink blink(LED_BUILTIN);
 
@@ -102,8 +105,9 @@ int restarts = 0;
 
 bool openNextFile() {
   blink.clear();
+  String name = deviceid.makeStr(settings.fileName());
   time_t t = now();
-  String name = rtclock.makeStr(settings.fileName(), t, true);
+  name = rtclock.makeStr(name, t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -238,6 +242,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
+  deviceid.report();
   prevname = "";
   sdcard.begin();
   rtclock.setFromFile(sdcard);

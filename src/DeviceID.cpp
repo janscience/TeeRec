@@ -50,6 +50,8 @@ int DeviceID::read() {
   }
   if (PowerPin >= 0)
     digitalWrite(PowerPin, 0);
+  if (r == 0)
+    return -1;
   ID = r;
   return ID;
 }
@@ -88,4 +90,8 @@ String DeviceID::makeStr(const String &str) const {
   return istr;
 }
 
+
+void DeviceID::report(Stream &stream) {
+  stream.printf("Device identifier: %d\n\n", ID);
+}
 

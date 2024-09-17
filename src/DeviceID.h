@@ -56,6 +56,9 @@ public:
   // Read out the device ID.
   // That is, supply power via the power pin, sequentally read in the
   // states of the pins, and return the number encoded by these bits.
+  // If no pins were specified or all pins are zero, the do no set the
+  // device ID and return -1.
+  // On success returns the read in device ID.
   int read();
 
   // Return the previously read in device ID.
@@ -73,6 +76,9 @@ public:
   // - "IDAA" by the device identifier as one or two alphanumerical characters,
   //   e.g. "DY", "N", "H".
   String makeStr(const String &str) const;
+
+  // Print device identifier on stream.
+  void report(Stream &stream=Serial);
 
   
 protected:
