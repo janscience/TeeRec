@@ -33,7 +33,9 @@ public:
 
 
   // Initialize the DeviceID class with a default device identifier.
-  DeviceID(int id=0);
+  // The optional powerdelay is the delay in milliseconds between
+  // switching on power and reading out the switches.
+  DeviceID(int id=0, int powerdelay=2);
 
   // Set the pins that have switches connected.
   // The first pin in the array is bit 0.
@@ -46,14 +48,13 @@ public:
   // Terminate the array with a negative number.
   void set(int powerpin, const int *pins);
 
-  // Set the powerpin that supplies the switches with power,
-  // the delay after with the pins are read out in ms, and
-  // the pins that have switches connected.
-  // The first pin in the array is bit 0.
-  // Terminate the array with a negative number.
-  void set(int powerpin, int powerdelay, const int *pins);
+  // Return the device ID.
+  int id() const { return ID; };
 
-  // Read out the device ID.
+  // Set the device identifier to id.
+  void setID(int id);
+
+  // Read out the device ID from DIP switches.
   // That is, supply power via the power pin, sequentally read in the
   // states of the pins, and return the number encoded by these bits.
   // If no pins were specified or all pins are zero, the do no set the
@@ -61,20 +62,13 @@ public:
   // On success returns the read in device ID.
   int read();
 
-  // Return the previously read in device ID.
-  int id() const { return ID; };
-
   // Replace in str:
-  // - "ID3" by the device identifier padded with zeros to three digits,
-  //   e.g. "103", "014", "007".
-  // - "ID2" by the device identifier padded with zeros to two digits,
-  //   e.g. "103", "14", "07".
-  // - "ID" by the device identifier,
-  //   e.g. "103", "14", "7".
-  // - "IDAA" by the device identifier as two alphanumerical characters,
-  //   e.g. "DY", "AN", "AH".
-  // - "IDAA" by the device identifier as one or two alphanumerical characters,
+  // - "ID" by the device identifier, e.g. "103", "14", "7".
+  //   Use "ID2" or "ID3" to pad the ID with zeros to two or three digits,
+  //   e.g. "103", "14", "07" for "ID2" or "103", "014", "007" of "ID3".
+  // - "IDA" by the device identifier as alphabetical characters,
   //   e.g. "DY", "N", "H".
+  //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AH".
   String makeStr(const String &str) const;
 
   // Print device identifier on stream.
@@ -87,7 +81,9 @@ protected:
   int Pins[MaxPins];  // the pins.
   int PowerPin;       // the pin providing power to the switches.
   int PowerDelay;     // the delay in ms between providing power and reading out the pins (default 2ms).
-  int ID;       // the read out device ID.
+  int ID;             // the device ID.
+  int Source;         // from which source was the device identifier set:
+                      // 0: none, 1: default via the constructor, 2: set via setID(), 3: read in via read().
 
 };
 

@@ -1,12 +1,15 @@
 #include <DeviceID.h>
 
 
-DeviceID::DeviceID(int id) :
+DeviceID::DeviceID(int id, int powerdelay) :
   NPins(0),
   PowerPin(-1),
-  PowerDelay(2),
-  ID(id) {
+  PowerDelay(powerdelay),
+  ID(id),
+  Source(0) {
   memset(Pins, 0, sizeof(Pins));
+  if (id > 0)
+    Source = 1;
 }
 
 
@@ -30,9 +33,9 @@ void DeviceID::set(int powerpin, const int *pins) {
 }
 
 
-void DeviceID::set(int powerpin, int powerdelay, const int *pins) {
-  set(powerpin, pins);
-  PowerDelay = powerdelay;
+void DeviceID::setID(int id) {
+  ID = id;
+  Source = 2;
 }
 
 
@@ -53,6 +56,7 @@ int DeviceID::read() {
   if (r == 0)
     return -1;
   ID = r;
+  Source = 3;
   return ID;
 }
 
@@ -92,6 +96,20 @@ String DeviceID::makeStr(const String &str) const {
 
 
 void DeviceID::report(Stream &stream) {
-  stream.printf("Device identifier: %d\n\n", ID);
+  char ss[20];
+  switch (Source) {
+  case 1:
+    strcpy(ss, "default");
+    break;
+  case 2:
+    strcpy(ss, "configured");
+    break;
+  case 3:
+    strcpy(ss, "read from device");
+    break;
+  default:
+    strcpy(ss, "not set");
+  }
+  stream.printf("Device identifier (%s): %d\n\n", ss, ID);
 }
 
