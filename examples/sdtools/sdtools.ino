@@ -8,6 +8,14 @@
 SDCard sdcard;
 
 
+void pause() {
+  while (Serial.available() == 0)
+    yield();
+  char pval[8];
+  Serial.readBytesUntil('\n', pval, 8);
+}
+
+
 bool yesno(const char *request, bool defval) {
   while (true) {
     Serial.print(request);
@@ -41,7 +49,7 @@ void loop() {
   // menu:
   Serial.println("1) SD card info");
   Serial.println("2) SD card check");
-  Serial.println("3) SD card data rates");
+  Serial.println("3) SD card benchmark test");
   Serial.println("4) SD card format");
   Serial.println("5) SD card erase and format");
   Serial.println("6) SD card list files");
@@ -79,7 +87,7 @@ void loop() {
     sdcard.check();
   }
   else if (pval[0] == '3') {
-    //sdcard.dataRates();
+    sdcard.benchmark();
   }
   else if (pval[0] == '4') {
     if (yesno("Do you really want to format the SD card?", false)) {
@@ -108,6 +116,7 @@ void loop() {
     }
     Serial.println();
   }
+  pause();
   // close SD card:
   sdcard.end();
 }

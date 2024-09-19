@@ -246,6 +246,122 @@ void SDCard::report(Stream &stream) {
 }
 
 
+void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
+		       Stream &stream) {
+  // adapted from bench.ino example of the sdfat library
+
+  const bool pre_allocate = true;
+
+  // open or create file - truncate existing file:
+  FsFile file = sdfs.open("bench.dat", O_RDWR | O_CREAT | O_TRUNC);
+  if (!file) {
+    stream.println("! ERROR: Failed to create file on SD card.\n");
+    return;
+  }
+  if (buffer_size < 32) {
+    stream.println("! ERROR: Buffer size too small.\n");
+    return;
+  }
+  
+  // insure 4-byte alignment.
+  uint32_t buf32[(buffer_size + 3)/4];
+  uint8_t* buf = (uint8_t*)buf32;
+
+  // fill buffer with known data:
+  for (size_t i=0; i<buffer_size - 2; i++) {
+    buf[i] = 'A' + (i % 26);
+  }
+  buf[buffer_size - 2] = '\r';
+  buf[buffer_size - 1] = '\n';
+
+  stream.println("Benchmarking write and read speeds.");
+  stream.printf("  File   size: %dMB\n", file_size);
+  stream.printf("  Buffer size: %dBytes\n\n", buffer_size);
+
+  file_size *= 1000000UL;   // to bytes
+
+  // run write test:
+  stream.println("Write speed and latency:");
+  stream.println("speed\tavg\tmin\tmax");
+  stream.println("MB/s\tms\tms\tms");
+  uint32_t n = file_size/buffer_size;
+  for (int k=0; k<repeats; k++) {
+    file.truncate(0);
+    if (pre_allocate) {
+      if (!file.preAllocate(file_size))
+	stream.println("! ERROR: pre-allocation of file failed.\n");
+    }
+    uint32_t max_latency = 0;
+    uint32_t min_latency = 9999999;
+    uint32_t total_latency = 0;
+    bool skip = true;
+    uint32_t t = millis();
+    for (uint32_t i=0; i<n; i++) {
+      uint32_t m = micros();
+      if (file.write(buf, buffer_size) != buffer_size)
+	stream.println("! ERROR: writing to file failed.\n");
+      m = micros() - m;
+      total_latency += m;
+      if (skip) {
+        // Wait until first write to SD, not just a copy to the cache.
+        skip = file.curPosition() < 512;
+      } else {
+        if (max_latency < m)
+          max_latency = m;
+        if (min_latency > m)
+          min_latency = m;
+      }
+    }
+    file.sync();
+    t = millis() - t;
+    float s = file.fileSize();
+    stream.printf("%.2f\t%.3f\t%.3f\t%.3f\n", 0.001*s/t, 0.001*total_latency/n,
+		  0.001*min_latency, 0.001*max_latency);
+  }
+  stream.println();
+
+  // run read test:
+  stream.println("Read speed and latency:");
+  stream.println("speed\tavg\tmin\tmax");
+  stream.println("MB/s\tms\tms\tms");
+  for (int k=0; k<repeats; k++) {
+    file.rewind();
+    uint32_t max_latency = 0;
+    uint32_t min_latency = 9999999;
+    uint32_t total_latency = 0;
+    bool skip = true;
+    uint32_t t = millis();
+    for (uint32_t i=0; i<n; i++) {
+      buf[buffer_size - 1] = 0;
+      uint32_t m = micros();
+      int32_t nr = file.read(buf, buffer_size);
+      m = micros() - m;
+      if (nr != (int32_t)buffer_size)
+	stream.println("! ERROR: reading from file failed.\n");
+      total_latency += m;
+      if (buf[buffer_size-1] != '\n')
+	stream.println("! ERROR: data check failed.\n");
+      if (skip)
+        skip = false;
+      else {
+        if (max_latency < m)
+          max_latency = m;
+        if (min_latency > m)
+          min_latency = m;
+      }
+    }
+    float s = file.fileSize();
+    t = millis() - t;
+    stream.printf("%.2f\t%.3f\t%.3f\t%.3f\n", 0.001*s/t, 0.001*total_latency/n,
+		  0.001*min_latency, 0.001*max_latency);
+  }
+  stream.println();
+  file.close();
+  stream.println("Done");
+  stream.println();
+}
+
+
 void SDCard::erase(Stream &stream) {
   uint32_t const ERASE_SIZE = 262144L;
   uint32_t nsectors = 0;

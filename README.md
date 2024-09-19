@@ -146,7 +146,7 @@ Some useful utilities.
 - [sinegen](examples/sinegen): Sine-wave generator.
 - [teensyboard](examples/teensyboard): Print Teensy board version, serial number and MAC adress.
 - [writeconfig](examples/writeconfig): Write a default configuration file on SD card.
-- [removefiles](examples/removefiles): Remove all files from a directory on SD card.
+- [sdtools](examples/sdtools): Inspect, test, and format SD cards.
 
 ### Demos
 

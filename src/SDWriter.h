@@ -83,8 +83,14 @@ class SDCard : public SDClass {
   // Free space of the card in Bytes.
   float free();
 
-  // Report sectors and capacity of SD card.
+  // Report SD card infos, capacity and available space.
   void report(Stream &stream=Serial);
+
+  // Run a benchmark test and report data rates for writing and reading.
+  // Write and read buffers of size bufer_size bytes
+  // of a file_size MB large file for repeats times.
+  void benchmark(size_t buffer_size=512, uint32_t file_size=10,
+		 int repeats=2, Stream &stream=Serial);
 
   // Flash erase all data.
   void erase(Stream &stream=Serial);
