@@ -66,18 +66,10 @@ class SDCard : public SDClass {
   // Return true on succes.
   bool rootDir();
 
-  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
-  // such that it specifies a non existing file. 
-  // If no SD card is available, or if no unique file can be found, return an empty string.
-  // Takes about 1-2ms.
-  String incrementFileName(const String &fname);
-
-  // Reset the counter that is used by incrementFileName().
-  // Call it, whenever the filename changes, for example, because of a new date.
-  void resetFileCounter();
-
   // List all files in path (non-recursively).
-  void listFiles(const char *path, Stream &stream=Serial);
+  // If list_dirs, then also list directories.
+  void listFiles(const char *path, bool list_dirs=false,
+		 Stream &stream=Serial);
 
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path, Stream &stream=Serial);
@@ -101,6 +93,16 @@ class SDCard : public SDClass {
   // If erase_card, flash erase all data first.
   void format(const char *path=0, bool erase_card=false,
 	      Stream &stream=Serial);
+
+  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
+  // such that it specifies a non existing file. 
+  // If no SD card is available, or if no unique file can be found, return an empty string.
+  // Takes about 1-2ms.
+  String incrementFileName(const String &fname);
+
+  // Reset the counter that is used by incrementFileName().
+  // Call it, whenever the filename changes, for example, because of a new date.
+  void resetFileCounter();
 
   // Open file on SD card for reading.
   File openRead(const char *path);

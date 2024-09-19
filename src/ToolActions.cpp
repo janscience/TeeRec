@@ -180,7 +180,7 @@ SDListAction::SDListAction(Configurable &menu, const char *name,
 void SDListAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
-  SDC.listFiles(SettingsMenu.path(), stream);
+  SDC.listFiles(SettingsMenu.path(), false, stream);
   stream.println();
 }
 

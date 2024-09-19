@@ -96,7 +96,7 @@ bool SDCard::rootDir() {
 }
 
 
-void SDCard::listFiles(const char *path, Stream &stream) {
+void SDCard::listFiles(const char *path, bool list_dirs, Stream &stream) {
   SdFile file;
   if (! Available)
     return;
@@ -108,11 +108,17 @@ void SDCard::listFiles(const char *path, Stream &stream) {
   stream.printf("Files in \"%s\":\n", path);
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
+    char fname[200];
+    file.getName(fname, 200);
     if (!file.isDir()) {
-      char fname[200];
-      file.getName(fname, 200);
       stream.print("  ");
       stream.println(fname);
+      n++;
+    }
+    else if (list_dirs) {
+      stream.print("  ");
+      stream.print(fname);
+      stream.println("/");
       n++;
     }
   }
@@ -152,7 +158,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
   if (n == 0)
     stream.println("No files found.");
   else
-    stream.printf("Removed %d files.", n);
+    stream.printf("Removed %d files.\n", n);
 }
 
 
@@ -217,11 +223,25 @@ void SDCard::report(Stream &stream) {
     return;
   }
   
+  cid_t cid;
+  if (!sdfs.card()->readCID(&cid)) {
+    stream.println("! ERROR: Failed to read CID from SD card.");
+    return;
+  }
+  
   stream.println("SD card:");
-  stream.printf("  Type       : %s\n", types);
-  stream.printf("  File system: %s\n", files);
-  stream.printf("  Capacity   : %.3f GB\n", 1e-9 * cap);
-  stream.printf("  Available  : %.3f GB\n", 1e-9 * free());
+  stream.printf("  Manufacturer ID   : %x\n", cid.mid);
+  stream.printf("  OEM ID            : %c%c\n", cid.oid[0], cid.oid[1]);
+  stream.printf("  Product           : %c%c%c%c%c\n", cid.pnm[0],
+		cid.pnm[1], cid.pnm[2], cid.pnm[3], cid.pnm[4]);
+  stream.printf("  Version           : %d.%d\n", cid.prv_n, cid.prv_m);
+  stream.printf("  Serial number     : %x\n", cid.psn);
+  stream.printf("  Manufacturing date: %d/%d\n", cid.mdt_month,
+		2000 + cid.mdt_year_low + 10*cid.mdt_year_high);
+  stream.printf("  Type              : %s\n", types);
+  stream.printf("  File system       : %s\n", files);
+  stream.printf("  Capacity          : %.3f GB\n", 1e-9 * cap);
+  stream.printf("  Available         : %.3f GB\n", 1e-9 * free());
   stream.println();
 }
 
@@ -259,14 +279,14 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
   File file;
   size_t n = 10;
   // read file:
-  if (path != 0) {
+  if (path != 0 && strlen(path) > 0) {
     stream.printf("Read file \"%s\" ...\n", path);
     rootDir();
     file = openRead(path);
     n = file.available();
   }
   char buffer[n];
-  if (path != 0) {
+  if (path != 0 && strlen(path) > 0) {
     file.read(buffer, n);
     file.close();
     stream.println();
@@ -290,7 +310,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
   }
   stream.println();
   // write file:
-  if (path != 0) {
+  if (path != 0 && strlen(path) > 0) {
     file = openWrite(path);
     file.write(buffer, n);
     file.close();
