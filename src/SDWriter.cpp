@@ -290,8 +290,10 @@ void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
   buf[buffer_size - 1] = '\n';
 
   stream.println("Benchmarking write and read speeds.");
-  stream.printf("  File   size: %dMB\n", file_size);
-  stream.printf("  Buffer size: %dBytes\n\n", buffer_size);
+  stream.println("- 'speed' is the average data rate for writing/reading the whole file.");
+  stream.println("- 'latency' is the average, minimum, and maximum time it takes to write/read a single buffer.");
+  stream.printf("- file   size: %dMB\n", file_size);
+  stream.printf("- buffer size: %dBytes\n\n", buffer_size);
 
   file_size *= 1000000UL;   // to bytes
 
