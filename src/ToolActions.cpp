@@ -110,6 +110,13 @@ void SDInfoAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
+void SDCheckAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.check(1024*1024, stream);
+}
+
+
 void SDBenchmarkAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;

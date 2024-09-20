@@ -107,6 +107,17 @@ class SDInfoAction : public SDCardAction {
 };
 
 
+class SDCheckAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* Check SD card access. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
 class SDBenchmarkAction : public SDCardAction {
 
  public:

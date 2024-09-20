@@ -272,7 +272,7 @@ void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
   // open or create file - truncate existing file:
   FsFile file = sdfs.open("bench.dat", O_RDWR | O_CREAT | O_TRUNC);
   if (!file) {
-    stream.println("! ERROR: Failed to create file on SD card.\n");
+    stream.println("! ERROR: Failed to create 'bench.dat' file on SD card.\n");
     return;
   }
   if (buffer_size < 32) {
@@ -376,6 +376,8 @@ void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
   }
   stream.println();
   file.close();
+  if (!sdfs.remove("bench.dat"))
+    stream.println("Failed to remove 'bench.dat'");
   stream.println("Done");
   stream.println();
 }
