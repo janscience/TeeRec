@@ -5,18 +5,6 @@
 #include <ToolActions.h>
 
 
-ConfigureAction::ConfigureAction(const char *name, int roles) :
-  ConfigureAction(*Configurator::MainConfig->Config, name, roles) {
-}
-
-
-ConfigureAction::ConfigureAction(Configurable &menu, const char *name,
-				 int roles) :
-  Configurable(menu, name, roles) {
-  root()->Config = this;
-}
-
-
 ReportConfigAction::ReportConfigAction(const char *name) :
   ReportConfigAction(*Configurator::MainConfig->Config, name) {
 }

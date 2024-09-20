@@ -17,18 +17,6 @@ class Settings;
 class RTClock;
 
 
-class ConfigureAction : public Configurable {
-
- public:
-
-  /* Initialize and add to default menu. */
-  ConfigureAction(const char *name, int roles=StreamInput);
-  
-  /* Initialize and add to configuration menu. */
-  ConfigureAction(Configurable &menu, const char *name, int roles=StreamInput);
-};
-
-
 class ReportConfigAction : public Action {
 
  public:
