@@ -5,6 +5,23 @@
 #include <ToolActions.h>
 
 
+HelpAction::HelpAction(const char *name) :
+  HelpAction(*Configurator::MainConfig->Config, name) {
+}
+
+
+HelpAction::HelpAction(Configurable &menu, const char *name) :
+  Action(menu, name, StreamInput) {
+}
+
+
+void HelpAction::configure(Stream &stream, unsigned long timeout) {
+  stream.println("Select menu entries by entering the number followed by 'return'.");
+  stream.println("Go up to the parent menu by entering 'q'.");
+  stream.println();
+}
+
+
 ReportConfigAction::ReportConfigAction(const char *name) :
   ReportConfigAction(*Configurator::MainConfig->Config, name) {
 }

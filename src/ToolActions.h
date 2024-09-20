@@ -17,6 +17,21 @@ class Settings;
 class RTClock;
 
 
+class HelpAction : public Action {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  HelpAction(const char *name);
+
+  /* Initialize and add to configuration menu. */
+  HelpAction(Configurable &menu, const char *name);
+
+  /* Print help and key-bindings. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+};
+
+
 class ReportConfigAction : public Action {
 
  public:

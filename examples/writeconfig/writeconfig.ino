@@ -75,6 +75,7 @@ Configurable firmware_menu("Firmware", Action::StreamInput);
 ListFirmwareAction listfirmware_act(firmware_menu, "List available updates", sdcard);
 UpdateFirmwareAction updatefirmware_act(firmware_menu, "Update firmware", sdcard);
 #endif
+HelpAction help_act(config, "Help");
 
 Blink blink(LED_BUILTIN);
 
