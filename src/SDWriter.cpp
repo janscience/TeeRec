@@ -140,11 +140,16 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
   }
   stream.printf("Removing all files in \"%s\":\n", path);
   int n = 0;
-  while (file.openNext(&dir, O_WRITE)) {
+  while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
-      if (file.remove()) {
+      char pname[200];
+      strcpy(pname, path);
+      if (pname[strlen(pname) - 1] != '/')
+	strcat(pname, "/");
+      strcat(pname, fname);
+      if (dir.remove(pname)) {
 	stream.print("  ");
 	stream.println(fname);
 	n++;
