@@ -105,6 +105,13 @@ void SDInfoAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
+void SDBenchmarkAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.benchmark(512, 10, 2, stream);
+}
+
+
 void SDFormatAction::format(const char *erases, bool erase, Stream &stream) {
   char request[64];
   sprintf(request, "Do you really want to%s format the SD card?", erases);

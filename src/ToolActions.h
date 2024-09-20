@@ -99,7 +99,18 @@ class SDInfoAction : public SDCardAction {
 
   using SDCardAction::SDCardAction;
 
-  /* Report sectors and size of SD card. */
+  /* Report SD card infos, capacity and available space. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class SDBenchmarkAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* Run a benchmark test and report data rates for writing and reading. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
 };
 
