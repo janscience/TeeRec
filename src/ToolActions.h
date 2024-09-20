@@ -144,6 +144,48 @@ class SDEraseFormatAction : public SDFormatAction {
 };
 
 
+class SDListRootAction : public SDCardAction {
+
+ public:
+
+  using SDCardAction::SDCardAction;
+
+  /* List files and directories of the root directory. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
+class SDListRecordingsAction : public SDCardAction {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  SDListRecordingsAction(const char *name, SDCard &sd, Settings &settings);
+
+  /* Initialize and add to configuration menu. */
+  SDListRecordingsAction(Configurable &menu, const char *name, SDCard &sd,
+		 Settings &settings);
+
+  /* List all recordings on SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+
+ protected:
+  
+  Settings &SettingsMenu;
+};
+
+
+class SDRemoveRecordingsAction : public SDListRecordingsAction {
+
+ public:
+
+  using SDListRecordingsAction::SDListRecordingsAction;
+
+  /* Remove all recordings from SD card. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+};
+
+
 #ifdef FIRMWARE_UPDATE
 
 class ListFirmwareAction : public SDCardAction {
@@ -168,37 +210,6 @@ class UpdateFirmwareAction : public SDCardAction {
 };
 
 #endif
-
-
-class SDListAction : public SDCardAction {
-
- public:
-
-  /* Initialize and add to default menu. */
-  SDListAction(const char *name, SDCard &sd, Settings &settings);
-
-  /* Initialize and add to configuration menu. */
-  SDListAction(Configurable &menu, const char *name, SDCard &sd,
-		 Settings &settings);
-
-  /* List all recordings on SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
-
- protected:
-  
-  Settings &SettingsMenu;
-};
-
-
-class SDRemoveAction : public SDListAction {
-
- public:
-
-  using SDListAction::SDListAction;
-
-  /* Remove all recordings from SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
-};
 
 
 class RTCAction : public Action {

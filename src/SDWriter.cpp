@@ -122,8 +122,10 @@ void SDCard::listFiles(const char *path, bool list_dirs, Stream &stream) {
       n++;
     }
   }
-  if (n > 0)
+  if (n > 1)
     stream.printf("%d files found.\n", n);
+  else if (n == 1)
+    stream.printf("%d file found.\n", n);
   else
     stream.printf("No files found.\n");
 }

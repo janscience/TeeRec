@@ -155,6 +155,53 @@ void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
+void SDListRootAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.listFiles("/", true, stream);
+  stream.println();
+}
+
+
+SDListRecordingsAction::SDListRecordingsAction(const char *name, SDCard &sd,
+					       Settings &settings) :
+  SDCardAction(name, sd),
+  SettingsMenu(settings) {
+}
+
+
+SDListRecordingsAction::SDListRecordingsAction(Configurable &menu,
+					       const char *name,
+					       SDCard &sd,
+					       Settings &settings) : 
+  SDCardAction(menu, name, sd),
+  SettingsMenu(settings) {
+}
+
+
+void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  SDC.listFiles(SettingsMenu.path(), false, stream);
+  stream.println();
+}
+
+
+void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout) {
+  if (disabled(StreamInput))
+    return;
+  if (! SDC.exists(SettingsMenu.path())) {
+    stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());
+    return;
+  }
+  stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
+  if (Action::yesno("Do you really want to erase all recordings?",
+		    true, stream))
+    SDC.removeFiles(SettingsMenu.path(), stream);
+  stream.println();
+}
+
+
 #ifdef FIRMWARE_UPDATE
 
 void ListFirmwareAction::configure(Stream &stream, unsigned long timeout) {
@@ -173,43 +220,6 @@ void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 #endif
-
-
-SDListAction::SDListAction(const char *name, SDCard &sd,
-			   Settings &settings) :
-  SDCardAction(name, sd),
-  SettingsMenu(settings) {
-}
-
-
-SDListAction::SDListAction(Configurable &menu, const char *name,
-			   SDCard &sd, Settings &settings) : 
-  SDCardAction(menu, name, sd),
-  SettingsMenu(settings) {
-}
-
-
-void SDListAction::configure(Stream &stream, unsigned long timeout) {
-  if (disabled(StreamInput))
-    return;
-  SDC.listFiles(SettingsMenu.path(), false, stream);
-  stream.println();
-}
-
-
-void SDRemoveAction::configure(Stream &stream, unsigned long timeout) {
-  if (disabled(StreamInput))
-    return;
-  if (! SDC.exists(SettingsMenu.path())) {
-    stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());
-    return;
-  }
-  stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
-  if (Action::yesno("Do you really want to erase all recordings?",
-		    true, stream))
-    SDC.removeFiles(SettingsMenu.path(), stream);
-  stream.println();
-}
 
 
 RTCAction::RTCAction(const char *name, RTClock &rtclock) :
