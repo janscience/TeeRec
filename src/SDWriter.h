@@ -83,6 +83,9 @@ class SDCard : public SDClass {
   // Free space of the card in Bytes.
   float free();
 
+  // Serial number of the SD card as hex string (minimum size of 9 characters).
+  void serial(char *s);
+
   // Report SD card infos, capacity and available space.
   void report(Stream &stream=Serial);
 

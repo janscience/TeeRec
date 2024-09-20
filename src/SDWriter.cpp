@@ -205,6 +205,16 @@ float SDCard::free() {
 }
 
 
+void SDCard::serial(char *s) {
+  cid_t cid;
+  if (!sdfs.card()->readCID(&cid)) {
+    s[0] = '\0';
+    return;
+  }
+  sprintf(s, "%lx", cid.psn);
+}
+
+
 void SDCard::report(Stream &stream) {
   if (! Available) {
     stream.println("! ERROR: No SD card present.");
@@ -240,7 +250,7 @@ void SDCard::report(Stream &stream) {
   stream.printf("  Product           : %c%c%c%c%c\n", cid.pnm[0],
 		cid.pnm[1], cid.pnm[2], cid.pnm[3], cid.pnm[4]);
   stream.printf("  Version           : %d.%d\n", cid.prv_n, cid.prv_m);
-  stream.printf("  Serial number     : %x\n", cid.psn);
+  stream.printf("  Serial number     : %lx\n", cid.psn);
   stream.printf("  Manufacturing date: %d/%d\n", cid.mdt_month,
 		2000 + cid.mdt_year_low + 10*cid.mdt_year_high);
   stream.printf("  Type              : %s\n", types);
