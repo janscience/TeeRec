@@ -4,12 +4,14 @@
 
   For various types of inputs (strings, enums, numbers), specialized
   classes are provided (see list below). For each type there are three
-  classes.  The Base*Parameter class, which provides most of the
-  infrastructure needed for handling this type. This class is
-  inherited by two classes. The *Parameter lass owns the value, and it
-  has to be retrieved by calling value().  The *PointerParameter class
-  just stores a pointer to the value, so that this external variable
-  is updated immediately, whenever it is configured.
+  classes.  The Base*Parameter classes provide most of the
+  infrastructure needed for handling a specific type. The
+  Base*Parameter class is inherited by two classes. An instance of the
+  *Parameter class owns the value, and it has to be retrieved by
+  calling value().  The *PointerParameter class just stores a pointer
+  to the value, so that this external variable is updated immediately
+  whenever it is configured without the need to retrieve it from the
+  class instance.
 
   Via the constructors, parameter classes get their name and are added
   to a Configurable. Via the value() and the valueStr() member functions,
@@ -18,7 +20,7 @@
 
   All classes support selections. These are lists of valid
   values. When provided, values can be chosen from these selections
-  and only value that are contained in selections are considered
+  and only values that are contained in selections are considered
   valid.
 
   Classes:
