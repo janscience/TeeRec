@@ -42,9 +42,13 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
   listSelection(stream);
   while (true) {
     if (NSelection > 0)
-      stream.printf("%-*s: ", w, "select new value");
+      stream.printf("%-*s", w, "select new value");
     else
-      stream.printf("%-*s: ", w, "enter new value");
+      stream.printf("%-*s", w, "enter new value");
+    instructions(pval);
+    if (strlen(pval) > 0)
+      stream.printf(" (%s)", pval);
+    stream.print(": ");
     elapsedMillis time = 0;
     while ((stream.available() == 0) && (timeout == 0 || time < timeout)) {
       yield();
@@ -88,6 +92,11 @@ void Parameter::set(const char *val, const char *name, Stream &stream) {
   else
     stream.printf("%*s%s is not a valid value for %s\n",
 		  indentation(), "", val, keyname);
+}
+
+
+void Parameter::instructions(char *str) const {
+  *str = '\0';
 }
 
 

@@ -83,6 +83,10 @@ class Parameter : public Action {
   /* List selection of valid values. */
   virtual void listSelection(Stream &stream) const {};
 
+  /* Return in str some instructions for interactive input,
+     e.g. a valid range for numbers. Used for the prompt in configure(). */
+  virtual void instructions(char *str) const;
+
   /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
 
@@ -369,6 +373,9 @@ class BaseNumberParameter : public Parameter {
 
   /* List selection of valid values. */
   virtual void listSelection(Stream &stream) const;
+
+  /* Return in str infos regarding valid minimum and maximum numbers. */
+  virtual void instructions(char *str) const;
 
   /* Set minimum value a number can have. */
   T setMinimum(T minimum);
@@ -890,10 +897,35 @@ int BaseNumberParameter<T>::checkSelection(T val) {
 
 template<class T>
 void BaseNumberParameter<T>::listSelection(Stream &stream) const {
+  char str[MaxVal];
   for (size_t k=0; k<NSelection; k++) {
-    char str[MaxVal];
     valueStr(Selection[k], str);
     stream.printf("  - %s\n", str);
+  }
+  if (NSelection == 0 && SpecialStr != NULL && strlen(SpecialStr) > 0) {
+    valueStr(SpecialValue, str);
+    stream.printf("  * %s: %s\n", SpecialStr, str);
+  }
+}
+
+
+template<class T>
+void BaseNumberParameter<T>::instructions(char *str) const {
+  *str = '\0';
+  char min_str[MaxVal];
+  char max_str[MaxVal];
+  if (CheckMin && CheckMax) {
+    valueStr(Minimum, min_str);    
+    valueStr(Maximum, max_str);
+    sprintf(str, "between %s and %s", min_str, max_str);
+  }
+  else if (CheckMin) {
+    valueStr(Minimum, min_str);    
+    sprintf(str, "greater than or equal to %s", min_str);
+  }
+  else if (CheckMax) {
+    valueStr(Maximum, max_str);    
+    sprintf(str, "less than or equal to %s", max_str);
   }
 }
 
