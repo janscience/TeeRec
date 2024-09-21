@@ -354,6 +354,10 @@ class BaseNumberParameter : public Parameter {
   /* Set the unit string for the string representation of the value to unit. */
   void setOutUnit(const char *unit);
 
+  /* Set special value that is encoded as a string. 
+     For example, setSpecial(0, "infinity"); */
+  void setSpecial(T value, const char *str);
+
   /* Provide a selection of n input values.
      If provided, only numbers in this list are valid inputs. */
   void setSelection(const T *selection, size_t n);
@@ -392,6 +396,9 @@ class BaseNumberParameter : public Parameter {
   char OutUnit[MaxUnit];
 
   const T *Selection;
+
+  T SpecialValue;
+  const char *SpecialStr;
 
   bool CheckMin;
   T Minimum;
@@ -791,6 +798,8 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
   Unit(""),
   OutUnit(""),
   Selection(selection),
+  SpecialValue(0),
+  SpecialStr(NULL),
   CheckMin(false),
   Minimum(0),
   CheckMax(false),
@@ -815,6 +824,8 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
   Unit(""),
   OutUnit(""),
   Selection(0),
+  SpecialValue(0),
+  SpecialStr(NULL),
   CheckMin(true),
   Minimum(minimum),
   CheckMax(true),
@@ -849,6 +860,13 @@ void BaseNumberParameter<T>::setOutUnit(const char *unit) {
     strncpy(OutUnit, unit, MaxUnit);
     OutUnit[MaxUnit-1] = '\0';
   }
+}
+
+
+template<class T>
+void BaseNumberParameter<T>::setSpecial(T value, const char *str) {
+  SpecialValue = value;
+  SpecialStr = str;
 }
 
 
@@ -908,12 +926,20 @@ template<class T>
 void BaseNumberParameter<T>::valueStr(T val, char *str) const {
   if (this->Unit != NULL && strlen(this->Unit) > 0) {
     float value = this->changeUnit((float)val, this->Unit, this->OutUnit);
-    sprintf(str, this->Format, value);
-    if (this->OutUnit != 0)
-      strcat(str, this->OutUnit);
+    if (SpecialStr != NULL && strlen(SpecialStr) > 0 && value == SpecialValue)
+      strcpy(str, SpecialStr);
+    else {
+      sprintf(str, this->Format, value);
+      if (this->OutUnit != 0)
+	strcat(str, this->OutUnit);
+    }
   }
-  else
-    sprintf(str, this->Format, val);
+  else {
+    if (SpecialStr != NULL && strlen(SpecialStr) > 0 && val == SpecialValue)
+      strcpy(str, SpecialStr);
+    else
+      sprintf(str, this->Format, val);
+  }
 }
 
 
@@ -978,6 +1004,11 @@ bool NumberParameter<T>::parseValue(char *val, bool selection) {
   }
   if (strlen(val) == 0)
     return true;
+  if (this->SpecialStr != NULL && strlen(this->SpecialStr) > 0 &&
+      strcmp(val, this->SpecialStr) == 0) {
+    Value = this->SpecialValue;
+    return true;
+  }
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
@@ -1071,6 +1102,11 @@ bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   }
   if (strlen(val) == 0)
     return true;
+  if (this->SpecialStr != NULL && strlen(this->SpecialStr) > 0 &&
+      strcmp(val, this->SpecialStr) == 0) {
+    *Value = this->SpecialValue;
+    return true;
+  }
   float num = atof(val);
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
