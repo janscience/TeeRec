@@ -321,11 +321,17 @@ class BaseNumberParameter : public Parameter {
  public:
   
   /* Initialize parameter with identifying name,
-     format string, and unit and add it to menu. */
+     format string, unit, and selection, and add it to menu. */
   BaseNumberParameter(Configurable &menu, const char *name,
 		      const char *format, const char *unit=0,
 		      const char *outunit=0, const T *selection=0,
 		      size_t n=0);
+  
+  /* Initialize parameter with identifying name,
+     minimum, maximum, format string, and unit, and add it to menu. */
+  BaseNumberParameter(Configurable &menu, const char *name,
+		      T minimu, T maximum, const char *format,
+		      const char *unit=0, const char *outunit=0);
 
   /* The format string for formatting a number. */
   const char *format() const { return Format; };
@@ -360,6 +366,17 @@ class BaseNumberParameter : public Parameter {
   /* List selection of valid values. */
   virtual void listSelection(Stream &stream) const;
 
+  /* Set minimum value a number can have. */
+  T setMinimum(T minimum);
+
+  /* Set maximum value a number can have. */
+  T setMaximum(T maximum);
+
+  /* Check whether val is in range. Return -2 if it is smaller than
+     minimum, return -1 if it is larger than maximum, return 1 if it
+     is in range. */
+  int checkMinMax(T val);
+
   /* Return for val a properly formatted string of maximum size MaxVal
      with outUnit appended. */
   virtual void valueStr(T val, char *str) const;
@@ -375,6 +392,12 @@ class BaseNumberParameter : public Parameter {
   char OutUnit[MaxUnit];
 
   const T *Selection;
+
+  bool CheckMin;
+  T Minimum;
+
+  bool CheckMax;
+  T Maximum;
   
 };
 
@@ -385,12 +408,18 @@ class NumberParameter : public BaseNumberParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying name, pointer number to value,
-     format string, and unit and add it to menu. */
-  NumberParameter(Configurable &menu, const char *name, T number,
+  /* Initialize parameter with identifying name, value,
+     format string, unit, and selection, and add it to menu. */
+  NumberParameter(Configurable &menu, const char *name, T value,
 		  const char *format, const char *unit=0,
 		  const char *outunit=0, const T *selection=0,
 		  size_t n=0);
+  
+  /* Initialize parameter with identifying name, value,
+     minimum and maximum, format string, unit, and add it to menu. */
+  NumberParameter(Configurable &menu, const char *name, T value,
+		  T minimum, T maximum, const char *format,
+		  const char *unit=0, const char *outunit=0);
 
   /* Return the value of the number in its unit(). */
   T value() const { return Value; };
@@ -436,12 +465,18 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   
  public:
   
-  /* Initialize parameter with identifying name, pointer number to value,
-     format string, and unit and add it to menu. */
-  NumberPointerParameter(Configurable &menu, const char *name, T *number,
+  /* Initialize parameter with identifying name, pointer to value,
+     format string, unit, and selection, and add it to menu. */
+  NumberPointerParameter(Configurable &menu, const char *name, T *value,
 			 const char *format, const char *unit=0,
 			 const char *outunit=0, const T *selection=0,
 			 size_t n=0);
+  
+  /* Initialize parameter with identifying name, pointer to value,
+     minimum, maximum, format string, and unit, and add it to menu. */
+  NumberPointerParameter(Configurable &menu, const char *name, T *value,
+			 T minimum, T maximum, const char *format,
+			 const char *unit=0, const char *outunit=0);
 
   /* Return the value of the number. */
   T value() const { return *Value; };
@@ -755,7 +790,35 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
   Format(""),
   Unit(""),
   OutUnit(""),
-  Selection(selection) {
+  Selection(selection),
+  CheckMin(false),
+  Minimum(0),
+  CheckMax(false),
+  Maximum(0) {
+  setFormat(format);
+  setUnit(unit);
+  setOutUnit(outunit);
+  if (strlen(OutUnit) == 0)
+    setOutUnit(unit);
+}
+
+
+template<class T>
+BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
+					    const char *name,
+					    T minimum, T maximum,
+					    const char *format,
+					    const char *unit,
+					    const char *outunit) :
+  Parameter(menu, name, 0),
+  Format(""),
+  Unit(""),
+  OutUnit(""),
+  Selection(0),
+  CheckMin(true),
+  Minimum(minimum),
+  CheckMax(true),
+  Maximum(maximum) {
   setFormat(format);
   setUnit(unit);
   setOutUnit(outunit);
@@ -818,6 +881,30 @@ void BaseNumberParameter<T>::listSelection(Stream &stream) const {
 
 
 template<class T>
+T BaseNumberParameter<T>::setMinimum(T minimum) {
+  CheckMin = true;
+  Minimum = minimum;
+}
+
+
+template<class T>
+T BaseNumberParameter<T>::setMaximum(T maximum) {
+  CheckMax = true;
+  Maximum = maximum;
+}
+
+
+template<class T>
+int BaseNumberParameter<T>::checkMinMax(T val) {
+  if (CheckMin && val < Minimum)
+    return -2;
+  if (CheckMax && val > Maximum)
+    return -1;
+  return 1;
+}
+
+
+template<class T>
 void BaseNumberParameter<T>::valueStr(T val, char *str) const {
   if (this->Unit != NULL && strlen(this->Unit) > 0) {
     float value = this->changeUnit((float)val, this->Unit, this->OutUnit);
@@ -843,6 +930,16 @@ NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
 
 
 template<class T>
+NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
+				    T number, T minimum, T maximum,
+				    const char *format, const char *unit,
+				    const char *outunit) :
+  BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
+  Value(number) {
+}
+
+
+template<class T>
 T NumberParameter<T>::value(const char *unit) const {
   float val = changeUnit((float)Value, this->Unit, unit);
   return (T)val;
@@ -853,6 +950,8 @@ template<class T>
 void NumberParameter<T>::setValue(T val) {
   if (this->checkSelection(val) < 0)
     return;
+  if (this->checkMinMax(val) < 0)
+    return;
   Value = val;
 }
 
@@ -861,6 +960,8 @@ template<class T>
 void NumberParameter<T>::setValue(T val, const char *unit) {
   float nv = changeUnit((float)val, unit, this->Unit);
   if (this->checkSelection(val) < 0)
+    return;
+  if (this->checkMinMax(nv) < 0)
     return;
   Value = (T)nv;
 }
@@ -890,6 +991,8 @@ bool NumberParameter<T>::parseValue(char *val, bool selection) {
   float nv = this->changeUnit(num, unit, this->Unit);
   if (this->checkSelection(nv) < 0)
     return false;
+  if (this->checkMinMax(nv) < 0)
+    return false;
   Value = (T)nv;
   return true;
 }
@@ -917,6 +1020,19 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
 
 
 template<class T>
+NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
+						  const char *name,
+						  T *number,
+						  T minimum, T maximum,
+						  const char *format,
+						  const char *unit,
+						  const char *outunit) :
+  BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
+  Value(number) {
+}
+
+
+template<class T>
 T NumberPointerParameter<T>::value(const char *unit) const {
   float val = changeUnit(*Value, this->Unit, unit);
   return (T)val;
@@ -927,6 +1043,8 @@ template<class T>
 void NumberPointerParameter<T>::setValue(T val) {
   if (this->checkSelection(val) < 0)
     return;
+  if (this->checkMinMax(val) < 0)
+    return;
   *Value = val;
 }
 
@@ -935,6 +1053,8 @@ template<class T>
 void NumberPointerParameter<T>::setValue(T val, const char *unit) {
   float nv = changeUnit((float)val, unit, this->Unit);
   if (this->checkSelection(nv) < 0)
+    return;
+  if (this->checkMinMax(nv) < 0)
     return;
   *Value = (T)nv;
 }
@@ -963,6 +1083,8 @@ bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   unit[this->MaxUnit-1] = '\0';
   float nv = this->changeUnit(num, unit, this->Unit);
   if (this->checkSelection(nv) < 0)
+    return false;
+  if (this->checkMinMax(nv) < 0)
     return false;
   *Value = (T)nv;
   return true;

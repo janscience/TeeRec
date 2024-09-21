@@ -46,6 +46,7 @@
 
 RTClock rtclock;
 SDCard sdcard;
+
 Configurator config;
 Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
