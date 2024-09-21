@@ -1,6 +1,37 @@
 /*
   Parameter - Actions with configurable name-value pairs of various types.
   Created by Jan Benda, October 22, 2023.
+
+  For various types of inputs (strings, enums, numbers), specialized
+  classes are provided (see list below). For each type there are three
+  classes.  The Base*Parameter class, which provides most of the
+  infrastructure needed for handling this type. This class is
+  inherited by two classes. The *Parameter lass owns the value, and it
+  has to be retrieved by calling value().  The *PointerParameter class
+  just stores a pointer to the value, so that this external variable
+  is updated immediately, whenever it is configured.
+
+  Via the constructors, parameter classes get their name and are added
+  to a Configurable. Via the value() and the valueStr() member functions,
+  the current value can be obtained directly or as a string representation.
+  Everything else is handled by the Configurable class.
+
+  All classes support selections. These are lists of valid
+  values. When provided, values can be chosen from these selections
+  and only value that are contained in selections are considered
+  valid.
+
+  Classes:
+  - Parameter: Base class for configurable parameters, i.e. name-value pairs.
+  - BaseStringParameter: Base class for string values.
+  - StringParameter: A parameter whose value is a string.
+  - StringPointerParameter: A parameter whose value points to a string.
+  - BaseEnumParameter: Base class for enum values, i.e. strings encoding integers.
+  - EnumParameter: A parameter whose value is an integer that is represented as a string.
+  - EnumPointerParameter: A parameter whose value points to an integer that is represented as a string.
+  - BaseNumberParameter: Base class for numerical values with optional unit (integers and floats).
+  - NumberParameter: A parameter whose value is a number with optional unit (any type of integer or float).
+  - NumberPointerParameter: A parameter whose value points to a number with optional unit (any type of integer or float). 
 */
 
 #ifndef Parameter_h
@@ -14,6 +45,7 @@ class File;
 class Configurable;
 
 
+/* Base class for configurable parameters, i.e. name-value pairs. */
 class Parameter : public Action {
 
  public:
@@ -69,6 +101,7 @@ class Parameter : public Action {
 };
 
 
+/* Base class for string values. */
 class BaseStringParameter : public Parameter {
 
   /* Parameter with character array as value. */
@@ -102,6 +135,7 @@ class BaseStringParameter : public Parameter {
 };
 
 
+/* A parameter whose value is a string of size N. */
 template<int N>
 class StringParameter : public BaseStringParameter {
 
@@ -139,6 +173,7 @@ class StringParameter : public BaseStringParameter {
 };
 
 
+/* A parameter whose value points to a string of size N. */
 template<int N>
 class StringPointerParameter : public BaseStringParameter {
 
@@ -176,10 +211,9 @@ class StringPointerParameter : public BaseStringParameter {
 };
 
 
+/* Base class for enum values, i.e. strings encoding integers of type T. */
 template<class T>
 class BaseEnumParameter : public BaseStringParameter {
-
-  /* Parameter with enum as value. */
   
  public:
   
@@ -207,10 +241,9 @@ class BaseEnumParameter : public BaseStringParameter {
 };
 
 
+/* A parameter whose value is an integer of type T that is represented as a string. */
 template<class T>
 class EnumParameter : public BaseEnumParameter<T> {
-
-  /* Parameter owning an enum . */
   
  public:
   
@@ -244,10 +277,9 @@ class EnumParameter : public BaseEnumParameter<T> {
 };
 
 
+/* A parameter whose value points to an integer of type T that is represented as a string. */
 template<class T>
 class EnumPointerParameter : public BaseEnumParameter<T> {
-
-  /* Parameter with a pointer to an enum . */
   
  public:
   
@@ -282,6 +314,7 @@ class EnumPointerParameter : public BaseEnumParameter<T> {
 };
 
 
+/* Base class for numerical values (integers and floats). */
 template<class T>
 class BaseNumberParameter : public Parameter {
   
@@ -308,14 +341,15 @@ class BaseNumberParameter : public Parameter {
   /* Set the internal unit string to unit. */
   void setUnit(const char *unit);
 
-  /* The unit string used forstring representations of the value,
+  /* The unit string used for string representations of the value,
      i.e. valueStr(). */
   const char *outunit() const { return OutUnit; };
 
   /* Set the unit string for the string representation of the value to unit. */
   void setOutUnit(const char *unit);
 
-  /* Provide a selection of n input values. */
+  /* Provide a selection of n input values.
+     If provided, only numbers in this list are valid inputs. */
   void setSelection(const T *selection, size_t n);
 
   /* Check whether val matches a selection.
@@ -345,6 +379,7 @@ class BaseNumberParameter : public Parameter {
 };
 
 
+/* A parameter whose value is a number with optional unit (any type of integer or float). */
 template<class T>
 class NumberParameter : public BaseNumberParameter<T> {
   
@@ -363,10 +398,15 @@ class NumberParameter : public BaseNumberParameter<T> {
   /* Return the value of the number in an alternative unit. */
   T value(const char *unit) const;
 
-  /* Set the number to val. */
+  /* Set the number to val.
+     If a selection was provided, then the number is only set,
+     if it matches an element of the selection. */
   void setValue(T val);
 
-  /* Set the number to val unit. */
+  /* Set the number to val unit. The number is converted to the internal unit.
+     If a selection was provided, then the number is only set,
+     if it matches an element of the selection, after it was
+     converted to the internal unit. */
   void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly.
@@ -390,6 +430,7 @@ class NumberParameter : public BaseNumberParameter<T> {
 };
 
 
+/* A parameter whose value points to a number with optional unit (any type of integer or float). */
 template<class T>
 class NumberPointerParameter : public BaseNumberParameter<T> {
   
@@ -408,10 +449,15 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   /* Return the value of the number in an alternative unit. */
   T value(const char *unit) const;
 
-  /* Set the number to val. */
+  /* Set the number to val.
+     If a selection was provided, then the number is only set,
+     if it matches an element of the selection. */
   void setValue(T val);
 
-  /* Set the number to val unit. */
+  /* Set the number to val unit. The number is converted to the internal unit.
+     If a selection was provided, then the number is only set,
+     if it matches an element of the selection, after it was
+     converted to the internal unit. */
   void setValue(T val, const char *unit);
   
   /* Parse the string val and set the value of this parameter accordingly.
@@ -824,6 +870,7 @@ template<class T>
 bool NumberParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled(Action::SetValue))
     return true;
+  // when a selection was offered and 'q' was entered, keep the value:
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
@@ -897,6 +944,7 @@ template<class T>
 bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled(Action::SetValue))
     return true;
+  // when a selection was offered and 'q' was entered, keep the value:
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
