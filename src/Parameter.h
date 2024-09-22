@@ -388,7 +388,7 @@ class BaseNumberParameter : public Parameter {
   /* Check whether val is in range. Return -2 if it is smaller than
      minimum, return -1 if it is larger than maximum, return 1 if it
      is in range. */
-  int checkMinMax(T val);
+  int checkMinMax(float val);
 
   /* Return for val a properly formatted string of maximum size MaxVal
      with outUnit appended. */
@@ -947,10 +947,10 @@ T BaseNumberParameter<T>::setMaximum(T maximum) {
 
 
 template<class T>
-int BaseNumberParameter<T>::checkMinMax(T val) {
-  if (CheckMin && val < Minimum)
+int BaseNumberParameter<T>::checkMinMax(float val) {
+  if (CheckMin && val < float(Minimum))
     return -2;
-  if (CheckMax && val > Maximum)
+  if (CheckMax && val > float(Maximum))
     return -1;
   return 1;
 }

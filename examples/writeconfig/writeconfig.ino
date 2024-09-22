@@ -1,6 +1,6 @@
 // select a data source:
-#define TEENSYADC     // data are recorded from Teensy internal ADCs
-//#define PCM186X     // data are recorded by TI PCM186x chip via TDM
+//#define TEENSYADC     // data are recorded from Teensy internal ADCs
+#define PCM186X     // data are recorded by TI PCM186x chip via TDM
 
 // select SD card:
 #define SDCARD_BUILTIN
