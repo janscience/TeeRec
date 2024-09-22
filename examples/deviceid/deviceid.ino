@@ -11,7 +11,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   Serial.println("DeviceID test");
-  deviceid.set(PowerPin, DIPPins);
+  deviceid.setPins(PowerPin, DIPPins);
 }
 
 

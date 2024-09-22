@@ -37,30 +37,11 @@ public:
   // switching on power and reading out the switches.
   DeviceID(int id=0, int powerdelay=2);
 
-  // Set the pins that have switches connected.
-  // The first pin in the array is bit 0.
-  // Terminate the array with a negative number.
-  void set(const int *pins);
-
-  // Set the powerpin that supplies the switches with power and
-  // the pins that have switches connected.
-  // The first pin in the array is bit 0.
-  // Terminate the array with a negative number.
-  void set(int powerpin, const int *pins);
-
   // Return the device ID.
   int id() const { return ID; };
 
   // Set the device identifier to id.
   void setID(int id);
-
-  // Read out the device ID from DIP switches.
-  // That is, supply power via the power pin, sequentally read in the
-  // states of the pins, and return the number encoded by these bits.
-  // If no pins were specified or all pins are zero, the do no set the
-  // device ID and return -1.
-  // On success returns the read in device ID.
-  int read();
 
   // Replace in str:
   // - "ID" by the device identifier, e.g. "103", "14", "7".
@@ -74,16 +55,36 @@ public:
   // Print device identifier on stream.
   void report(Stream &stream=Serial);
 
+  // Set the pins that have switches connected.
+  // The first pin in the array is bit 0.
+  // Terminate the array with a negative number.
+  void setPins(const int *pins);
+
+  // Set the powerpin that supplies the switches with power and
+  // the pins that have switches connected.
+  // The first pin in the array is bit 0.
+  // Terminate the array with a negative number.
+  void setPins(int powerpin, const int *pins);
+
+  // Read out the device ID from DIP switches.
+  // That is, supply power via the power pin, sequentally read in the
+  // states of the pins, and return the number encoded by these bits.
+  // If no pins were specified or all pins are zero, the do no set the
+  // device ID and return -1.
+  // On success returns the read in device ID.
+  int read();
+
   
 protected:
+  
+  int ID;             // the device ID.
+  int Source;         // from which source was the device identifier set:
+                      // 0: none, 1: default via the constructor, 2: set via setID(), 3: read in via read().
 
   int NPins;          // number of pins.
   int Pins[MaxPins];  // the pins.
   int PowerPin;       // the pin providing power to the switches.
   int PowerDelay;     // the delay in ms between providing power and reading out the pins (default 2ms).
-  int ID;             // the device ID.
-  int Source;         // from which source was the device identifier set:
-                      // 0: none, 1: default via the constructor, 2: set via setID(), 3: read in via read().
 
 };
 
