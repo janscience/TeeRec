@@ -15,7 +15,7 @@ class Settings : public Configurable {
 
 public:
 
-  Settings(const char *path="recordings",
+  Settings(const char *path="recordings", int deviceid=0,
 	   const char *filename="SDATELNUM.wav", float filetime=10.0,
 	   float pulsefrequency=500.0, float displaytime=0.005,
 	   float initialdelay=0.0, float sensorsinterval=10.0);
@@ -24,6 +24,9 @@ public:
 
   /* Path on SD card where to store the data. */
   const char *path() const { return Path.value(); };
+
+  /* Device identifier. */
+  int deviceID() const { return ID.value(); };
 
   /* File name to be used to save the recorded data. */
   const char *fileName() const { return FileName.value(); };
@@ -47,6 +50,7 @@ public:
 protected:
 
   StringParameter<MaxStr> Path;
+  NumberParameter<int> ID;
   StringParameter<MaxStr> FileName;
   NumberParameter<float> FileTime;
   NumberParameter<float> PulseFrequency;

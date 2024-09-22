@@ -391,8 +391,9 @@ class BaseNumberParameter : public Parameter {
   int checkMinMax(float val);
 
   /* Return for val a properly formatted string of maximum size MaxVal
-     with outUnit appended. */
-  virtual void valueStr(T val, char *str) const;
+     with outUnit appended.
+     If use_special, replace special value by special string. */
+  virtual void valueStr(T val, char *str, bool use_special=true) const;
 
   
  protected:
@@ -465,7 +466,7 @@ class NumberParameter : public BaseNumberParameter<T> {
   
   /* Return for val a properly formatted string of maximum size MaxVal
      with outUnit appended. */
-  virtual void valueStr(T val, char *str) const { BaseNumberParameter<T>::valueStr(val, str); };
+  virtual void valueStr(T val, char *str, bool use_special=true) const { BaseNumberParameter<T>::valueStr(val, str, use_special); };
   
   
  protected:
@@ -522,7 +523,7 @@ class NumberPointerParameter : public BaseNumberParameter<T> {
   
   /* Return for val a properly formatted string of maximum size MaxVal
      with outUnit appended. */
-  virtual void valueStr(T val, char *str) const { BaseNumberParameter<T>::valueStr(val, str); };
+  virtual void valueStr(T val, char *str, bool use_special=true) const { BaseNumberParameter<T>::valueStr(val, str, use_special); };
   
   
  protected:
@@ -904,10 +905,6 @@ void BaseNumberParameter<T>::listSelection(Stream &stream) const {
     valueStr(Selection[k], str);
     stream.printf("  - %s\n", str);
   }
-  if (NSelection == 0 && SpecialStr != NULL && strlen(SpecialStr) > 0) {
-    valueStr(SpecialValue, str);
-    stream.printf("  * %s: %s\n", SpecialStr, str);
-  }
 }
 
 
@@ -917,17 +914,23 @@ void BaseNumberParameter<T>::instructions(char *str) const {
   char min_str[MaxVal];
   char max_str[MaxVal];
   if (CheckMin && CheckMax) {
-    valueStr(Minimum, min_str);    
-    valueStr(Maximum, max_str);
+    valueStr(Minimum, min_str, false);    
+    valueStr(Maximum, max_str, false);
     sprintf(str, "between %s and %s", min_str, max_str);
   }
   else if (CheckMin) {
-    valueStr(Minimum, min_str);    
+    valueStr(Minimum, min_str, false);    
     sprintf(str, "greater than or equal to %s", min_str);
   }
   else if (CheckMax) {
-    valueStr(Maximum, max_str);    
+    valueStr(Maximum, max_str, false);    
     sprintf(str, "less than or equal to %s", max_str);
+  }
+  if (SpecialStr != NULL && strlen(SpecialStr) > 0) {
+    if (strlen(str) > 0)
+      strcat(str, ", ");
+    valueStr(SpecialValue, max_str, false);
+    sprintf(str + strlen(str), "or \"%s\" [%s]", SpecialStr, max_str);
   }
 }
 
@@ -957,10 +960,11 @@ int BaseNumberParameter<T>::checkMinMax(float val) {
 
 
 template<class T>
-void BaseNumberParameter<T>::valueStr(T val, char *str) const {
+void BaseNumberParameter<T>::valueStr(T val, char *str, bool use_special) const {
   if (this->Unit != NULL && strlen(this->Unit) > 0) {
     float value = this->changeUnit((float)val, this->Unit, this->OutUnit);
-    if (SpecialStr != NULL && strlen(SpecialStr) > 0 && value == SpecialValue)
+    if (use_special && SpecialStr != NULL && strlen(SpecialStr) > 0 &&
+	value == SpecialValue)
       strcpy(str, SpecialStr);
     else {
       sprintf(str, this->Format, value);
@@ -969,7 +973,8 @@ void BaseNumberParameter<T>::valueStr(T val, char *str) const {
     }
   }
   else {
-    if (SpecialStr != NULL && strlen(SpecialStr) > 0 && val == SpecialValue)
+    if (use_special && SpecialStr != NULL && strlen(SpecialStr) > 0 &&
+	val == SpecialValue)
       strcpy(str, SpecialStr);
     else
       sprintf(str, this->Format, val);
@@ -1047,6 +1052,8 @@ bool NumberParameter<T>::parseValue(char *val, bool selection) {
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
 			   *up == '.' || *up == 'e'); ++up);
+  if (up == val)
+    return false;
   char unit[this->MaxUnit] = "";
   if (strlen(up) == 0 && strlen(this->OutUnit) > 0)
     strncpy(unit, this->OutUnit, this->MaxUnit);
@@ -1145,6 +1152,8 @@ bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   const char *up = val;
   for (; *up != '\0' && (isdigit(*up) || *up == '+' || *up == '-' ||
 			   *up == '.' || *up == 'e'); ++up);
+  if (up == val)
+    return false;
   char unit[this->MaxUnit] = "";
   if (strlen(up) == 0 && strlen(this->OutUnit) > 0)
     strncpy(unit, this->OutUnit, this->MaxUnit);

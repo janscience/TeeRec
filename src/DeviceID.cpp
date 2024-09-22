@@ -85,7 +85,7 @@ void DeviceID::setPins(const int *pins) {
 
 
 void DeviceID::setPins(int powerpin, const int *pins) {
-  set(pins);
+  setPins(pins);
   PowerPin = powerpin;
   if (PowerPin >= 0 )
     pinMode(PowerPin, OUTPUT);
