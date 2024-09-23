@@ -1,14 +1,14 @@
 //#define SINGLE_FILE_MTP
 
 // select a data source:
-//#define TEENSYADC     // data are recorded from Teensy internal ADCs
-#define PCM186X     // data are recorded by TI PCM186x chip via TDM
-#define PCM186X_2ND // data are recorded by a second TI PCM186x chip via TDM
+//#define INPUT_ADC      // data are recorded from Teensy internal ADCs
+#define INPUT_TDM      // data are recorded by TI PCM186x chip via TDM
+#define INPUT_TDM_2ND  // data are recorded by a second TI PCM186x chip via TDM
 
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
   #include <InputADC.h>
   #include <InputADCSettings.h>
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
   #include <Wire.h>
   #include <ControlPCM186x.h>
   #include <InputTDM.h>
@@ -28,7 +28,7 @@
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file logger.cfg)
-#if defined(PCM186X)
+#if defined(INPUT_TDM)
   #define I2C_BUS       Wire
   #define TDM_BUS       InputTDM::TDM1
   #define SAMPLING_RATE 48000 // samples per second and channel in Hertz
@@ -37,7 +37,7 @@
   #define CHANNELS      ControlPCM186x::CH1L, ControlPCM186x::CH1R, ControlPCM186x::CH2L, ControlPCM186x::CH2R
   //#define CHANNELS      ControlPCM186x::CH2L, ControlPCM186x::CH2R, ControlPCM186x::CH3L, ControlPCM186x::CH3R
   //#define CHANNELS      ControlPCM186x::CH3L, ControlPCM186x::CH3R, ControlPCM186x::CH4L, ControlPCM186x::CH4R
-#elif defined(TEENSYADC)
+#elif defined(INPUT_ADC)
   #define SAMPLING_RATE 44100 // samples per second and channel in Hertz
   #define BITS             12 // resolution: 10bit 12bit, or 16bit
   #define AVERAGING         8 // number of averages per sample: 0, 4, 8, 16, 32
@@ -73,11 +73,11 @@ DATA_BUFFER(AIBuffer, NAIBuffer, 512*256)
 #else
 DATA_BUFFER(AIBuffer, NAIBuffer, 256*256)
 #endif
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
 InputADC aidata(AIBuffer, NAIBuffer, channels0, channels1);
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
 ControlPCM186x pcm1(I2C_BUS, PCM186x_I2C_ADDR1, TDM_BUS);
-#ifdef PCM186X_2ND
+#ifdef INPUT_TDM_2ND
 ControlPCM186x pcm2(I2C_BUS, PCM186x_I2C_ADDR2, TDM_BUS);
 #endif
 InputTDM aidata(AIBuffer, NAIBuffer);
@@ -89,10 +89,10 @@ SDWriter file(sdcard, aidata);
 Configurator config;
 Settings settings(PATH, DEVICENUM, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
 RTClock rtclock;
@@ -217,7 +217,7 @@ void storeData() {
 }
 
 
-#if defined(PCM186X)
+#if defined(INPUT_TDM)
 void setupPCM(InputTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.begin();
   bool r = pcm.setMicBias(false, true);
@@ -256,12 +256,12 @@ void setup() {
   deviceid.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
-#if defined(PCM186X)
+#if defined(INPUT_TDM)
   aidata.setSwapLR();
   I2C_BUS.begin();
   Serial.print("Setup PCM 1: ");
   setupPCM(aidata, pcm1, false);
-#ifdef PCM186X_2ND
+#ifdef INPUT_TDM_2ND
   Serial.print("Setup PCM 2: ");
   setupPCM(aidata, pcm2, true);
 #endif
@@ -279,9 +279,9 @@ void setup() {
   else
     delay(uint32_t(1000.0*settings.initialDelay()));
   char gs[16];
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
   aidata.gainStr(gs, PREGAIN);
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
   pcm1.gainStr(gs, PREGAIN);
 #endif  
   file.header().setGain(gs);

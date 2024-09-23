@@ -1,6 +1,6 @@
 // select a data source:
-//#define TEENSYADC     // data are recorded from Teensy internal ADCs
-#define PCM186X     // data are recorded by TI PCM186x chip via TDM
+//#define INPUT_ADC     // data are recorded from Teensy internal ADCs
+#define INPUT_TDM     // data are recorded by TI PCM186x chip via TDM
 
 // select SD card:
 #define SDCARD_BUILTIN
@@ -12,10 +12,10 @@
 #include <Configurator.h>
 #include <ToolActions.h>
 #include <Settings.h>
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
   #include <InputADC.h>
   #include <InputADCSettings.h>
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
   #include <InputTDMSettings.h>
 #endif
 #include <Blink.h>
@@ -34,13 +34,13 @@
 
 // Input XXXSettings:
 #define SAMPLING_RATE  48000 // samples per second and channel in Hertz
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
   #define BITS           12    // resolution: 10bit 12bit, or 16bit
   #define AVERAGING       8    // number of averages per sample: 0, 4, 8, 16, 32
   #define CONVERSION     ADC_CONVERSION_SPEED::HIGH_SPEED
   #define SAMPLING       ADC_SAMPLING_SPEED::HIGH_SPEED
   #define REFERENCE      ADC_REFERENCE::REF_3V3
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
   #define GAIN           20.0  // dB
 #endif
 
@@ -51,10 +51,10 @@ SDCard sdcard;
 Configurator config;
 Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
-#if defined(TEENSYADC)
+#if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
-#elif defined(PCM186X)
+#elif defined(INPUT_TDM)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
 Configurable datetime_menu("Date & time", Action::StreamInput);
