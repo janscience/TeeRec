@@ -1,3 +1,4 @@
+// Use with Teensy 3.5/3.6
 #include <InputADC.h>
 #include <AudioMonitor.h>
 #include <SDWriter.h>

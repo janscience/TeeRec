@@ -1,3 +1,5 @@
+// Use Teensy 3.5/3.6
+
 // select one library for the TFT display:
 //#define ST7735_T3
 #define ST7789_T3
@@ -14,7 +16,7 @@
 #define TFT_CS    10  
 #define TFT_RST   8 // 9
 #define TFT_DC    7 // 8 
-#define TFT_BL   30 // backlight PWM, -1 to not use it
+#define TFT_BL    30   // backlight PWM, -1 to not use it
 
 #define AI_SPLASH_SCREEN
 

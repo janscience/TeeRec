@@ -1,3 +1,5 @@
+// Use Teensy 3.5/3.6
+
 // select a library for the TFT display:
 //#define ST7735_T3
 #define ST7789_T3

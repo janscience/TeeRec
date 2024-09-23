@@ -87,7 +87,7 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-Settings settings(PATH, DEVICENUM, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
+Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
