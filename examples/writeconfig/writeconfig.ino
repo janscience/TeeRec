@@ -19,6 +19,7 @@
   #include <InputTDMSettings.h>
 #endif
 #include <Blink.h>
+#include <TeeRecBanner.h>
 
 // Adapt the following parameter values to your needs:
 
@@ -92,7 +93,7 @@ void setup() {
 
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  Serial.println("\n=================================================================\n");
+  printTeeRecBanner();
   blink.switchOn();
 #if defined(SDCARD_BUILTIN)
   sdcard.begin();

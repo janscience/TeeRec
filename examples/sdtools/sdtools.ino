@@ -4,6 +4,7 @@
 //#define SDCARD_SPI1
 
 #include <SDWriter.h>
+#include <TeeRecBanner.h>
 
 SDCard sdcard;
 
@@ -41,7 +42,7 @@ bool yesno(const char *request, bool defval) {
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
-  Serial.println("\n=================================================================\n");
+  printTeeRecBanner();
 }
 
 

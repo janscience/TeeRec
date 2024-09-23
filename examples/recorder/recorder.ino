@@ -33,6 +33,7 @@
 #include <InputADCSettings.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
+#include <TeeRecBanner>
   
 
 // Default settings: ---------------------------------------------------
@@ -239,6 +240,7 @@ void storeData() {
 void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
+  printTeeRecBanner();
   rtclock.check();
   prevname = "";
   setupButtons();

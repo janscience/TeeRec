@@ -8,6 +8,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
+#include <TeeRecBanner.h>
 
 // Default settings: ----------------------------------------------------------
 // (may be overwritten by config file teerec.cfg)
@@ -194,6 +195,7 @@ void setup() {
   blink.switchOn();
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
+  printTeeRecBanner();
   rtclock.check();
   rtclock.report();
   setupButtons();

@@ -21,6 +21,7 @@
 #include <TestSignals.h>
 #include <Configurator.h>
 #include <Settings.h>
+#include <TeeRecBanner.h>
 #ifdef SINGLE_FILE_MTP
 #include <MTP_Teensy.h>
 #endif
@@ -241,6 +242,7 @@ void setup() {
   blink.switchOn();
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
+  printTeeRecBanner();
   rtclock.check();
   prevname = "";
   sdcard.begin();
