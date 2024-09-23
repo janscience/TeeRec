@@ -50,7 +50,8 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 
 bool logging = false;           // keep saving to files
 #define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "SDATELNUM"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define DEVICEID      1            // device identifier
+#define FILENAME      "SDATELNUM"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME 10   // seconds
 
 #define START_PIN 24
@@ -80,7 +81,7 @@ elapsedMillis screenTime;
 Configurator config;
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(PATH, FILENAME, FILE_SAVE_TIME,
+Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 		  PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name

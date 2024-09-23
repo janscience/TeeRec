@@ -54,7 +54,7 @@
 #define PATH          "recordings"  // folder where to store the recordings
 #define DEVICEID      1             // may be used for naming files
 #ifdef SINGLE_FILE_MTP
-#define FILENAME      "recNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "recNUM.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #else
 #define FILENAME      "loggerID-SDATELNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #endif
@@ -87,7 +87,7 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-Settings settings(PATH, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
+Settings settings(PATH, DEVICENUM, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
                   0.0, INITIAL_DELAY);
 #if defined(TEENSYADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,

@@ -25,8 +25,8 @@
 #define CFG_FILE        "teerec.cfg"   // name of configuration file
 
 // Settings:
-#define PATH            "recordings" // folder where to store the recordings
-#define DEVICEID        0                // device identifier
+#define PATH            "recordings"   // folder where to store the recordings
+#define DEVICEID        0                 // device identifier
 #define FILENAME        "recID-NUM4.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME  10   // seconds
 #define INITIAL_DELAY   10.0  // seconds
