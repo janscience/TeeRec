@@ -2,6 +2,7 @@
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
+#include <DeviceID.h>
 #include <PushButtons.h>
 #include <Blink.h>
 #include <Configurator.h>
@@ -49,6 +50,7 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 Settings settings(PATH, DEVICEID, FILENAME);
 
 RTClock rtclock;
+DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 int restarts = 0;
 
@@ -70,8 +72,9 @@ void setupAudio() {
 
 
 String makeFileName() {
+  String name = deviceid.makeStr(settings.fileName());
   time_t t = now();
-  String name = rtclock.makeStr(settings.fileName(), t, true);
+  name = rtclock.makeStr(name, t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -206,6 +209,7 @@ void setup() {
   if (Serial)
     config.configure(Serial, 10000);
   config.report();
+  deviceid.report();
   setupStorage();
   aisettings.configure(&aidata);
   aidata.check();

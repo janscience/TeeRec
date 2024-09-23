@@ -26,6 +26,7 @@
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
 #include <RTClock.h>
+#include <DeviceID.h>
 #include <Configurator.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
@@ -84,13 +85,15 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 		  PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
+DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 PushButtons buttons;
 
 
 bool openNextFile() {
+  String name = deviceid.makeStr(settings.fileName());
   time_t t = now();
-  String name = rtclock.makeStr(settings.fileName(), t, true);
+  name = rtclock.makeStr(name, t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -249,6 +252,7 @@ void setup() {
   if (Serial)
     config.configure(Serial, 10000);
   config.report();
+  deviceid.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
   aidata.check();
