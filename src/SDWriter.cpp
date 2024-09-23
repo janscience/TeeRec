@@ -658,6 +658,17 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
 }
 
 
+bool SDWriter::openWave(const char *fname, const WaveHeader &wave) {
+  if (!open(fname))
+    return false;
+  if (DataFile.write(wave.Buffer, wave.NBuffer) != wave.NBuffer) {  // 14ms
+    Serial.println("ERROR: initial writing of wave header");
+    return false;
+  }
+  return (DataFile) ? true : false;
+}
+
+
 bool SDWriter::closeWave() {
   if (! (DataFile))
     return true;
@@ -781,6 +792,12 @@ void SDWriter::start(size_t decr) {
     decrement(decr);
     WriteTime += int(1000.0*Data->time(decr));
   }
+}
+
+
+void SDWriter::start(const SDWriter &file) {
+  synchronize(file);
+  WriteTime = 0;
 }
 
 

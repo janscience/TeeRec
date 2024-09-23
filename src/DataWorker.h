@@ -58,6 +58,9 @@ protected:
   // If no producer is available yet return false.
   bool synchronize();
 
+  // Set current index and cycle counter to the ones of worker.
+  void synchronize(const DataWorker &worker);
+
   // Decrement current index by indices samples. Wrap around the
   // buffer and decrement cycle counter if necessary.  Return true if
   // the index was wrapped back.  The index is decremented by the

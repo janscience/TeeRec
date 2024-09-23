@@ -195,6 +195,10 @@ class SDWriter : public DataWorker {
   bool openWave(const char *fname, int32_t samples=-1,
                 const char *datetime=0);
 
+  // Open new file for writing and write wave header from file.
+  // Return true if the file was successfully opened.
+  bool openWave(const char *fname, const WaveHeader &wave);
+
   // Update wave header with proper file size and close file.
   // Return true if the file was not open or the file was sucessfully
   // closed, including an update of the wave header with the actual
@@ -224,6 +228,9 @@ class SDWriter : public DataWorker {
 
   // Start writing to a file from the current sample minus decr samples on.
   void start(size_t decr=0);
+  
+  // Start writing from the same sample as file.
+  void start(const SDWriter &file);
 
   // Return current file size in samples.
   size_t fileSamples() const;

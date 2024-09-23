@@ -17,7 +17,7 @@ public:
   WaveHeader();
   ~WaveHeader();
 
-  static const size_t MaxBuffer = 500;
+  static const size_t MaxBuffer = 512;
   size_t NBuffer;
   char Buffer[MaxBuffer];
 

@@ -169,6 +169,12 @@ bool DataWorker::synchronize() {
 }
 
 
+void DataWorker::synchronize(const DataWorker &worker) {
+  Index = worker.Index;
+  Cycle = worker.Cycle;
+}
+
+
 bool DataWorker::decrement(size_t indices) {
   if (indices > Data->nbuffer())
     indices = Data->nbuffer();
