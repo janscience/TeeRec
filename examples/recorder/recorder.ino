@@ -26,7 +26,6 @@
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
 #include <RTClock.h>
-#include <DeviceID.h>
 #include <Configurator.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
@@ -51,7 +50,6 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 
 bool logging = false;           // keep saving to files
 #define PATH          "recordings" // folder where to store the recordings
-#define DEVICEID      1            // device identifier
 #define FILENAME      "SDATELNUM"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME 10   // seconds
 
@@ -82,18 +80,16 @@ elapsedMillis screenTime;
 Configurator config;
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
+Settings settings(PATH, 0, FILENAME, FILE_SAVE_TIME,
 		  PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
-DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 PushButtons buttons;
 
 
 bool openNextFile() {
-  String name = deviceid.makeStr(settings.fileName());
   time_t t = now();
-  name = rtclock.makeStr(name, t, true);
+  String name = rtclock.makeStr(settings.fileName(), t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -252,7 +248,6 @@ void setup() {
   if (Serial)
     config.configure(Serial, 10000);
   config.report();
-  deviceid.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
   aidata.check();

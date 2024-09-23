@@ -242,7 +242,6 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   rtclock.check();
-  deviceid.report();
   prevname = "";
   sdcard.begin();
   rtclock.setFromFile(sdcard);
@@ -254,6 +253,7 @@ void setup() {
   if (Serial)
     config.configure(Serial, 10000);
   config.report();
+  deviceid.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
 #if defined(PCM186X)

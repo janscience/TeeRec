@@ -2,7 +2,6 @@
 #include <AudioMonitor.h>
 #include <SDWriter.h>
 #include <RTClock.h>
-#include <DeviceID.h>
 #include <PushButtons.h>
 #include <Blink.h>
 #include <Configurator.h>
@@ -22,7 +21,6 @@ int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // i
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
 #define PATH          "recordings" // folder where to store the recordings
-#define DEVICEID      1            // device identifier
 #define FILENAME      "teerecID-SDATETIME.wav" // may include ID, IDA, DATE, SDATE, TIME, STIME,
 
 // Pin assignment: ----------------------------------------------------
@@ -47,10 +45,9 @@ SDWriter file(sdcard, aidata);
 Configurator config;
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(PATH, DEVICEID, FILENAME);
+Settings settings(PATH, 0, FILENAME);
 
 RTClock rtclock;
-DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 int restarts = 0;
 
@@ -72,9 +69,8 @@ void setupAudio() {
 
 
 String makeFileName() {
-  String name = deviceid.makeStr(settings.fileName());
   time_t t = now();
-  name = rtclock.makeStr(name, t, true);
+  String name = rtclock.makeStr(settings.fileName(), t, true);
   if (name != prevname) {
     file.sdcard()->resetFileCounter();
     prevname = name;
@@ -209,7 +205,6 @@ void setup() {
   if (Serial)
     config.configure(Serial, 10000);
   config.report();
-  deviceid.report();
   setupStorage();
   aisettings.configure(&aidata);
   aidata.check();
