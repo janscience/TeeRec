@@ -81,26 +81,27 @@ class RTClock {
   // str needs to hold 11 characters.
   // If time equals zero, then get current time (`time = now()`).
   // If brief, without the dashes.
-  void date(char *str, time_t time=0, bool brief=false);
+  void date(char *str, time_t time=0, bool brief=false) const;
 
   // String with time in the format HH:MM:SS.
   // str needs to hold 9 characters.
   // If time equals zero, then get current time (`time = now()`).
   // If brief, without the colons. If dash, replace colons by dashes.
-  void time(char *str, time_t time=0, bool brief=false, bool dash=false);
+  void time(char *str, time_t time=0, bool brief=false, bool dash=false) const;
 
   // String with date and time in the format YYYY-MM-DDTHH:MM:SS.
   // str needs to hold 20 characters.
   // If time equals zero, then get current time (`time = now()`).
   // If brief, without the dashes and colons. If dash, replace colons by dashes.
-  void dateTime(char *str, time_t time=0, bool brief=false, bool dash=false);
+  void dateTime(char *str, time_t time=0,
+		bool brief=false, bool dash=false) const;
 
   // Replace in str, DATE, TIME, DATETIME by the respective strings of time.
   // SDATE, STIME, SDATETIME are replaced by the corresponding brief
   // (short) versions.
   // If time equals zero, then get current time (`time = now()`).
   // If dash, replace colons by dashes.
-  String makeStr(const String &str, time_t time=0, bool dash=false);
+  String makeStr(const String &str, time_t time=0, bool dash=false) const;
 
   // Write out current time, real time provider, and potential error message
   // on stream.

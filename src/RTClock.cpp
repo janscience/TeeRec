@@ -195,7 +195,7 @@ bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
 }
 
 
-void RTClock::date(char *str, time_t t, bool brief) {
+void RTClock::date(char *str, time_t t, bool brief) const {
   str[0] = '\0';
   if (t == 0) {
     if (timeStatus() == timeNotSet)
@@ -209,7 +209,7 @@ void RTClock::date(char *str, time_t t, bool brief) {
 }
 
 
-void RTClock::time(char *str, time_t t, bool brief, bool dash) {
+void RTClock::time(char *str, time_t t, bool brief, bool dash) const {
   str[0] = '\0';
   if (t == 0) {
     if (timeStatus() == timeNotSet)
@@ -225,7 +225,7 @@ void RTClock::time(char *str, time_t t, bool brief, bool dash) {
 }
 
 
-void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) {
+void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) const {
   str[0] = '\0';
   if (t == 0) {
     if (timeStatus() == timeNotSet)
@@ -244,7 +244,7 @@ void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) {
 }
 
 
-String RTClock::makeStr(const String &str, time_t t, bool dash) {
+String RTClock::makeStr(const String &str, time_t t, bool dash) const {
   char ts[20];
   String tstr = str;
   if (t == 0) {
