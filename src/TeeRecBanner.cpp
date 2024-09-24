@@ -11,13 +11,12 @@ void printTeeRecBanner(const char *software, Stream &stream) {
   stream.println(R"(  | |  __/  __/  _ <  __/ (__ )");
   stream.println(R"(  |_|\___|\___|_| \_\___|\___|)");
   stream.println();
-  if (software != NULL) {
-    if (strlen(software) > 6 && strncmp(software, "TeeRec", 6) == 0)
-      software = software + 7;
-    stream.print(software);
-    stream.print(" ");
-  }
-  stream.println("by Benda-Lab");
+  if (software == NULL)
+    software = TEEREC_SOFTWARE;
+  if (strlen(software) > 6 && strncmp(software, "TeeRec", 6) == 0)
+    software = software + 7;
+  stream.print(software);
+  stream.println(" by Benda-Lab");
   stream.println("--------------------------------------------------------");
   stream.println();
 }
