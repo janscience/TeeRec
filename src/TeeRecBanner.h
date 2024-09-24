@@ -1,5 +1,5 @@
 /*
-  TeeRecBanner - ASCII art banner for serial output.
+  TeeRecBanner - ASCII art banner and TeeRec version for output streams.
   Created by Jan Benda, September 23th, 2024.
 */
 

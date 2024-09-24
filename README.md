@@ -82,11 +82,11 @@ via the `TeeRec.h` header.
 - [Action](src/Action.h): Base class for configurable menu entries.
 - [Parameter](src/Parameter.h): Actions with configurable name-value pairs of various types.
 - [Configurable](src/Configurable.h): A collection of Actions.
+- [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
+- [ToolActions](src/ToolActions.h): Actions for handling the configuration file and the real-time clock.
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
-- [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
-- [ToolActions](src/ToolActions.h): Actions for handling the configuration file and the real-time clock.
 
 ### Audio monitor
 
@@ -111,9 +111,11 @@ via the `TeeRec.h` header.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.
+- [FirmwareUpdate](src/FirmwareUpdate.h): Upload hex file from SD card.
 - [Menu](src/Menu.h): Select actions from a menu.
 - [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
 - [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
+- [TeeRecBanner](src/TeeRecBanner.h): ASCII art banner and TeeRec version for output streams.
 
 
 ## Examples
