@@ -53,7 +53,7 @@ public:
   String makeStr(const String &str) const;
 
   // Print device identifier on stream.
-  void report(Stream &stream=Serial);
+  void report(Stream &stream=Serial) const;
 
   // Set the pins that have switches connected.
   // The first pin in the array is bit 0.

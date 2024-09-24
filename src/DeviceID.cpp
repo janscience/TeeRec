@@ -53,7 +53,7 @@ String DeviceID::makeStr(const String &str) const {
 }
 
 
-void DeviceID::report(Stream &stream) {
+void DeviceID::report(Stream &stream) const {
   char ss[20];
   switch (Source) {
   case 1:

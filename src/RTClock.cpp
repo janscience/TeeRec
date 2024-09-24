@@ -280,7 +280,7 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
 }
 
 
-void RTClock::report(Stream &stream) {
+void RTClock::report(Stream &stream) const {
   char source[22];
   if (RTCSource == 1)
     strcpy(source, "DS1307/DS1337/DS3231");

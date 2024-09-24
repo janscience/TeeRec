@@ -105,7 +105,7 @@ class RTClock {
 
   // Write out current time, real time provider, and potential error message
   // on stream.
-  void report(Stream &stream=Serial);
+  void report(Stream &stream=Serial) const;
 
 private:
 
