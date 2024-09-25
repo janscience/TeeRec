@@ -3,23 +3,24 @@
 #include <DataWorker.h>
 
 
-#define DEBUG 1
-
-
-DataWorker::DataWorker() {
-  Index = 0;
-  Cycle = 0;
-  Data = 0;
-  Producer = 0;
-  NConsumers = 0;
+DataWorker::DataWorker(int verbose) :
+  Index(0),
+  Cycle(0),
+  Data(0),
+  Producer(0),
+  NConsumers(0),
+  Verbose(verbose) {
 }
 
 
-DataWorker::DataWorker(const DataWorker *producer) {
-  Index = 0;
-  Cycle = 0;
+DataWorker::DataWorker(const DataWorker *producer, int verbose) :
+  Index(0),
+  Cycle(0),
+  Data(0),
+  Producer(0),
+  NConsumers(0),
+  Verbose(verbose) {
   setProducer(producer);
-  NConsumers = 0;
 }
 
 
@@ -75,19 +76,19 @@ size_t DataWorker::available() const {
   else if (cycle == Cycle + 1 && index <= Index)
     return Data->nbuffer() - Index + index;
   else {
-#ifdef DEBUG
-    Serial.println("No data available in DataWorker:");
-    Serial.print("    Worker cycle: ");
-    Serial.print(Cycle);
-    Serial.print(",   Worker index: ");
-    Serial.println(Index);
-    Serial.print("  Producer cycle: ");
-    Serial.print(cycle);
-    Serial.print(", Producer index: ");
-    Serial.print(index);
-    Serial.print(", Buffer size: ");
-    Serial.println(Data->nbuffer());
-#endif
+    if (Verbose > 3) {
+      Serial.println("  No data available in DataWorker right now:");
+      Serial.print("      Worker cycle: ");
+      Serial.print(Cycle);
+      Serial.print(",     Worker index: ");
+      Serial.println(Index);
+      Serial.print("    Producer cycle: ");
+      Serial.print(cycle);
+      Serial.print(",   Producer index: ");
+      Serial.print(index);
+      Serial.print(", Buffer size: ");
+      Serial.println(Data->nbuffer());
+    }
     return 0;
   }
 }
@@ -107,27 +108,8 @@ size_t DataWorker::overrun() {
   size_t missed = 0;
   if (cycle > Cycle+1 && index < Index) {
     missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
-#ifdef DEBUG
-    Serial.print("Overrun 1 in DataWorker by ");
-    Serial.print(missed);
-    Serial.println(" samples:");
-    Serial.print("    Worker cycle: ");
-    Serial.print(Cycle);
-    Serial.print(",   Worker index: ");
-    Serial.println(Index);
-    Serial.print("  Producer cycle: ");
-    Serial.print(cycle);
-    Serial.print(", Producer index: ");
-    Serial.print(index);
-    Serial.print(", Buffer size: ");
-    Serial.println(Data->nbuffer());
-#endif
-  }
-  else if (cycle > Cycle && index >= Index) {
-    missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
-#ifdef DEBUG
-    if (missed > 0) {
-      Serial.print("Overrun 2 in DataWorker by ");
+    if (Verbose > 2) {
+      Serial.print("ERROR in DataWorker::overrun(): overrun 1 by ");
       Serial.print(missed);
       Serial.println(" samples:");
       Serial.print("    Worker cycle: ");
@@ -141,7 +123,24 @@ size_t DataWorker::overrun() {
       Serial.print(", Buffer size: ");
       Serial.println(Data->nbuffer());
     }
-#endif
+  }
+  else if (cycle > Cycle && index >= Index) {
+    missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
+    if (missed > 0 && Verbose > 2) {
+      Serial.print("ERROR in DataWorker::overrun(): overrun 2 by ");
+      Serial.print(missed);
+      Serial.println(" samples:");
+      Serial.print("    Worker cycle: ");
+      Serial.print(Cycle);
+      Serial.print(",   Worker index: ");
+      Serial.println(Index);
+      Serial.print("  Producer cycle: ");
+      Serial.print(cycle);
+      Serial.print(", Producer index: ");
+      Serial.print(index);
+      Serial.print(", Buffer size: ");
+      Serial.println(Data->nbuffer());
+    }
   }
   if (missed > 0) {
     // update tail:
@@ -149,6 +148,11 @@ size_t DataWorker::overrun() {
     Cycle = cycle - 1;
   }
   return missed;
+}
+
+
+void DataWorker::setVerbosity(int verbose) {
+  Verbose = verbose;
 }
 
 

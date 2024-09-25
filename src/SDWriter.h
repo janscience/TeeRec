@@ -141,9 +141,9 @@ class SDWriter : public DataWorker {
   static const size_t MajorSize = 512;
 
   // Initialize writer on default SD card.
-  SDWriter(const DataWorker &data);
+  SDWriter(const DataWorker &data, int verbose=0);
   // Initialize writer on SD card.
-  SDWriter(SDCard &sd, const DataWorker &data);
+  SDWriter(SDCard &sd, const DataWorker &data, int verbose=0);
   // Close file and end usage of SD card.
   ~SDWriter();
 
@@ -261,7 +261,12 @@ class SDWriter : public DataWorker {
   // Data buffer has been initialized.
   virtual void reset();
   
+  // Set maximum time for write operations in milliseconds.
+  // If the write operation takes longer and the verbosity level is 2 or higher,
+  // then print the elepsed time on Serial.
+  void setMaxWriteTime(uint ms);
 
+  
  protected:
 
   SDCard *SDC;
@@ -272,6 +277,7 @@ class SDWriter : public DataWorker {
   WaveHeader Wave;
 
   elapsedMillis WriteTime;
+  uint MaxWriteTime;
   uint WriteInterval;
 
   size_t FileSamples;    // current number of samples stored in the file.

@@ -19,8 +19,8 @@ class DataWorker {
   
 public:
 
-  DataWorker();
-  DataWorker(const DataWorker *producer);
+  DataWorker(int verbose=0);
+  DataWorker(const DataWorker *producer, int verbose=0);
 
   // Set producer from which data should be further processed.
   void setProducer(const DataWorker *producer);
@@ -43,6 +43,10 @@ public:
   // Number of samples that have been missed to be consumed.
   // Sets the tail forward to the first still available sample.
   size_t overrun();
+
+  // Set verbosity level. 0: no messages. The higher, the more messages you get.
+  // Messages of this class are displayed for levels 3 and 4.
+  void setVerbosity(int verbose);
 
   // Add metadata to the header of a wave file holding the data of the
   // buffer.
@@ -82,7 +86,10 @@ protected:
 
   static const size_t MaxConsumers = 10;
   mutable size_t NConsumers;
-  mutable DataWorker *Consumers[MaxConsumers];  
+  mutable DataWorker *Consumers[MaxConsumers];
+
+  int Verbose;
+  
 };
 
 
