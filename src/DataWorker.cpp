@@ -76,7 +76,7 @@ size_t DataWorker::available() const {
     return Data->nbuffer() - Index + index;
   else {
 #ifdef DEBUG
-    Serial.println("No data available:");
+    Serial.println("No data available in DataWorker:");
     Serial.print("    Worker cycle: ");
     Serial.print(Cycle);
     Serial.print(",   Worker index: ");
@@ -108,7 +108,7 @@ size_t DataWorker::overrun() {
   if (cycle > Cycle+1 && index < Index) {
     missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
 #ifdef DEBUG
-    Serial.print("Overrun 1 by ");
+    Serial.print("Overrun 1 in DataWorker by ");
     Serial.print(missed);
     Serial.println(" samples:");
     Serial.print("    Worker cycle: ");
@@ -127,7 +127,7 @@ size_t DataWorker::overrun() {
     missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
 #ifdef DEBUG
     if (missed > 0) {
-      Serial.print("Overrun 2 by ");
+      Serial.print("Overrun 2 in DataWorker by ");
       Serial.print(missed);
       Serial.println(" samples:");
       Serial.print("    Worker cycle: ");
