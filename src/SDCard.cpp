@@ -86,6 +86,7 @@ bool SDCard::check(float minfree, Stream &stream) {
     stream.println("SD card present and writable.\n");
     return true;
   }
+  return false;
 }
 
 
