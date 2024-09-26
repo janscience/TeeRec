@@ -3,7 +3,7 @@
 //#define SDCARD_SPI0
 //#define SDCARD_SPI1
 
-#include <SDWriter.h>
+#include <SDCard.h>
 #include <TeeRecBanner.h>
 
 SDCard sdcard;

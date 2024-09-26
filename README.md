@@ -74,6 +74,7 @@ via the `TeeRec.h` header.
 
 ### Storage on SD card
 
+- [SDCard](src/SDCard.h): Oparate on SD cards.
 - [SDWriter](src/SDWriter.h): Write data from a DataWorker to SD card.
 - [WaveHeader](src/WaveHeader.h): Setting up wave file header with metadata.
 

@@ -8,7 +8,7 @@
 //#define SDCARD_SPI1
 
 #include <RTClock.h>
-#include <SDWriter.h>
+#include <SDCard.h>
 #include <Configurator.h>
 #include <ToolActions.h>
 #include <Settings.h>
