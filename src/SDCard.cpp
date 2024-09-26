@@ -56,6 +56,7 @@ bool SDCard::check(float minfree, Stream &stream) {
     if (k == 1) {
       end();
       sdfs.restart();
+      stream.println("Restarted SD card.");
     }
     if (! Available) {
       if (k == 0)
