@@ -89,6 +89,7 @@ protected:
   mutable DataWorker *Consumers[MaxConsumers];
 
   int Verbose;
+  mutable elapsedMicros NoDataTime;
   
 };
 

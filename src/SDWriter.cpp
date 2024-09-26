@@ -623,7 +623,7 @@ bool SDWriter::open(const char *fname) {
   DataFile = SDC->openWrite(fname);
   FileSamples = 0;
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = t;
+    unsigned long wt = t;
     Serial.printf("----> SDWriter::open() took %dms.\n", wt);
   }
   return isOpen();
@@ -661,7 +661,7 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     return false;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = t;
+    unsigned long wt = t;
     Serial.printf("----> SDWriter::openWave() took %dms.\n", wt);
   }
   return (DataFile) ? true : false;
@@ -677,7 +677,7 @@ bool SDWriter::openWave(const char *fname, const WaveHeader &wave) {
     return false;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = t;
+    unsigned long wt = t;
     Serial.printf("----> SDWriter::openWave() took %dms.\n", wt);
   }
   return (DataFile) ? true : false;
@@ -700,7 +700,7 @@ bool SDWriter::closeWave() {
   }
   close();
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = t;
+    unsigned long wt = t;
     Serial.printf("----> SDWriter::closeWave() took %dms.\n", wt);
   }
   return success;
@@ -728,7 +728,7 @@ ssize_t SDWriter::write() {
   if (missed > 0) {
     if (Verbose > 0) {
       Serial.printf("ERROR in SDWriter::write(): data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
-      int wt = WriteTime;
+      unsigned long wt = WriteTime;
       Serial.printf("----> last write %dms ago.\n", wt);
     }
     return -4;
@@ -746,7 +746,7 @@ ssize_t SDWriter::write() {
       return 0;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = WriteTime;
+    unsigned long wt = WriteTime;
     Serial.printf("----> SDWriter::write(): last write %dms ago.\n", wt);
   }
   size_t index = Producer->index();
@@ -760,7 +760,7 @@ ssize_t SDWriter::write() {
       if (nbytes == 0)
 	return -5;
       if (Verbose > 1 && WriteTime > MaxWriteTime) {
-	int wt = WriteTime;
+	unsigned long wt = WriteTime;
 	Serial.printf("----> SDWriter::write(): needed %dms for writing end-of-buffer data to SD card.\n", wt);
       }
       WriteTime = 0;
@@ -793,7 +793,7 @@ ssize_t SDWriter::write() {
     FileSamples += samples1;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
-    int wt = WriteTime;
+    unsigned long wt = WriteTime;
     Serial.printf("----> SDWriter::write(): needed %dms for writing beginning-of-buffer data to SD card.\n", wt);
   }
   return samples0 + samples1;

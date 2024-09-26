@@ -77,7 +77,8 @@ size_t DataWorker::available() const {
     return Data->nbuffer() - Index + index;
   else {
     if (Verbose > 3) {
-      Serial.println("  No data available in DataWorker right now:");
+      float dt = NoDataTime;
+      Serial.printf("  No new data available in DataWorker right now (previous warning %.3fms ago):\n", 0.001*dt);
       Serial.print("      Worker cycle: ");
       Serial.print(Cycle);
       Serial.print(",     Worker index: ");
@@ -88,6 +89,7 @@ size_t DataWorker::available() const {
       Serial.print(index);
       Serial.print(", Buffer size: ");
       Serial.println(Data->nbuffer());
+      NoDataTime = 0;
     }
     return 0;
   }
