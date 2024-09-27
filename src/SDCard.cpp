@@ -152,7 +152,7 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     else
       stream.printf("%d file found", n);
     if (list_sizes)
-      stream.printf(" (%.3fMB).\n", file_sizes);
+      stream.printf(" (%.3f MB).\n", file_sizes);
     else
       stream.println(".");
   }
@@ -174,12 +174,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
-      char pname[200];
-      strcpy(pname, path);
-      if (pname[strlen(pname) - 1] != '/')
-	strcat(pname, "/");
-      strcat(pname, fname);
-      if (dir.remove(pname)) {
+      if (dir.remove(fname)) {
 	stream.print("  ");
 	stream.println(fname);
 	n++;
