@@ -3,6 +3,7 @@
 //#define SDCARD_SPI0
 //#define SDCARD_SPI1
 
+#include <SPI.h>
 #include <SDCard.h>
 #include <TeeRecBanner.h>
 
@@ -43,6 +44,13 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   printTeeRecBanner();
+#if defined(SDCARD_SPI0)
+  pinMode(10, OUTPUT);
+  SPI.begin();
+#elif defined(SDCARD_SPI1)
+  pinMode(0, OUTPUT);
+  SPI.begin();
+#endif
 }
 
 
@@ -76,9 +84,9 @@ void loop() {
 #if defined(SDCARD_BUILTIN)
   sdcard.begin();
 #elif defined(SDCARD_SPI0)
-  sdcard.begin(10, DEDICATED_SPI, 20, &SPI);
+  sdcard.begin(10, DEDICATED_SPI, 40, &SPI);
 #elif defined(SDCARD_SPI1)
-  sdcard.begin(0, DEDICATED_SPI, 20, &SPI1);
+  sdcard.begin(0, DEDICATED_SPI, 40, &SPI1);
 #endif
   // run action:
   if (pval[0] == '1') {

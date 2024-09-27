@@ -98,9 +98,13 @@ void setup() {
 #if defined(SDCARD_BUILTIN)
   sdcard.begin();
 #elif defined(SDCARD_SPI0)
-  sdcard.begin(10, DEDICATED_SPI, 20, &SPI);
+  pinMode(10, OUTPUT);
+  SPI.begin();
+  sdcard.begin(10, DEDICATED_SPI, 40, &SPI);
 #elif defined(SDCARD_SPI1)
-  sdcard.begin(0, DEDICATED_SPI, 20, &SPI1);
+  pinMode(0, OUTPUT);
+  SPI.begin();
+  sdcard.begin(0, DEDICATED_SPI, 40, &SPI1);
 #endif
   sdcard.check();
   config.setConfigFile(CFG_FILE);
