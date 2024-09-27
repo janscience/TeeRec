@@ -130,7 +130,7 @@ class SDCard : public SDClass {
   
  protected:
 
-  static const int MaxName = 32;
+  static const size_t MaxName = 32;
   char Name[MaxName];
 
   bool Available;
