@@ -165,7 +165,7 @@ void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
 void SDListRootAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
-  SDC.listFiles("/", true, stream);
+  SDC.listFiles("/", true, true, stream);
   stream.println();
 }
 
@@ -189,7 +189,7 @@ SDListRecordingsAction::SDListRecordingsAction(Configurable &menu,
 void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
-  SDC.listFiles(SettingsMenu.path(), false, stream);
+  SDC.listFiles(SettingsMenu.path(), false, true, stream);
   stream.println();
 }
 
