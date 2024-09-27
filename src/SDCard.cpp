@@ -1,9 +1,15 @@
 #include <SDCard.h>
 
 
-SDCard::SDCard() {
-  Available = false;
-  NameCounter = 0;
+SDCard::SDCard(const char *name) :
+  Available(false),
+  NameCounter(0) {
+  if (name == 0)
+    strcpy(Name, "");
+  else {
+    strcpy(Name, name);
+    strcat(Name, " ");
+  }
 }
 
 
@@ -64,35 +70,35 @@ bool SDCard::check(float minfree, Stream &stream) {
     if (k == 1) {
       end();
       sdfs.restart();
-      stream.println("Restarted SD card.");
+      stream.printf("Restarted %sSD card.\n", Name);
     }
     if (! Available) {
       if (k == 0)
 	continue;
-      stream.println("! ERROR: No SD card present.\n");
+      stream.printf("! ERROR: No %sSD card present.\n\n", Name);
       return false;
     }
     if (free() < minfree) {
       if (k == 0)
 	continue;
-      stream.println("! WARNING: No space left on SD card.\n");
+      stream.printf("! WARNING: No space left on %sSD card.\n\n", Name);
       return false;
     }
     File tf = open("testit.wrt", FILE_WRITE);
     if (! tf) {
       if (k == 0)
 	continue;
-      stream.println("! ERROR: Can not write onto SD card.\n");
+      stream.printf("! ERROR: Can not write onto %sSD card.\n\n", Name);
       return false;
     }
     tf.close();
     if (! remove("testit.wrt")) {
       if (k == 0)
 	continue;
-      stream.println("! ERROR: Failed to remove test file.\n");
+      stream.printf("! ERROR: Failed to remove test file on %s SD card.\n\n", Name);
       return false;
     }
-    stream.println("SD card present and writable.\n");
+    stream.printf("%sSD card present and writable.\n\n", Name);
     return true;
   }
   return false;
@@ -123,10 +129,10 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     return;
   SdFile dir;
   if (!dir.open(path)) {
-    stream.printf("! ERROR: Folder \"%s\" does not exist.\n", path);
+    stream.printf("! ERROR: Folder \"%s\" does not exist on %s SD card.\n", path, Name);
     return;
   }
-  stream.printf("Files in \"%s\":\n", path);
+  stream.printf("Files in \"%s\" on %sSD card:\n", path, Name);
   float file_sizes = 0.0;
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
@@ -173,10 +179,10 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     return;
   SdFile dir;
   if (!dir.open(path)) {
-    stream.printf("! ERROR: Folder \"%s\" does not exist.\n", path);
+    stream.printf("! ERROR: Folder \"%s\" does not exist on %sSD card.\n", path, Name);
     return;
   }
-  stream.printf("Removing all files in \"%s\":\n", path);
+  stream.printf("Removing all files in \"%s\" on %sSD card:\n", path, Name);
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
@@ -250,7 +256,7 @@ void SDCard::serial(char *s) {
 
 void SDCard::report(Stream &stream) {
   if (! Available) {
-    stream.println("! ERROR: No SD card present.");
+    stream.printf("! ERROR: No %sSD card present.\n", Name);
     stream.println();
     return;
   }
@@ -267,17 +273,17 @@ void SDCard::report(Stream &stream) {
   
   float cap = capacity();
   if (cap < 1.0) {
-    stream.println("! ERROR: Failed to get sector count of SD card.");
+    stream.printf("! ERROR: Failed to get sector count of %sSD card.\n", Name);
     return;
   }
   
   cid_t cid;
   if (!sdfs.card()->readCID(&cid)) {
-    stream.println("! ERROR: Failed to read CID from SD card.");
+    stream.printf("! ERROR: Failed to read CID from %sSD card.\n", Name);
     return;
   }
   
-  stream.println("SD card:");
+  stream.printf("%sSD card:\n", Name);
   stream.printf("  Manufacturer ID   : %x\n", cid.mid);
   stream.printf("  OEM ID            : %c%c\n", cid.oid[0], cid.oid[1]);
   stream.printf("  Product           : %c%c%c%c%c\n", cid.pnm[0],
@@ -303,7 +309,7 @@ void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
   // open or create file - truncate existing file:
   FsFile file = sdfs.open("bench.dat", O_RDWR | O_CREAT | O_TRUNC);
   if (!file) {
-    stream.println("! ERROR: Failed to create 'bench.dat' file on SD card.\n");
+    stream.printf("! ERROR: Failed to create 'bench.dat' file on %sSD card.\n\n", Name);
     return;
   }
   if (buffer_size < 32) {
@@ -322,7 +328,7 @@ void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
   buf[buffer_size - 2] = '\r';
   buf[buffer_size - 1] = '\n';
 
-  stream.println("Benchmarking write and read speeds.");
+  stream.printf("Benchmarking write and read speeds of %sSD card\n", Name);
   stream.println("- 'speed' is the average data rate for writing/reading the whole file.");
   stream.println("- 'latency' is the average, minimum, and maximum time it takes to write/read a single buffer.");
   stream.printf("- file   size: %dMB\n", file_size);
@@ -421,7 +427,7 @@ void SDCard::erase(Stream &stream) {
   uint32_t last_block;
   uint16_t n = 0;
   
-  stream.println("Erase SD card:");
+  stream.printf("Erase %sSD card:\n", Name);
   nsectors = sdfs.card()->sectorCount();
   do {
     last_block = first_block + ERASE_SIZE - 1;
@@ -448,7 +454,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
   size_t n = 10;
   // read file:
   if (path != 0 && strlen(path) > 0) {
-    stream.printf("Read file \"%s\" ...\n", path);
+    stream.printf("Read file \"%s\" on %sSD card ...\n", path, Name);
     rootDir();
     file = openRead(path);
     n = file.available();
@@ -463,7 +469,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
   if (erase_card)
     erase();
   // format SD card:
-  stream.println("Format SD card:");
+  stream.printf("Format %sSD card:\n", Name);
   uint32_t nsectors = sdfs.card()->sectorCount();
   uint8_t sector_buffer[512];
   if (nsectors > 67108864) {   // larger than 32GB
@@ -482,7 +488,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
     file = openWrite(path);
     file.write(buffer, n);
     file.close();
-    stream.printf("Restored file \"%s\".\n", path);
+    stream.printf("Restored file \"%s\" on %sSD card.\n", path, Name);
     stream.println();
   }
 }
@@ -515,7 +521,7 @@ String SDCard::incrementFileName(const String &fname) {
 	aa[1] = char('a' + ((NameCounter-1) % 26));
 	uint16_t major = (NameCounter-1) / 26;
 	if (major > 25) {
-	  Serial.println("WARNING: file name overflow");
+	  Serial.printf("WARNING: file name overflow on %sSD card.\n", Name);
 	  return "";
 	}
 	aa[0] = char('a' + major);
@@ -528,7 +534,7 @@ String SDCard::incrementFileName(const String &fname) {
 	  maxn *= 10;
 	maxn -= 1;
 	if (NameCounter > maxn) {
-	  Serial.println("WARNING: file name overflow");
+	  Serial.printf("WARNING: file name overflow on %sSD card.\n", Name);
 	  return "";
 	}
 	volatile int nn_size = sizeof(nn); // avoid truncation warning: https://stackoverflow.com/a/70938456

@@ -17,7 +17,8 @@ class SDCard : public SDClass {
  public:
 
   // Initialize. You need to call begin() for accessing the SD card.
-  SDCard();
+  // The optional name is used for error messages.
+  SDCard(const char *name=0);
   // End usage of SD card.
   virtual ~SDCard();
 
@@ -48,6 +49,9 @@ class SDCard : public SDClass {
 
   // Availability of a SD card. 
   bool available() const { return Available; };
+
+  // The name of the SD card, as passed to the constructor.
+  const char *name() const { return Name; };
 
   // True if SD card is busy.
   bool isBusy();
@@ -125,6 +129,9 @@ class SDCard : public SDClass {
 
   
  protected:
+
+  static const int MaxName = 32;
+  char Name[MaxName];
 
   bool Available;
 

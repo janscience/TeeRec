@@ -89,7 +89,7 @@ bool SDWriter::open(const char *fname) {
   if (! cardAvailable() || strlen(fname) == 0)
     return false;
   if (DataFile) {
-    Serial.println("failed to open file because the file is still open.");
+    Serial.printf("failed to open file \"%s\", because the file is still open.\n", fname);
     return false;
   }
   FileName = fname;
@@ -97,7 +97,7 @@ bool SDWriter::open(const char *fname) {
   FileSamples = 0;
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = t;
-    Serial.printf("----> SDWriter::open() took %dms.\n", wt);
+    Serial.printf("----> SDWriter::open() on %sSD card took %dms.\n", sdcard()->name(), wt);
   }
   return isOpen();
 }
@@ -130,12 +130,12 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     Wave.clearDateTime();
   Wave.assemble();
   if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {
-    Serial.println("ERROR: initial writing of wave header");
+    Serial.printf("ERROR: initial writing of wave header failed on %sSD card.\n", sdcard()->name());
     return false;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = t;
-    Serial.printf("----> SDWriter::openWave() took %dms.\n", wt);
+    Serial.printf("----> SDWriter::openWave() on %sSD card took %dms.\n", sdcard()->name(), wt);
   }
   return (DataFile) ? true : false;
 }
@@ -146,12 +146,12 @@ bool SDWriter::openWave(const char *fname, const WaveHeader &wave) {
   if (!open(fname))
     return false;
   if (DataFile.write(wave.Buffer, wave.NBuffer) != wave.NBuffer) {
-    Serial.println("ERROR: initial writing of wave header");
+    Serial.printf("ERROR: initial writing of wave header failed on %sSD card.\n", sdcard()->name());
     return false;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = t;
-    Serial.printf("----> SDWriter::openWave() took %dms.\n", wt);
+    Serial.printf("----> SDWriter::openWave() on %sSD card took %dms.\n", sdcard()->name(), wt);
   }
   return (DataFile) ? true : false;
 }
@@ -167,14 +167,14 @@ bool SDWriter::closeWave() {
     Wave.assemble();
     DataFile.seek(0);
     if (DataFile.write(Wave.Buffer, Wave.NBuffer) != Wave.NBuffer) {  // 2ms
-      Serial.println("ERROR: final writing of wave header");
+      Serial.printf("ERROR: final writing of wave header on %sSD card failed.\n", sdcard()->name());
       success = false;
     }
   }
   close();
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = t;
-    Serial.printf("----> SDWriter::closeWave() took %dms.\n", wt);
+    Serial.printf("----> SDWriter::closeWave() on %sSD card took %dms.\n", sdcard()->name(), wt);
   }
   return success;
 }
@@ -200,16 +200,16 @@ ssize_t SDWriter::write() {
   size_t missed = overrun();
   if (missed > 0) {
     if (Verbose > 0) {
-      Serial.printf("ERROR in SDWriter::write(): data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
+      Serial.printf("ERROR in SDWriter::write() on %sSD card: data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", sdcard()->name(), missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
       unsigned long wt = WriteTime;
-      Serial.printf("----> last write %dms ago.\n", wt);
+      Serial.printf("----> last write on %sSD card %dms ago.\n", sdcard()->name(), wt);
     }
     return -4;
   }
   if (available() == 0) {
     if (writeTime() > 4*Data->DMABufferTime()) {
       if (Verbose > 0) {
-	Serial.println("ERROR in SDWriter::write(): no data are produced!");
+	Serial.printf("ERROR in SDWriter::write() on %sSD card: no data are produced!\n", sdcard()->name());
 	Serial.printf("    Worker cycle: %u,   Worker index: %u\n", Cycle, Index);
 	Serial.printf("  Producer cycle: %u, Producer index: %u, Buffer size: %u\n", Data->cycle(), Data->index(), Data->nbuffer());
       }
@@ -220,7 +220,7 @@ ssize_t SDWriter::write() {
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = WriteTime;
-    Serial.printf("----> SDWriter::write(): last write %dms ago.\n", wt);
+    Serial.printf("----> SDWriter::write() on %sSD card: last write %dms ago.\n", sdcard()->name(), wt);
   }
   size_t index = Producer->index();
   size_t nwrite = 0;
@@ -234,7 +234,8 @@ ssize_t SDWriter::write() {
 	return -5;
       if (Verbose > 1 && WriteTime > MaxWriteTime) {
 	unsigned long wt = WriteTime;
-	Serial.printf("----> SDWriter::write(): needed %dms for writing end-of-buffer data to SD card.\n", wt);
+	Serial.printf("----> SDWriter::write() on %sSD card: needed %dms for writing end-of-buffer data to SD card.\n",
+		      sdcard()->name(), wt);
       }
       WriteTime = 0;
       samples0 = nbytes / sizeof(sample_t);
@@ -242,7 +243,8 @@ ssize_t SDWriter::write() {
       FileSamples += samples0;
       if (samples0 < nwrite) {
 	if (Verbose > 0)
-	  Serial.printf("WARNING in SDWriter::write(): only wrote %d samples of %d to the end of the data buffer\n", samples0, nwrite);
+	  Serial.printf("WARNING in SDWriter::write() on %sSD card: only wrote %d samples of %d to the end of the data buffer\n",
+			sdcard()->name(), samples0, nwrite);
 	return samples0;
       }
       if (FileMaxSamples > 0 && FileSamples >= FileMaxSamples)
@@ -261,13 +263,15 @@ ssize_t SDWriter::write() {
     WriteTime = 0;
     samples1 = nbytes / sizeof(sample_t);
     if (Verbose > 0 && samples1 < nwrite)
-      Serial.printf("WARNING in SDWriter::write(): only wrote %d samples of %d\n", samples1, nwrite);
+      Serial.printf("WARNING in SDWriter::write() on %sSD card: only wrote %d samples of %d\n",
+		    sdcard()->name(), samples1, nwrite);
     increment(samples1);
     FileSamples += samples1;
   }
   if (Verbose > 1 && WriteTime > MaxWriteTime) {
     unsigned long wt = WriteTime;
-    Serial.printf("----> SDWriter::write(): needed %dms for writing beginning-of-buffer data to SD card.\n", wt);
+    Serial.printf("----> SDWriter::write() on %sSD card: needed %dms for writing beginning-of-buffer data to SD card.\n",
+		  sdcard()->name(), wt);
   }
   return samples0 + samples1;
 }
@@ -275,7 +279,7 @@ ssize_t SDWriter::write() {
 
 void SDWriter::start(size_t decr) {
   if (!synchronize())
-    Serial.println("ERROR in SDWriter::startWrite(): Data buffer not initialized yet. ");
+    Serial.println("ERROR in SDWriter::startWrite(): data buffer not initialized yet. ");
   WriteTime = 0;
   if (decr > 0) {
     decrement(decr);
