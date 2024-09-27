@@ -94,7 +94,7 @@ void Configurable::report(Stream &stream, size_t indent,
 }
 
 
-void Configurable::save(File &file, size_t indent, size_t w) const {
+void Configurable::save(FsFile &file, size_t indent, size_t w) const {
   // longest name:
   size_t ww = 0;
   for (size_t j=0; j<NActions; j++) {
@@ -112,7 +112,7 @@ void Configurable::save(File &file, size_t indent, size_t w) const {
 
 
 bool Configurable::save(SDCard &sd, const char *filename) const {
-  File file = sd.openWrite(filename);
+  FsFile file = sd.openWrite(filename);
   if (!file) {
     Serial.printf("ERROR! Configuration file \"%s\" cannot be written to SD card.\n",
 		  filename);
@@ -130,7 +130,7 @@ void Configurable::load(SDCard &sd, const char *filename) {
   const size_t nline = 128;
   char line[nline];
   char sections[nline];
-  File file = sd.openRead(filename);
+  FsFile file = sd.openRead(filename);
   if (!file || file.available() < 10) {
     Serial.printf("Configuration file \"%s\" not found or empty.\n\n",
 		  filename);

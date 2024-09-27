@@ -11,7 +11,7 @@
 
 
 class SDCard;
-class File;
+class FsFile;
 
 
 class Configurable : public Action {
@@ -42,7 +42,7 @@ class Configurable : public Action {
 		      size_t w=0, bool descend=true) const;
 
   /* Save current settings to file. */
-  virtual void save(File &file, size_t indent=0, size_t w=0) const;
+  virtual void save(FsFile &file, size_t indent=0, size_t w=0) const;
 
   /* Save current setting to configuration file on SD card.
      Return true on success. */

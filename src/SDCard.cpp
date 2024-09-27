@@ -84,7 +84,7 @@ bool SDCard::check(float minfree, Stream &stream) {
       stream.printf("! WARNING: No space left on %sSD card.\n\n", Name);
       return false;
     }
-    File tf = open("testit.wrt", FILE_WRITE);
+    FsFile tf = sdfs.open("testit.wrt", O_RDWR | O_CREAT | O_TRUNC);
     if (! tf) {
       if (k == 0)
 	continue;
@@ -108,6 +108,7 @@ bool SDCard::check(float minfree, Stream &stream) {
 bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;
+  sdfs.chvol();
   if (! exists(path))
     mkdir(path);
   NameCounter = 0;
@@ -118,6 +119,7 @@ bool SDCard::dataDir(const char *path) {
 bool SDCard::rootDir() {
   if (! Available)
     return false;
+  sdfs.chvol();
   return sdfs.chdir("/");
 }
 
@@ -127,8 +129,8 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
   SdFile file;
   if (! Available)
     return;
-  SdFile dir;
-  if (!dir.open(path)) {
+  FsFile dir = sdfs.open(path);
+  if (!dir) {
     stream.printf("! ERROR: Folder \"%s\" does not exist on %s SD card.\n", path, Name);
     return;
   }
@@ -177,30 +179,32 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
   SdFile file;
   if (! Available)
     return;
-  SdFile dir;
-  if (!dir.open(path)) {
+  FsFile dir = sdfs.open(path);
+  if (!dir) {
     stream.printf("! ERROR: Folder \"%s\" does not exist on %sSD card.\n", path, Name);
     return;
   }
-  stream.printf("Removing all files in \"%s\" on %sSD card:\n", path, Name);
+  stream.printf("Erase all files in \"%s\" on %sSD card:\n", path, Name);
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
       char fname[200];
       file.getName(fname, 200);
       if (dir.remove(fname)) {
-	stream.print("  ");
+	stream.print("  erased ");
 	stream.println(fname);
 	n++;
       }
       else {
-	stream.print("  Failed to remove file ");
+	stream.print("  Failed to erase file ");
 	stream.println(fname);
       }
     }
   }
   if (n == 0)
     stream.println("No files found.");
+  else if (n == 1)
+    stream.printf("Removed %d file.\n", n);
   else
     stream.printf("Removed %d files.\n", n);
 }
@@ -450,12 +454,12 @@ void SDCard::erase(Stream &stream) {
 
 
 void SDCard::format(const char *path, bool erase_card, Stream &stream) {
-  File file;
+  FsFile file;
   size_t n = 10;
   // read file:
   if (path != 0 && strlen(path) > 0) {
     stream.printf("Read file \"%s\" on %sSD card ...\n", path, Name);
-    rootDir();
+    sdfs.chdir();
     file = openRead(path);
     n = file.available();
   }
@@ -482,6 +486,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
     FatFormatter fat_formatter;
     fat_formatter.format(sdfs.card(), sector_buffer, &stream);
   }
+  sdfs.restart();
   stream.println();
   // write file:
   if (path != 0 && strlen(path) > 0) {
@@ -541,7 +546,7 @@ String SDCard::incrementFileName(const String &fname) {
 	snprintf(nn, nn_size, "%0*d", width, NameCounter);
 	name.replace(nums, nn);
       }
-    } while (exists(name.c_str()));
+    } while (sdfs.exists(name.c_str()));
     return name;
   }
   else
@@ -554,17 +559,17 @@ void SDCard::resetFileCounter() {
 }
 
 
-File SDCard::openRead(const char *path) {
-  return open(path, FILE_READ);
+FsFile SDCard::openRead(const char *path) {
+  return sdfs.open(path, O_RDONLY);
 }
 
 
-File SDCard::openWrite(const char *path) {
-  return open(path, FILE_WRITE_BEGIN);
+FsFile SDCard::openWrite(const char *path) {
+  return sdfs.open(path, O_WRONLY | O_CREAT | O_TRUNC );
 }
 
 
-File SDCard::openAppend(const char *path) {
-  return open(path, FILE_WRITE);
+FsFile SDCard::openAppend(const char *path) {
+  return sdfs.open(path, O_WRONLY | O_CREAT | O_AT_END);
 }
 

@@ -63,7 +63,7 @@ class SDWriter : public DataWorker {
   void close();
 
   // Return file object.
-  File &file() { return DataFile; };
+  FsFile &file() { return DataFile; };
 
   // Open new file for writing and write wave header with metadata
   // from all data producers.
@@ -152,7 +152,7 @@ class SDWriter : public DataWorker {
 
   SDCard *SDC;
   bool SDOwn;
-  mutable File DataFile;   // mutable because File from FS.h has non-constant bool() function
+  mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
   String FileName;         // name of the currently or previously open file.
 
   WaveHeader Wave;

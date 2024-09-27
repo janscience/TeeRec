@@ -119,13 +119,13 @@ class SDCard : public SDClass {
   void resetFileCounter();
 
   // Open file on SD card for reading.
-  File openRead(const char *path);
+  FsFile openRead(const char *path);
 
   // Open file on SD card for writing (not appending).
-  File openWrite(const char *path);
+  FsFile openWrite(const char *path);
 
   // Open file on SD card for appending to existing file.
-  File openAppend(const char *path);
+  FsFile openAppend(const char *path);
 
   
  protected:

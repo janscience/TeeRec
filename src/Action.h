@@ -10,7 +10,7 @@
 #include <Arduino.h>
 
 
-class File;
+class FsFile;
 class Configurable;
 class Configurator;
 
@@ -90,7 +90,7 @@ class Action {
 
   /* Save the actions's name and potential value to file.
      FileOutput must be enabled. */
-  virtual void save(File &file, size_t indent=0, size_t w=0) const {};
+  virtual void save(FsFile &file, size_t indent=0, size_t w=0) const {};
   
   /* Interactive configuration of this action via serial stream.
      StreamInput and StreamOutput must be enabled. */

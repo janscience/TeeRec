@@ -176,7 +176,7 @@ bool RTClock::set(Stream &stream) {
 
 
 bool RTClock::setFromFile(SDCard &sdcard, const char *path, bool from_start) {
-  File file = sdcard.openRead(path);
+  FsFile file = sdcard.openRead(path);
   if (!file)
     return false;
   char datetime[20];
