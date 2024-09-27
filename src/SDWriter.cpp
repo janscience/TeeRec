@@ -210,8 +210,8 @@ ssize_t SDWriter::write() {
     if (writeTime() > 4*Data->DMABufferTime()) {
       if (Verbose > 0) {
 	Serial.println("ERROR in SDWriter::write(): no data are produced!");
-	Serial.printf("   SD cycle: %5d,  SD index: %6d\n", Cycle, Index);
-	Serial.printf("  TDM cycle: %5d, TDM index: %6d\n", Data->cycle(), Data->index());
+	Serial.printf("    Worker cycle: %u,   Worker index: %u\n", Cycle, Index);
+	Serial.printf("  Producer cycle: %u, Producer index: %u, Buffer size: %u\n", Data->cycle(), Data->index(), Data->nbuffer());
       }
       return -3;
     }

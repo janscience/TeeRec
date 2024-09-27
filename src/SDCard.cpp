@@ -19,8 +19,12 @@ bool SDCard::begin() {
 #endif
 
 
-bool SDCard::begin(uint8_t csPin) {
-  if (!SDClass::begin(csPin))
+bool SDCard::begin(uint8_t cs) {
+  if (cs == 255) {
+    Available = false;
+    return false;
+  }
+  if (!SDClass::begin(cs))
     return false;
   Available = true;
   sdfs.chvol();
@@ -29,6 +33,10 @@ bool SDCard::begin(uint8_t csPin) {
 
 
 bool SDCard::begin(uint8_t cs, uint8_t opt, uint32_t clock, SPIClass* spi) {
+  if (cs == 255) {
+    Available = false;
+    return false;
+  }
   if (!sdfs.begin(SdSpiConfig(cs, opt, SD_SCK_MHZ(clock), spi)))
     return false;
   Available = true;

@@ -28,11 +28,13 @@ class SDCard : public SDClass {
 #endif
   
   // Initialize SD card on specified SPI chip select pin.
+  // Set cs to 255 for not initializing the SD card.
   // Return true on success.
-  bool begin(uint8_t csPin);
+  bool begin(uint8_t cs);
   
   // Initialize SD card on SPI bus.
   // cs is the chip select pin,
+  // set it to 255 for not initializing the SD card.
   // opt is DEDICATED_SPI (fast) or SHARED_SPI (a bit slower),
   // clock is the clock frequency in MHZ (max 50),
   // spi is the SPI bus, &SPI or &SPI1.

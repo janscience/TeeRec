@@ -1,6 +1,6 @@
 // select SD card:
-#define SDCARD_BUILTIN
-//#define SDCARD_SPI0
+//#define SDCARD_BUILTIN
+#define SDCARD_SPI0
 //#define SDCARD_SPI1
 
 #include <SPI.h>
