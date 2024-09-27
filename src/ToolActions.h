@@ -1,5 +1,5 @@
 /*
-  ToolActions - Actions for handling the configuration file and the real-time clock.
+  ToolActions - Actions for managing configurations, SD cards, and the real-time clock.
   Created by Jan Benda, August 13th, 2024.
 */
 

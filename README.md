@@ -84,10 +84,11 @@ via the `TeeRec.h` header.
 - [Parameter](src/Parameter.h): Actions with configurable name-value pairs of various types.
 - [Configurable](src/Configurable.h): A collection of Actions.
 - [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
-- [ToolActions](src/ToolActions.h): Actions for handling the configuration file and the real-time clock.
+- [ToolActions](src/ToolActions.h): Actions for managing configurations, SD cards, and the real-time clock.
+- [ToolMenus](src/ToolMenus.h): Menus with actions for managing configurations, SD cards, and the real-time clock.
+- [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
-- [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 
 ### Audio monitor
 
