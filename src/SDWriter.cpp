@@ -77,6 +77,22 @@ float SDWriter::writeTime() const {
 }
 
 
+void SDWriter::checkTiming(unsigned long t, const char *function,
+			   const char *message) {
+  if ((Verbose > 1 && t > MaxWriteTime) ||
+      0.001*t > 0.5*Data->bufferTime()) {
+    if (0.001*t > 0.5*Data->bufferTime())
+      Serial.print("WARNING");
+    else
+      Serial.print("------>");
+    Serial.printf(" in SDWriter::%s() on %sSD card: ",
+		 function, sdcard()->name());
+    Serial.printf(message, t);
+    Serial.println(".");
+  }
+}
+
+
 bool SDWriter::pending() {
   //return (DataFile && available() >= 2048 && SDC != 0 && !SDC->isBusy()) {
   // or a combination of samples and writetime!!!
@@ -95,16 +111,7 @@ bool SDWriter::open(const char *fname) {
   FileName = fname;
   DataFile = SDC->openWrite(fname);
   FileSamples = 0;
-  if ((Verbose > 1 && t > MaxWriteTime) ||
-      0.001*t > 0.5*Data->bufferTime()) {
-    if (0.001*t > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = t;
-    Serial.printf(" in SDWriter::open() on %sSD card took %dms.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(t, "open", "opening file took %lums");
   return isOpen();
 }
 
@@ -139,16 +146,7 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     Serial.printf("ERROR: initial writing of wave header failed on %sSD card.\n", sdcard()->name());
     return false;
   }
-  if ((Verbose > 1 && t > MaxWriteTime) ||
-      0.001*t > 0.5*Data->bufferTime()) {
-    if (0.001*t > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = t;
-    Serial.printf(" in SDWriter::openWave() on %sSD card took %dms.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(t, "openWave", "opening wave file took %lums");
   return (DataFile) ? true : false;
 }
 
@@ -162,16 +160,7 @@ bool SDWriter::openWave(const char *fname, const WaveHeader &wave) {
 		  sdcard()->name());
     return false;
   }
-  if ((Verbose > 1 && t > MaxWriteTime) ||
-      0.001*t > 0.5*Data->bufferTime()) {
-    if (0.001*t > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = t;
-    Serial.printf(" in SDWriter::openWave() on %sSD card took %dms.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(t, "openWave", "opening wave file took %lums");
   return (DataFile) ? true : false;
 }
 
@@ -191,16 +180,7 @@ bool SDWriter::closeWave() {
     }
   }
   close();
-  if ((Verbose > 1 && t > MaxWriteTime) ||
-      0.001*t > 0.5*Data->bufferTime()) {
-    if (0.001*t > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = t;
-    Serial.printf(" in SDWriter::closeWave() on %sSD card took %dms.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(t, "closeWave", "closing wave file took %lums");
   return success;
 }
 
@@ -241,16 +221,7 @@ ssize_t SDWriter::write() {
     else
       return 0;
   }
-  if ((Verbose > 1 && WriteTime > MaxWriteTime) ||
-      0.001*WriteTime > 0.5*Data->bufferTime()) {
-    if (0.001*WriteTime > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = WriteTime;
-    Serial.printf(" in SDWriter::write() on %sSD card: last write %dms ago.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(WriteTime, "write", "last write %lums ago");
   WriteTime = 0;
   size_t index = Producer->index();
   size_t nwrite = 0;
@@ -262,16 +233,7 @@ ssize_t SDWriter::write() {
       nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
       if (nbytes == 0)
 	return -5;
-      if ((Verbose > 1 && WriteTime > MaxWriteTime) ||
-	  0.001*WriteTime > 0.5*Data->bufferTime()) {
-	if (0.001*WriteTime > 0.5*Data->bufferTime())
-	  Serial.print("WARNING");
-	else
-	  Serial.print("------>");
-	unsigned long wt = WriteTime;
-	Serial.printf(" in SDWriter::write() on %sSD card: needed %dms for writing end-of-buffer data to SD card.\n",
-		      sdcard()->name(), wt);
-      }
+      checkTiming(WriteTime, "write", "needed %lums for writing end-of-buffer data");
       samples0 = nbytes / sizeof(sample_t);
       increment(samples0);
       FileSamples += samples0;
@@ -303,16 +265,7 @@ ssize_t SDWriter::write() {
     increment(samples1);
     FileSamples += samples1;
   }
-  if ((Verbose > 1 && WriteTime > MaxWriteTime) ||
-      0.001*WriteTime > 0.5*Data->bufferTime()) {
-    if (0.001*WriteTime > 0.5*Data->bufferTime())
-      Serial.print("WARNING");
-    else
-      Serial.print("------>");
-    unsigned long wt = WriteTime;
-    Serial.printf(" in SDWriter::write() on %sSD card: needed %dms for writing beginning-of-buffer data to SD card.\n",
-		  sdcard()->name(), wt);
-  }
+  checkTiming(WriteTime, "write", "needed %lums for writing beginning-of-buffer data");
   return samples0 + samples1;
 }
 

@@ -150,6 +150,9 @@ class SDWriter : public DataWorker {
   
  protected:
 
+  // Print error messages about timing issues, depending on verbosity level.
+  void checkTiming(unsigned long t, const char *function, const char *message);
+
   SDCard *SDC;
   bool SDOwn;
   mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
