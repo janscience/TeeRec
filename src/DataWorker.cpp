@@ -78,17 +78,19 @@ size_t DataWorker::available() const {
   else {
     if (Verbose > 3) {
       float dt = NoDataTime;
-      Serial.printf("  No new data available in DataWorker right now (previous warning %.3fms ago):\n", 0.001*dt);
-      Serial.print("      Worker cycle: ");
-      Serial.print(Cycle);
-      Serial.print(",     Worker index: ");
-      Serial.println(Index);
-      Serial.print("    Producer cycle: ");
-      Serial.print(cycle);
-      Serial.print(",   Producer index: ");
-      Serial.print(index);
-      Serial.print(", Buffer size: ");
-      Serial.println(Data->nbuffer());
+      Serial.printf("  No new data available in DataWorker (previous warning %.3fms ago):\n", 0.001*dt);
+      if (Cycle != cycle || Index != index) {
+	Serial.print("      Worker cycle: ");
+	Serial.print(Cycle);
+	Serial.print(",     Worker index: ");
+	Serial.println(Index);
+	Serial.print("    Producer cycle: ");
+	Serial.print(cycle);
+	Serial.print(",   Producer index: ");
+	Serial.print(index);
+	Serial.print(", Buffer size: ");
+	Serial.println(Data->nbuffer());
+      }
       NoDataTime = 0;
     }
     return 0;
