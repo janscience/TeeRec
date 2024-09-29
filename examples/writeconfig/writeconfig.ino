@@ -11,6 +11,7 @@
 #include <SDCard.h>
 #include <Configurator.h>
 #include <ToolActions.h>
+#include <ToolMenus.h>
 #include <Settings.h>
 #if defined(INPUT_ADC)
   #include <InputADC.h>
@@ -58,28 +59,13 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 #elif defined(INPUT_TDM)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
-Configurable datetime_menu("Date & time", Action::StreamInput);
-ReportRTCAction report_rtc_act(datetime_menu, "Print date & time", rtclock);
-SetRTCAction set_rtc_act(datetime_menu, "Set date & time", rtclock);
-Configurable config_menu("Configuration", Action::StreamInput);
-ReportConfigAction report_act(config_menu, "Print configuration");
-SaveConfigAction save_act(config_menu,"Save configuration", sdcard);
-LoadConfigAction load_act(config_menu, "Load configuration", sdcard);
-RemoveConfigAction remove_act(config_menu, "Erase configuration", sdcard);
-Configurable sdcard_menu("SD card", Action::StreamInput);
-SDInfoAction sdinfo_act(sdcard_menu, "SD card info", sdcard);
-SDCheckAction sdcheck_act(sdcard_menu, "SD card check", sdcard);
-SDBenchmarkAction sdbench_act(sdcard_menu, "SD card benchmark", sdcard);
-SDFormatAction format_act(sdcard_menu, "Format SD card", sdcard);
-SDEraseFormatAction eraseformat_act(sdcard_menu, "Erase and format SD card", sdcard);
-SDListRootAction listroot_act(sdcard_menu, "List files in root directory", sdcard);
-SDListRecordingsAction listrecs_act(sdcard_menu, "List all recordings", sdcard, settings);
-SDRemoveRecordingsAction eraserecs_act(sdcard_menu, "Erase all recordings", sdcard, settings);
+DateTimeMenu datetime_menu(rtclock);
+ConfigurationMenu configuration_menu(sdcard);
+SDCardMenu sdcard0_menu("Primary SD card", sdcard, settings);
 #ifdef FIRMWARE_UPDATE
-Configurable firmware_menu("Firmware", Action::StreamInput);
-ListFirmwareAction listfirmware_act(firmware_menu, "List available updates", sdcard);
-UpdateFirmwareAction updatefirmware_act(firmware_menu, "Update firmware", sdcard);
+FirmwareMenu firmware_menu(sdcard0);
 #endif
+DiagnosticMenu diagnostic_menu("Diagnostics", sdcard);
 HelpAction help_act(config, "Help");
 
 Blink blink(LED_BUILTIN);

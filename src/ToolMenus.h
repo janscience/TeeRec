@@ -49,14 +49,11 @@ public:
 
 protected:
 
-  SDInfoAction InfoAct;
-  SDCheckAction CheckAct;
-  SDBenchmarkAction BenchmarkAct;
-  SDFormatAction FormatAct;
-  SDEraseFormatAction EraseFormatAct;
   SDListRootAction ListRootAct;
   SDListRecordingsAction ListRecsAct;
   SDRemoveRecordingsAction EraseRecsAct;
+  SDFormatAction FormatAct;
+  SDEraseFormatAction EraseFormatAct;
   
 };
 
@@ -75,6 +72,28 @@ protected:
   
 };
 #endif
+
+
+class DiagnosticMenu : public Configurable {
+
+public:
+
+  DiagnosticMenu(const char *name, SDCard &sdcard);
+  DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1);
+
+protected:
+
+  TeensyInfoAction TeensyInfoAct;
+  PSRAMInfoAction PSRAMInfoAct;
+  PSRAMTestAction PSRAMTestAct;
+  SDInfoAction SD0InfoAct;
+  SDCheckAction SD0CheckAct;
+  SDBenchmarkAction SD0BenchmarkAct;
+  SDInfoAction SD1InfoAct;
+  SDCheckAction SD1CheckAct;
+  SDBenchmarkAction SD1BenchmarkAct;
+  
+};
 
 
 #endif
