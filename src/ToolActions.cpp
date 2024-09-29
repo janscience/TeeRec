@@ -1,3 +1,4 @@
+#include <TeensyBoard.h>
 #include <RTClock.h>
 #include <SDWriter.h>
 #include <Configurator.h>
@@ -19,6 +20,183 @@ void HelpAction::configure(Stream &stream, unsigned long timeout) {
   stream.println("Select menu entries by entering the number followed by 'return'.");
   stream.println("Go up to the parent menu by entering 'q'.");
   stream.println();
+}
+
+
+TeensyInfoAction::TeensyInfoAction(const char *name) :
+  TeensyInfoAction(*Configurator::MainConfig->Config, name) {
+}
+
+
+TeensyInfoAction::TeensyInfoAction(Configurable &menu, const char *name) :
+  Action(menu, name, StreamInput) {
+}
+
+
+void TeensyInfoAction::configure(Stream &stream, unsigned long timeout) {
+  stream.println("Teensy development board:");
+  stream.printf("  board        : %s\n", teensyBoard());
+  stream.printf("  serial number: %s\n", teensySN());
+  stream.printf("  MAC address  : %s\n", teensyMAC());
+  stream.println();
+}
+
+
+#ifdef TEENSY41
+extern "C" uint8_t external_psram_size;
+#endif
+
+void PSRAMInfoAction::configure(Stream &stream, unsigned long timeout) {
+#ifdef TEENSY41
+  // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
+  stream.println("EXTMEM PSRAM Memory:");
+  uint8_t size = external_psram_size;
+  if (size == 0) {
+    stream.println("  no external PSRAM memory installed.\n");
+    return;
+  }
+  const float clocks[4] = {396.0f, 720.0f, 664.62f, 528.0f};
+  const float frequency = clocks[(CCM_CBCMR >> 8) & 3] / (float)(((CCM_CBCMR >> 29) & 7) + 1);
+  stream.printf("  size     : %u MB\n", size);
+  stream.printf("  CCM_CBCMR: %08X (%.1f MHz)\n", CCM_CBCMR, frequency);
+  stream.println();
+#else
+  stream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
+#endif
+}
+
+
+bool PSRAMTestAction::checkFixed(uint32_t pattern, Stream &stream) {
+  // fill the entire RAM with a fixed pattern, then check it:
+  volatile uint32_t *p;
+  stream.printf("  testing with fixed pattern %08X\n", pattern);
+  for (p = MemoryBegin; p < MemoryEnd; p++)
+    *p = pattern;
+  arm_dcache_flush_delete((void *)MemoryBegin,
+			  (uint32_t)MemoryEnd - (uint32_t)MemoryBegin);
+  for (p = MemoryBegin; p < MemoryEnd; p++) {
+    uint32_t actual = *p;
+    if (actual != pattern) {
+      stream.printf("  ERROR at %08X, read %08X but expected %08X\n",
+		    (uint32_t)p, actual, pattern);
+      return false;
+    }
+  }
+  return true;
+}
+
+
+bool PSRAMTestAction::checkRandom(uint32_t seed, Stream &stream) {
+  // fill the entire RAM with a pseudo-random sequence, then check it:
+  volatile uint32_t *p;
+  uint32_t reg;
+
+  stream.printf("  testing with pseudo-random sequence, seed=%u\n", seed);
+  reg = seed;
+  for (p = MemoryBegin; p < MemoryEnd; p++) {
+    *p = reg;
+    for (int i=0; i < 3; i++) {
+      // https://en.wikipedia.org/wiki/Xorshift
+      reg ^= reg << 13;
+      reg ^= reg >> 17;
+      reg ^= reg << 5;
+    }
+  }
+  arm_dcache_flush_delete((void *)MemoryBegin,
+			  (uint32_t)MemoryEnd - (uint32_t)MemoryBegin);
+  reg = seed;
+  for (p = MemoryBegin; p < MemoryEnd; p++) {
+    uint32_t actual = *p;
+    if (actual != reg) {
+      stream.printf("  ERROR at %08X, read %08X but expected %08X\n",
+		    (uint32_t)p, actual, reg);
+      return false;
+    }
+    for (int i=0; i < 3; i++) {
+      reg ^= reg << 13;
+      reg ^= reg >> 17;
+      reg ^= reg << 5;
+    }
+  }
+  return true;
+}
+
+
+void PSRAMTestAction::configure(Stream &stream, unsigned long timeout) {
+#ifdef TEENSY41
+  // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
+  uint8_t size = external_psram_size;
+  stream.println("EXTMEM Memory Test:");
+  if (size == 0) {
+    stream.println("  no external PSRAM memory installed.\n");
+    return;
+  }
+  MemoryBegin = (uint32_t *)(0x70000000);
+  MemoryEnd = (uint32_t *)(0x70000000 + size * 1048576);
+  elapsedMillis msec = 0;
+  if (!checkFixed(0x5A698421, stream)) return;
+  if (!checkRandom(2976674124ul, stream)) return;
+  if (!checkRandom(1438200953ul, stream)) return;
+  if (!checkRandom(3413783263ul, stream)) return;
+  if (!checkRandom(1900517911ul, stream)) return;
+  if (!checkRandom(1227909400ul, stream)) return;
+  if (!checkRandom(276562754ul, stream)) return;
+  if (!checkRandom(146878114ul, stream)) return;
+  if (!checkRandom(615545407ul, stream)) return;
+  if (!checkRandom(110497896ul, stream)) return;
+  if (!checkRandom(74539250ul, stream)) return;
+  if (!checkRandom(4197336575ul, stream)) return;
+  if (!checkRandom(2280382233ul, stream)) return;
+  if (!checkRandom(542894183ul, stream)) return;
+  if (!checkRandom(3978544245ul, stream)) return;
+  if (!checkRandom(2315909796ul, stream)) return;
+  if (!checkRandom(3736286001ul, stream)) return;
+  if (!checkRandom(2876690683ul, stream)) return;
+  if (!checkRandom(215559886ul, stream)) return;
+  if (!checkRandom(539179291ul, stream)) return;
+  if (!checkRandom(537678650ul, stream)) return;
+  if (!checkRandom(4001405270ul, stream)) return;
+  if (!checkRandom(2169216599ul, stream)) return;
+  if (!checkRandom(4036891097ul, stream)) return;
+  if (!checkRandom(1535452389ul, stream)) return;
+  if (!checkRandom(2959727213ul, stream)) return;
+  if (!checkRandom(4219363395ul, stream)) return;
+  if (!checkRandom(1036929753ul, stream)) return;
+  if (!checkRandom(2125248865ul, stream)) return;
+  if (!checkRandom(3177905864ul, stream)) return;
+  if (!checkRandom(2399307098ul, stream)) return;
+  if (!checkRandom(3847634607ul, stream)) return;
+  if (!checkRandom(27467969ul, stream)) return;
+  if (!checkRandom(520563506ul, stream)) return;
+  if (!checkRandom(381313790ul, stream)) return;
+  if (!checkRandom(4174769276ul, stream)) return;
+  if (!checkRandom(3932189449ul, stream)) return;
+  if (!checkRandom(4079717394ul, stream)) return;
+  if (!checkRandom(868357076ul, stream)) return;
+  if (!checkRandom(2474062993ul, stream)) return;
+  if (!checkRandom(1502682190ul, stream)) return;
+  if (!checkRandom(2471230478ul, stream)) return;
+  if (!checkRandom(85016565ul, stream)) return;
+  if (!checkRandom(1427530695ul, stream)) return;
+  if (!checkRandom(1100533073ul, stream)) return;
+  if (!checkFixed(0x55555555, stream)) return;
+  if (!checkFixed(0x33333333, stream)) return;
+  if (!checkFixed(0x0F0F0F0F, stream)) return;
+  if (!checkFixed(0x00FF00FF, stream)) return;
+  if (!checkFixed(0x0000FFFF, stream)) return;
+  if (!checkFixed(0xAAAAAAAA, stream)) return;
+  if (!checkFixed(0xCCCCCCCC, stream)) return;
+  if (!checkFixed(0xF0F0F0F0, stream)) return;
+  if (!checkFixed(0xFF00FF00, stream)) return;
+  if (!checkFixed(0xFFFF0000, stream)) return;
+  if (!checkFixed(0xFFFFFFFF, stream)) return;
+  if (!checkFixed(0x00000000, stream)) return;
+  stream.printf("  test ran for %.2f seconds\n", (float)msec / 1000.0f);
+  stream.println("  All memory tests passed :-)"); 
+  stream.println();
+#else
+  stream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
+#endif
 }
 
 

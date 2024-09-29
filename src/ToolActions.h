@@ -32,6 +32,52 @@ class HelpAction : public Action {
 };
 
 
+class TeensyInfoAction : public Action {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  TeensyInfoAction(const char *name);
+
+  /* Initialize and add to configuration menu. */
+  TeensyInfoAction(Configurable &menu, const char *name);
+
+  /* Info about Teensy version, serial number and MAC. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+};
+
+
+class PSRAMInfoAction : public TeensyInfoAction {
+
+ public:
+
+  using TeensyInfoAction::TeensyInfoAction;
+
+  /* Info about Teensy 4.1 PSRAM memory. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+};
+
+
+class PSRAMTestAction : public TeensyInfoAction {
+
+ public:
+
+  using TeensyInfoAction::TeensyInfoAction;
+
+  /* Test Teensy 4.1 PSRAM memory. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+
+ protected:
+
+  bool checkFixed(uint32_t pattern, Stream &stream);
+  bool checkRandom(uint32_t seed, Stream &stream);
+
+  uint32_t *MemoryBegin;
+  uint32_t *MemoryEnd;
+
+};
+
+
 class ReportConfigAction : public Action {
 
  public:
