@@ -580,7 +580,7 @@ void SDCard::resetFileCounter() {
 
 
 FsFile SDCard::openRead(const char *path) {
-  return sdfs.open(path, O_RDONLY);
+  return sdfs.open(path, O_READ);
 }
 
 

@@ -43,7 +43,7 @@
 #include <Action.h>
 
 
-class File;
+class FsFile;
 class Configurable;
 
 
@@ -61,7 +61,7 @@ class Parameter : public Action {
 		      size_t w=0, bool descend=true) const;
 
   /* Save the parameter's key and value to file. */
-  virtual void save(File &file, size_t indent=0, size_t w=0) const;
+  virtual void save(FsFile &file, size_t indent=0, size_t w=0) const;
   
   /* Interactive configuration via Serial stream. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0);

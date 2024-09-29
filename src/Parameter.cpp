@@ -20,7 +20,7 @@ void Parameter::report(Stream &stream, size_t indent,
 }
 
 
-void Parameter::save(File &file, size_t indent, size_t w) const {
+void Parameter::save(FsFile &file, size_t indent, size_t w) const {
   if (enabled(FileOutput)) {
     char pval[MaxVal];
     valueStr(pval);

@@ -76,6 +76,12 @@ class Action {
   /* Disable the specified roles from the supported roles. */
   void disableSupported(int roles);
 
+  /* Return the roles this action currently has. */
+  int roles() const { return Roles; };
+  
+  /* Return the roles this action in general supports. */
+  int supportedRoles() const { return Roles; };
+
   /* The number of spaces to be used for each indentation level. */
   size_t indentation() const { return Indentation; };
 
