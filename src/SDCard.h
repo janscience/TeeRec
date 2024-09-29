@@ -47,6 +47,9 @@ class SDCard : public SDClass {
   // End usage of SD card.
   void end();
 
+  // Begin SD card usage with the same begin() command as before.
+  bool restart();
+
   // Availability of a SD card. 
   bool available() const { return Available; };
 
@@ -134,6 +137,7 @@ class SDCard : public SDClass {
   char Name[MaxName];
 
   bool Available;
+  int SDIOCSPin;
 
   uint16_t NameCounter;
 };

@@ -3,6 +3,7 @@
 
 SDCard::SDCard(const char *name) :
   Available(false),
+  SDIOCSPin(-1),
   NameCounter(0) {
   if (name == 0)
     strcpy(Name, "");
@@ -26,10 +27,10 @@ bool SDCard::begin() {
 
 
 bool SDCard::begin(uint8_t cs) {
-  if (cs == 255) {
-    Available = false;
+  Available = false;
+  SDIOCSPin = cs;
+  if (cs == 255)
     return false;
-  }
   if (!SDClass::begin(cs))
     return false;
   Available = true;
@@ -39,10 +40,10 @@ bool SDCard::begin(uint8_t cs) {
 
 
 bool SDCard::begin(uint8_t cs, uint8_t opt, uint32_t clock, SPIClass* spi) {
-  if (cs == 255) {
-    Available = false;
+  Available = false;
+  SDIOCSPin = -1;
+  if (cs == 255)
     return false;
-  }
   if (!sdfs.begin(SdSpiConfig(cs, opt, SD_SCK_MHZ(clock), spi)))
     return false;
   Available = true;
@@ -58,6 +59,20 @@ void SDCard::end() {
 }
 
 
+bool SDCard::restart() {
+  end();
+  if (SDIOCSPin >= 0)
+    begin(SDIOCSPin);
+  else {
+    if (!sdfs.restart())
+      return false;
+    sdfs.chvol();
+    Available = true;
+  }
+  return Available;
+}
+
+
 bool SDCard::isBusy() {
   return sdfs.isBusy();
 }
@@ -68,8 +83,7 @@ bool SDCard::check(float minfree, Stream &stream) {
     minfree = 512.0;
   for (int k=0; k<2; k++) {
     if (k == 1) {
-      end();
-      sdfs.restart();
+      restart();
       stream.printf("Restarted %sSD card.\n", Name);
     }
     if (! Available) {
@@ -141,6 +155,8 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     char fname[200];
     file.getName(fname, 200);
     if (!file.isDir()) {
+      if (n == 0 && list_sizes)
+	stream.println("  size (bytes) name");
       stream.print("  ");
       if (list_sizes) {
 	stream.printf("%12lu ", file.fileSize());
@@ -150,6 +166,8 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
       n++;
     }
     else if (list_dirs) {
+      if (n == 0 && list_sizes)
+	stream.println("  size (bytes) name");
       stream.print("  ");
       if (list_sizes) {
 	stream.printf("%12lu ", file.fileSize());
@@ -486,7 +504,9 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
     FatFormatter fat_formatter;
     fat_formatter.format(sdfs.card(), sector_buffer, &stream);
   }
-  sdfs.restart();
+  // make new file system known:
+  sdfs.card()->syncDevice();
+  restart();
   stream.println();
   // write file:
   if (path != 0 && strlen(path) > 0) {
