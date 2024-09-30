@@ -73,6 +73,16 @@ bool SDCard::restart() {
 }
 
 
+bool SDCard::checkAvailability(Stream &stream) {
+  if (! Available) {
+    stream.printf("! ERROR: No %sSD card present.\n", Name);
+    stream.println();
+    return false;
+  }
+  return true;
+}
+
+
 bool SDCard::isBusy() {
   return sdfs.isBusy();
 }
@@ -140,12 +150,13 @@ bool SDCard::rootDir() {
 
 void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
 		       Stream &stream) {
-  SdFile file;
-  if (! Available)
+  if (!checkAvailability(stream))
     return;
+  
+  SdFile file;
   FsFile dir = sdfs.open(path);
   if (!dir) {
-    stream.printf("! ERROR: Folder \"%s\" does not exist on %s SD card.\n", path, Name);
+    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
     return;
   }
   stream.printf("Files in \"%s\" on %sSD card:\n", path, Name);
@@ -194,12 +205,13 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
 
 
 void SDCard::removeFiles(const char *path, Stream &stream) {
-  SdFile file;
-  if (! Available)
+  if (!checkAvailability(stream))
     return;
+  
+  SdFile file;
   FsFile dir = sdfs.open(path);
   if (!dir) {
-    stream.printf("! ERROR: Folder \"%s\" does not exist on %sSD card.\n", path, Name);
+    stream.printf("Folder \"%s\" does not exist on %sSD card.\n", path, Name);
     return;
   }
   stream.printf("Erase all files in \"%s\" on %sSD card:\n", path, Name);
@@ -277,11 +289,8 @@ void SDCard::serial(char *s) {
 
 
 void SDCard::report(Stream &stream) {
-  if (! Available) {
-    stream.printf("! ERROR: No %sSD card present.\n", Name);
-    stream.println();
+  if (!checkAvailability(stream))
     return;
-  }
   
   char types[10];
   cardType(types);
@@ -324,6 +333,9 @@ void SDCard::report(Stream &stream) {
 
 void SDCard::benchmark(size_t buffer_size, uint32_t file_size, int repeats,
 		       Stream &stream) {
+  if (!checkAvailability(stream))
+    return;
+  
   // adapted from bench.ino example of the sdfat library
 
   const bool pre_allocate = true;
@@ -472,6 +484,12 @@ void SDCard::erase(Stream &stream) {
 
 
 void SDCard::format(const char *path, bool erase_card, Stream &stream) {
+  if (! Available) {
+    stream.printf("! ERROR: No %sSD card present.\n", Name);
+    stream.println();
+    return;
+  }
+  
   FsFile file;
   size_t n = 10;
   // read file:

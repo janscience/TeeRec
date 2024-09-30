@@ -191,8 +191,8 @@ void PSRAMTestAction::configure(Stream &stream, unsigned long timeout) {
   if (!checkFixed(0xFFFF0000, stream)) return;
   if (!checkFixed(0xFFFFFFFF, stream)) return;
   if (!checkFixed(0x00000000, stream)) return;
-  stream.printf("  test ran for %.2f seconds\n", (float)msec / 1000.0f);
-  stream.println("  All memory tests passed :-)"); 
+  stream.printf("test ran for %.2f seconds\n", (float)msec / 1000.0f);
+  stream.println("All memory tests passed :-)"); 
   stream.println();
 #else
   stream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
@@ -327,6 +327,8 @@ void SDFormatAction::format(const char *erases, bool erase, Stream &stream) {
 void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
+  if (!SDC.checkAvailability(stream))
+    return;
   stream.println("Formatting will destroy all data on the SD card.");
   format("", false, stream);
 }
@@ -335,6 +337,8 @@ void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
 void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
+  if (!SDC.checkAvailability(stream))
+    return;
   stream.println("Erasing and formatting will destroy all data on the SD card.");
   format(" erase and", true, stream);
 }
@@ -342,6 +346,8 @@ void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
 
 void SDListRootAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
+    return;
+  if (!SDC.checkAvailability(stream))
     return;
   SDC.listFiles("/", true, true, stream);
   stream.println();
@@ -367,6 +373,8 @@ SDListRecordingsAction::SDListRecordingsAction(Configurable &menu,
 void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
     return;
+  if (!SDC.checkAvailability(stream))
+    return;
   SDC.listFiles(SettingsMenu.path(), false, true, stream);
   stream.println();
 }
@@ -374,6 +382,8 @@ void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
 
 void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout) {
   if (disabled(StreamInput))
+    return;
+  if (!SDC.checkAvailability(stream))
     return;
   if (! SDC.exists(SettingsMenu.path())) {
     stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());

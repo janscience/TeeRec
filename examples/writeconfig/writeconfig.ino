@@ -61,9 +61,9 @@ InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
 #endif
 DateTimeMenu datetime_menu(rtclock);
 ConfigurationMenu configuration_menu(sdcard);
-SDCardMenu sdcard0_menu("Primary SD card", sdcard, settings);
+SDCardMenu sdcard0_menu("SD card", sdcard, settings);
 #ifdef FIRMWARE_UPDATE
-FirmwareMenu firmware_menu(sdcard0);
+FirmwareMenu firmware_menu(sdcard);
 #endif
 DiagnosticMenu diagnostic_menu("Diagnostics", sdcard);
 HelpAction help_act(config, "Help");

@@ -19,6 +19,7 @@ ConfigurationMenu::ConfigurationMenu(SDCard &sdcard) :
 
 SDCardMenu::SDCardMenu(const char *name, SDCard &sdcard, Settings &settings) :
   Configurable(name, Action::StreamInput),
+  InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard, settings),
   EraseRecsAct(*this, "Erase all recordings", sdcard, settings),
@@ -41,13 +42,10 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard) :
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
-  SD0InfoAct(*this, "SD card info", sdcard),
   SD0CheckAct(*this, "SD card check", sdcard),
   SD0BenchmarkAct(*this, "SD card benchmark", sdcard),
-  SD1InfoAct(*this, "SD card info", sdcard),
   SD1CheckAct(*this, "SD card check", sdcard),
   SD1BenchmarkAct(*this, "SD card benchmark", sdcard) {
-  SD1InfoAct.disable();
   SD1CheckAct.disable();
   SD1BenchmarkAct.disable();
 }
@@ -59,10 +57,8 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
-  SD0InfoAct(*this, "Primary SD card info", sdcard0),
   SD0CheckAct(*this, "Primary SD card check", sdcard0),
   SD0BenchmarkAct(*this, "Primary SD card benchmark", sdcard0),
-  SD1InfoAct(*this, "Secondary SD card info", sdcard1),
   SD1CheckAct(*this, "Secondary SD card check", sdcard1),
   SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1) {
 }

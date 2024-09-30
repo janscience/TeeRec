@@ -53,6 +53,10 @@ class SDCard : public SDClass {
   // Availability of a SD card. 
   bool available() const { return Available; };
 
+  // Check availability of SD card.
+  // If not present, print out error message on stream.
+  bool checkAvailability(Stream &stream=Serial);
+
   // The name of the SD card, as passed to the constructor.
   const char *name() const { return Name; };
 

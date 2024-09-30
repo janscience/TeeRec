@@ -49,6 +49,7 @@ public:
 
 protected:
 
+  SDInfoAction InfoAct;
   SDListRootAction ListRootAct;
   SDListRecordingsAction ListRecsAct;
   SDRemoveRecordingsAction EraseRecsAct;
@@ -86,10 +87,8 @@ protected:
   TeensyInfoAction TeensyInfoAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
-  SDInfoAction SD0InfoAct;
   SDCheckAction SD0CheckAct;
   SDBenchmarkAction SD0BenchmarkAct;
-  SDInfoAction SD1InfoAct;
   SDCheckAction SD1CheckAct;
   SDBenchmarkAction SD1BenchmarkAct;
   
