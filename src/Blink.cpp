@@ -18,8 +18,8 @@ Blink::Blink() :
   Interval(2000),
   OnTime(50),
   OffTime(150),
-  LastOn(0),
-  LastOff(0) {
+  NSwitchTimes(0),
+  SwitchOverflow(false) {
   memset(Times, 0, sizeof(Times));
 }
 
@@ -267,17 +267,14 @@ void Blink::delay(uint32_t delayms) {
 }
 
 
-uint32_t Blink::switchedOnTime() const {
-  uint32_t t = LastOn;
-  LastOn = 0;
-  return t;
-}
-
-
-uint32_t Blink::switchedOffTime() const {
-  uint32_t t = LastOff;
-  LastOff = 0;
-  return t;
+bool Blink::getSwitchTimes(uint32_t *times, bool *states, size_t *n) {
+  memcpy(times, &SwitchTimes, NSwitchTimes*sizeof(uint32_t));
+  memcpy(states, &SwitchStates, NSwitchTimes*sizeof(bool));
+  *n = NSwitchTimes;
+  NSwitchTimes = 0;
+  bool overflow = SwitchOverflow;
+  SwitchOverflow = false;
+  return overflow;
 }
 
 
@@ -287,10 +284,13 @@ void Blink::switchOn(bool on) {
       digitalWrite(Pin1, Invert1 != on);
     if (Pin2 >=0)
       digitalWrite(Pin2, Invert2 != on);
-    if (on)
-      LastOn = millis();
+    if (NSwitchTimes < MaxTimes) {
+      SwitchTimes[NSwitchTimes] = millis();
+      SwitchStates[NSwitchTimes] = on;
+      NSwitchTimes++;
+    }
     else
-      LastOff = millis();
+      SwitchOverflow = true;
     On = on;
   }
 }

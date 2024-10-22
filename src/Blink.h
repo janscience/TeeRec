@@ -140,13 +140,10 @@ class Blink {
   // Delay sketch by delayms milliseconds while blinking.
   void delay(uint32_t delayms);
 
-  // Return the time when the LED was last switched on in milliseconds.
-  // When called again and the LED has not been switched on again, 0 is returned.
-  uint32_t switchedOnTime() const;
-
-  // Return the time when the LED was last switched off in milliseconds.
-  // When called again and the LED has not been switched off again, 0 is returned.
-  uint32_t switchedOffTime() const;
+  // Retrieve the stored switch times and states.
+  // times and states must hold MaxTimes elements.
+  // Returns true if the buffers overflowed.
+  bool getSwitchTimes(uint32_t *times, bool *states, size_t *n);
 
   
   // basic level:
@@ -180,8 +177,10 @@ class Blink {
   uint32_t OnTime;
   uint32_t OffTime;
 
-  mutable uint32_t LastOn;
-  mutable uint32_t LastOff;
+  uint32_t SwitchTimes[MaxTimes];
+  bool SwitchStates[MaxTimes];
+  size_t NSwitchTimes;
+  bool SwitchOverflow;
 
   static volatile uint64_t PRNGState;  // any nonzero state is valid
   
