@@ -145,6 +145,9 @@ class Blink {
   // Returns true if the buffers overflowed.
   bool getSwitchTimes(uint32_t *times, bool *states, size_t *n);
 
+  // Return the number of stored switch times.
+  size_t nswitchTimes() const { return NSwitchTimes; };
+
   // Clear the buffer holding switch times.
   void clearSwitchTimes();
 
@@ -160,6 +163,8 @@ class Blink {
   // A random number between 0 and 1.
   static float urand(void);
   
+  static const int MaxTimes = 32;
+
   
  protected:
   
@@ -168,7 +173,6 @@ class Blink {
   bool Invert1;
   bool Invert2;
   bool On;
-  static const int MaxTimes = 32;
   uint32_t Times[2][MaxTimes];
   uint32_t  Delay;
   bool Random;
