@@ -572,11 +572,12 @@ void InputADC::start() {
       }
     }
   }
-  reset();   // resets the buffer and consumers
-             // (they also might want to know about Rate)
 
   if (ADCUse > 0)
-    Running = true;
+    Input::start();
+  
+  reset();   // resets the buffer and consumers
+             // (they also might want to know about Rate)
 }
 
 
@@ -591,7 +592,7 @@ void InputADC::stop() {
       DMABuffer[adc].detachInterrupt();
     }
   }
-  Running = false;
+  Input::stop();
 }
 
 

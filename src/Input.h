@@ -35,19 +35,24 @@ class Input : public DataBuffer {
   virtual void report(Stream &stream=Serial) = 0;
 
   // Start the acquisition based on the channel, rate, and buffer settings.
-  virtual void start() = 0;
+  // Default implementation stores start time and sets Running to True.
+  virtual void start();
 
   // True if data acquisition is running and transfering to buffer.
   bool running() const { return Running; };
 
+  // The time when data acquisition was started in milliseconds.
+  uint32_t startTime() const { return StartTime; };
+
   // Stop acquisition.
-  virtual void stop() = 0;
+  // Default implementation sets Running to False.
+  virtual void stop();
 
 
 protected:
   
   bool Running;
-
+  mutable uint32_t StartTime;
   
 };
 

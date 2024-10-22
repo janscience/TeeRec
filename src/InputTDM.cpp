@@ -487,7 +487,7 @@ void InputTDM::start() {
   }
 
   if (TDMUse > 0)
-    Running = true;
+    Input::start();
 }
 
 
@@ -498,7 +498,7 @@ void InputTDM::stop() {
       DMA[bus].detachInterrupt();
     }
   }
-  Running = false;
+  Input::stop();
 }
 
 
