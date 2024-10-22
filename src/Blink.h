@@ -145,6 +145,9 @@ class Blink {
   // Returns true if the buffers overflowed.
   bool getSwitchTimes(uint32_t *times, bool *states, size_t *n);
 
+  // Clear the buffer holding switch times.
+  void clearSwitchTimes();
+
   
   // basic level:
   

@@ -278,6 +278,12 @@ bool Blink::getSwitchTimes(uint32_t *times, bool *states, size_t *n) {
 }
 
 
+void Blink::clearSwitchTimes() {
+  NSwitchTimes = 0;
+  SwitchOverflow = false;
+}
+
+
 void Blink::switchOn(bool on) {
   if (on != On) {
     if (Pin1 >=0)
