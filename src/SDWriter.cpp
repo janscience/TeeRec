@@ -11,7 +11,8 @@ SDWriter::SDWriter(const DataWorker &producer, int verbose) :
   MaxWriteTime(100),
   WriteInterval(100),
   FileSamples(0),
-  FileMaxSamples(0) {
+  FileMaxSamples(0),
+  StartWriteTime(0) {
   SDC = new SDCard;
   DataFile.close();
 }
@@ -26,7 +27,8 @@ SDWriter::SDWriter(SDCard &sd, const DataWorker &producer, int verbose) :
   MaxWriteTime(100),
   WriteInterval(100),
   FileSamples(0),
-  FileMaxSamples(0) {
+  FileMaxSamples(0),
+  StartWriteTime(0) {
   DataFile.close();
 }
 
@@ -77,7 +79,7 @@ float SDWriter::writeTime() const {
 }
 
 
-void SDWriter::checkTiming(unsigned long t, const char *function,
+void SDWriter::checkTiming(uint32_t t, const char *function,
 			   const char *message) {
   if ((Verbose > 1 && t > MaxWriteTime) ||
       0.001*t > 0.5*Data->bufferTime()) {
@@ -204,7 +206,7 @@ ssize_t SDWriter::write() {
     return -2;
   size_t missed = overrun();
   if (missed > 0) {
-    unsigned long wt = WriteTime;
+    uint32_t wt = WriteTime;
     Serial.printf("ERROR in SDWriter::write() on %sSD card: data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", sdcard()->name(), missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
     Serial.printf("------> last write on %sSD card %dms ago.\n", sdcard()->name(), wt);
     return -4;
@@ -274,9 +276,12 @@ void SDWriter::start(size_t decr) {
   if (!synchronize())
     Serial.println("ERROR in SDWriter::startWrite(): data buffer not initialized yet. ");
   WriteTime = 0;
+  StartWriteTime = millis();
   if (decr > 0) {
     decrement(decr);
-    WriteTime += int(1000.0*Data->time(decr));
+    int decms = int(1000.0*Data->time(decr));
+    WriteTime += decms;
+    StartWriteTime -= decms;
   }
 }
 
@@ -284,6 +289,7 @@ void SDWriter::start(size_t decr) {
 void SDWriter::start(const SDWriter &file) {
   synchronize(file);
   WriteTime = 0;
+  StartWriteTime = file.startWriteTime();
 }
 
 
@@ -335,7 +341,7 @@ void SDWriter::reset() {
 }
 
 
-void SDWriter::setMaxWriteTime(uint ms) {
+void SDWriter::setMaxWriteTime(uint32_t ms) {
   MaxWriteTime = ms;
 }
 

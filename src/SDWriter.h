@@ -145,27 +145,32 @@ class SDWriter : public DataWorker {
   // Set maximum time for write operations in milliseconds.
   // If the write operation takes longer and the verbosity level is 2 or higher,
   // then print the elepsed time on Serial.
-  void setMaxWriteTime(uint ms);
+  void setMaxWriteTime(uint32_t ms);
+
+  // Time when writing was started in milliseconds.
+  uint32_t startWriteTime() const { return StartWriteTime; };
 
   
  protected:
 
   // Print error messages about timing issues, depending on verbosity level.
-  void checkTiming(unsigned long t, const char *function, const char *message);
+  void checkTiming(uint32_t t, const char *function, const char *message);
 
   SDCard *SDC;
   bool SDOwn;
   mutable FsFile DataFile;   // mutable because File from FS.h has non-constant bool() function
-  String FileName;         // name of the currently or previously open file.
+  String FileName;           // name of the currently or previously open file.
 
   WaveHeader Wave;
 
   elapsedMillis WriteTime;
-  uint MaxWriteTime;
-  uint WriteInterval;
+  uint32_t MaxWriteTime;
+  uint32_t WriteInterval;
 
   size_t FileSamples;    // current number of samples stored in the file.
   size_t FileMaxSamples; // maximum number of samples to be stored in a file.
+
+  uint32_t StartWriteTime; // time when writing was started in milliseconds.
   
 };
 
