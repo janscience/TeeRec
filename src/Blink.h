@@ -30,6 +30,7 @@ class Blink {
   // Set pin of secondary LED. If invert, LOW is on.
   void setPin2(int pin=LED_BUILTIN, bool invert=false);
 
+  
   // abstract level (requires update() to be called regularly):
 
   // Set interval, on time, and off time in milliseconds.
@@ -96,6 +97,7 @@ class Blink {
   void blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
 		     uint32_t offms, bool reset=true);
 
+  
   // detailed level (requires update() to be called regularly):
 
   // Set simple blink interval. Every intervalms the LED is on for onms.
@@ -124,17 +126,29 @@ class Blink {
   // First interval is LED on. Null terminated.
   // After finishing fall back to the default blinking defined by set().
   void blink(const uint32_t *times, bool reset=true);
-
+  
   // Switch off all blinking and the LED.
   void clear();
 
+
+  // execute the blinking:
+  
+  // Orchestrate all the blinking set by the above functions.
   // Call this function as often as possible in your loop().
   void update();
 
   // Delay sketch by delayms milliseconds while blinking.
   void delay(uint32_t delayms);
 
+  // Return the time when the LED was last switched on in milliseconds.
+  // When called again and the LED has not been switched on again, 0 is returned.
+  uint32_t switchedOnTime() const;
 
+  // Return the time when the LED was last switched off in milliseconds.
+  // When called again and the LED has not been switched off again, 0 is returned.
+  uint32_t switchedOffTime() const;
+
+  
   // basic level:
   
   // Manually switch LED on or off.
@@ -165,6 +179,9 @@ class Blink {
   uint32_t Interval;
   uint32_t OnTime;
   uint32_t OffTime;
+
+  mutable uint32_t LastOn;
+  mutable uint32_t LastOff;
 
   static volatile uint64_t PRNGState;  // any nonzero state is valid
   

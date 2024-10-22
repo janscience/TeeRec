@@ -17,7 +17,9 @@ Blink::Blink() :
   State(0),
   Interval(2000),
   OnTime(50),
-  OffTime(150) {
+  OffTime(150),
+  LastOn(0),
+  LastOff(0) {
   memset(Times, 0, sizeof(Times));
 }
 
@@ -265,12 +267,30 @@ void Blink::delay(uint32_t delayms) {
 }
 
 
+uint32_t Blink::switchedOnTime() const {
+  uint32_t t = LastOn;
+  LastOn = 0;
+  return t;
+}
+
+
+uint32_t Blink::switchedOffTime() const {
+  uint32_t t = LastOff;
+  LastOff = 0;
+  return t;
+}
+
+
 void Blink::switchOn(bool on) {
   if (on != On) {
     if (Pin1 >=0)
       digitalWrite(Pin1, Invert1 != on);
     if (Pin2 >=0)
       digitalWrite(Pin2, Invert2 != on);
+    if (on)
+      LastOn = millis();
+    else
+      LastOff = millis();
     On = on;
   }
 }
