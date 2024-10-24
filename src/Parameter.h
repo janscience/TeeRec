@@ -913,18 +913,20 @@ void BaseNumberParameter<T>::instructions(char *str) const {
   *str = '\0';
   char min_str[MaxVal];
   char max_str[MaxVal];
-  if (CheckMin && CheckMax) {
-    valueStr(Minimum, min_str, false);    
-    valueStr(Maximum, max_str, false);
-    sprintf(str, "between %s and %s", min_str, max_str);
-  }
-  else if (CheckMin) {
-    valueStr(Minimum, min_str, false);    
-    sprintf(str, "greater than or equal to %s", min_str);
-  }
-  else if (CheckMax) {
-    valueStr(Maximum, max_str, false);    
-    sprintf(str, "less than or equal to %s", max_str);
+  if (NSelection == 0) {
+    if (CheckMin && CheckMax) {
+      valueStr(Minimum, min_str, false);    
+      valueStr(Maximum, max_str, false);
+      sprintf(str, "between %s and %s", min_str, max_str);
+    }
+    else if (CheckMin) {
+      valueStr(Minimum, min_str, false);    
+      sprintf(str, "greater than or equal to %s", min_str);
+    }
+    else if (CheckMax) {
+      valueStr(Maximum, max_str, false);    
+      sprintf(str, "less than or equal to %s", max_str);
+    }
   }
   if (SpecialStr != NULL && strlen(SpecialStr) > 0) {
     if (strlen(str) > 0)
