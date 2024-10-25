@@ -207,3 +207,19 @@ void BaseStringParameter::listSelection(Stream &stream) const {
     stream.printf("  - %d) %s\n", k+1, Selection[k]);
 }
 
+
+const char *BaseStringParameter::YesNoStrings[2] = {"no", "yes"};
+const bool BaseStringParameter::BoolEnums[2] = {false, true};
+
+
+BoolParameter::BoolParameter(Configurable &menu, const char *name, bool val) :
+  EnumParameter<bool>(menu, name, val, BoolEnums, YesNoStrings, 2) {
+}
+
+
+BoolPointerParameter::BoolPointerParameter(Configurable &menu,
+					   const char *name, bool *val) :
+  EnumPointerParameter<bool>(menu, name, val, BoolEnums, YesNoStrings, 2) {
+}
+
+

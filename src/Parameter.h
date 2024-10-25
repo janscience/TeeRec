@@ -137,6 +137,9 @@ class BaseStringParameter : public Parameter {
  protected:
 
   const char **Selection;
+
+  static const char *YesNoStrings[2];
+  static const bool BoolEnums[2];
   
 };
 
@@ -316,6 +319,30 @@ class EnumPointerParameter : public BaseEnumParameter<T> {
  protected:
 
   T *Value;
+  
+};
+
+
+/* A boolean parameter. */
+class BoolParameter : public EnumParameter<bool> {
+  
+ public:
+  
+  /* Initialize parameter with identifying name, value, and add to
+     menu. */
+  BoolParameter(Configurable &menu, const char *name, bool val);
+  
+};
+
+
+/* A parameter whose value points to a boolean. */
+class BoolPointerParameter : public EnumPointerParameter<bool> {
+  
+ public:
+  
+  /* Initialize parameter with identifying name, value, and add to
+     menu. */
+  BoolPointerParameter(Configurable &menu, const char *name, bool *val);
   
 };
 
@@ -699,30 +726,30 @@ bool EnumParameter<T>::setValue(T val) {
   
 template<class T>
 bool EnumParameter<T>::parseValue(char *val, bool selection) {
+  if (strlen(val) == 0)
+    return true;
   if (selection) {
-    if (strcmp(val, "q") != 0) {
-      char *end;
-      long i = strtol(val, &end, 10) - 1;
-      if (end == val || i < 0 || i >= (long)(this->NSelection))
-	return false;
+    char *end;
+    long i = strtol(val, &end, 10) - 1;
+    if (end > val && i >= 0 && i < (long)(this->NSelection)) {
       Value = this->Enums[i];
+      valueStr(val);
+      return true;
     }
   }
-  else {
-    T eval = this->checkSelection(val);
-    // lower case input string:
-    char lval[strlen(val)+1];
-    for (size_t k=0; k<strlen(val)+1; k++)
-      lval[k] = tolower(val[k]);
-    // lower case enum string:
-    const char *es = this->enumStr(eval);
-    char les[strlen(es)+1];
-    for (size_t k=0; k<strlen(es)+1; k++)
-      les[k] = tolower(es[k]);
-    if (strcmp(lval, les) != 0)
-      return false;
-    Value = eval;
-  }
+  T eval = this->checkSelection(val);
+  // lower case input string:
+  char lval[strlen(val)+1];
+  for (size_t k=0; k<strlen(val)+1; k++)
+    lval[k] = tolower(val[k]);
+  // lower case enum string:
+  const char *es = this->enumStr(eval);
+  char les[strlen(es)+1];
+  for (size_t k=0; k<strlen(es)+1; k++)
+    les[k] = tolower(es[k]);
+  if (strcmp(lval, les) != 0)
+    return false;
+  Value = eval;
   valueStr(val);
   return true;
 }
@@ -758,30 +785,30 @@ bool EnumPointerParameter<T>::setValue(T val) {
   
 template<class T>
 bool EnumPointerParameter<T>::parseValue(char *val, bool selection) {
+  if (strlen(val) == 0)
+    return true;
   if (selection) {
-    if (strcmp(val, "q") != 0) {
-      char *end;
-      long i = strtol(val, &end, 10) - 1;
-      if (end == val || i < 0 || i >= (long)(this->NSelection))
-	return false;
+    char *end;
+    long i = strtol(val, &end, 10) - 1;
+    if (end > val && i >= 0 && i < (long)(this->NSelection)) {
       *Value = this->Enums[i];
+      valueStr(val);
+      return true;
     }
   }
-  else {
-    T eval = this->checkSelection(val);
-    // lower case input string:
-    char lval[strlen(val)+1];
-    for (size_t k=0; k<strlen(val)+1; k++)
-      lval[k] = tolower(val[k]);
-    // lower case enum string:
-    const char *es = enumStr(eval);
-    char les[strlen(es)+1];
-    for (size_t k=0; k<strlen(es)+1; k++)
-      les[k] = tolower(es[k]);
-    if (strcmp(lval, les) != 0)
-      return false;
-    *Value = eval;
-  }
+  T eval = this->checkSelection(val);
+  // lower case input string:
+  char lval[strlen(val)+1];
+  for (size_t k=0; k<strlen(val)+1; k++)
+    lval[k] = tolower(val[k]);
+  // lower case enum string:
+  const char *es = this->enumStr(eval);
+  char les[strlen(es)+1];
+  for (size_t k=0; k<strlen(es)+1; k++)
+    les[k] = tolower(es[k]);
+  if (strcmp(lval, les) != 0)
+    return false;
+  *Value = eval;
   valueStr(val);
   return true;
 }
@@ -789,7 +816,7 @@ bool EnumPointerParameter<T>::parseValue(char *val, bool selection) {
 
 template<class T>
 void EnumPointerParameter<T>::valueStr(char *str) const {
-  const char *es = enumStr(*Value);
+  const char *es = this->enumStr(*Value);
   strncpy(str, es, Parameter::MaxVal);
   str[Parameter::MaxVal-1] = '\0';
 }
