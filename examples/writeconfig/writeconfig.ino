@@ -31,8 +31,11 @@
 #define DEVICEID        0                 // device identifier
 #define FILENAME        "recID-NUM4.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME  10   // seconds
+#define RANDOM_BLINKS   false
 #define INITIAL_DELAY   10.0  // seconds
-#define PULSE_FREQUENCY 230 // Hertz
+#define PULSE_FREQUENCY 230   // Hertz
+#define DISPLAY_TIME  0.005   // seconds
+#define SENSORS_TIME   10.0   // seconds
 
 // Input XXXSettings:
 #define SAMPLING_RATE  48000 // samples per second and channel in Hertz
@@ -51,8 +54,8 @@ RTClock rtclock;
 SDCard sdcard;
 
 Configurator config;
-Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
-                  0.0, INITIAL_DELAY);
+Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, INITIAL_DELAY,
+                  RANDOM_BLINKS, PULSE_FREQUENCY, DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
@@ -72,10 +75,12 @@ Blink blink(LED_BUILTIN);
 
 
 void setup() {
-  // disable parameter that should not go into the configuration file here:
-  settings.disable("PulseFreq");
-  settings.disable("DisplayTime");
-  settings.disable("SensorsInterval");
+  // enable parameter that also should go into the configuration file:
+  settings.enable("InitialDelay");
+  settings.enable("RandomBlinks");
+  settings.enable("PulseFreq");
+  settings.enable("DisplayTime");
+  settings.enable("SensorsInterval");
 
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};

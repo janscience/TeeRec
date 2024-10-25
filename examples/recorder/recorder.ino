@@ -84,7 +84,7 @@ Configurator config;
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
 Settings settings(PATH, 0, FILENAME, FILE_SAVE_TIME,
-		  PULSE_FREQUENCY, DISPLAY_TIME);
+		  0, false, PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name
 PushButtons buttons;
@@ -245,8 +245,8 @@ void setup() {
   prevname = "";
   setupButtons();
   sdcard.begin();
-  settings.disable("InitialDelay");
-  settings.disable("SensorsInterval");
+  settings.enable("PulseFreq");
+  settings.enable("DisplayTime");
   config.setConfigFile("teerec.cfg");
   config.load(sdcard);
   if (Serial)

@@ -88,8 +88,8 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 Configurator config;
-Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, PULSE_FREQUENCY,
-                  0.0, INITIAL_DELAY);
+Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
+	          INITIAL_DELAY, false, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE);
@@ -248,8 +248,8 @@ void setup() {
   sdcard.begin();
   rtclock.setFromFile(sdcard);
   rtclock.report();
-  settings.disable("DisplayTime");
-  settings.disable("SensorsInterval");
+  settings.enable("InitialDelay");
+  settings.enable("PulseFreq");
   config.setConfigFile("logger.cfg");
   config.load(sdcard);
   if (Serial)

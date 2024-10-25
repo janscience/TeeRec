@@ -17,8 +17,9 @@ public:
 
   Settings(const char *path="recordings", int deviceid=0,
 	   const char *filename="SDATELNUM.wav", float filetime=10.0,
+	   float initialdelay=0.0, bool randomblinks=false,
 	   float pulsefrequency=500.0, float displaytime=0.005,
-	   float initialdelay=0.0, float sensorsinterval=10.0);
+	   float sensorsinterval=10.0);
 
   static const size_t MaxStr = 128;
 
@@ -46,6 +47,18 @@ public:
   /* Set time the files will record data to time seconds. */
   void setFileTime(float time);
 
+  /* Time in seconds until recording of data is started. */
+  float initialDelay() const { return InitialDelay.value(); };
+
+  /* Set initial delay to time seconds. */
+  void setInitialDelay(float time);
+
+  /* Whether LED should blink randomly and be stored to file. */
+  bool randomBlinks() const { return RandomBlinks.value(); };
+
+  /* Set whether LED should blink randomly. */
+  void setRandomBlinks(bool random);
+
   /* Base frequency of generated test pulses. */
   float pulseFrequency() const { return PulseFrequency.value(); };
 
@@ -57,13 +70,7 @@ public:
 
   /* Set update time for display to time seconds. */
   void setDisplayTime(float time);
-
-  /* Time in seconds until recording of data is started. */
-  float initialDelay() const { return InitialDelay.value(); };
-
-  /* Set initial delay to time seconds. */
-  void setInitialDelay(float time);
-
+  
   /* Time in seconds between sensor readings. */
   float sensorsInterval() const { return SensorsInterval.value(); };
 
@@ -77,9 +84,10 @@ protected:
   NumberParameter<int> ID;
   StringParameter<MaxStr> FileName;
   NumberParameter<float> FileTime;
+  NumberParameter<float> InitialDelay;
+  BoolParameter RandomBlinks;
   NumberParameter<float> PulseFrequency;
   NumberParameter<float> DisplayTime;
-  NumberParameter<float> InitialDelay;
   NumberParameter<float> SensorsInterval;
   
 };

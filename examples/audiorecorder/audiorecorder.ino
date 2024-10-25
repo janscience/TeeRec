@@ -200,9 +200,6 @@ void setup() {
   rtclock.report();
   setupButtons();
   sdcard.begin();
-  settings.disable("InitialDelay");
-  settings.disable("DisplayTime");
-  settings.disable("SensorsInterval");
   config.setConfigFile("teerec.cfg");
   config.load(sdcard);
   if (Serial)
