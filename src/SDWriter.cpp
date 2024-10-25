@@ -2,9 +2,24 @@
 #include <SDWriter.h>
 
 
+SDWriter::SDWriter() :
+  DataWorker(),
+  SDC(NULL),
+  SDOwn(true),
+  FileName(""),
+  WriteTime(0),
+  MaxWriteTime(100),
+  WriteInterval(100),
+  FileSamples(0),
+  FileMaxSamples(0),
+  StartWriteTime(0) {
+  DataFile.close();
+}
+
+
 SDWriter::SDWriter(const DataWorker &producer, int verbose) :
   DataWorker(&producer, verbose),
-  SDC(0),
+  SDC(NULL),
   SDOwn(true),
   FileName(""),
   WriteTime(0),

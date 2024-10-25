@@ -21,6 +21,8 @@ class SDWriter : public DataWorker {
   // Must be an integer multiple of InputADC::MajorSize.
   static const size_t MajorSize = 512;
 
+  // Initialize a non-writer.
+  SDWriter();
   // Initialize writer on default SD card.
   SDWriter(const DataWorker &data, int verbose=0);
   // Initialize writer on SD card.
