@@ -1,3 +1,4 @@
+#include <SDCard.h>
 #include <ToolMenus.h>
 
 
@@ -17,14 +18,20 @@ ConfigurationMenu::ConfigurationMenu(SDCard &sdcard) :
 }
 
 
-SDCardMenu::SDCardMenu(const char *name, SDCard &sdcard, Settings &settings) :
-  Configurable(name, Action::StreamInput),
+SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
+  Configurable("SD", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard, settings),
   EraseRecsAct(*this, "Erase all recordings", sdcard, settings),
   FormatAct(*this, "Format SD card", sdcard),
   EraseFormatAct(*this, "Erase and format SD card", sdcard) {
+  char name[64];
+  strcpy(name, sdcard.name());
+  if (strlen(name) > 0)
+    name[0] = toupper(name[0]);
+  strcat(name, "SD card");
+  setName(name);
 }
 
 
@@ -42,10 +49,11 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard) :
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
-  SD0CheckAct(*this, "SD card check", sdcard),
-  SD0BenchmarkAct(*this, "SD card benchmark", sdcard),
-  SD1CheckAct(*this, "SD card check", sdcard),
-  SD1BenchmarkAct(*this, "SD card benchmark", sdcard) {
+  SD0CheckAct(*this, "SDc", sdcard),
+  SD0BenchmarkAct(*this, "SDb", sdcard),
+  SD1CheckAct(*this, "SDc", sdcard),
+  SD1BenchmarkAct(*this, "SDb", sdcard) {
+  setSDCardNames(sdcard, SD0CheckAct, SD0BenchmarkAct);
   SD1CheckAct.disable();
   SD1BenchmarkAct.disable();
 }
@@ -61,6 +69,20 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
   SD0BenchmarkAct(*this, "Primary SD card benchmark", sdcard0),
   SD1CheckAct(*this, "Secondary SD card check", sdcard1),
   SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1) {
+  setSDCardNames(sdcard0, SD0CheckAct, SD0BenchmarkAct);
+  setSDCardNames(sdcard1, SD1CheckAct, SD1BenchmarkAct);
 }
 
 
+void DiagnosticMenu::setSDCardNames(SDCard &sdcard, Action &checkact,
+				    Action &benchmarkact) {
+  char name[64];
+  strcpy(name, sdcard.name());
+  if (strlen(name) > 0)
+    name[0] = toupper(name[0]);
+  strcat(name, "SD card check");
+  checkact.setName(name);
+  name[strlen(name) - 5] = '\0';
+  strcat(name, "benchmark");
+  benchmarkact.setName(name);
+}

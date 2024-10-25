@@ -45,7 +45,7 @@ class SDCardMenu : public Configurable {
 
 public:
 
-  SDCardMenu(const char *name, SDCard &sdcard, Settings &settings);
+  SDCardMenu(SDCard &sdcard, Settings &settings);
 
 protected:
 
@@ -83,6 +83,9 @@ public:
   DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1);
 
 protected:
+
+  void setSDCardNames(SDCard &sdcard, Action &checkact,
+		      Action &benchmarkact);
 
   TeensyInfoAction TeensyInfoAct;
   PSRAMInfoAction PSRAMInfoAct;
