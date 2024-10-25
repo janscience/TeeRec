@@ -30,6 +30,10 @@ class Blink {
   // Set pin of secondary LED. If invert, LOW is on.
   void setPin2(int pin=LED_BUILTIN, bool invert=false);
 
+  // Reset pin configuration
+  // (in case the pin mode was reconfigured by something else).
+  void reset();
+
   
   // abstract level (requires update() to be called regularly):
 

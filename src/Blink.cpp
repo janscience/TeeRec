@@ -56,6 +56,14 @@ void Blink::setPin2(int pin, bool invert) {
 }
 
 
+void Blink::reset() {
+  if (Pin1 >= 0)
+    pinMode(Pin1, OUTPUT);
+  if (Pin2 >= 0)
+    pinMode(Pin2, OUTPUT);
+}
+
+
 void Blink::setTiming(uint32_t intervalms, uint32_t onms, uint32_t offms) {
   Interval = intervalms;
   OnTime = onms;
