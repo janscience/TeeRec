@@ -139,6 +139,7 @@ protected:
   InfoChunk<16> Gain;
   InfoChunk<16> Board;
   InfoChunk<32> MAC;
+  InfoChunk<8> CPUSpeed;
   InfoChunk<32> DateTime;
   InfoChunk<64> Software;
   DataChunk Data;

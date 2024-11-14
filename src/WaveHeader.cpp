@@ -16,11 +16,15 @@ WaveHeader::WaveHeader() :
   Gain("GAIN", ""),
   Board("IBRD", teensyBoard()),
   MAC("IMAC", teensyMAC()),
+  CPUSpeed("CPUF", ""),
   DateTime("DTIM", ""),
   Software("ISFT", "TeeRec"),
   Data() {
   DataResolution = 16;
   NBuffer = 0;
+  char cpuf[8];
+  sprintf(cpuf, "%ldMHz", F_CPU_ACTUAL / 1000000);
+  CPUSpeed.set(cpuf);
 }
 
 
@@ -193,7 +197,7 @@ void WaveHeader::clearSoftware() {
 
 void WaveHeader::assemble() {
   // riff chunks:
-  const int maxchunks = 15;
+  const int maxchunks = 16;
   int nchunks = 0;
   Chunk *chunks[maxchunks];
   chunks[nchunks++] = &Riff;
@@ -218,6 +222,8 @@ void WaveHeader::assemble() {
     chunks[nchunks++] = &Board;
   if (MAC.Use)
     chunks[nchunks++] = &MAC;
+  if (CPUSpeed.Use)
+    chunks[nchunks++] = &CPUSpeed;
   if (DateTime.Use)
     chunks[nchunks++] = &DateTime;
   if (Software.Use)
