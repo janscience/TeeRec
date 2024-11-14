@@ -59,6 +59,9 @@ public:
   // Clear name of software.
   void clearSoftware();
 
+  // Set CPU speed to current CPU speed.
+  void setCPUSpeed();
+
   // Assemble wave header from previously set infos.
   // The header can then be retrieved from Buffer.
   void assemble();

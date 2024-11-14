@@ -22,9 +22,7 @@ WaveHeader::WaveHeader() :
   Data() {
   DataResolution = 16;
   NBuffer = 0;
-  char cpuf[8];
-  sprintf(cpuf, "%ldMHz", F_CPU_ACTUAL / 1000000);
-  CPUSpeed.set(cpuf);
+  setCPUSpeed();  
 }
 
 
@@ -192,6 +190,13 @@ void WaveHeader::setSoftware(const char *software) {
 
 void WaveHeader::clearSoftware() {
   Software.clear();
+}
+
+
+void WaveHeader::setCPUSpeed() {
+  char cpuf[8];
+  sprintf(cpuf, "%ldMHz", F_CPU_ACTUAL/1000000);
+  CPUSpeed.set(cpuf);
 }
 
 
