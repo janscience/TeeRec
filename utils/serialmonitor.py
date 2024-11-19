@@ -16,7 +16,25 @@ try:
 except ImportError:
     has_usb = False
 
+import sys
+import threading
+from time import sleep
 
+
+class KeyboardInput(threading.Thread):
+
+    def __init__(self, ser):
+        super().__init__(daemon=True)
+        self.ser = ser
+        self.start()
+
+    def run(self):
+        while True:
+            x = input()
+            self.ser.write(x.encode('latin1'))
+            self.ser.write(b'\n')
+
+    
 teensy_model = {   
     0x274: '30',
     0x275: '31',
@@ -65,24 +83,33 @@ def read_teensy(device):
     ser = serial.Serial(device)
     ser.reset_input_buffer()
     ser.reset_output_buffer()
+    KeyboardInput(ser)
     while True:
         try:
-            ser_bytes = ser.readline()
-            print(ser_bytes.decode('latin1').rstrip())
-        except serial.serialutil.SerialException:
+            if ser.in_waiting > 0:
+                x = ser.read(ser.in_waiting)
+                if x == '\n':
+                    sys.stdout.write(b'\n')
+                else:
+                    sys.stdout.write(x.decode('latin1'))
+            sleep(0.01)
+        except (OSError, serial.serialutil.SerialException):
+            print()
             print()
             print('disconnected')
             break
+    ser.close()
     
 
 if __name__ == '__main__':
-    print('Waiting for Teensy device ...')
     while True:
-        devices, models, serial_numbers = discover_teensy_ports()
-        if len(devices) > 0:
-            break
-    print('found ', end='')
-    print_teensys(devices, models, serial_numbers)
-    read_teensy(devices[0])
-    
-    
+        print()
+        print('Waiting for Teensy device ...')
+        while True:
+            devices, models, serial_numbers = discover_teensy_ports()
+            if len(devices) > 0:
+                break
+        print('found ', end='')
+        print_teensys(devices, models, serial_numbers)
+        read_teensy(devices[0])
+        sleep(1)
