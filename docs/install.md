@@ -21,6 +21,11 @@ FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/t
 
    For Linux, download the AppImage file, make it executable, and run
    it. You may provide a link to this file in `/usr/local/bin`.
+   ```sh
+   cd Downloads
+   chmod a+x arduino-ide_2.3.3_Linux_64bit.AppImage
+   sudo ln -s arduino-ide_2.3.3_Linux_64bit.AppImage /usr/local/bin/arduino
+   ```
 
 2. Run the [Arduino IDE](https://docs.arduino.cc/software/ide-v2). Go
    to File > Preferences and add
@@ -32,7 +37,12 @@ FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/t
 
 4. For Linux, copy the
    [udev rules](https://www.pjrc.com/teensy/00-teensy.rules)
-   to `/etc/udev/rules.d/`.
+   to `/etc/udev/rules.d/`:
+   ```sh
+   cd .arduino15/packages/teensy/tools/teensy-tools/1.59.0
+   sudo cp 00-teensy.rules /etc/udev/rules.d/
+   sudo udevadm trigger
+   ```
 
 5. If you are updating from Teensyduino < 1.56, make sure that you
    remove `SdFat` and `Bounce2` from your `Arduino/libraries`
