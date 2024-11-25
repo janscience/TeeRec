@@ -23,16 +23,20 @@ from time import sleep
 
 class KeyboardInput(threading.Thread):
 
-    def __init__(self, ser):
+    def __init__(self):
         super().__init__(daemon=True)
-        self.ser = ser
+        self.ser = None
         self.start()
+
+    def set_serial(self, serial):
+        self.ser = serial
 
     def run(self):
         while True:
             x = input()
-            self.ser.write(x.encode('latin1'))
-            self.ser.write(b'\n')
+            if self.ser is not None:
+                self.ser.write(x.encode('latin1'))
+                self.ser.write(b'\n')
 
     
 teensy_model = {   
@@ -69,7 +73,8 @@ def get_teensy_model(vid, pid, serial_number):
     if has_usb:
         dev = usb.core.find(idVendor=vid, idProduct=pid,
                             serial_number=serial_number)
-        return teensy_model[dev.bcdDevice]
+        model = teensy_model[dev.bcdDevice]
+        return model
     else:
         return ''
 
@@ -79,11 +84,11 @@ def print_teensys(devices, models, serial_numbers):
         print(f'Teensy{model} with serial number {num} on {dev:<20s}')
 
         
-def read_teensy(device):
+def read_teensy(device, key_input):
     ser = serial.Serial(device)
     ser.reset_input_buffer()
     ser.reset_output_buffer()
-    KeyboardInput(ser)
+    key_input.set_serial(ser)
     while True:
         try:
             if ser.in_waiting > 0:
@@ -102,14 +107,16 @@ def read_teensy(device):
     
 
 if __name__ == '__main__':
+    key_input = KeyboardInput()
     while True:
         print()
         print('Waiting for Teensy device ...')
         while True:
             devices, models, serial_numbers = discover_teensy_ports()
             if len(devices) > 0:
+                sleep(0.1)
                 break
         print('found ', end='')
         print_teensys(devices, models, serial_numbers)
-        read_teensy(devices[0])
+        read_teensy(devices[0], key_input)
         sleep(1)
