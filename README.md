@@ -166,6 +166,7 @@ Demonstrate the usage of some of the provided libraries.
 
 In [utils/](utils) you find some useful python scripts.
 
+- [serialmonitor](utils/serialmonitor.py): serial monitor for the console that automatically detects Teensys connected to USB.
 - [viewwave](utils/viewwave.py): display the traces in a wave file.
 - [spectra](utils/spectra.py): power spectra of traces in wave files.
 - [noise](utils/noise.py): plot and analyse baseline noise levels from wave files.
