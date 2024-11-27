@@ -96,6 +96,16 @@ cables etc. the maximum clock rate might also need to go down to
 ensure reliable data transmission. In the end, on a SPI driven SD
 card, maximum data rates are not more than 5MHz/s.
 
+In addition, bus speed is also limited by by CPU speed. Here are some
+measurements with a SanDisk 512GB U1 SD card:
+
+| CPU speed | write speed |
+| --------: | ----------: |
+|    600MHz |    18.4MB/s |
+|    450MHz |    18.1MB/s |
+|    150MHz |    17.7MB/s |
+|     24MHz |     9.6MB/s |
+
 ''')
 for b in bits:
     print(f'## {b} bit resolution')
