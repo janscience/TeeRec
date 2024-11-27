@@ -46,6 +46,9 @@
 // Return string with name of Teensy board.
 const char *teensyBoard();
 
+// Return string with CPU speed of Teensy board in MHz.
+long teensySpeed();
+
 
 // From https://github.com/sstaub/TeensyID :
 

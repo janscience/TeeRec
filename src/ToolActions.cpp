@@ -36,6 +36,7 @@ TeensyInfoAction::TeensyInfoAction(Configurable &menu, const char *name) :
 void TeensyInfoAction::configure(Stream &stream, unsigned long timeout) {
   stream.println("Teensy development board:");
   stream.printf("  board        : %s\n", teensyBoard());
+  stream.printf("  CPU speed    : %ldMHz\n", teensySpeed());
   stream.printf("  serial number: %s\n", teensySN());
   stream.printf("  MAC address  : %s\n", teensyMAC());
   stream.println();

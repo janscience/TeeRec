@@ -195,7 +195,7 @@ void WaveHeader::clearSoftware() {
 
 void WaveHeader::setCPUSpeed() {
   char cpuf[8];
-  sprintf(cpuf, "%ldMHz", F_CPU_ACTUAL/1000000);
+  sprintf(cpuf, "%ldMHz", teensySpeed());
   CPUSpeed.set(cpuf);
 }
 

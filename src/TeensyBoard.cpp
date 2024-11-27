@@ -22,6 +22,10 @@ const char *teensyBoard() {
 }
 
 
+long teensySpeed() {
+  return F_CPU_ACTUAL/1000000;
+}
+
 #if defined(TEENSY40) || defined(TEENSY41)
 
 static uint32_t getTeensySerial(void) {
