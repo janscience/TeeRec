@@ -103,7 +103,7 @@ void Action::disableSupported(int roles) {
 void Action::report(Stream &stream, size_t indent,
 		    size_t w, bool descend) const {
   if (enabled(StreamOutput) || enabled(StreamInput))
-    stream.printf("%*s%s ...\n", indent, "", name());
+    stream.printf("%*s%s\n", indent, "", name());
 }
 
 
