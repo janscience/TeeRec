@@ -42,7 +42,8 @@ void Configurator::load(SDCard &sd) {
 }
 
 
-void Configurator::configure(Stream &stream, unsigned long timeout) {
-  Configurable::configure(stream, timeout);
+void Configurator::configure(Stream &stream, unsigned long timeout,
+			     bool detailed) {
+  Configurable::configure(stream, timeout, detailed);
 }
 

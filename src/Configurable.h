@@ -54,7 +54,8 @@ class Configurable : public Action {
   
   /* Interactive configuration via Serial stream.
      Returns from initial menu after timeout milliseconds. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
   /* Set the provided name-value pair and report on stream. */
   virtual void set(const char *val, const char *name,

@@ -16,7 +16,8 @@ HelpAction::HelpAction(Configurable &menu, const char *name) :
 }
 
 
-void HelpAction::configure(Stream &stream, unsigned long timeout) {
+void HelpAction::configure(Stream &stream, unsigned long timeout,
+			   bool detailed) {
   stream.println("Select menu entries by entering the number followed by 'return'.");
   stream.println("Go up to the parent menu by entering 'q'.");
   stream.println();
@@ -33,7 +34,8 @@ TeensyInfoAction::TeensyInfoAction(Configurable &menu, const char *name) :
 }
 
 
-void TeensyInfoAction::configure(Stream &stream, unsigned long timeout) {
+void TeensyInfoAction::configure(Stream &stream, unsigned long timeout,
+				 bool detailed) {
   stream.println("Teensy development board:");
   stream.printf("  board        : %s\n", teensyBoard());
   stream.printf("  CPU speed    : %ldMHz\n", teensySpeed());
@@ -47,7 +49,8 @@ void TeensyInfoAction::configure(Stream &stream, unsigned long timeout) {
 extern "C" uint8_t external_psram_size;
 #endif
 
-void PSRAMInfoAction::configure(Stream &stream, unsigned long timeout) {
+void PSRAMInfoAction::configure(Stream &stream, unsigned long timeout,
+				bool detailed) {
 #ifdef TEENSY41
   // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
   stream.println("EXTMEM PSRAM Memory:");
@@ -123,7 +126,8 @@ bool PSRAMTestAction::checkRandom(uint32_t seed, Stream &stream) {
 }
 
 
-void PSRAMTestAction::configure(Stream &stream, unsigned long timeout) {
+void PSRAMTestAction::configure(Stream &stream, unsigned long timeout,
+				bool detailed) {
 #ifdef TEENSY41
   // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
   uint8_t size = external_psram_size;
@@ -211,7 +215,8 @@ ReportConfigAction::ReportConfigAction(Configurable &menu, const char *name) :
 }
 
 
-void ReportConfigAction::configure(Stream &stream, unsigned long timeout) {
+void ReportConfigAction::configure(Stream &stream, unsigned long timeout,
+				   bool detailed) {
   root()->report(stream);
   stream.println();
 }
@@ -228,7 +233,8 @@ SDCardAction::SDCardAction(Configurable &menu, const char *name, SDCard &sd) :
 }
 
 
-void SaveConfigAction::configure(Stream &stream, unsigned long timeout) {
+void SaveConfigAction::configure(Stream &stream, unsigned long timeout,
+				 bool detailed) {
   bool save = true;
   if (SDC.exists(root()->configFile())) {
     stream.printf("Configuration file \"%s\" already exists on SD card.\n",
@@ -243,7 +249,8 @@ void SaveConfigAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void LoadConfigAction::configure(Stream &stream, unsigned long timeout) {
+void LoadConfigAction::configure(Stream &stream, unsigned long timeout,
+				 bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.exists(root()->configFile())) {
@@ -260,7 +267,8 @@ void LoadConfigAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
+void RemoveConfigAction::configure(Stream &stream, unsigned long timeout,
+				   bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.exists(root()->configFile())) {
@@ -282,21 +290,24 @@ void RemoveConfigAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void SDInfoAction::configure(Stream &stream, unsigned long timeout) {
+void SDInfoAction::configure(Stream &stream, unsigned long timeout,
+			     bool detailed) {
   if (disabled(StreamInput))
     return;
   SDC.report(stream);
 }
 
 
-void SDCheckAction::configure(Stream &stream, unsigned long timeout) {
+void SDCheckAction::configure(Stream &stream, unsigned long timeout,
+			      bool detailed) {
   if (disabled(StreamInput))
     return;
   SDC.check(1024*1024, stream);
 }
 
 
-void SDBenchmarkAction::configure(Stream &stream, unsigned long timeout) {
+void SDBenchmarkAction::configure(Stream &stream, unsigned long timeout,
+				  bool detailed) {
   if (disabled(StreamInput))
     return;
   SDC.benchmark(512, 10, 2, stream);
@@ -325,7 +336,8 @@ void SDFormatAction::format(const char *erases, bool erase, Stream &stream) {
 }
 
 
-void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
+void SDFormatAction::configure(Stream &stream, unsigned long timeout,
+			       bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.checkAvailability(stream))
@@ -335,7 +347,8 @@ void SDFormatAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
+void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout,
+				    bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.checkAvailability(stream))
@@ -345,7 +358,8 @@ void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void SDListRootAction::configure(Stream &stream, unsigned long timeout) {
+void SDListRootAction::configure(Stream &stream, unsigned long timeout,
+				 bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.checkAvailability(stream))
@@ -371,7 +385,8 @@ SDListRecordingsAction::SDListRecordingsAction(Configurable &menu,
 }
 
 
-void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
+void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout,
+				       bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.checkAvailability(stream))
@@ -381,7 +396,8 @@ void SDListRecordingsAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout) {
+void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout,
+					 bool detailed) {
   if (disabled(StreamInput))
     return;
   if (!SDC.checkAvailability(stream))
@@ -400,7 +416,8 @@ void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout) 
 
 #ifdef FIRMWARE_UPDATE
 
-void ListFirmwareAction::configure(Stream &stream, unsigned long timeout) {
+void ListFirmwareAction::configure(Stream &stream, unsigned long timeout,
+				   bool detailed) {
   if (disabled(StreamInput))
     return;
   listFirmware(SDC, stream);
@@ -408,7 +425,8 @@ void ListFirmwareAction::configure(Stream &stream, unsigned long timeout) {
 }
 
 
-void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout) {
+void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout,
+				     bool detailed) {
   if (disabled(StreamInput))
     return;
   updateFirmware(SDC, stream);
@@ -429,14 +447,16 @@ RTCAction::RTCAction(Configurable &menu, const char *name, RTClock &rtclock) :
 }
 
 
-void ReportRTCAction::configure(Stream &stream, unsigned long timeout) {
+void ReportRTCAction::configure(Stream &stream, unsigned long timeout,
+				bool detailed) {
   char times[20];
   RTC.dateTime(times);
   stream.printf("Current time: %s\n\n", times);
 }
 
 
-void SetRTCAction::configure(Stream &stream, unsigned long timeout) {
+void SetRTCAction::configure(Stream &stream, unsigned long timeout,
+			     bool detailed) {
   RTC.set(stream);
   stream.println();
 }

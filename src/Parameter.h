@@ -64,7 +64,8 @@ class Parameter : public Action {
   virtual void save(FsFile &file, size_t indent=0, size_t w=0) const;
   
   /* Interactive configuration via Serial stream. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
   /* Parse the string val and set the parameter accordingly.  If
      StreamOutput is enabled, report the new value together with name
@@ -86,8 +87,9 @@ class Parameter : public Action {
   virtual void listSelection(Stream &stream) const {};
 
   /* Return in str some instructions for interactive input,
-     e.g. a valid range for numbers. Used for the prompt in configure(). */
-  virtual void instructions(char *str) const;
+     e.g. a valid range for numbers. Used for the prompt in configure().
+     If detailed provide more infos for a GUI. */
+  virtual void instructions(char *str, bool detailed) const;
 
   /* Maximum size of string needed for valueStr() */
   static const size_t MaxVal = 64;
@@ -99,6 +101,9 @@ class Parameter : public Action {
  protected:
 
   size_t NSelection;
+  
+  static const size_t MaxType = 16;
+  char TypeStr[MaxType];
   
   static const int NUnits = 50;
   static char UnitPref[NUnits][6];
@@ -404,7 +409,7 @@ class BaseNumberParameter : public Parameter {
   virtual void listSelection(Stream &stream) const;
 
   /* Return in str infos regarding valid minimum and maximum numbers. */
-  virtual void instructions(char *str) const;
+  virtual void instructions(char *str, bool detailed) const;
 
   /* Set minimum value a number can have. */
   T setMinimum(T minimum);
@@ -567,6 +572,7 @@ StringParameter<N>::StringParameter(Configurable &menu, const char *name,
   BaseStringParameter(menu, name, selection, n) {
   strncpy(Value, str, N);
   Value[N-1] = '\0';
+  sprintf(TypeStr, "string %d", N);
 }
 
 
@@ -616,6 +622,7 @@ StringPointerParameter<N>::StringPointerParameter(Configurable &menu,
 						  size_t n) :
   BaseStringParameter(menu, name, selection, n),
   Value(str) {
+  sprintf(TypeStr, "string %d", N);
 }
 
 
@@ -667,6 +674,7 @@ BaseEnumParameter<T>::BaseEnumParameter(Configurable &menu,
 					size_t n) :
   BaseStringParameter(menu, name, selection, n),
   Enums(enums) {
+  strcpy(TypeStr, "enum");
 }
 
 
@@ -936,23 +944,31 @@ void BaseNumberParameter<T>::listSelection(Stream &stream) const {
 
 
 template<class T>
-void BaseNumberParameter<T>::instructions(char *str) const {
+void BaseNumberParameter<T>::instructions(char *str, bool detailed) const {
   *str = '\0';
+  if (detailed)
+    strcpy(str, TypeStr);
   char min_str[MaxVal];
   char max_str[MaxVal];
   if (NSelection == 0) {
     if (CheckMin && CheckMax) {
       valueStr(Minimum, min_str, false);    
       valueStr(Maximum, max_str, false);
-      sprintf(str, "between %s and %s", min_str, max_str);
+      if (strlen(str) > 0)
+	strcat(str, ", ");
+      sprintf(str + strlen(str), "between %s and %s", min_str, max_str);
     }
     else if (CheckMin) {
       valueStr(Minimum, min_str, false);    
-      sprintf(str, "greater than or equal to %s", min_str);
+      if (strlen(str) > 0)
+	strcat(str, ", ");
+      sprintf(str + strlen(str), "greater than or equal to %s", min_str);
     }
     else if (CheckMax) {
       valueStr(Maximum, max_str, false);    
-      sprintf(str, "less than or equal to %s", max_str);
+      if (strlen(str) > 0)
+	strcat(str, ", ");
+      sprintf(str + strlen(str), "less than or equal to %s", max_str);
     }
   }
   if (SpecialStr != NULL && strlen(SpecialStr) > 0) {
@@ -1020,6 +1036,10 @@ NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
   BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 

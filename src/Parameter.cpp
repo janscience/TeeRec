@@ -6,6 +6,7 @@
 Parameter::Parameter(Configurable &menu, const char *name, size_t n) :
   Action(menu, name, SetValue | AllRoles),
   NSelection(n) {
+  TypeStr[0] = '\0';
 }
 
 
@@ -30,7 +31,8 @@ void Parameter::save(FsFile &file, size_t indent, size_t w) const {
 }
 
 
-void Parameter::configure(Stream &stream, unsigned long timeout) {
+void Parameter::configure(Stream &stream, unsigned long timeout,
+			  bool detailed) {
   if (disabled(SetValue | StreamIO))
     return;
   int w = strlen(name());
@@ -45,7 +47,7 @@ void Parameter::configure(Stream &stream, unsigned long timeout) {
       stream.print("select new value");
     else
       stream.print("enter new value");
-    instructions(pval);
+    instructions(pval, detailed);
     if (strlen(pval) > 0)
       stream.printf(" (%s)", pval);
     stream.print(": ");
@@ -95,8 +97,10 @@ void Parameter::set(const char *val, const char *name, Stream &stream) {
 }
 
 
-void Parameter::instructions(char *str) const {
+void Parameter::instructions(char *str, bool detailed) const {
   *str = '\0';
+  if (detailed)
+    strcpy(str, TypeStr);
 }
 
 
@@ -214,12 +218,14 @@ const bool BaseStringParameter::BoolEnums[2] = {false, true};
 
 BoolParameter::BoolParameter(Configurable &menu, const char *name, bool val) :
   EnumParameter<bool>(menu, name, val, BoolEnums, YesNoStrings, 2) {
+  strcpy(TypeStr, "boolean");
 }
 
 
 BoolPointerParameter::BoolPointerParameter(Configurable &menu,
 					   const char *name, bool *val) :
   EnumPointerParameter<bool>(menu, name, val, BoolEnums, YesNoStrings, 2) {
+  strcpy(TypeStr, "boolean");
 }
 
 

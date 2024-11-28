@@ -28,7 +28,8 @@ class HelpAction : public Action {
   HelpAction(Configurable &menu, const char *name);
 
   /* Print help and key-bindings. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -43,7 +44,8 @@ class TeensyInfoAction : public Action {
   TeensyInfoAction(Configurable &menu, const char *name);
 
   /* Info about Teensy version, serial number and MAC. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -54,7 +56,8 @@ class PSRAMInfoAction : public TeensyInfoAction {
   using TeensyInfoAction::TeensyInfoAction;
 
   /* Info about Teensy 4.1 PSRAM memory. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -65,7 +68,8 @@ class PSRAMTestAction : public TeensyInfoAction {
   using TeensyInfoAction::TeensyInfoAction;
 
   /* Test Teensy 4.1 PSRAM memory. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
  protected:
 
@@ -89,7 +93,8 @@ class ReportConfigAction : public Action {
   ReportConfigAction(Configurable &menu, const char *name);
 
   /* Report the configuration settings. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);  
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -116,7 +121,8 @@ class SaveConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Save the configuration settings to configuration file. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -127,7 +133,8 @@ class LoadConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Load the configuration settings from configuration file. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -138,7 +145,8 @@ class RemoveConfigAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Remove the configuration file from SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -149,7 +157,8 @@ class SDInfoAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Report SD card infos, capacity and available space. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -160,7 +169,8 @@ class SDCheckAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Check SD card access. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -171,7 +181,8 @@ class SDBenchmarkAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Run a benchmark test and report data rates for writing and reading. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -182,7 +193,8 @@ class SDFormatAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Format SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
  protected:
 
@@ -197,7 +209,8 @@ class SDEraseFormatAction : public SDFormatAction {
   using SDFormatAction::SDFormatAction;
 
   /* Erase and format SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -208,7 +221,8 @@ class SDListRootAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List files and directories of the root directory. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -224,7 +238,8 @@ class SDListRecordingsAction : public SDCardAction {
 		 Settings &settings);
 
   /* List all recordings on SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
  protected:
   
@@ -239,7 +254,8 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
   using SDListRecordingsAction::SDListRecordingsAction;
 
   /* Remove all recordings from SD card. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -252,7 +268,8 @@ class ListFirmwareAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List firmware hex files found on SD card */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -263,7 +280,8 @@ class UpdateFirmwareAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Upload firmware from SD card */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 #endif
@@ -292,7 +310,8 @@ class ReportRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Report the real-time clock. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 
@@ -303,7 +322,8 @@ class SetRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Set the real-time clock. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 };
 
 

@@ -99,8 +99,10 @@ class Action {
   virtual void save(FsFile &file, size_t indent=0, size_t w=0) const {};
   
   /* Interactive configuration of this action via serial stream.
-     StreamInput and StreamOutput must be enabled. */
-  virtual void configure(Stream &stream=Serial, unsigned long timeout=0);
+     StreamInput and StreamOutput must be enabled.
+     If detailed provide additional infos for GUI applications. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool detailed=false);
 
   /* Parse the string val and configure the action accordingly.
      SetValue must be enabled. If StreamOutput is enabled,

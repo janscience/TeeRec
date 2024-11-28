@@ -39,7 +39,8 @@ class Configurator : public Configurable {
   void load(SDCard &sd);
 
   /* Interactive configuration via Serial stream. */
-  void configure(Stream &stream=Serial, unsigned long timeout=0);
+  void configure(Stream &stream=Serial, unsigned long timeout=0,
+		 bool detailed=false);
 
   /* The main menu, i.e. pointer to the last Configurator instance. */
   static Configurator *MainConfig;
