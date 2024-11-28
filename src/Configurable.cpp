@@ -278,6 +278,10 @@ void Configurable::configure(Stream &stream, unsigned long timeout,
 	detailed = true;
       else if (strcmp(pval, "detailed: off") == 0)
 	detailed = false;
+      else if (strcmp(pval, "print") == 0) {
+	stream.println();
+	break;
+      }
       else {
 	char *end;
 	long i = strtol(pval, &end, 10) - 1;
