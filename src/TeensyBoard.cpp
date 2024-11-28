@@ -23,8 +23,24 @@ const char *teensyBoard() {
 
 
 long teensySpeed() {
+#if defined(__IMXRT1062__)
   return F_CPU_ACTUAL/1000000;
+#else
+  return F_CPU/1000000;
+#endif
 }
+
+
+#if defined(__IMXRT1062__)
+extern "C" uint32_t set_arm_clock(uint32_t frequency);
+#endif
+
+void setTeensySpeed(long speed) {
+#if defined(__IMXRT1062__)
+  set_arm_clock(1000000L*speed);
+#endif
+}
+
 
 #if defined(TEENSY40) || defined(TEENSY41)
 
