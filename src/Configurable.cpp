@@ -232,7 +232,7 @@ void Configurable::load(SDCard &sd, const char *filename) {
 
 
 void Configurable::configure(Stream &stream, unsigned long timeout,
-			     bool detailed) {
+			     bool echo, bool detailed) {
   if (disabled(StreamInput))
     return;
   int def = 0;
@@ -269,7 +269,8 @@ void Configurable::configure(Stream &stream, unsigned long timeout,
       stream.readBytesUntil('\n', pval, 32);
       if (strlen(pval) == 0 && def >= 0)
 	sprintf(pval, "%d", def + 1);
-      stream.println(pval);
+      if (echo)
+	stream.println(pval);
       if (strlen(pval) == 0 && def < 0) {
 	def = 0;
 	continue;
@@ -278,6 +279,10 @@ void Configurable::configure(Stream &stream, unsigned long timeout,
 	detailed = true;
       else if (strcmp(pval, "detailed: off") == 0)
 	detailed = false;
+      else if (strcmp(pval, "echo: on") == 0)
+	echo = true;
+      else if (strcmp(pval, "echo: off") == 0)
+	echo = false;
       else if (strcmp(pval, "print") == 0) {
 	stream.println();
 	break;
@@ -289,7 +294,7 @@ void Configurable::configure(Stream &stream, unsigned long timeout,
 	    iaction[i] < NActions) {
 	  def = i;
 	  stream.println();
-	  Actions[iaction[i]]->configure(stream, 0, detailed);
+	  Actions[iaction[i]]->configure(stream, 0, echo, detailed);
 	  break;
 	}
 	else if (strcmp(pval, "q") == 0) {

@@ -53,9 +53,11 @@ class Configurable : public Action {
   void load(SDCard &sd, const char *filename);
   
   /* Interactive configuration via Serial stream.
-     Returns from initial menu after timeout milliseconds. */
+     Returns from initial menu after timeout milliseconds.
+     If echo, print out received input.
+     If detailed provide additional infos for GUI applications. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
-			 bool detailed=false);
+			 bool echo=true, bool detailed=false);
 
   /* Set the provided name-value pair and report on stream. */
   virtual void set(const char *val, const char *name,

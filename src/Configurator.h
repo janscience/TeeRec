@@ -40,7 +40,7 @@ class Configurator : public Configurable {
 
   /* Interactive configuration via Serial stream. */
   void configure(Stream &stream=Serial, unsigned long timeout=0,
-		 bool detailed=false);
+		 bool echo=true, bool detailed=false);
 
   /* The main menu, i.e. pointer to the last Configurator instance. */
   static Configurator *MainConfig;

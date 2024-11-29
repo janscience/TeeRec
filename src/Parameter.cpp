@@ -32,7 +32,7 @@ void Parameter::save(FsFile &file, size_t indent, size_t w) const {
 
 
 void Parameter::configure(Stream &stream, unsigned long timeout,
-			  bool detailed) {
+			  bool echo, bool detailed) {
   if (disabled(SetValue | StreamIO))
     return;
   int w = strlen(name());
@@ -57,10 +57,12 @@ void Parameter::configure(Stream &stream, unsigned long timeout,
     }
     stream.readBytesUntil('\n', pval, MaxVal);
     if (parseValue(pval, NSelection > 0)) {
-      stream.println(pval);
+      if (echo)
+	stream.println(pval);
       break;
     }
-    stream.println(pval);
+    if (echo)
+      stream.println(pval);
   }
   stream.println();
 }

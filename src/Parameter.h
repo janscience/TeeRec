@@ -63,9 +63,12 @@ class Parameter : public Action {
   /* Save the parameter's key and value to file. */
   virtual void save(FsFile &file, size_t indent=0, size_t w=0) const;
   
-  /* Interactive configuration via Serial stream. */
+  /* Interactive configuration via Serial stream.
+     Returns from initial menu after timeout milliseconds.
+     If echo, print out received input.
+     If detailed provide additional infos for GUI applications. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
-			 bool detailed=false);
+			 bool echo=true, bool detailed=false);
 
   /* Parse the string val and set the parameter accordingly.  If
      StreamOutput is enabled, report the new value together with name
@@ -1050,6 +1053,10 @@ NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
 				    const char *outunit) :
   BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
   Value(number) {
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 
@@ -1137,6 +1144,10 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
   BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 
@@ -1150,6 +1161,10 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
 						  const char *outunit) :
   BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
   Value(number) {
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 
