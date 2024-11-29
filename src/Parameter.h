@@ -857,6 +857,10 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
   setOutUnit(outunit);
   if (strlen(OutUnit) == 0)
     setOutUnit(unit);
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 
@@ -883,6 +887,10 @@ BaseNumberParameter<T>::BaseNumberParameter(Configurable &menu,
   setOutUnit(outunit);
   if (strlen(OutUnit) == 0)
     setOutUnit(unit);
+  if constexpr (std::is_integral_v<T>)
+    strcpy(this->TypeStr, "integer");
+  else
+    strcpy(this->TypeStr, "float");
 }
 
 
@@ -949,8 +957,11 @@ void BaseNumberParameter<T>::listSelection(Stream &stream) const {
 template<class T>
 void BaseNumberParameter<T>::instructions(char *str, bool detailed) const {
   *str = '\0';
-  if (detailed)
+  if (detailed) {
     strcpy(str, TypeStr);
+    strcat(str, ", ");
+    strcat(str, Unit);
+  }
   char min_str[MaxVal];
   char max_str[MaxVal];
   if (NSelection == 0) {
@@ -1039,10 +1050,6 @@ NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
   BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
-  if constexpr (std::is_integral_v<T>)
-    strcpy(this->TypeStr, "integer");
-  else
-    strcpy(this->TypeStr, "float");
 }
 
 
@@ -1053,10 +1060,6 @@ NumberParameter<T>::NumberParameter(Configurable &menu, const char *name,
 				    const char *outunit) :
   BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
   Value(number) {
-  if constexpr (std::is_integral_v<T>)
-    strcpy(this->TypeStr, "integer");
-  else
-    strcpy(this->TypeStr, "float");
 }
 
 
@@ -1144,10 +1147,6 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
   BaseNumberParameter<T>(menu, name, format, unit, outunit,
 			 selection, n),
   Value(number) {
-  if constexpr (std::is_integral_v<T>)
-    strcpy(this->TypeStr, "integer");
-  else
-    strcpy(this->TypeStr, "float");
 }
 
 
@@ -1161,10 +1160,6 @@ NumberPointerParameter<T>::NumberPointerParameter(Configurable &menu,
 						  const char *outunit) :
   BaseNumberParameter<T>(menu, name, minimum, maximum, format, unit, outunit),
   Value(number) {
-  if constexpr (std::is_integral_v<T>)
-    strcpy(this->TypeStr, "integer");
-  else
-    strcpy(this->TypeStr, "float");
 }
 
 
