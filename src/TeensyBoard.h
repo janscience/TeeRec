@@ -55,6 +55,10 @@ void setTeensySpeed(long speed);
 // Reboot Teensy.
 void reboot();
 
+// Print "HALT" and stop the sketch.
+// Reboot if "reboot" string is received in stream.
+void halt(Stream &stream=Serial);
+
 // From https://github.com/sstaub/TeensyID :
 
 // Pointer to an  array with size of 4 uint8_t containing the serial number

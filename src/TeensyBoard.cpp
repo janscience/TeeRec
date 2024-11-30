@@ -52,6 +52,30 @@ void reboot() {
 }
 
 
+void halt(Stream &stream) {
+  stream.println("HALT");
+  char reboot_s[] = "reboot";
+  size_t i = 0;
+  while (true) {
+    yield();
+    int b = stream.read();
+    if (b >= 0) {
+      char c = char(b);
+      if (c == reboot_s[i]) {
+	i++;
+	if (i >= strlen(reboot_s)) {
+	  stream.println("REBOOT NOW");
+	  delay(100);
+	  reboot();
+	}
+      }
+      else
+	i = 0;
+    }
+  };
+}
+
+
 #if defined(TEENSY4)
 
 static uint32_t getTeensySerial(void) {
