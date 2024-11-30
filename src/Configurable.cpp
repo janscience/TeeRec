@@ -1,3 +1,4 @@
+#include <TeensyBoard.h>
 #include <SDWriter.h>
 #include <Configurator.h>
 #include <Configurable.h>
@@ -275,13 +276,15 @@ void Configurable::configure(Stream &stream, unsigned long timeout,
 	def = 0;
 	continue;
       }
-      if (strcmp(pval, "detailed: on") == 0)
+      if (strcmp(pval, "reboot") == 0)
+	reboot();
+      else if (strcmp(pval, "detailed on") == 0)
 	detailed = true;
-      else if (strcmp(pval, "detailed: off") == 0)
+      else if (strcmp(pval, "detailed off") == 0)
 	detailed = false;
-      else if (strcmp(pval, "echo: on") == 0)
+      else if (strcmp(pval, "echo on") == 0)
 	echo = true;
-      else if (strcmp(pval, "echo: off") == 0)
+      else if (strcmp(pval, "echo off") == 0)
 	echo = false;
       else if (strcmp(pval, "print") == 0) {
 	stream.println();

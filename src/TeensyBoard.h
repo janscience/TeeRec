@@ -52,6 +52,8 @@ long teensySpeed();
 // Set the speed of the CPU in MHz.
 void setTeensySpeed(long speed);
 
+// Reboot Teensy.
+void reboot();
 
 // From https://github.com/sstaub/TeensyID :
 

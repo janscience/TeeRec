@@ -42,7 +42,17 @@ void setTeensySpeed(long speed) {
 }
 
 
-#if defined(TEENSY40) || defined(TEENSY41)
+void reboot() {
+#if defined(TEENSY4)
+  SCB_AIRCR = 0x05FA0004;
+#elif defined(TEENSY3)
+  #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
+  *CPU_RESTART_ADDR = 0x5FA0004
+#endif
+}
+
+
+#if defined(TEENSY4)
 
 static uint32_t getTeensySerial(void) {
   uint32_t num;
@@ -96,7 +106,7 @@ const char* teensySN(void) {
 }
 
 
-#if defined(TEENSY40) || defined(TEENSY41)
+#if defined(TEENSY4)
 
 void teensyMAC(uint8_t *mac) { // there are 2 MAC addresses each 48bit 
   uint32_t m1 = HW_OCOTP_MAC1;
