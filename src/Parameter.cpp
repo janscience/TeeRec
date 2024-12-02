@@ -56,7 +56,9 @@ void Parameter::configure(Stream &stream, unsigned long timeout,
       yield();
     }
     stream.readBytesUntil('\n', pval, MaxVal);
-    if (parseValue(pval, NSelection > 0)) {
+    if ((strcmp(pval, "ktv") == 0) ||
+	(strcmp(pval, "keepthevalue") == 0) ||
+	parseValue(pval, NSelection > 0)) {
       if (echo)
 	stream.println(pval);
       break;
