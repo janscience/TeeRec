@@ -38,19 +38,6 @@ class KeyboardInput(threading.Thread):
                 self.ser.write(x.encode('latin1'))
                 self.ser.write(b'\n')
 
-    
-teensy_model = {   
-    0x274: '30',
-    0x275: '31',
-    0x273: 'LC',
-    0x276: '35',
-    0x277: '36',
-    0x278: '40 beta',
-    0x279: '40',
-    0x280: '41',
-    0x281: 'MM'}
-"""Map bcdDevice of USB device to Teensy model version."""
-
 
 def discover_teensy_ports():
     devices = []
@@ -70,11 +57,27 @@ def discover_teensy_ports():
 
 
 def get_teensy_model(vid, pid, serial_number):
+    
+    # map bcdDevice of USB device to Teensy model version:
+    teensy_model = {   
+        0x274: '30',
+        0x275: '31',
+        0x273: 'LC',
+        0x276: '35',
+        0x277: '36',
+        0x278: '40 beta',
+        0x279: '40',
+        0x280: '41',
+        0x281: 'MM'}
+
     if has_usb:
         dev = usb.core.find(idVendor=vid, idProduct=pid,
                             serial_number=serial_number)
-        model = teensy_model[dev.bcdDevice]
-        return model
+        if dev is None:
+            # this happens when we do not have permissions for the device!
+            return ''
+        else:
+            return teensy_model[dev.bcdDevice]
     else:
         return ''
 
