@@ -35,7 +35,7 @@ class Action {
 
   /* Ask a yes or no question on a serial I/O stream. */
   static bool yesno(const char *request, bool defval=true,
-		    Stream &stream=Serial);
+		    bool echo=true, Stream &stream=Serial);
 
   /* Initialize action with name and supported roles. */
   Action(const char *name, int roles=AllRoles);

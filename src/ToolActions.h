@@ -198,7 +198,7 @@ class SDFormatAction : public SDCardAction {
 
  protected:
 
-  void format(const char *erases, bool erase, Stream &stream);
+  void format(const char *erases, bool erase, bool echo, Stream &stream);
 };
 
 

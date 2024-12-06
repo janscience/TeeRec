@@ -43,7 +43,7 @@ int listFirmware(SDCard &sdcard, Stream &stream, bool number) {
 }
 
 
-void updateFirmware(SDCard &sdcard, Stream &stream) {
+void updateFirmware(SDCard &sdcard, bool echo, Stream &stream) {
   // list firmware files:
   int n = listFirmware(sdcard, stream, true);
   stream.println();
@@ -105,7 +105,7 @@ void updateFirmware(SDCard &sdcard, Stream &stream) {
   stream.println("WARNING: make sure that your device stays powered during the entire firmware update!");
   stream.println();
   if (!Action::yesno("Do you really want to update the firmware?",
-		     false, stream)) {
+		     false, echo, stream)) {
     stream.println();
     stream.println("Firmware update aborted.");
     return;

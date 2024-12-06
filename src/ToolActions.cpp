@@ -240,7 +240,7 @@ void SaveConfigAction::configure(Stream &stream, unsigned long timeout,
     stream.printf("Configuration file \"%s\" already exists on SD card.\n",
 		  root()->configFile());
     save = Action::yesno("Do you want to overwrite the configuration file?",
-			 true, stream);
+			 true, echo, stream);
   }
   if (save && root()->save(SDC))
     stream.printf("Saved configuration to file \"%s\" on SD card.\n",
@@ -260,7 +260,7 @@ void LoadConfigAction::configure(Stream &stream, unsigned long timeout,
   }
   stream.println("Reloading the configuration file will discard all changes.");
   bool r = Action::yesno("Do you really want to reload the configuration file?",
-			 true, stream);
+			 true, echo, stream);
   stream.println();
   if (r)
     root()->load(SDC);
@@ -277,7 +277,7 @@ void RemoveConfigAction::configure(Stream &stream, unsigned long timeout,
     return;
   }
   if (Action::yesno("Do you really want to remove the configuration file?",
-		    false, stream)) {
+		    false, echo, stream)) {
     if (SDC.remove(root()->configFile()))
       stream.printf("\nRemoved configuration file \"%s\" from SD card.\n\n",
 		    root()->configFile());
@@ -314,16 +314,17 @@ void SDBenchmarkAction::configure(Stream &stream, unsigned long timeout,
 }
 
 
-void SDFormatAction::format(const char *erases, bool erase, Stream &stream) {
+void SDFormatAction::format(const char *erases, bool erase,
+			    bool echo, Stream &stream) {
   char request[64];
   sprintf(request, "Do you really want to%s format the SD card?", erases);
-  if (Action::yesno(request, false, stream)) {
+  if (Action::yesno(request, false, echo, stream)) {
     bool keep = false;
     if (SDC.exists(root()->configFile())) {
       char request[256];
       sprintf(request, "Should the configuration file \"%s\" be kept?",
 	      root()->configFile());
-      keep = Action::yesno(request, true, stream);
+      keep = Action::yesno(request, true, echo, stream);
     }
     stream.println();
     const char *path = NULL;
@@ -343,7 +344,7 @@ void SDFormatAction::configure(Stream &stream, unsigned long timeout,
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Formatting will destroy all data on the SD card.");
-  format("", false, stream);
+  format("", false, echo, stream);
 }
 
 
@@ -354,7 +355,7 @@ void SDEraseFormatAction::configure(Stream &stream, unsigned long timeout,
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Erasing and formatting will destroy all data on the SD card.");
-  format(" erase and", true, stream);
+  format(" erase and", true, echo, stream);
 }
 
 
@@ -408,7 +409,7 @@ void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout,
   }
   stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
   if (Action::yesno("Do you really want to erase all recordings?",
-		    true, stream))
+		    true, echo, stream))
     SDC.removeFiles(SettingsMenu.path(), stream);
   stream.println();
 }
@@ -429,7 +430,7 @@ void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout,
 				     bool echo, bool detailed) {
   if (disabled(StreamInput))
     return;
-  updateFirmware(SDC, stream);
+  updateFirmware(SDC, echo, stream);
   stream.println();
 }
 

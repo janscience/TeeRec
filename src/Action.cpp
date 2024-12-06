@@ -4,7 +4,8 @@
 #include <Action.h>
 
 
-bool Action::yesno(const char *request, bool defval, Stream &stream) {
+bool Action::yesno(const char *request, bool defval,
+		   bool echo, Stream &stream) {
   while (true) {
     stream.print(request);
     if (defval)
@@ -15,7 +16,8 @@ bool Action::yesno(const char *request, bool defval, Stream &stream) {
       yield();
     char pval[8];
     stream.readBytesUntil('\n', pval, 8);
-    stream.println(pval);
+    if (echo)
+      stream.println(pval);
     if (strlen(pval) == 0)
       return defval;
     if (tolower(pval[0]) == 'y')
