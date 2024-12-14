@@ -121,7 +121,7 @@ size_t InputTDM::counter(TDM_BUS bus) const {
 }
 
 
-bool InputTDM::check(Stream &stream) {
+bool InputTDM::check(uint8_t nchannels, Stream &stream) {
   if ( Rate < 1 ) {
     stream.println("ERROR: no sampling rate specfied.");
     Rate = 0;
@@ -143,7 +143,7 @@ bool InputTDM::check(Stream &stream) {
     NChannels = 0;
     return false;
   }
-  return true;
+  return Input::check(nchannels, stream);
 }
 
   

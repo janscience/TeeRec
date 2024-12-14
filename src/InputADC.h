@@ -275,8 +275,10 @@ class InputADC : public Input {
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
   // Otherwise print warnings on stream.
+  // If nchannels is greater than zero, check will fail if
+  // the number of configured channels does not match nchannels.
   // If successfull, you may remove this check from your code.
-  virtual bool check(Stream &stream=Serial);
+  virtual bool check(uint8_t nchannels=0, Stream &stream=Serial);
 
   // Print current settings on stream.
   virtual void report(Stream &stream=Serial);

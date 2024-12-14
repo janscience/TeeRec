@@ -28,8 +28,11 @@ class Input : public DataBuffer {
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
   // Otherwise print warnings on Serial.
+  // Default implementation returns false if nchannels is greater than
+  // zero and the number of configured channels does not match
+  // nchannels.
   // If successfull, you may remove this check from your code.
-  virtual bool check(Stream &stream=Serial) = 0;
+  virtual bool check(uint8_t nchannels=0, Stream &stream=Serial);
 
   // Print current settings on Serial.
   virtual void report(Stream &stream=Serial) = 0;

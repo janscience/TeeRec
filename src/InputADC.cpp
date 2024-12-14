@@ -445,7 +445,7 @@ void InputADC::pinAssignment() {
 }
 
 
-bool InputADC::check(Stream &stream) {
+bool InputADC::check(uint8_t nchannels, Stream &stream) {
   if ( Rate < 1 ) {
     stream.println("ERROR: no sampling rate specfied.");
     ADCUse = 0;
@@ -490,7 +490,7 @@ bool InputADC::check(Stream &stream) {
     stream.printf("ERROR: averaging must be one of 0, 1, 4, 8, 16, 32\n");
     return false;
   }
-  return true;
+  return Input::check(nchannels, stream);
 }
 
   
