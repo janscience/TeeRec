@@ -14,19 +14,14 @@ hints for updating/installing the Arduino IDE.
 Update your [Arduino IDE](https://www.arduino.cc/en/software) to
 version 2 and install Teensy support.
 
-FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/td_download.html):
+For this follow the instructions for
+[Teensyduino](https://www.pjrc.com/teensy/td_download.html):
 
 1. Install the latest Arduino IDE provided on
    [arduino.cc](https://www.arduino.cc/en/software).
 
-   For Linux, download the AppImage file, make it executable, and run
-   it. You may provide a link to this file in `/usr/local/bin`.
-   ```sh
-   cd Downloads
-   chmod a+x arduino-ide_2.3.3_Linux_64bit.AppImage
-   sudo ln -s arduino-ide_2.3.3_Linux_64bit.AppImage /usr/local/bin/arduino
-   ```
-
+   For Linux, download the AppImage file. See below for details.
+   
 2. Run the [Arduino IDE](https://docs.arduino.cc/software/ide-v2). Go
    to File > Preferences and add
    `https://www.pjrc.com/teensy/package_teensy_index.json` to
@@ -34,31 +29,70 @@ FOr this follow the instructions for [Teensyduino](https://www.pjrc.com/teensy/t
 
 3. Activate the board manager from the tool bar on the left.
    Search for Teensy and click on the "Install" button.
-
-4. For Linux, copy the
-   [udev rules](https://www.pjrc.com/teensy/00-teensy.rules)
-   to `/etc/udev/rules.d/`:
-   ```sh
-   cd .arduino15/packages/teensy/tools/teensy-tools/1.59.0
-   sudo cp 00-teensy.rules /etc/udev/rules.d/
-   sudo udevadm trigger
-   ```
-
-5. If you are updating from Teensyduino < 1.56, make sure that you
+   
+4. If you are updating from Teensyduino < 1.56, make sure that you
    remove `SdFat` and `Bounce2` from your `Arduino/libraries`
    folder. They are now part of the new
    [Teensyduino](https://www.pjrc.com/teensy/teensyduino.html).
 
+That's all!
+
+
+### Linux installation hints
+
+1. After downloading the AppImage, make it executable and provide a
+   link to this file in `/usr/local/bin`.
+   ```sh
+   cd Downloads
+   chmod a+x arduino-ide_2.3.4_Linux_64bit.AppImage
+   sudo ln -s arduino-ide_2.3.4_Linux_64bit.AppImage /usr/local/bin/arduino
+   ```
+   Now you can run it by executing `arduino` anywhere.
+
+2. If the Arduino IDE complains about sandboxing, then you need to
+   tweak apparmor settings (this happens on Ubuntu 24, for
+   example). Create a file
+   `home.<username>.Downloads.arduino-ide_2.3.4_Linux_64bit.AppImage`
+   in `/etc/apparmor.d/`, e.g. via
+   
+   ```sh
+   sudo vim /etc/apparmor.d/home.<username>.Downloads.arduino-ide_2.3.4_Linux_64bit.AppImage
+   ```
+   Copy the following content into this file:
+   ```txt
+   abi <abi/4.0>,
+   include <tunables/global>
+   profile arduino /home/<username>/Downloads/arduino-ide_2.3.4_Linux_64bit.AppImage flags=(unconfined) {
+     userns,
+     include if exists <local/arduino>
+   }
+   ```
+   Adapt the folders, arduino files name and `<username>` as needed.
+
+   Save the file and run
+   ```sh
+   sudo service apparmor reload
+   ```
+
+   See [ask Ubuntu](https://askubuntu.com/questions/1515105/sandbox-problems-with-arduino-ides-with-24-04) for details and alternatives.
+   
+4. Copy the [udev rules](https://www.pjrc.com/teensy/00-teensy.rules)
+   to `/etc/udev/rules.d/`:
+   ```sh
+   cd ~/.arduino15/packages/teensy/tools/teensy-tools/1.59.0
+   sudo cp 00-teensy.rules /etc/udev/rules.d/
+   sudo udevadm trigger
+   ```
+   These rules are needed to make the Teensy USB device readable and
+   writable for all users.
+
 
 ## Installation of TeeRec from github repository
 
-For an installation from the [TeeRec github
-repository](https://github.com/janscience/TeeRec), install all the
-libraries TeeRec is depending on and then clone the repository, as
-described in the following. This is preferred over the installation
-via the library manager if you need the latest developments or if you
-need to change a few things in the library.
-
+If you want to use the latest development versions of TeeRec, or
+change a few things in the code, then do not install TeeRec via the
+library manager of the Arduino IDE but download TeeRec directly from
+the [TeeRec github repository](https://github.com/janscience/TeeRec) as described in the following.
 
 ### Dependencies
 
@@ -78,7 +112,7 @@ These libraries are already available and do not need to be installed
 manually.
 
 _Note_: If you upgraded from an older Arduino IDE, make sure that none
-of these librariers are located in your `Arduino/libraries` folder. In
+of these libraries are located in your `Arduino/libraries` folder. In
 particular, `SdFat` and `Bounce2`.
 
 The only library that needs to be installed is
@@ -92,7 +126,7 @@ Install this library from the library manager of the Arduino IDE
 ### Download TeeRec from github
 
 Clone the [TeeRec](https://github.com/janscience/TeeRec) repository
-directly into 'Arduino/libraries':
+directly into the 'Arduino/libraries' directory:
 ```sh
 cd Arduino/libraries
 git clone https://github.com/janscience/TeeRec.git
@@ -124,7 +158,9 @@ Close the Arduino IDE and open it again. Then the Arduino IDE knows
 about the TeeRec library and its examples.
 
 
-## Upload new TeeRec version to Arduino library manager
+## Publish new TeeRec version on Arduino library registry
+
+This is a note to myself...
 
 See [Arduino Library Manager list](https://github.com/arduino/library-registry).
 
