@@ -11,7 +11,7 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   uint8_t averaging,
 				   ADC_CONVERSION_SPEED conversion_speed,
 				   ADC_SAMPLING_SPEED sampling_speed,
-				   ADC_REFERENCE reference) :
+				   ADC_REFERENCE reference, float pregain) :
   Configurable("ADC"),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Bits(*this, "Resolution", bits, "%.0f", "bits", "",
@@ -29,7 +29,9 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
   Reference(*this, "Reference", reference,
 	    InputADC::ReferenceEnums,
 	    InputADC::ReferenceStrings,
-	    InputADC::MaxReferences) {
+	    InputADC::MaxReferences),
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
+  PreGain.disable();
 }
 
 
@@ -37,7 +39,7 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 				   uint8_t bits, uint8_t averaging,
 				   ADC_CONVERSION_SPEED conversion_speed,
 				   ADC_SAMPLING_SPEED sampling_speed,
-				   ADC_REFERENCE reference) :
+				   ADC_REFERENCE reference, float pregain) :
   Configurable(name),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Bits(*this, "Resolution", bits, "%.0f", "bits", "",
@@ -55,7 +57,9 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
   Reference(*this, "Reference", reference,
 	    InputADC::ReferenceEnums,
 	    InputADC::ReferenceStrings,
-	    InputADC::MaxReferences) {
+	    InputADC::MaxReferences),
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
+  PreGain.disable();
 }
 
 
@@ -86,6 +90,11 @@ void InputADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
 
 void InputADCSettings::setReference(ADC_REFERENCE ref) {
   Reference.setValue(ref);
+}
+
+
+void InputADCSettings::setPreGain(float pregain) {
+  PreGain.setValue(pregain);
 }
 
 

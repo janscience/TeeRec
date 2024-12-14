@@ -92,9 +92,9 @@ Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 	          INITIAL_DELAY, false, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
-		  	    CONVERSION, SAMPLING, REFERENCE);
+		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
-InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
+InputTDMSettings aisettings(SAMPLING_RATE, 8, false, GAIN, PREGAIN);
 #endif
 RTClock rtclock;
 DeviceID deviceid(DEVICEID);
@@ -183,7 +183,7 @@ void storeData() {
         file.closeWave();
         char mfs[30];
         sprintf(mfs, "error%d-%d.msg", restarts+1, -samples);
-        File mf = sdcard.openWrite(mfs);
+        FsFile mf = sdcard.openWrite(mfs);
         mf.close();
       }
     }
@@ -282,9 +282,9 @@ void setup() {
     delay(uint32_t(1000.0*settings.initialDelay()));
   char gs[16];
 #if defined(INPUT_ADC)
-  aidata.gainStr(gs, PREGAIN);
+  aidata.gainStr(gs, aisettings.pregain());
 #elif defined(INPUT_TDM)
-  pcm1.gainStr(gs, PREGAIN);
+  pcm1.gainStr(gs, aisettings.pregain());
 #endif  
   file.header().setGain(gs);
   setupStorage();

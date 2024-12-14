@@ -25,14 +25,16 @@ public:
   InputADCSettings(uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
 		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3,
+		   float pregain=1);
 
   // Constructor setting configuration name.
   InputADCSettings(const char *name, uint32_t rate=0,
 		   uint8_t bits=16, uint8_t averaging=4,
 		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3);
+		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3,
+		   float pregain=1);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };
@@ -92,6 +94,14 @@ public:
   // The voltage reference.
   ADC_REFERENCE reference() const { return Reference.value(); };
 
+  // Return pregain as a factor.
+  // This is the fixed gain of a first amplification stage.
+  float pregain() const { return PreGain.value(); };
+  
+  // Set pregain as a factor.
+  // This is the fixed gain of a first amplification stage.
+  void setPreGain(float pregain);
+
   // Apply ADC settings on adc.
   void configure(InputADC *adc);
 
@@ -107,6 +117,7 @@ protected:
   EnumParameter<ADC_CONVERSION_SPEED> ConversionSpeed;
   EnumParameter<ADC_SAMPLING_SPEED> SamplingSpeed;
   EnumParameter<ADC_REFERENCE> Reference;
+  NumberParameter<float> PreGain;
 
   static const size_t NBitsSelection = 3;
   static const uint8_t BitsSelection[NBitsSelection];

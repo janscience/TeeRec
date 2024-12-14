@@ -20,6 +20,7 @@
   #include <InputTDMSettings.h>
 #endif
 #include <Blink.h>
+#include <TeensyBoard.h>
 #include <TeeRecBanner.h>
 
 // Adapt the following parameter values to your needs:
@@ -37,7 +38,7 @@
 #define DISPLAY_TIME  0.005   // seconds
 #define SENSORS_TIME   10.0   // seconds
 
-// Input XXXSettings:
+// Input Settings:
 #define SAMPLING_RATE  48000 // samples per second and channel in Hertz
 #if defined(INPUT_ADC)
   #define BITS           12    // resolution: 10bit 12bit, or 16bit
@@ -48,6 +49,7 @@
 #elif defined(INPUT_TDM)
   #define GAIN           20.0  // dB
 #endif
+  #define PREGAIN        1.0
 
 
 RTClock rtclock;
@@ -58,9 +60,9 @@ Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, INITIAL_DELAY,
                   RANDOM_BLINKS, PULSE_FREQUENCY, DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
-		  	    CONVERSION, SAMPLING, REFERENCE);
+		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
-InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN);
+InputTDMSettings aisettings(SAMPLING_RATE, 8, false, GAIN, PREGAIN);
 #endif
 DateTimeMenu datetime_menu(rtclock);
 ConfigurationMenu configuration_menu(sdcard);
@@ -81,6 +83,7 @@ void setup() {
   settings.enable("PulseFreq");
   settings.enable("DisplayTime");
   settings.enable("SensorsInterval");
+  aisettings.enable("Pregain");
 
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
@@ -106,6 +109,7 @@ void setup() {
   Serial.println();
   blink.switchOff();
   sdcard.end();
+  halt();   // from TeensyBoard.h
 }
 
 
