@@ -98,7 +98,7 @@ class InputTDM : public Input {
 
   // Start generation of clock signals.
   // Need to setup resolution and sampling rate before.
-  void begin();
+  void begin(Stream &stream=Serial);
 
   // Start data transfer to buffer.
   virtual void start();

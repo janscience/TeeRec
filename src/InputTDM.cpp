@@ -122,6 +122,8 @@ size_t InputTDM::counter(TDM_BUS bus) const {
 
 
 bool InputTDM::check(uint8_t nchannels, Stream &stream) {
+  if (!Input::check(nchannels, stream))
+    return false;
   if ( Rate < 1 ) {
     stream.println("ERROR: no sampling rate specfied.");
     Rate = 0;
@@ -143,7 +145,7 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
     NChannels = 0;
     return false;
   }
-  return Input::check(nchannels, stream);
+  return true;
 }
 
   
@@ -196,9 +198,9 @@ void InputTDM::setWaveHeader(WaveHeader &wave) const {
 #endif
 
 
-void InputTDM::begin() {
+void InputTDM::begin(Stream &stream) {
   if (Bits == 0 || Rate == 0) {
-    Serial.println("ERROR: InputTDM::begin() -> resultion and sampling rate not yet specified.");
+    stream.println("ERROR in starting TDM bus: bit resultion or sampling rate not yet specified.");
     return;
   }
   
@@ -256,7 +258,7 @@ void InputTDM::begin() {
     }
   }
   if (!rate_found) {
-    Serial.printf("InputTDM::begin() -> invalid sampling rate %d Hz.\n", Rate);
+    stream.printf("ERROR in starting TDM bus: invalid sampling rate %d Hz.\n", Rate);
     Rate = 0;
     return;
   }
@@ -315,16 +317,16 @@ void InputTDM::begin() {
   int n2 = 1 + (24000000 * 27) / (fs * 256 * n1);
   if (n2 > 63) {
     // n2 must fit into a 6-bit field
-    Serial.printf("ERROR: n2 exceeds 63 - %d\n",n2);
+    stream.printf("ERROR in starting TDM bus: n2 exceeds 63 - %d\n",n2);
     return;
   }
 
   double C = ((double)fs * 256 * n1 * n2) / 24000000;
-  //  Serial.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ", freq, n1, n2, C);
+  //  stream.printf("%6d : n1 = %d, n2 = %d, C = %12.6f ", freq, n1, n2, C);
   int c0 = C;
   int c2 = 10000;
   int c1 = C * c2 - (c0 * c2);
-  //  Serial.printf("c0 = %d, c1 = %d, c2 = %d\n", c0, c1, c2);
+  //  stream.printf("c0 = %d, c1 = %d, c2 = %d\n", c0, c1, c2);
   set_audioClock(c0, c1, c2, true);
 
   n1 = n1 / 2; // double speed for TDM
