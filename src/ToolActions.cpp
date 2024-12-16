@@ -136,6 +136,8 @@ void PSRAMTestAction::configure(Stream &stream, unsigned long timeout,
     stream.println("  no external PSRAM memory installed.\n");
     return;
   }
+  long orig_speed = teensySpeed();
+  setTeensySpeed(600);
   MemoryBegin = (uint32_t *)(0x70000000);
   MemoryEnd = (uint32_t *)(0x70000000 + size * 1048576);
   elapsedMillis msec = 0;
@@ -196,6 +198,7 @@ void PSRAMTestAction::configure(Stream &stream, unsigned long timeout,
   if (!checkFixed(0xFFFF0000, stream)) return;
   if (!checkFixed(0xFFFFFFFF, stream)) return;
   if (!checkFixed(0x00000000, stream)) return;
+  setTeensySpeed(orig_speed);
   stream.printf("test ran for %.2f seconds\n", (float)msec / 1000.0f);
   stream.println("All memory tests passed :-)"); 
   stream.println();
