@@ -3,12 +3,10 @@
 
 
 InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels,
-				   bool exactchannels,
 				   float gain, float pregain) :
   Configurable("ADC"),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   NChannels(*this, "NChannels", nchannels, 1, 128, "%hu"),
-  ExactChannels(*this, "ExactChannels", exactchannels),
   Gain(*this, "Gain", gain, "%.1f", "dB"),
   PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
   PreGain.disable();
@@ -16,12 +14,11 @@ InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels,
 
 
 InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
-				   int nchannels, bool exactchannels,
+				   int nchannels,
 				   float gain, float pregain) :
   Configurable(name),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   NChannels(*this, "NChannels", nchannels, 1, 128, "%hu"),
-  ExactChannels(*this, "ExactChannels", exactchannels),
   Gain(*this, "Gain", gain, "%.1f", "dB"),
   PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
   PreGain.disable();
@@ -40,11 +37,6 @@ void InputTDMSettings::setRateSelection(uint32_t *selection, size_t n) {
 
 void InputTDMSettings::setNChannels(uint8_t nchannels) {
   NChannels.setValue(nchannels);
-}
-
-
-void InputTDMSettings::setExactChannels(bool exact) {
-  ExactChannels.setValue(exact);
 }
 
 

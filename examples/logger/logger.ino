@@ -94,7 +94,7 @@ Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
-InputTDMSettings aisettings(SAMPLING_RATE, 8, false, GAIN, PREGAIN);
+InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
 RTClock rtclock;
 DeviceID deviceid(DEVICEID);

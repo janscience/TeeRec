@@ -21,11 +21,11 @@ public:
 
   // Constructor. Sets configuration name to "ADC".
   InputTDMSettings(uint32_t rate=0, int nchannels=16,
-		   bool exactchannels=false, float gain=0, float pregain=1);
+		   float gain=0, float pregain=1);
 
   // Constructor setting configuration name.
   InputTDMSettings(const char *name, uint32_t rate=0, int nchannels=16,
-		   bool exactchannels=false, float gain=0, float pregain=1);
+		   float gain=0, float pregain=1);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };
@@ -43,14 +43,6 @@ public:
   
   // Set the number of channels.
   void setNChannels(uint8_t nchannels);
-
-  // If true, the logger should halt, if the number of available
-  // channels does not match the number of requested channels.
-  bool exactChannels() const { return ExactChannels.value(); };
-  
-  // Set whether the number of available channels must match the
-  // number of requested channels.
-  void setExactChannels(bool exact);
 
   // Return gain in dB.
   // The gain is set from the configuration file but needs to be passed
@@ -81,7 +73,6 @@ protected:
 
   NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> NChannels;
-  BoolParameter ExactChannels;
   NumberParameter<float> Gain;
   NumberParameter<float> PreGain;
   
