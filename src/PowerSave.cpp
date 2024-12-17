@@ -55,7 +55,7 @@ FASTRUN void start_usb_pll( void ) {
 
 
 void shutdown_usb() {
-  Serial.println("\n\nSHUTTING DOWN USB");
+  Serial.println("\nShutting down USB interface\n");
   Serial.end();
 #if defined(__IMXRT1062__)
   /* This is

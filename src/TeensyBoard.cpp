@@ -38,6 +38,8 @@ extern "C" uint32_t set_arm_clock(uint32_t frequency);
 void setTeensySpeed(long speed) {
 #if defined(__IMXRT1062__)
   set_arm_clock(1000000L*speed);
+  if (teensySpeed() != speed)
+    Serial.printf("WARNING: CPU speed is %ldMHz instead of the requested %ldMHz!\n", teensySpeed(), speed);
 #endif
 }
 
