@@ -69,7 +69,7 @@ via the `TeeRec.h` header.
 - [Input](src/Input.h): Base class for all input streams.
 - [InputADC](src/InputADC.h): Sample from multiple analog pins into a DataBuffer. Also see [Performance of Teensy ADC](docs/inputadc.md).
 - [InputTDM](src/InputTDM.h): Streaming TDM data into a single cyclic buffer.
-- [Control](src/Control.h): Minimum interface for classes controlling data acquisition.
+- [Device](src/Device.h): General device infos.
 - [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
 
 ### Storage on SD card

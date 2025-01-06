@@ -79,8 +79,11 @@ class DiagnosticMenu : public Configurable {
 
 public:
 
-  DiagnosticMenu(const char *name, SDCard &sdcard);
-  DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1);
+  DiagnosticMenu(const char *name, SDCard &sdcard, Device* dev0=0,
+		 Device* dev1=0, Device* dev2=0, Device* dev3=0);
+  DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1,
+		 Device* dev0=0, Device* dev1=0,
+		 Device* dev2=0, Device* dev3=0);
 
 protected:
 
@@ -94,7 +97,7 @@ protected:
   SDBenchmarkAction SD0BenchmarkAct;
   SDCheckAction SD1CheckAct;
   SDBenchmarkAction SD1BenchmarkAct;
-  
+  DevicesAction DevicesAct;
 };
 
 

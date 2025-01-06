@@ -57,10 +57,11 @@
 #include <Arduino.h>
 #include <ADC.h>
 #include <DMAChannel.h>
+#include <Device.h>
 #include <Input.h>
 
 
-class InputADC : public Input {
+class InputADC : public Input, Device {
 
  public:
 
@@ -103,6 +104,9 @@ class InputADC : public Input {
   // Use channels0 on ADC0 and channels1 on ADC (see setChannels()).
   InputADC(volatile sample_t *buffer, size_t nbuffer,
 	   const int8_t *channels0, const int8_t *channels1);
+  
+  // Return true.
+  virtual bool available() const;
   
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.

@@ -44,7 +44,9 @@ FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
 #endif
 
 
-DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard) :
+DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
+			       Device* dev0, Device* dev1,
+			       Device* dev2, Device* dev3) :
   Configurable(name, Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
@@ -52,7 +54,8 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard) :
   SD0CheckAct(*this, "SDc", sdcard),
   SD0BenchmarkAct(*this, "SDb", sdcard),
   SD1CheckAct(*this, "SDc", sdcard),
-  SD1BenchmarkAct(*this, "SDb", sdcard) {
+  SD1BenchmarkAct(*this, "SDb", sdcard),
+  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3) {
   setSDCardNames(sdcard, SD0CheckAct, SD0BenchmarkAct);
   SD1CheckAct.disable();
   SD1BenchmarkAct.disable();
@@ -60,7 +63,9 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard) :
 
 
 DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
-			       SDCard &sdcard1) :
+			       SDCard &sdcard1,
+			       Device* dev0, Device* dev1,
+			       Device* dev2, Device* dev3) :
   Configurable(name, Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
@@ -68,7 +73,8 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
   SD0CheckAct(*this, "Primary SD card check", sdcard0),
   SD0BenchmarkAct(*this, "Primary SD card benchmark", sdcard0),
   SD1CheckAct(*this, "Secondary SD card check", sdcard1),
-  SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1) {
+  SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1),
+  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3) {
   setSDCardNames(sdcard0, SD0CheckAct, SD0BenchmarkAct);
   setSDCardNames(sdcard1, SD1CheckAct, SD1BenchmarkAct);
 }

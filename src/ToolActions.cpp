@@ -3,6 +3,7 @@
 #include <SDWriter.h>
 #include <Configurator.h>
 #include <Settings.h>
+#include <Device.h>
 #include <ToolActions.h>
 
 
@@ -462,6 +463,53 @@ void ReportRTCAction::configure(Stream &stream, unsigned long timeout,
 void SetRTCAction::configure(Stream &stream, unsigned long timeout,
 			     bool echo, bool detailed) {
   RTC.set(stream);
+  stream.println();
+}
+
+
+DevicesAction::DevicesAction(const char *name, Device* dev0, Device* dev1,
+			     Device* dev2, Device* dev3) :
+  DevicesAction(*Configurator::MainConfig->Config, name,
+		dev0, dev1, dev2, dev3) {
+}
+
+
+DevicesAction::DevicesAction(Configurable &menu, const char *name,
+			     Device* dev0, Device* dev1,
+			     Device* dev2, Device* dev3) :
+  Action(menu, name, StreamInput) {
+  if (dev0 != 0)
+    Devices[NDevices++] = dev0;
+  if (dev1 != 0)
+    Devices[NDevices++] = dev1;
+  if (dev2 != 0)
+    Devices[NDevices++] = dev2;
+  if (dev3 != 0)
+    Devices[NDevices++] = dev3;
+}
+
+
+void DevicesAction::configure(Stream &stream, unsigned long timeout,
+			      bool echo, bool detailed) {
+  size_t navailable = 0;
+  for (size_t k=0; k<NDevices; k++) {
+    if (Devices[k]->available())
+      navailable++;
+  }
+  // report:
+  char ds[2] = {'\0', '\0'};
+  if (NDevices > 1)
+    ds[0] = 's';
+  stream.printf("%d of %d device%s available:\n",
+                navailable, NDevices, ds);
+  for (size_t k=0; k<NDevices; k++) {
+    if (Devices[k]->available()) {
+      stream.print("  ");
+      Devices[k]->Device::report(stream);
+    }
+  }
+  if (navailable == 0 && NDevices > 0)
+    stream.println("  no device available!");
   stream.println();
 }
 

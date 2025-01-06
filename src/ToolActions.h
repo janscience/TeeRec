@@ -15,6 +15,7 @@
 class SDCard;
 class Settings;
 class RTClock;
+class Device;
 
 
 class HelpAction : public Action {
@@ -324,6 +325,32 @@ class SetRTCAction : public RTCAction {
   /* Set the real-time clock. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
 			 bool echo=true, bool detailed=false);
+};
+
+
+class DevicesAction : public Action {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  DevicesAction(const char *name, Device* dev0, Device* dev1=0,
+		Device* dev2=0, Device* dev3=0);
+
+  /* Initialize and add to configuration menu. */
+  DevicesAction(Configurable &menu, const char *name,
+		Device* dev0, Device* dev1=0,
+		Device* dev2=0, Device* dev3=0);
+
+  /* Print device infos. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool echo=true, bool detailed=false);
+
+protected:
+
+  static const size_t MaxDevices = 4;
+  size_t NDevices;
+  Device *Devices[MaxDevices];
+  
 };
 
 

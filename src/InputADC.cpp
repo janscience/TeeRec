@@ -115,7 +115,10 @@ const ADC_REFERENCE InputADC::ReferenceEnums[MaxReferences] = {
   
 InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
 		   int8_t channel0, int8_t channel1) :
-  Input(buffer, nbuffer, MajorSize) {
+  Input(buffer, nbuffer, MajorSize),
+  Device() {
+  setInternBus();
+  setChip("ADC");
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;
@@ -150,6 +153,11 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
   InputADC(buffer, nbuffer) {
   setChannels(0, channels0);
   setChannels(1, channels1);
+}
+
+
+bool InputADC::available() const {
+  return true;
 }
 
 

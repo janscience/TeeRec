@@ -9,7 +9,7 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-//#include <AudioControl.h>  // Teensy Audio library
+#include <Device.h>
 #include <InputTDM.h>
 
 
@@ -17,8 +17,7 @@
 #define PCM186x_I2C_ADDR2     0x4B
 
 
-//class ControlPCM186x : public AudioControl {
-class ControlPCM186x {
+class ControlPCM186x : public Device {
   
 public:
 
@@ -96,6 +95,9 @@ public:
   /* Initialize PCM186x with address (0x4A or 0x4B) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
+  
+  // Return true if PCM chip is available.
+  virtual bool available() const;
   
   // Set sampling rate per channel in Hertz.
   void setRate(InputTDM &tdm, uint32_t rate);
@@ -217,14 +219,6 @@ public:
   /* Print values of all DSP coefficients to Serial */
   void printDSPCoefficients();
 
-  // AudioControl interface:
-  /*
-  virtual bool enable(void);
-  virtual bool disable(void);
-  virtual bool volume(float volume);      // volume 0.0 to 1.0
-  virtual bool inputLevel(float volume);  // volume 0.0 to 1.0
-  virtual bool inputSelect(int n);
-  */
   
 protected:
     
@@ -238,6 +232,7 @@ protected:
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
+  uint8_t Available;
   uint8_t CurrentPage;
   bool PGALinked;
   int NChannels;
