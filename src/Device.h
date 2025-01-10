@@ -33,6 +33,9 @@ class Device {
 
   // Initialize the device.
   Device();
+  
+  // Type of device (max 8 characters).
+  const char *deviceType() const { return DeviceType; };
 
   // Bus controlling the device.
   virtual BUS bus() const;
@@ -61,6 +64,9 @@ class Device {
   
 protected:
 
+  // Set device type.
+  void setDeviceType(const char *devicetype);
+
   // Set internal bus.
   void setInternBus() { Bus = BUS::INTERN; };
 
@@ -84,9 +90,11 @@ protected:
   BUS Bus;
   unsigned int Address;
   int Pin;
-  static const int MaxStr = 49;
-  char Chip[MaxStr + 1];
-  char Identifier[MaxStr + 1];
+  static const int MaxType = 8;
+  char DeviceType[MaxType];
+  static const int MaxStr = 32;
+  char Chip[MaxStr];
+  char Identifier[MaxStr];
   
 };
 

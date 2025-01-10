@@ -21,6 +21,13 @@ Device::Device() :
   Pin(-1),
   Chip(""),
   Identifier("") {
+  setDeviceType("unknown");
+}
+
+
+void Device::setDeviceType(const char *devicetype) {
+  strncpy(DeviceType, devicetype, MaxType);
+  DeviceType[MaxType - 1] = '\0';
 }
 
 
@@ -94,6 +101,7 @@ const char* Device::chip() const {
 
 void Device::setChip(const char *chip) {
   strncpy(Chip, chip, MaxStr);
+  Chip[MaxStr - 1] = '\0';
 }
 
 
@@ -104,12 +112,13 @@ const char* Device::identifier() const {
 
 void Device::setIdentifier(const char *identifier) {
   strncpy(Identifier, identifier, MaxStr);
+  Identifier[MaxStr - 1] = '\0';
 }
 
 
 void Device::report(Stream &stream) {
   if (available()) {
-    stream.printf("device %-12s", chip());
+    stream.printf("%-7s device %-12s", deviceType(), chip());
     if (bus() != BUS::UNKNOWN) {
       stream.printf(" on %-8s bus", busStr());
       if (address() != 0)
@@ -122,6 +131,7 @@ void Device::report(Stream &stream) {
     else
       stream.printf("%32s", "");
     if (strlen(identifier()) > 0)
-      stream.printf(" with ID %s\n", identifier());
+      stream.printf(" with ID %s", identifier());
+    stream.println();
   }
 }

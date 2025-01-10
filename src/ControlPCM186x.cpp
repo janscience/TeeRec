@@ -121,44 +121,12 @@
 
 
 ControlPCM186x::ControlPCM186x() :
-  Device(),
-  I2CBus(&Wire),
-  I2CAddress(PCM186x_I2C_ADDR1),
-  Available(0),
-  CurrentPage(10),
-  PGALinked(false),
-  NChannels(0),
-  Bus(InputTDM::TDM1) {
-  setI2CBus(Wire, PCM186x_I2C_ADDR1);
-  setChip("PCM186x");
+  ControlPCM186x(Wire, PCM186x_I2C_ADDR1, InputTDM::TDM1) {
 }
 
 
-ControlPCM186x::ControlPCM186x(uint8_t address) :
-  Device(),
-  I2CBus(&Wire),
-  I2CAddress(address),
-  Available(0),
-  CurrentPage(10),
-  PGALinked(false),
-  NChannels(0),
-  Bus(InputTDM::TDM1) {
-  setI2CBus(Wire, address);
-  setChip("PCM186x");
-}
-
-
-ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address) :
-  Device(),
-  I2CBus(&wire),
-  I2CAddress(address),
-  Available(0),
-  CurrentPage(10),
-  PGALinked(false),
-  NChannels(0),
-  Bus(InputTDM::TDM1) {
-  setI2CBus(wire, address);
-  setChip("PCM186x");
+ControlPCM186x::ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus) :
+  ControlPCM186x(Wire, address, bus) {
 }
 
 
@@ -172,6 +140,7 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   PGALinked(false),
   NChannels(0),
   Bus(bus) {
+  setDeviceType("input");
   setI2CBus(wire, address);
   setChip("PCM186x");
 }

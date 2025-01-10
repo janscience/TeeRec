@@ -18,12 +18,13 @@
 
 #include <Arduino.h>
 #include <TimeLib.h>
+#include <Device.h>
 
 
 class SDCard;
 
 
-class RTClock {
+class RTClock : public Device {
 
  public:
 
@@ -34,6 +35,9 @@ class RTClock {
   // present, otherwise the Teensy on-board real time clock is used.
   // Call this early on in setup() if you intend to use an DS1307 clock.
   void init();
+
+  // True if real-time clock is available (always true).
+  virtual bool available() const;
 
   // Set the real time clock (either DS1307 if available or on-board)
   // via setSyncProvider() from TimeLib.h.

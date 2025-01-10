@@ -117,6 +117,7 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
 		   int8_t channel0, int8_t channel1) :
   Input(buffer, nbuffer, MajorSize),
   Device() {
+  setDeviceType("input");
   setInternBus();
   setChip("ADC");
   for (uint8_t adc=0; adc<2; adc++) {

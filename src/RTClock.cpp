@@ -10,7 +10,11 @@ time_t getTeensyRTCTime() {
 
 
 RTClock::RTClock() :
+  Device(),
   RTCSource(0) {
+  setDeviceType("clock");
+  setInternBus();
+  setChip("Teensy-RTC");
   setSync();
 }
 
@@ -18,7 +22,16 @@ RTClock::RTClock() :
 void RTClock::init() {
   tmElements_t tm;
   RTCSource = RTC.read(tm) && RTC.chipPresent() ? 1 : 0;
+  if (RTCSource == 1) {
+    setI2CBus(Wire, 0x68);
+    setChip("DS1307");
+  }
   setSync();
+}
+
+
+bool RTClock::available() const {
+  return true;
 }
 
 

@@ -75,14 +75,12 @@ public:
 
   /* Communicate with PCM chip using defaut I2C bus
      and address (0x4A or 0x4B). */
-  ControlPCM186x(uint8_t address);
-
-  /* Communicate with PCM chip using wire and address (0x4A or 0x4B). */
-  ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
+  ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
 
   /* Communicate with PCM chip using wire, address (0x4A or 0x4B),
      and TDM bus. */
-  ControlPCM186x(TwoWire &wire, uint8_t address, InputTDM::TDM_BUS bus);
+  ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1,
+		 InputTDM::TDM_BUS bus=InputTDM::TDM1);
   
   /* Initialize PCM186x with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
