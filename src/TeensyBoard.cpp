@@ -49,7 +49,7 @@ void reboot() {
   SCB_AIRCR = 0x05FA0004;
 #elif defined(TEENSY3)
   #define CPU_RESTART_ADDR (uint32_t *)0xE000ED0C
-  *CPU_RESTART_ADDR = 0x5FA0004
+  *CPU_RESTART_ADDR = 0x5FA0004;
 #endif
 }
 
