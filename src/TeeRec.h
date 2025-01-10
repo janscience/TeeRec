@@ -1,10 +1,13 @@
 #include <DataWorker.h>
 #include <DataBuffer.h>
+#include <Device.h>
 #include <Input.h>
 #include <InputADC.h>
 #include <InputTDM.h>
 #include <ControlPCM186x.h>
+
 #include <WaveHeader.h>
+#include <SDCard.h>
 #include <SDWriter.h>
 #include <FirmwareUpdate.h>
 
@@ -13,6 +16,7 @@
 #include <Configurable.h>
 #include <Configurator.h>
 #include <ToolActions.h>
+#include <ToolMenus.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
 #include <InputTDMSettings.h>
@@ -31,5 +35,7 @@
 #include <DeviceID.h>
 #include <Menu.h>
 #include <RTClock.h>
-#include <TeensyBoard.h>
+
 #include <TeeRecBanner.h>
+#include <TeensyBoard.h>
+#include <PowerSave.h>
