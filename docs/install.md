@@ -164,8 +164,9 @@ This is a note to myself...
 
 See [Arduino Library Manager list](https://github.com/arduino/library-registry).
 
-1. Make sure arduino-lint was successful (by pushing something onto the repository)
-2. Update the version in `library.properties` to the one in `src/TeeRecBanner.h`.
+1. Right after a new release: update the version in
+   `library.properties` and `src/TeeRecBanner.h`.
+2. Make sure arduino-lint was successful (by pushing something onto the repository)
 3. Make git tag for this version: `git tag v0.9.0`
 4. Push the tag to the repository: `git push origin v0.9.0`
 5. On github make a new release for this tag.
