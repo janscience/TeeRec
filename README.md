@@ -33,6 +33,7 @@ forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-cha
   channels and pin IDs, bit resolution, gain, date and time, Teensy board
   version, and its unique MAC address.
 - Filenames based on date and/or time of the real-time-clock or incremental.
+- Interactive configuration via serial stream or from config file on SD card.
 - Analysis chain on top of data buffer.
 - Audio monitor.
 - Display recorded data on a monitor.
@@ -41,7 +42,6 @@ forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-cha
 - Read out a device identifier.
 - Simple menu for selecting actions.
 - Feedback by blinking the LED.
-- Configurable via config file on SD card.
 
 For slow acquisition of environmental sensor readings see [ESensors
 library](https://github.com/janscience/ESensors).
