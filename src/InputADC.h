@@ -61,7 +61,7 @@
 #include <Input.h>
 
 
-class InputADC : public Input, Device {
+class InputADC : public Input, public Device {
 
  public:
 
