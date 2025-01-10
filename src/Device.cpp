@@ -122,7 +122,7 @@ void Device::report(Stream &stream) {
     if (bus() != BUS::UNKNOWN) {
       stream.printf(" on %-8s bus", busStr());
       if (address() != 0)
-	stream.printf(" at address %04x", address());
+	stream.printf(" at address %4x", address());
       else if (pin() >= 0)
 	stream.printf(" at pin     %4d", pin());
       else
