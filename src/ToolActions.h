@@ -334,12 +334,14 @@ class DevicesAction : public Action {
 
   /* Initialize and add to default menu. */
   DevicesAction(const char *name, Device* dev0, Device* dev1=0,
-		Device* dev2=0, Device* dev3=0);
+		Device* dev2=0, Device* dev3=0,
+		Device* dev4=0, Device* dev5=0);
 
   /* Initialize and add to configuration menu. */
   DevicesAction(Configurable &menu, const char *name,
 		Device* dev0, Device* dev1=0,
-		Device* dev2=0, Device* dev3=0);
+		Device* dev2=0, Device* dev3=0,
+		Device* dev4=0, Device* dev5=0);
 
   /* Print device infos. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
@@ -347,7 +349,7 @@ class DevicesAction : public Action {
 
 protected:
 
-  static const size_t MaxDevices = 4;
+  static const size_t MaxDevices = 6;
   size_t NDevices;
   Device *Devices[MaxDevices];
   

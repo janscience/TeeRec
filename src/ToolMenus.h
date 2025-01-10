@@ -80,10 +80,12 @@ class DiagnosticMenu : public Configurable {
 public:
 
   DiagnosticMenu(const char *name, SDCard &sdcard, Device* dev0=0,
-		 Device* dev1=0, Device* dev2=0, Device* dev3=0);
+		 Device* dev1=0, Device* dev2=0, Device* dev3=0,
+		 Device* dev4=0, Device* dev5=0);
   DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1,
 		 Device* dev0=0, Device* dev1=0,
-		 Device* dev2=0, Device* dev3=0);
+		 Device* dev2=0, Device* dev3=0,
+		 Device* dev4=0, Device* dev5=0);
 
 protected:
 

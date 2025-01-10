@@ -468,15 +468,17 @@ void SetRTCAction::configure(Stream &stream, unsigned long timeout,
 
 
 DevicesAction::DevicesAction(const char *name, Device* dev0, Device* dev1,
-			     Device* dev2, Device* dev3) :
+			     Device* dev2, Device* dev3,
+			     Device* dev4, Device* dev5) :
   DevicesAction(*Configurator::MainConfig->Config, name,
-		dev0, dev1, dev2, dev3) {
+		dev0, dev1, dev2, dev3, dev4, dev5) {
 }
 
 
 DevicesAction::DevicesAction(Configurable &menu, const char *name,
 			     Device* dev0, Device* dev1,
-			     Device* dev2, Device* dev3) :
+			     Device* dev2, Device* dev3,
+			     Device* dev4, Device* dev5) :
   Action(menu, name, StreamInput) {
   if (dev0 != 0)
     Devices[NDevices++] = dev0;
@@ -486,6 +488,10 @@ DevicesAction::DevicesAction(Configurable &menu, const char *name,
     Devices[NDevices++] = dev2;
   if (dev3 != 0)
     Devices[NDevices++] = dev3;
+  if (dev4 != 0)
+    Devices[NDevices++] = dev4;
+  if (dev5 != 0)
+    Devices[NDevices++] = dev5;
 }
 
 
@@ -498,7 +504,7 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
   }
   // report:
   char ds[2] = {'\0', '\0'};
-  if (NDevices > 1)
+  if (NDevices != 1)
     ds[0] = 's';
   stream.printf("%d of %d device%s available:\n",
                 navailable, NDevices, ds);
@@ -508,7 +514,7 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
       Devices[k]->Device::report(stream);
     }
   }
-  if (navailable == 0 && NDevices > 0)
+  if (navailable == 0)
     stream.println("  no device available!");
   stream.println();
 }
