@@ -31,6 +31,8 @@
   - BaseEnumParameter: Base class for enum values, i.e. strings encoding integers.
   - EnumParameter: A parameter whose value is an integer that is represented as a string.
   - EnumPointerParameter: A parameter whose value points to an integer that is represented as a string.
+  - BoolParameter: A parameter whose value is a boolean.
+  - BoolPointerParameter: A parameter whose value points to a noolean.
   - BaseNumberParameter: Base class for numerical values with optional unit (integers and floats).
   - NumberParameter: A parameter whose value is a number with optional unit (any type of integer or float).
   - NumberPointerParameter: A parameter whose value points to a number with optional unit (any type of integer or float). 
@@ -244,8 +246,8 @@ class BaseEnumParameter : public BaseStringParameter {
   void setSelection(const T *enums, const char **selection, size_t n);
 
   /* Check whether val matches a string of the selection. Return
-     corresponding enum alue. */
-  T checkSelection(const char *val);
+     corresponding enum value or -1 if not found. */
+  int checkSelection(const char *val);
 
   /* Return string representation of enum value. */
   const char *enumStr(T val) const;
@@ -692,7 +694,7 @@ void BaseEnumParameter<T>::setSelection(const T *enums,
 
 
 template<class T>
-T BaseEnumParameter<T>::checkSelection(const char *val) {
+int BaseEnumParameter<T>::checkSelection(const char *val) {
   char lval[strlen(val)+1];
   for (size_t k=0; k<strlen(val)+1; k++)
     lval[k] = tolower(val[k]);
@@ -701,9 +703,9 @@ T BaseEnumParameter<T>::checkSelection(const char *val) {
     for (size_t k=0; k<strlen(Selection[j])+1; k++)
       cval[k] = tolower(Selection[j][k]);
     if (strcmp(cval, lval) == 0)
-      return Enums[j];
+      return int(Enums[j]);
   }
-  return Enums[0];
+  return -1;
 }
 
 
@@ -739,29 +741,27 @@ template<class T>
 bool EnumParameter<T>::parseValue(char *val, bool selection) {
   if (strlen(val) == 0)
     return true;
-  if (selection) {
-    char *end;
-    long i = strtol(val, &end, 10) - 1;
-    if (end > val && i >= 0 && i < (long)(this->NSelection)) {
+  if (selection && this->NSelection > 0) {
+    if (strcmp(val, "q") == 0) {
+      strncpy(val, this->enumStr(Value), this->MaxVal);
+      val[this->MaxVal-1] = '\0';
+    }
+    else {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)this->NSelection)
+	return false;
       Value = this->Enums[i];
       valueStr(val);
-      return true;
     }
   }
-  T eval = this->checkSelection(val);
-  // lower case input string:
-  char lval[strlen(val)+1];
-  for (size_t k=0; k<strlen(val)+1; k++)
-    lval[k] = tolower(val[k]);
-  // lower case enum string:
-  const char *es = this->enumStr(eval);
-  char les[strlen(es)+1];
-  for (size_t k=0; k<strlen(es)+1; k++)
-    les[k] = tolower(es[k]);
-  if (strcmp(lval, les) != 0)
-    return false;
-  Value = eval;
-  valueStr(val);
+  else {
+    int ev = this->checkSelection(val);
+    if (ev < 0)
+      return false;
+    Value = T(ev);
+    valueStr(val);
+  }
   return true;
 }
 
@@ -798,29 +798,27 @@ template<class T>
 bool EnumPointerParameter<T>::parseValue(char *val, bool selection) {
   if (strlen(val) == 0)
     return true;
-  if (selection) {
-    char *end;
-    long i = strtol(val, &end, 10) - 1;
-    if (end > val && i >= 0 && i < (long)(this->NSelection)) {
+  if (selection && this->NSelection > 0) {
+    if (strcmp(val, "q") == 0) {
+      strncpy(val, this->enumStr(*Value), this->MaxVal);
+      val[this->MaxVal-1] = '\0';
+    }
+    else {
+      char *end;
+      long i = strtol(val, &end, 10) - 1;
+      if (end == val || i < 0 || i >= (long)this->NSelection)
+	return false;
       *Value = this->Enums[i];
       valueStr(val);
-      return true;
     }
   }
-  T eval = this->checkSelection(val);
-  // lower case input string:
-  char lval[strlen(val)+1];
-  for (size_t k=0; k<strlen(val)+1; k++)
-    lval[k] = tolower(val[k]);
-  // lower case enum string:
-  const char *es = this->enumStr(eval);
-  char les[strlen(es)+1];
-  for (size_t k=0; k<strlen(es)+1; k++)
-    les[k] = tolower(es[k]);
-  if (strcmp(lval, les) != 0)
-    return false;
-  *Value = eval;
-  valueStr(val);
+  else {
+    int ev = this->checkSelection(val);
+    if (ev < 0)
+      return false;
+    *Value = T(ev);
+    valueStr(val);
+  }
   return true;
 }
 
@@ -1095,13 +1093,13 @@ template<class T>
 bool NumberParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled(Action::SetValue))
     return true;
+  if (strlen(val) == 0)
+    return true;
   // when a selection was offered and 'q' was entered, keep the value:
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
   }
-  if (strlen(val) == 0)
-    return true;
   if (this->SpecialStr != NULL && strlen(this->SpecialStr) > 0 &&
       strcmp(val, this->SpecialStr) == 0) {
     Value = this->SpecialValue;
@@ -1195,13 +1193,13 @@ template<class T>
 bool NumberPointerParameter<T>::parseValue(char *val, bool selection) {
   if (this->disabled(Action::SetValue))
     return true;
+  if (strlen(val) == 0)
+    return true;
   // when a selection was offered and 'q' was entered, keep the value:
   if (selection && this->NSelection > 0 && strcmp(val, "q") == 0) {
     valueStr(val);
     return true;
   }
-  if (strlen(val) == 0)
-    return true;
   if (this->SpecialStr != NULL && strlen(this->SpecialStr) > 0 &&
       strcmp(val, this->SpecialStr) == 0) {
     *Value = this->SpecialValue;

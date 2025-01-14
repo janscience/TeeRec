@@ -44,9 +44,9 @@ void Parameter::configure(Stream &stream, unsigned long timeout,
   listSelection(stream);
   while (true) {
     if (NSelection > 0)
-      stream.print("select new value");
+      stream.print("Select new value");
     else
-      stream.print("enter new value");
+      stream.print("Enter new value");
     instructions(pval, detailed);
     if (strlen(pval) > 0)
       stream.printf(" (%s)", pval);
