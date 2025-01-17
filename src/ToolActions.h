@@ -300,13 +300,25 @@ class RTCAction : public Action {
 };
 
 
+class PrintRTCAction : public RTCAction {
+
+ public:
+
+  using RTCAction::RTCAction;
+
+  /* Print the current time. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool echo=true, bool detailed=false);
+};
+
+
 class ReportRTCAction : public RTCAction {
 
  public:
 
   using RTCAction::RTCAction;
 
-  /* Report the real-time clock. */
+  /* Report the time and the status of the real-time clock. */
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
 			 bool echo=true, bool detailed=false);
 };

@@ -448,11 +448,17 @@ RTCAction::RTCAction(Configurable &menu, const char *name, RTClock &rtclock) :
 }
 
 
+void PrintRTCAction::configure(Stream &stream, unsigned long timeout,
+			       bool echo, bool detailed) {
+  stream.print("Current time: ");
+  RTC.print(stream);
+  stream.println();
+}
+
+
 void ReportRTCAction::configure(Stream &stream, unsigned long timeout,
 				bool echo, bool detailed) {
-  char times[20];
-  RTC.dateTime(times);
-  stream.printf("Current time: %s\n\n", times);
+  RTC.report(stream);
 }
 
 

@@ -99,7 +99,10 @@ class RTClock : public Device {
   // If dash, replace colons by dashes.
   String makeStr(const String &str, time_t time=0, bool dash=false) const;
 
-  // Write out current time, real time provider, and potential error message
+  // Print current time on stream.
+  void print(Stream &stream=Serial) const;
+
+  // Print current time, real time provider, and potential error message
   // on stream.
   void report(Stream &stream=Serial) const;
 

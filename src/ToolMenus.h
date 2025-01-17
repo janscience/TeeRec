@@ -19,6 +19,7 @@ public:
 
 protected:
 
+  PrintRTCAction PrintAct;
   ReportRTCAction ReportAct;
   SetRTCAction SetAct;
   

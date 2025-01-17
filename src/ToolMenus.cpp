@@ -4,7 +4,8 @@
 
 DateTimeMenu::DateTimeMenu(RTClock &rtclock) :
   Configurable("Date & time", Action::StreamInput),
-  ReportAct(*this, "Print date & time", rtclock),
+  PrintAct(*this, "Print date & time", rtclock),
+  ReportAct(*this, "Report date & time infos", rtclock),
   SetAct(*this, "Set date & time", rtclock) {
 }
 

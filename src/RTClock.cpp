@@ -274,6 +274,13 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
 }
 
 
+void RTClock::print(Stream &stream) const {
+  char times[20];
+  dateTime(times);
+  stream.println(times);
+}
+
+
 void RTClock::report(Stream &stream) const {
   char times[20];
   dateTime(times);

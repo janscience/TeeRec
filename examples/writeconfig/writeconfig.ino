@@ -1,13 +1,13 @@
 // select a data source:
-//#define INPUT_ADC     // data are recorded from Teensy internal ADCs
-#define INPUT_TDM     // data are recorded by TI PCM186x chip via TDM
+#define INPUT_ADC     // data are recorded from Teensy internal ADCs
+//#define INPUT_TDM     // data are recorded by TI PCM186x chip via TDM
 
 // select SD card:
 #define SDCARD_BUILTIN
 //#define SDCARD_SPI0
 //#define SDCARD_SPI1
 
-#include <RTClock.h>
+#include <RTClockDS1307.h>
 #include <SDCard.h>
 #include <Configurator.h>
 #include <ToolActions.h>
