@@ -1,7 +1,6 @@
 #include <Arduino.h>
-#include <DS1307RTC.h>
 #include <RTClock.h>
-#include <SDWriter.h>
+#include <SDCard.h>
 
 
 time_t getTeensyRTCTime() {
@@ -10,36 +9,21 @@ time_t getTeensyRTCTime() {
 
 
 RTClock::RTClock() :
-  Device(),
-  RTCSource(0) {
+  Device() {
   setDeviceType("clock");
   setInternBus();
   setChip("Teensy-RTC");
-  setSync();
+  setSyncProvider(getTeensyRTCTime);
 }
 
 
-void RTClock::init() {
-  tmElements_t tm;
-  RTCSource = RTC.read(tm) && RTC.chipPresent() ? 1 : 0;
-  if (RTCSource == 1) {
-    setI2CBus(Wire, 0x68);
-    setChip("DS1307");
-  }
-  setSync();
+bool RTClock::begin() {
+  return true;
 }
 
 
 bool RTClock::available() const {
   return true;
-}
-
-
-void RTClock::setSync() {
-  if (RTCSource == 1)
-    setSyncProvider(RTC.get);
-  else
-    setSyncProvider(getTeensyRTCTime);
 }
 
 
@@ -49,7 +33,7 @@ bool RTClock::check(Stream &stream) {
     if (timeStatus() == timeNotSet)
       stream.println("RTC: time has never been set!");
     else if (timeStatus() == timeNeedsSync)
-      stream.println("RTC: unable to sync time with RTC!");
+      stream.println("RTC: time needs to be synchronized with RTC!");
   }
   return status;
 }
@@ -57,10 +41,7 @@ bool RTClock::check(Stream &stream) {
 
 void RTClock::set(time_t t) {
   setTime(t);
-  if (RTCSource == 1)
-    RTC.set(t);
-  else
-    Teensy3Clock.set(t);
+  Teensy3Clock.set(t);
 }
 
 
@@ -294,19 +275,14 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
 
 
 void RTClock::report(Stream &stream) const {
-  char source[22];
-  if (RTCSource == 1)
-    strcpy(source, "DS1307/DS1337/DS3231");
-  else
-    strcpy(source, "on-board");
   char times[20];
   dateTime(times);
-  stream.printf("RTC (%s) current time: %s\n", source, times);
+  stream.printf("RTC (%s) current time: %s\n", chip(), times);
   if (timeStatus() != timeSet) {
     if (timeStatus() == timeNotSet)
-      stream.println("  time has never been set!");
+      stream.println(" - time has never been set!");
     else if (timeStatus() == timeNeedsSync)
-      stream.println("  unable to sync time with RTC!");
+      stream.println(" -  time needs to be synchronized with RTC!");
   }
   stream.println();
 }

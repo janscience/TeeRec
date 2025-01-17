@@ -15,7 +15,7 @@
   #include <InputTDMSettings.h>
 #endif
 #include <SDWriter.h>
-#include <RTClock.h>
+#include <RTClockDS1307.h>
 #include <DeviceID.h>
 #include <Blink.h>
 #include <TestSignals.h>

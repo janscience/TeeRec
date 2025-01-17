@@ -34,7 +34,9 @@
 #include <PushButtons.h>
 #include <DeviceID.h>
 #include <Menu.h>
+
 #include <RTClock.h>
+#include <RTClockDS1307.h>
 
 #include <TeeRecBanner.h>
 #include <TeensyBoard.h>

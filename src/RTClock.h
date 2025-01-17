@@ -1,15 +1,14 @@
 /*
-  RTClock - library for using a real-time clock.
+  RTClock - base class for using a real-time clock.
   Created by Jan Benda, June 3rd, 2021.
   Based on https://github.com/PaulStoffregen/Time
   and on contributions from Stefan Mucha and Lydia Federman.
-  See also https://www.pjrc.com/teensy/td_libs_Time.html 
-  and https://www.pjrc.com/teensy/td_libs_DS1307RTC.html.
+  See also https://www.pjrc.com/teensy/td_libs_Time.html.
 
-  If a DS1307, DS1337 or DS3231 chip is present, it is used as the
-  source for getting real time.  Without such a chip the Teensy
-  on-board real-time clock is used - you just need to attach a 3.3V
-  battery to VBAT to make it work.
+  Uses the Teensy on-board real-time clock. You just need to attach a
+  3.3V battery to VBAT to make it work.
+  
+  For using a DS1307, DS1337 or DS3231 chip, see RTClockDS1307.h.
 */
 
 #ifndef RTClock_h
@@ -28,29 +27,22 @@ class RTClock : public Device {
 
  public:
 
-  // Initialize the Teensy on-board real time clock.
+  // Initialize usage of the Teensy on-board real time clock.
   RTClock();
 
-  // Set the source for real time clock to DS1307 chip if
-  // present, otherwise the Teensy on-board real time clock is used.
-  // Call this early on in setup() if you intend to use an DS1307 clock.
-  void init();
+  // Set the source to an external real time clock.
+  // Return true on success.
+  // The default implementation return true.
+  virtual bool begin();
 
   // True if real-time clock is available (always true).
   virtual bool available() const;
-
-  // Set the real time clock (either DS1307 if available or on-board)
-  // via setSyncProvider() from TimeLib.h.
-  // This function is called by the constructor or by init()
-  // and you usually do not need to call it again.
-  // You need to call it when waking up from a deep sleep, though.
-  void setSync();
 
   // Check whether clock is available and set.
   // If not print message to stream.
   bool check(Stream &stream=Serial);
 
-  // Set real-time clock to t.
+  // Set real-time clock to time t.
   void set(time_t t);
   
   // Set real-time clock to the given time.
@@ -110,10 +102,6 @@ class RTClock : public Device {
   // Write out current time, real time provider, and potential error message
   // on stream.
   void report(Stream &stream=Serial) const;
-
-private:
-
-  int RTCSource;
 
 };
 
