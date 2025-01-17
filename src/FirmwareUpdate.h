@@ -6,10 +6,6 @@
 #ifndef FirmwareUpdate_h
 #define FirmwareUpdate_h
 
-//#define FIRMWARE_UPDATE 1
-
-#ifdef FIRMWARE_UPDATE
-
 
 class SDCard;
 
@@ -23,6 +19,3 @@ void updateFirmware(SDCard &sdcard, bool echo=true, Stream &stream=Serial);
 
 
 #endif
-
-#endif
-

@@ -1,15 +1,12 @@
 #include <Arduino.h>
 #include <Action.h>
-#include <SDWriter.h>
+#include <SDCard.h>
 #include <FirmwareUpdate.h>
 
-
-#ifdef FIRMWARE_UPDATE
-
-
-#include "FXUtil.h"		// read_ascii_line(), hex file support
+// From https://github.com/joepasquariello/FlasherX :
+#include "FlasherX/FXUtil.h"     // read_ascii_line(), hex file support
 extern "C" {
-  #include "FlashTxx.h"		// TLC/T3x/T4x/TMM flash primitives
+  #include "FlasherX/FlashTxx.h" // TLC/T3x/T4x/TMM flash primitives
 }
 
 
@@ -154,7 +151,3 @@ void updateFirmware(SDCard &sdcard, bool echo, Stream &stream) {
   firmware_buffer_free( buffer_addr, buffer_size );
   REBOOT;
 }
-
-
-#endif
-

@@ -35,13 +35,11 @@ SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
 }
 
 
-#ifdef FIRMWARE_UPDATE
 FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
   Configurable("Firmware", Action::StreamInput),
   ListAct(*this, "List available updates", sdcard),
   UpdateAct(*this, "Update firmware", sdcard) {
 }
-#endif
 
 
 DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,

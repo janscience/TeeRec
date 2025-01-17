@@ -419,8 +419,6 @@ void SDRemoveRecordingsAction::configure(Stream &stream, unsigned long timeout,
 }
 
 
-#ifdef FIRMWARE_UPDATE
-
 void ListFirmwareAction::configure(Stream &stream, unsigned long timeout,
 				   bool echo, bool detailed) {
   if (disabled(StreamInput))
@@ -437,8 +435,6 @@ void UpdateFirmwareAction::configure(Stream &stream, unsigned long timeout,
   updateFirmware(SDC, echo, stream);
   stream.println();
 }
-
-#endif
 
 
 RTCAction::RTCAction(const char *name, RTClock &rtclock) :

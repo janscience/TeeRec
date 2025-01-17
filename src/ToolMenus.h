@@ -59,7 +59,6 @@ protected:
 };
 
 
-#ifdef FIRMWARE_UPDATE
 class FirmwareMenu : public Configurable {
 
 public:
@@ -72,7 +71,6 @@ protected:
   UpdateFirmwareAction UpdateAct;
   
 };
-#endif
 
 
 class DiagnosticMenu : public Configurable {

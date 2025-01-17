@@ -260,8 +260,6 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
 };
 
 
-#ifdef FIRMWARE_UPDATE
-
 class ListFirmwareAction : public SDCardAction {
 
  public:
@@ -284,8 +282,6 @@ class UpdateFirmwareAction : public SDCardAction {
   virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
 			 bool echo=true, bool detailed=false);
 };
-
-#endif
 
 
 class RTCAction : public Action {

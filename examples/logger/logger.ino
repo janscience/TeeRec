@@ -243,6 +243,7 @@ void setup() {
   Serial.begin(9600);
   while (!Serial && millis() < 2000) {};
   printTeeRecBanner();
+  rtclock.begin();
   rtclock.check();
   prevname = "";
   sdcard.begin();

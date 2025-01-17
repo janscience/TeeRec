@@ -67,9 +67,7 @@ InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
 DateTimeMenu datetime_menu(rtclock);
 ConfigurationMenu configuration_menu(sdcard);
 SDCardMenu sdcard0_menu(sdcard, settings);
-#ifdef FIRMWARE_UPDATE
 FirmwareMenu firmware_menu(sdcard);
-#endif
 DiagnosticMenu diagnostic_menu("Diagnostics", sdcard);
 HelpAction help_act(config, "Help");
 
@@ -89,6 +87,7 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   printTeeRecBanner();
   blink.switchOn();
+  rtclock.begin();
 #if defined(SDCARD_BUILTIN)
   sdcard.begin();
 #elif defined(SDCARD_SPI0)
