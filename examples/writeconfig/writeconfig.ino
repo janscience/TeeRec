@@ -52,7 +52,7 @@
   #define PREGAIN        1.0
 
 
-RTClock rtclock;
+RTClockDS1307 rtclock;
 SDCard sdcard;
 
 Configurator config;
@@ -88,6 +88,7 @@ void setup() {
   printTeeRecBanner();
   blink.switchOn();
   rtclock.begin();
+  rtclock.check();
 #if defined(SDCARD_BUILTIN)
   sdcard.begin();
 #elif defined(SDCARD_SPI0)

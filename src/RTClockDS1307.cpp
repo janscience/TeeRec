@@ -9,7 +9,7 @@ RTClockDS1307::RTClockDS1307() :
 
 bool RTClockDS1307::begin() {
   tmElements_t tm;
-  if (RTC.chipPresent() && RTC.read(tm)) {
+  if (RTC.read(tm) && RTC.chipPresent()) {
     setI2CBus(Wire, 0x68);
     setChip("DS1307/DS1337/DS3231");
     setSyncProvider(RTC.get);

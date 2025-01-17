@@ -96,7 +96,7 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 #elif defined(INPUT_TDM)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
-RTClock rtclock;
+RTClockRTClockDS1307 rtclock;
 DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 Blink blink(LED_BUILTIN);
