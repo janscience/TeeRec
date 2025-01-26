@@ -162,9 +162,14 @@ void DataBuffer::printData(size_t start, size_t nframes,
   if (Rate == 0 || NChannels == 0)
     return;
   start *= NChannels;
+  bool check = (start < index());
   for (size_t k=0; k<nframes; k++) {
-    if (start >= NBuffer)
+    if (start >= NBuffer) {
       start -= NBuffer;
+      check = true;
+    }
+    if (check && start >= index())
+      return;
     stream.print(Buffer[start++]);
     for (uint8_t j=1; j<NChannels; j++) {
       stream.print(';');
@@ -180,10 +185,15 @@ void DataBuffer::printData(uint8_t channel, size_t start, size_t nframes,
   if (Rate == 0 || NChannels == 0)
     return;
   start *= NChannels;
+  bool check = (start < index());
   start += channel;
   for (size_t k=0; k<nframes; k++) {
-    if (start >= NBuffer)
+    if (start >= NBuffer) {
       start -= NBuffer;
+      check = true;
+    }
+    if (check && start >= index())
+      return;
     stream.print(Buffer[start]);
     stream.println();
     start += NChannels;

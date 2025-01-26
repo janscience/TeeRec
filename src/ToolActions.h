@@ -16,6 +16,7 @@ class SDCard;
 class Settings;
 class RTClock;
 class Device;
+class Input;
 
 
 class HelpAction : public Action {
@@ -361,6 +362,34 @@ protected:
   size_t NDevices;
   Device *Devices[MaxDevices];
   
+};
+
+
+class InputAction : public Action {
+
+ public:
+
+  /* Initialize and add to default menu. */
+  InputAction(const char *name, Input &data);
+
+  /* Initialize and add to configuration menu. */
+  InputAction(Configurable &menu, const char *name, Input &data);
+
+ protected:
+
+  Input &Data;
+};
+
+
+class PrintInputAction : public InputAction {
+
+ public:
+
+  using InputAction::InputAction;
+
+  /* Record and print 100ms of data. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool echo=true, bool detailed=false);
 };
 
 

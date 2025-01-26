@@ -4,6 +4,7 @@
 #include <Configurator.h>
 #include <Settings.h>
 #include <Device.h>
+#include <Input.h>
 #include <ToolActions.h>
 
 
@@ -518,6 +519,40 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
   }
   if (navailable == 0)
     stream.println("  no device available!");
+  stream.println();
+}
+
+
+InputAction::InputAction(const char *name, Input &data) :
+  InputAction(*root()->Config, name, data) {
+}
+
+
+InputAction::InputAction(Configurable &menu, const char *name, Input &data) :
+  Action(menu, name, StreamInput),
+  Data(data) {
+}
+
+
+void PrintInputAction::configure(Stream &stream, unsigned long timeout,
+				 bool echo, bool detailed) {
+  // TODO:
+  // configure from current settings!
+  // check -> own action?
+  int tmax = 100;
+  stream.println("Record some data:");
+  Data.reset();
+  Data.start();
+  delay(tmax);
+  Data.stop();
+  stream.println("done");
+  stream.println();
+  size_t nframes = Data.available()/Data.nchannels();
+  if (Data.frames(0.001*tmax) < nframes)
+    nframes = Data.frames(0.001*tmax);
+  stream.printf("Sampling rate: %dHz", Data.rate());
+  stream.println();
+  Data.printData(0, nframes, stream);
   stream.println();
 }
 
