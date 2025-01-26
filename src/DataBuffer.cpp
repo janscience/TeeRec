@@ -113,19 +113,19 @@ size_t DataBuffer::incrementSample(size_t idx, size_t incr) const {
 
 
 void DataBuffer::getData(uint8_t channel, size_t start,
-			 sample_t *buffer, size_t nbuffer) const {
+			 sample_t *buffer, size_t nframes) const {
   if (Rate == 0 || NChannels == 0) {
-    memset(buffer, 0, sizeof(sample_t)*nbuffer);
+    memset(buffer, 0, sizeof(sample_t)*nframes);
     return;
   }
-  if (nbuffer*NChannels > NBuffer) {
+  if (nframes*NChannels > NBuffer) {
     Serial.println("ERROR: requested too many samples.");
-    memset(buffer, 0, sizeof(sample_t)*nbuffer);
+    memset(buffer, 0, sizeof(sample_t)*nframes);
     return;
   }
   // copy:
   start += channel;
-  for (size_t k=0; k<nbuffer; k++) {
+  for (size_t k=0; k<nframes; k++) {
     if (start >= NBuffer)
       start -= NBuffer;
     buffer[k] = Buffer[start];
@@ -135,23 +135,57 @@ void DataBuffer::getData(uint8_t channel, size_t start,
 
 
 void DataBuffer::getData(uint8_t channel, size_t start,
-			 float *buffer, size_t nbuffer) const {
+			 float *buffer, size_t nframes) const {
   if (Rate == 0 || NChannels == 0) {
-    memset(buffer, 0, sizeof(float)*nbuffer);
+    memset(buffer, 0, sizeof(float)*nframes);
     return;
   }
-  if (nbuffer*NChannels > NBuffer) {
+  if (nframes*NChannels > NBuffer) {
     Serial.println("ERROR: requested too many samples.");
-    memset(buffer, 0, sizeof(float)*nbuffer);
+    memset(buffer, 0, sizeof(float)*nframes);
     return;
   }
   // copy:
   start += channel;
   float scale = 1.0/(1 << (DataBits-1));
-  for (size_t k=0; k<nbuffer; k++) {
+  for (size_t k=0; k<nframes; k++) {
     if (start >= NBuffer)
       start -= NBuffer;
     buffer[k] = scale*Buffer[start];
+    start += NChannels;
+  }
+}
+
+
+void DataBuffer::printData(size_t start, size_t nframes,
+			   Stream &stream) const {
+  if (Rate == 0 || NChannels == 0)
+    return;
+  start *= NChannels;
+  for (size_t k=0; k<nframes; k++) {
+    if (start >= NBuffer)
+      start -= NBuffer;
+    stream.print(Buffer[start++]);
+    for (uint8_t j=1; j<NChannels; j++) {
+      stream.print(';');
+      stream.print(Buffer[start++]);
+    }
+    stream.println();
+  }
+}
+
+
+void DataBuffer::printData(uint8_t channel, size_t start, size_t nframes,
+			   Stream &stream) const {
+  if (Rate == 0 || NChannels == 0)
+    return;
+  start *= NChannels;
+  start += channel;
+  for (size_t k=0; k<nframes; k++) {
+    if (start >= NBuffer)
+      start -= NBuffer;
+    stream.print(Buffer[start]);
+    stream.println();
     start += NChannels;
   }
 }

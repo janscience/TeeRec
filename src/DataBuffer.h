@@ -115,11 +115,23 @@ public:
   // Increment sample index into data buffer by decr frames.
   size_t incrementSample(size_t idx, size_t incr) const;
 
-  // Get the nbuffer most recent data from a channel.
-  void getData(uint8_t channel, size_t start, sample_t *buffer, size_t nbuffer) const;
+  // Get nframes data from a channel starting at sample index start.
+  // Assumes start to be the first index of a frame, not the one of the channel.
+  void getData(uint8_t channel, size_t start,
+	       sample_t *buffer, size_t nframes) const;
 
-  // Get the nbuffer most recent data from a channel scaled to (-1, 1). <1ms
-  void getData(uint8_t channel, size_t start, float *buffer, size_t nbuffer) const;
+  // Get the nframes most recent data from a channel scaled to (-1, 1).
+  // Assumes start to be the first index of a frame, not the one of the channel.
+  void getData(uint8_t channel, size_t start,
+	       float *buffer, size_t nframes) const;
+
+  // Print nframes samples of all channels starting at frame start.
+  // Each line is one frame with channels separated by ';'.
+  void printData(size_t start, size_t nframes, Stream &stream=Serial) const;
+
+  // Print nframes samples of the specified channel starting at frame start.
+  void printData(uint8_t channel, size_t start, size_t nframes,
+		 Stream &stream=Serial) const;
 
   // Check whether data in the whole buffer are within the specified range
   // (for debugging).
