@@ -12,26 +12,8 @@ InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
 				   ADC_CONVERSION_SPEED conversion_speed,
 				   ADC_SAMPLING_SPEED sampling_speed,
 				   ADC_REFERENCE reference, float pregain) :
-  Configurable("ADC"),
-  Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
-  Bits(*this, "Resolution", bits, "%.0f", "bits", "",
-       BitsSelection, NBitsSelection),
-  Averaging(*this, "Averaging", averaging, "%hu", "", "",
-	    AveragingSelection, NAveragingSelection),
-  ConversionSpeed(*this, "Conversion", conversion_speed,
-		  InputADC::ConversionEnums,
-		  InputADC::ConversionShortStrings,
-		  InputADC::MaxConversions),
-  SamplingSpeed(*this, "Sampling", sampling_speed,
-		InputADC::SamplingEnums,
-		InputADC::SamplingShortStrings,
-		InputADC::MaxSamplings),
-  Reference(*this, "Reference", reference,
-	    InputADC::ReferenceEnums,
-	    InputADC::ReferenceStrings,
-	    InputADC::MaxReferences),
-  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
-  PreGain.disable();
+  InputADCSettings("ADC", rate, bits, averaging, conversion_speed,
+		   sampling_speed, reference, pregain) {
 }
 
 
@@ -40,8 +22,7 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 				   ADC_CONVERSION_SPEED conversion_speed,
 				   ADC_SAMPLING_SPEED sampling_speed,
 				   ADC_REFERENCE reference, float pregain) :
-  Configurable(name),
-  Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
+  InputSettings(name, rate, pregain),
   Bits(*this, "Resolution", bits, "%.0f", "bits", "",
        BitsSelection, NBitsSelection),
   Averaging(*this, "Averaging", averaging, "%hu", "", "",
@@ -57,14 +38,8 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
   Reference(*this, "Reference", reference,
 	    InputADC::ReferenceEnums,
 	    InputADC::ReferenceStrings,
-	    InputADC::MaxReferences),
-  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
-  PreGain.disable();
-}
-
-
-void InputADCSettings::setRate(uint32_t rate) {
-  Rate.setValue(rate);
+	    InputADC::MaxReferences) {
+  // TODO: fix order of Parameters!
 }
 
 
@@ -93,12 +68,8 @@ void InputADCSettings::setReference(ADC_REFERENCE ref) {
 }
 
 
-void InputADCSettings::setPreGain(float pregain) {
-  PreGain.setValue(pregain);
-}
-
-
-void InputADCSettings::configure(InputADC *adc) {
+void InputADCSettings::configure(Input *input) {
+  InputADC *adc = static_cast<InputADC *>(input);
   if (adc == 0)
     return;
   adc->setRate(rate());
@@ -110,7 +81,8 @@ void InputADCSettings::configure(InputADC *adc) {
 }
 
 
-void InputADCSettings::setConfiguration(InputADC *adc) {
+void InputADCSettings::setConfiguration(Input *input) {
+  InputADC *adc = static_cast<InputADC *>(input);
   if (adc == 0)
     return;
   setRate(adc->rate());

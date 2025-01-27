@@ -8,14 +8,10 @@
 #define InputTDMSettings_h
 
 
-#include <Configurable.h>
-#include <Parameter.h>
+#include <InputSettings.h>
 
 
-class InputTDM;
-
-
-class InputTDMSettings : public Configurable {
+class InputTDMSettings : public InputSettings {
 
 public:
 
@@ -26,15 +22,6 @@ public:
   // Constructor setting configuration name.
   InputTDMSettings(const char *name, uint32_t rate=0, int nchannels=16,
 		   float gain=0, float pregain=1);
-
-  // Return sampling rate per channel in Hertz.
-  uint32_t rate() const { return Rate.value(); };
-  
-  // Set sampling rate per channel in Hertz.
-  void setRate(uint32_t rate);
-
-  // Provide a list of valid sampling rates in Hz.
-  void setRateSelection(uint32_t *selection, size_t n);
 
   // Return number of channels.
   // The number of channels is set from the configuration file
@@ -54,27 +41,11 @@ public:
   // manually to appropriate Control instances.
   void setGain(float gain);
 
-  // Return pregain as a factor.
-  // This is the fixed gain of a first amplification stage.
-  float pregain() const { return PreGain.value(); };
-  
-  // Set pregain as a factor.
-  // This is the fixed gain of a first amplification stage.
-  void setPreGain(float pregain);
-
-  // Apply TDM settings on tdm.
-  void configure(InputTDM *tdm);
-
-  // Transfer TDM settings from tdm to the InputTDMSettings instance.
-  void setConfiguration(InputTDM *tdm);
-
     
 protected:
 
-  NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> NChannels;
   NumberParameter<float> Gain;
-  NumberParameter<float> PreGain;
   
 };
 

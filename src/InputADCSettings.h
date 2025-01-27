@@ -8,16 +8,11 @@
 #define InputADCSettings_h
 
 
-#include <Arduino.h>
 #include <ADC.h>
-#include <Configurable.h>
-#include <Parameter.h>
+#include <InputSettings.h>
 
 
-class InputADC;
-
-
-class InputADCSettings : public Configurable {
+class InputADCSettings : public InputSettings {
 
 public:
 
@@ -35,12 +30,6 @@ public:
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
 		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3,
 		   float pregain=1);
-
-  // Return sampling rate per channel in Hertz.
-  uint32_t rate() const { return Rate.value(); };
-  
-  // Set sampling rate per channel in Hertz.
-  void setRate(uint32_t rate);
 
   // Return ADC resolution in bits per sample.
   uint8_t resolution() const { return Bits.value(); };
@@ -94,30 +83,20 @@ public:
   // The voltage reference.
   ADC_REFERENCE reference() const { return Reference.value(); };
 
-  // Return pregain as a factor.
-  // This is the fixed gain of a first amplification stage.
-  float pregain() const { return PreGain.value(); };
-  
-  // Set pregain as a factor.
-  // This is the fixed gain of a first amplification stage.
-  void setPreGain(float pregain);
+  // Apply settings on input.
+  virtual void configure(Input *input);
 
-  // Apply ADC settings on adc.
-  void configure(InputADC *adc);
-
-  // Transfer ADC settings from adc to the InputADCSettings instance.
-  void setConfiguration(InputADC *adc);
+  // Transfer settings from input to this InputADCSettings instance.
+  virtual void setConfiguration(Input *input);
 
     
 protected:
 
-  NumberParameter<uint32_t> Rate;
   NumberParameter<uint8_t> Bits;
   NumberParameter<uint8_t> Averaging;
   EnumParameter<ADC_CONVERSION_SPEED> ConversionSpeed;
   EnumParameter<ADC_SAMPLING_SPEED> SamplingSpeed;
   EnumParameter<ADC_REFERENCE> Reference;
-  NumberParameter<float> PreGain;
 
   static const size_t NBitsSelection = 3;
   static const uint8_t BitsSelection[NBitsSelection];
