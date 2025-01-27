@@ -542,8 +542,10 @@ void ReportInputAction::configure(Stream &stream, unsigned long timeout,
 				  bool echo, bool detailed) {
   Data.reset();
   Settings.configure(&Data);
-  if (!Data.check(0, stream))
+  if (!Data.check(0, stream)) {
+    stream.println();
     return;
+  }
   Data.start();
   Data.report(stream);
   Data.stop();
@@ -555,8 +557,10 @@ void PrintInputAction::configure(Stream &stream, unsigned long timeout,
 				 bool echo, bool detailed) {
   Data.reset();
   Settings.configure(&Data);
-  if (!Data.check(0, stream))
+  if (!Data.check(0, stream)) {
+    stream.println();
     return;
+  }
   int tmax = 100;
   stream.print("Record some data ...");
   Data.reset();
