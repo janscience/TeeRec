@@ -29,6 +29,37 @@ void Configurable::add(Action *act) {
 }
 
 
+void Configurable::move(const Action *action, size_t index) {
+  Serial.println("MOVE");
+  if (index >= NActions)
+    return;
+  // find index of action:
+  size_t aidx = 0;
+  for (size_t j=0; j<NActions; j++) {
+    if (Actions[j] == action) {
+      aidx = j;
+      break;
+    }
+  }
+  if (Actions[aidx] != action)
+    return;
+  if (aidx == index)
+    return;
+  Serial.printf("found at %d, move to %d, n=%d\n", aidx, index, NActions);
+  // move:
+  Action *act = Actions[aidx];
+  if (index > aidx) {
+    for (size_t j=aidx; j<index; j++)
+      Actions[j] = Actions[j+1];
+  }
+  else {
+    for (size_t j=aidx; j>index; j--)
+      Actions[j] = Actions[j-1];
+  }
+  Actions[index] = act;
+}
+
+
 Action *Configurable::action(const char *name) {
   size_t inx = strlen(name);
   char lname[strlen(name)+1];

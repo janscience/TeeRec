@@ -14,7 +14,7 @@ InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
   InputSettings(name, rate, pregain),
   NChannels(*this, "NChannels", nchannels, 1, 128, "%hu"),
   Gain(*this, "Gain", gain, "%.1f", "dB") {
-  // TODO: fix order of parameters!
+  move(&PreGain, 3);
 }
 
 

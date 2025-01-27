@@ -39,7 +39,7 @@ InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
 	    InputADC::ReferenceEnums,
 	    InputADC::ReferenceStrings,
 	    InputADC::MaxReferences) {
-  // TODO: fix order of Parameters!
+  move(&PreGain, 6);
 }
 
 

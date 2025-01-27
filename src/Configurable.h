@@ -27,6 +27,9 @@ class Configurable : public Action {
   /* Add an action to this Configurable. */
   void add(Action *action);
 
+  /* Move action that was already added to this Configurable to index. */
+  void move(const Action *action, size_t index);
+
   /* Return the Action matching name. */
   virtual Action *action(const char *name);
 
