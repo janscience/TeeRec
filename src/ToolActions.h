@@ -17,6 +17,7 @@ class Settings;
 class RTClock;
 class Device;
 class Input;
+class InputSettings;
 
 
 class HelpAction : public Action {
@@ -370,14 +371,28 @@ class InputAction : public Action {
  public:
 
   /* Initialize and add to default menu. */
-  InputAction(const char *name, Input &data);
+  InputAction(const char *name, Input &data, InputSettings &settings);
 
   /* Initialize and add to configuration menu. */
-  InputAction(Configurable &menu, const char *name, Input &data);
+  InputAction(Configurable &menu, const char *name,
+	      Input &data, InputSettings &settings);
 
  protected:
 
   Input &Data;
+  InputSettings &Settings;
+};
+
+
+class ReportInputAction : public InputAction {
+
+ public:
+
+  using InputAction::InputAction;
+
+  /* Start, report, and stop analog input. */
+  virtual void configure(Stream &stream=Serial, unsigned long timeout=0,
+			 bool echo=true, bool detailed=false);
 };
 
 

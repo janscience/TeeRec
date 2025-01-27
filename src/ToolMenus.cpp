@@ -43,6 +43,13 @@ FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
 }
 
 
+InputMenu::InputMenu(Input &data, InputSettings &settings) :
+  Configurable("Analog input", Action::StreamInput),
+  ReportAct(*this, "Report input configuration", data, settings),
+  PrintAct(*this, "Record some data", data, settings) {
+}
+
+
 DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,

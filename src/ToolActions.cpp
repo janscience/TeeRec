@@ -5,6 +5,7 @@
 #include <Settings.h>
 #include <Device.h>
 #include <Input.h>
+#include <InputSettings.h>
 #include <ToolActions.h>
 
 
@@ -523,34 +524,52 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
 }
 
 
-InputAction::InputAction(const char *name, Input &data) :
-  InputAction(*root()->Config, name, data) {
+InputAction::InputAction(const char *name, Input &data,
+			 InputSettings &settings) :
+  InputAction(*root()->Config, name, data, settings) {
 }
 
 
-InputAction::InputAction(Configurable &menu, const char *name, Input &data) :
+InputAction::InputAction(Configurable &menu, const char *name,
+			 Input &data, InputSettings &settings) :
   Action(menu, name, StreamInput),
-  Data(data) {
+  Data(data),
+  Settings(settings) {
+}
+
+
+void ReportInputAction::configure(Stream &stream, unsigned long timeout,
+				  bool echo, bool detailed) {
+  Data.reset();
+  Settings.configure(&Data);
+  if (!Data.check(0, stream))
+    return;
+  Data.start();
+  Data.report(stream);
+  Data.stop();
+  Data.reset();
 }
 
 
 void PrintInputAction::configure(Stream &stream, unsigned long timeout,
 				 bool echo, bool detailed) {
-  // TODO:
-  // configure from current settings!
-  // check -> own action?
+  Data.reset();
+  Settings.configure(&Data);
+  if (!Data.check(0, stream))
+    return;
   int tmax = 100;
-  stream.println("Record some data:");
+  stream.print("Record some data ...");
   Data.reset();
   Data.start();
   delay(tmax);
   Data.stop();
-  stream.println("done");
   stream.println();
-  size_t nframes = Data.available()/Data.nchannels();
+  size_t nframes = Data.index()/Data.nchannels();
   if (Data.frames(0.001*tmax) < nframes)
     nframes = Data.frames(0.001*tmax);
   stream.printf("Sampling rate: %dHz", Data.rate());
+  stream.println();
+  stream.printf("Resolution: %ubits", Data.dataResolution());
   stream.println();
   Data.printData(0, nframes, stream);
   stream.println();

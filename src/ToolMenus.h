@@ -74,6 +74,20 @@ protected:
 };
 
 
+class InputMenu : public Configurable {
+
+public:
+
+  InputMenu(Input &data, InputSettings &settings);
+
+protected:
+
+  ReportInputAction ReportAct;
+  PrintInputAction PrintAct;
+  
+};
+
+
 class DiagnosticMenu : public Configurable {
 
 public:
