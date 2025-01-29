@@ -371,16 +371,20 @@ class InputAction : public Action {
  public:
 
   /* Initialize and add to default menu. */
-  InputAction(const char *name, Input &data, InputSettings &settings);
+  InputAction(const char *name, Input &data, InputSettings &settings,
+	      Device** controls=0, size_t ncontrols=0);
 
   /* Initialize and add to configuration menu. */
   InputAction(Configurable &menu, const char *name,
-	      Input &data, InputSettings &settings);
+	      Input &data, InputSettings &settings,
+	      Device** controls=0, size_t ncontrols=0);
 
  protected:
 
   Input &Data;
   InputSettings &Settings;
+  size_t NControls;
+  Device **Controls;
 };
 
 

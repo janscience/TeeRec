@@ -525,16 +525,21 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
 
 
 InputAction::InputAction(const char *name, Input &data,
-			 InputSettings &settings) :
-  InputAction(*root()->Config, name, data, settings) {
+			 InputSettings &settings,
+			 Device** controls, size_t ncontrols) :
+  InputAction(*root()->Config, name, data, settings,
+	      controls, ncontrols) {
 }
 
 
 InputAction::InputAction(Configurable &menu, const char *name,
-			 Input &data, InputSettings &settings) :
+			 Input &data, InputSettings &settings,
+			 Device** controls, size_t ncontrols) :
   Action(menu, name, StreamInput),
   Data(data),
   Settings(settings) {
+  Controls = controls;
+  NControls = ncontrols;
 }
 
 
