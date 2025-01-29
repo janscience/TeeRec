@@ -136,7 +136,7 @@ class InputADC : public Input, public Device {
   void clearChannels(uint8_t adc);
   
   // Clear the channel configuration of both ADCs.
-  void clearChannels();
+  virtual void clearChannels();
 
   // Return number of channels on specified ADC.
   uint8_t nchannels(uint8_t adc) const;

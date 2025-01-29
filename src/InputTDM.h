@@ -70,7 +70,7 @@ class InputTDM : public Input {
   void clearChannels(TDM_BUS bus);
   
   // Clear the channel configuration of all TDM buses.
-  void clearChannels();
+  virtual void clearChannels();
 
   // Swap left/right channels.
   bool swapLR() const;
@@ -98,7 +98,7 @@ class InputTDM : public Input {
 
   // Start generation of clock signals.
   // Need to setup resolution and sampling rate before.
-  void begin(Stream &stream=Serial);
+  virtual void begin(Stream &stream=Serial);
 
   // Start data transfer to buffer.
   virtual void start();

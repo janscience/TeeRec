@@ -103,6 +103,7 @@ void InputTDM::clearChannels() {
     NChans[k] = 0;
   TDMUse = 0;
   Channels[0] = '\0';
+  SwapLR = false;
 }
 
 

@@ -79,7 +79,8 @@ class InputMenu : public Configurable {
 public:
 
   InputMenu(Input &data, InputSettings &settings,
-	    Device** controls=0, size_t ncontrols=0);
+	    Device** controls=0, size_t ncontrols=0,
+	    SetupAI setupai=0);
 
 protected:
 

@@ -366,25 +366,29 @@ protected:
 };
 
 
+typedef void (*SetupAI)(Input &aidata, const InputSettings &aisettings,
+		 Device **controls, size_t ncontrols, Stream &stream);
+
 class InputAction : public Action {
 
  public:
 
   /* Initialize and add to default menu. */
   InputAction(const char *name, Input &data, InputSettings &settings,
-	      Device** controls=0, size_t ncontrols=0);
+	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
 
   /* Initialize and add to configuration menu. */
   InputAction(Configurable &menu, const char *name,
 	      Input &data, InputSettings &settings,
-	      Device** controls=0, size_t ncontrols=0);
+	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
 
  protected:
 
   Input &Data;
   InputSettings &Settings;
-  size_t NControls;
   Device **Controls;
+  size_t NControls;
+  SetupAI Setupai;
 };
 
 

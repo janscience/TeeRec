@@ -24,6 +24,9 @@ class Input : public DataBuffer {
   // Return in chans a string with the channels/pins
   // in the order they are multiplexed into the buffer.
   virtual void channels(char *chans) const = 0;
+  
+  // Clear the channel configuration.
+  virtual void clearChannels() = 0;
 
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -36,6 +39,11 @@ class Input : public DataBuffer {
 
   // Print current settings on stream.
   virtual void report(Stream &stream=Serial) = 0;
+  
+  // Prepare start of acquisition.
+  // For example, start generating a clock signal for data transfer.
+  // The default implementation does nothing.
+  virtual void begin(Stream &stream=Serial);
 
   // Start the acquisition based on the channel, rate, and buffer settings.
   // Default implementation stores start time and sets Running to True.

@@ -526,20 +526,23 @@ void DevicesAction::configure(Stream &stream, unsigned long timeout,
 
 InputAction::InputAction(const char *name, Input &data,
 			 InputSettings &settings,
-			 Device** controls, size_t ncontrols) :
+			 Device** controls, size_t ncontrols,
+			 SetupAI setupai) :
   InputAction(*root()->Config, name, data, settings,
-	      controls, ncontrols) {
+	      controls, ncontrols, setupai) {
 }
 
 
 InputAction::InputAction(Configurable &menu, const char *name,
 			 Input &data, InputSettings &settings,
-			 Device** controls, size_t ncontrols) :
+			 Device** controls, size_t ncontrols,
+			 SetupAI setupai) :
   Action(menu, name, StreamInput),
   Data(data),
-  Settings(settings) {
-  Controls = controls;
-  NControls = ncontrols;
+  Settings(settings),
+  Controls(controls),
+  NControls(ncontrols),
+  Setupai(setupai) {
 }
 
 
@@ -547,10 +550,13 @@ void ReportInputAction::configure(Stream &stream, unsigned long timeout,
 				  bool echo, bool detailed) {
   Data.reset();
   Settings.configure(&Data);
+  if (Setupai != 0)
+    Setupai(Data, Settings, Controls, NControls, stream);
   if (!Data.check(0, stream)) {
     stream.println();
     return;
   }
+  Data.begin();
   Data.start();
   Data.report(stream);
   Data.stop();
@@ -562,13 +568,15 @@ void PrintInputAction::configure(Stream &stream, unsigned long timeout,
 				 bool echo, bool detailed) {
   Data.reset();
   Settings.configure(&Data);
+  if (Setupai != 0)
+    Setupai(Data, Settings, Controls, NControls, stream);
   if (!Data.check(0, stream)) {
     stream.println();
     return;
   }
   int tmax = 100;
   stream.print("Record some data ...");
-  Data.reset();
+  Data.begin();
   Data.start();
   delay(tmax);
   Data.stop();

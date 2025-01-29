@@ -44,12 +44,12 @@ FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
 
 
 InputMenu::InputMenu(Input &data, InputSettings &settings,
-		     Device** controls, size_t ncontrols) :
+		     Device** controls, size_t ncontrols, SetupAI setupai) :
   Configurable("Analog input", Action::StreamInput),
   ReportAct(*this, "Report input configuration", data, settings,
-	    controls, ncontrols),
+	    controls, ncontrols, setupai),
   PrintAct(*this, "Record some data", data, settings,
-	   controls, ncontrols) {
+	   controls, ncontrols, setupai) {
 }
 
 

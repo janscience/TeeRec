@@ -26,6 +26,10 @@ bool Input::check(uint8_t nchannels, Stream &stream) {
 }
 
 
+void Input::begin(Stream &stream) {
+}
+
+
 void Input::start() {
   Running = true;
   StartTime = millis();
