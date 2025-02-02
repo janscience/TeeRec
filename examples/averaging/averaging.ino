@@ -42,7 +42,7 @@
 
 bool markdown = true;   // report as markdown table or plain text
 
-char filestr[] = "-gain024";     // string inserted into filenames
+char filestr[] = "";     // string inserted into filenames
 int bits = 16;                   // resolution: 10bit 12bit, or 16bit
 uint32_t samplingRate = 20000;   // samples per second and channel in Hertz
 int8_t channels0 [] =  {A2, -1, A0, A1, A2, A3, A4, A5, A6, A7, A8, A9};  // input pins for ADC0

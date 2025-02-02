@@ -136,7 +136,8 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
   Averaging = 1;
   ConversionSpeed = ADC_CONVERSION_SPEED::HIGH_SPEED;
   SamplingSpeed = ADC_SAMPLING_SPEED::HIGH_SPEED;
-  Reference = ADC_REFERENCE::REF_3V3;
+  setUnit("mV");
+  setReference(ADC_REFERENCE::REF_3V3);
   Rate = 0;
   NChannels = 0;
   ADCUse = 0;
@@ -401,6 +402,12 @@ ADC_SAMPLING_SPEED InputADC::samplingSpeedEnum(const char *sampling) {
 
 void InputADC::setReference(ADC_REFERENCE ref) {
   Reference = ref;
+  float range = 3300.0;
+#ifndef TEENSY4
+  if (Reference == ADC_REFERENCE::REF_1V2)
+    range = 1200.0;
+#endif
+  setGain(0.5*range);
 }
 
 
@@ -427,16 +434,6 @@ ADC_REFERENCE InputADC::referenceEnum(const char *reference) {
       return ReferenceEnums[j];
   }
   return ADC_REFERENCE::REF_3V3;
-}
-
-
-void InputADC::gainStr(char *gains, float pregain) {
-  float range = 3300.0;
-#ifndef TEENSY4
-  if (Reference == ADC_REFERENCE::REF_1V2)
-    range = 1200.0;
-#endif
-  sprintf(gains, "%.2fmV", 0.5*range/pregain);
 }
 
 
@@ -506,23 +503,17 @@ bool InputADC::check(uint8_t nchannels, Stream &stream) {
 
   
 void InputADC::report(Stream &stream) {
-  char chans0[50];
-  char chans1[50];
+  char chans0[48];
+  char chans1[48];
   channels(0, chans0);
   channels(1, chans1);
   if (chans0[0] == '\0')
     strcpy(chans0, "-");
   if (chans1[0] == '\0')
     strcpy(chans1, "-");
+  char gs[16];
+  gainStr(gs);
   float bt = bufferTime();
-  char bts[20];
-  if (bt < 1.0)
-    sprintf(bts, "%.0fms", 1000.0*bt);
-  else
-    sprintf(bts, "%.2fs", bt);
-  float dt = DMABufferTime();
-  char dts[20];
-  sprintf(dts, "%.1fms", 1000.0*dt);
   stream.println("ADC settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   stream.printf("  resolution: %dbits\n", Bits);
@@ -530,10 +521,15 @@ void InputADC::report(Stream &stream) {
   stream.printf("  conversion: %s\n", conversionSpeedStr());
   stream.printf("  sampling:   %s\n", samplingSpeedStr());
   stream.printf("  reference:  %s\n", referenceStr());
+  stream.printf("  pregain:    %g\n", pregain());
+  stream.printf("  gain:       %s\n", gs);
   stream.printf("  ADC0:       %s\n", chans0);
   stream.printf("  ADC1:       %s\n", chans1);
-  stream.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
-  stream.printf("  DMA time:   %s\n", dts);
+  if (bt < 1.0)
+    stream.printf("  buffer:     %.0fms (%d samples)\n", bt, nbuffer());
+  else
+    stream.printf("  buffer:     %.2fs (%d samples)\n", bt, nbuffer());
+  stream.printf("  DMA time:   %.1fms\n", 1000.0*DMABufferTime());
   stream.println();
 }
 

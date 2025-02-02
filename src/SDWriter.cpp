@@ -152,6 +152,9 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     samples = FileMaxSamples;
   Wave.setFormat(Data->nchannels(), Data->rate(), Data->resolution(),
 		 Data->dataResolution());
+  char gs[16];
+  gainStr(gs);
+  Wave.setGain(gs);
   setWaveHeader(Wave);    // recursively calls setWaveHeader on all producers.
   Wave.setData(samples);
   if (datetime != 0)

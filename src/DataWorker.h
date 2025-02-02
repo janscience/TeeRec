@@ -48,6 +48,35 @@ public:
   // Messages of this class are displayed for levels 3 and 4.
   void setVerbosity(int verbose);
 
+  // Total gain. That is the factor needed to multiply
+  // the raw data (normalized to one) to result in the unit().
+  float gain() const { return Gain/PreGain; };
+
+  // Set the gain of the recorded data. That is the factor needed to
+  // normalize the raw integer data to a range of one.
+  // The gain is also passed on to all consumers.
+  virtual void setGain(float gain);
+
+  // The pregain of the recorded data. This is the gain factor of
+  // additional amplifiers before entering the ADC.
+  float pregain() const { return PreGain; };
+
+  // Set the pregain of the recorded data. This is the gain factor of
+  // additional amplifiers before entering the ADC.
+  // The pregain is also passed on to all consumers.
+  virtual void setPreGain(float pregain);
+
+  // Unit of the data after multiplication with gain().
+  // Default is empty string.
+  const char *unit() const { return Unit; };
+
+  // Set the unit of the recorded data.
+  // The unit is also passed on to all consumers.
+  virtual void setUnit(const char *unit);
+  
+  /* Return the current gain and unit as a string in gains. */
+  virtual void gainStr(char *gains);
+
   // Add metadata to the header of a wave file holding the data of the
   // buffer.
   // The default implementation calls this function of the producer.
@@ -90,6 +119,11 @@ protected:
 
   int Verbose;
   mutable elapsedMicros NoDataTime;
+
+  float Gain;
+  float PreGain;
+  static const size_t MaxUnit = 16;
+  char Unit[MaxUnit];
   
 };
 

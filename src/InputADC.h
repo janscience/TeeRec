@@ -96,12 +96,14 @@ class InputADC : public Input, public Device {
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   // Use channel0 on ADC0 and channel1 on ADC (see setChannel()).
+  // Set unit to mV.
   InputADC(volatile sample_t *buffer, size_t nbuffer,
 	   int8_t channel0=-1, int8_t channel1=-1);
 
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   // Use channels0 on ADC0 and channels1 on ADC (see setChannels()).
+  // Set unit to mV.
   InputADC(volatile sample_t *buffer, size_t nbuffer,
 	   const int8_t *channels0, const int8_t *channels1);
   
@@ -249,7 +251,7 @@ class InputADC : public Input, public Device {
   // Translate sampling speed short string to sampling speed enum.
   static ADC_SAMPLING_SPEED samplingSpeedEnum(const char *sampling);
 
-  // Set the voltage preference.
+  // Set the voltage preference and gain.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
   // Teensy 4.x has only 3V3, on Teensy 3.x EXT equals 3V3.
   void setReference(ADC_REFERENCE ref);
@@ -265,10 +267,6 @@ class InputADC : public Input, public Device {
 
   // Translate voltage reference string to reference enum.
   static ADC_REFERENCE referenceEnum(const char *reference);
-
-  /* Return the current gain as a string in gains.
-     The gain of a possible preamplifier is specified by pregain. */
-  void gainStr(char *gains, float pregain=1.0);
 
   // Return DMA counter for specified adc.
   size_t counter(uint8_t adc) const;

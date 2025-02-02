@@ -9,17 +9,15 @@ DataWorker::DataWorker(int verbose) :
   Data(0),
   Producer(0),
   NConsumers(0),
-  Verbose(verbose) {
+  Verbose(verbose),
+  Gain(1.0),
+  PreGain(1.0),
+  Unit("") {
 }
 
 
 DataWorker::DataWorker(const DataWorker *producer, int verbose) :
-  Index(0),
-  Cycle(0),
-  Data(0),
-  Producer(0),
-  NConsumers(0),
-  Verbose(verbose) {
+  DataWorker(verbose) {
   setProducer(producer);
 }
 
@@ -28,6 +26,9 @@ void DataWorker::setProducer(const DataWorker *producer) {
   producer->addConsumer(this);
   Producer = producer;
   Data = producer->Data;
+  Gain = producer->Gain;
+  PreGain = producer->PreGain;
+  strcpy(Unit, producer->Unit);
 }
 
 
@@ -157,6 +158,33 @@ size_t DataWorker::overrun() {
 
 void DataWorker::setVerbosity(int verbose) {
   Verbose = verbose;
+}
+
+
+void DataWorker::setGain(float gain) {
+  Gain = gain;
+  for (size_t k=0; k<NConsumers; k++)
+    Consumers[k]->setGain(gain);
+}
+
+
+void DataWorker::setPreGain(float pregain) {
+  PreGain = pregain;
+  for (size_t k=0; k<NConsumers; k++)
+    Consumers[k]->setPreGain(pregain);
+}
+
+
+void DataWorker::setUnit(const char *unit) {
+  strncpy(Unit, unit, MaxUnit);
+  Unit[MaxUnit - 1] = '\0';
+  for (size_t k=0; k<NConsumers; k++)
+    Consumers[k]->setUnit(unit);
+}
+
+
+void DataWorker::gainStr(char *gains) {
+  sprintf(gains, "%.2f%s", gain(), unit());
 }
 
 

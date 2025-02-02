@@ -34,6 +34,7 @@ void InputSettings::configure(Input *input) {
   if (input == 0)
     return;
   input->setRate(rate());
+  input->setPreGain(pregain());
 }
 
 
@@ -41,4 +42,5 @@ void InputSettings::setConfiguration(Input *input) {
   if (input == 0)
     return;
   setRate(input->rate());
+  setPreGain(input->pregain());
 }

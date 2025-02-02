@@ -96,7 +96,7 @@ InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
 #elif defined(INPUT_TDM)
 InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
-RTClockRTClockDS1307 rtclock;
+RTClockDS1307 rtclock;
 DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 Blink blink(LED_BUILTIN);
@@ -229,7 +229,7 @@ void setupPCM(InputTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.setRate(tdm, aisettings.rate());
   pcm.setupTDM(tdm, CHANNELS, offs);
   pcm.setSmoothGainChange(false);
-  pcm.setGain(aisettings.gain());
+  pcm.setGainDecibel(tdm, aisettings.gain());
   pcm.setFilters(ControlPCM186x::FIR, false);
   Serial.println("configured for 4 channels");
 }
@@ -251,6 +251,7 @@ void setup() {
   rtclock.report();
   settings.enable("InitialDelay");
   settings.enable("PulseFreq");
+  aisettings.enable("Pregain");
   config.setConfigFile("logger.cfg");
   config.load(sdcard);
   if (Serial)
@@ -281,13 +282,6 @@ void setup() {
   }
   else
     delay(uint32_t(1000.0*settings.initialDelay()));
-  char gs[16];
-#if defined(INPUT_ADC)
-  aidata.gainStr(gs, aisettings.pregain());
-#elif defined(INPUT_TDM)
-  pcm1.gainStr(gs, aisettings.pregain());
-#endif  
-  file.header().setGain(gs);
   setupStorage();
 }
 

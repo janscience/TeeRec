@@ -34,6 +34,8 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
     DataHead[bus] = 0;
   }
   TDMUse = 0;
+  setGain(1000.0);
+  setUnit("mV");
 }
 
 
@@ -151,11 +153,18 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
 
   
 void InputTDM::report(Stream &stream) {
+  char chans[64];
+  channels(chans);
+  char gs[16];
+  gainStr(gs);
   float bt = bufferTime();
   stream.println("TDM settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   stream.printf("  resolution: %dbits\n", Bits);
-  stream.printf("  channels:   %d\n", NChannels);
+  stream.printf("  nchannels:  %d\n", NChannels);
+  stream.printf("  channels:   %s\n", chans);
+  stream.printf("  pregain:    %g\n", pregain());
+  stream.printf("  gain:       %s\n", gs);
   stream.printf("  swap l/r:   %d\n", SwapLR);
   if (bt < 1.0)
     stream.printf("  buffer:     %.0fms (%d samples)\n", 1000.0*bt, nbuffer());
