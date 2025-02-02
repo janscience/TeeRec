@@ -34,10 +34,10 @@ void AnalysisChain::start(float interval, float window) {
   Time = 0;
   Counter = -1;
   Continuous = (fabs(interval - window) < 1e-8);
-  NChannels = Data->nchannels();
+  NChannels = nchannels();
   if (NChannels > MaxChannels)
     NChannels = MaxChannels;
-  NFrames = Data->frames(Window);
+  NFrames = frames(Window);
   for(uint8_t c=0; c<NChannels; ++c) {
     Buffer[c] = (sample_t*)malloc(NFrames*sizeof(sample_t));
     if (Buffer[c] == 0) {
@@ -49,7 +49,7 @@ void AnalysisChain::start(float interval, float window) {
   for (int i=0; i<NAnalyzer; i++) {
     if (Analyzers[i]->enabled()) {
       Analyzers[i]->setContinuous(Continuous);
-      Analyzers[i]->setRate(Data->rate());
+      Analyzers[i]->setRate(rate());
       Analyzers[i]->start(NChannels, NFrames);
     }
   }
@@ -94,7 +94,7 @@ void AnalysisChain::update() {
     if (Continuous)
       start = index();
     else
-      start = Data->currentSample(NFrames);
+      start = currentSample(NFrames);
     for (uint8_t c=0; c<NChannels; c++)
       Data->getData(c, start, Buffer[c], NFrames);
     if (Continuous)

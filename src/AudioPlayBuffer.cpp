@@ -43,7 +43,7 @@ void AudioPlayBuffer::update() {
   ssize_t navail = available();
 
   double interval = 1.0/AUDIO_SAMPLE_RATE_EXACT;
-  if (Data->time(navail) < AUDIO_BLOCK_SAMPLES*interval)
+  if (time(navail) < AUDIO_BLOCK_SAMPLES*interval)
     return;
   
   // allocate audio blocks to transmit:
@@ -57,7 +57,7 @@ void AudioPlayBuffer::update() {
   }
   
   // copy data into audio block buffer:
-  uint8_t nchannels = Data->nchannels();
+  uint8_t nchans = nchannels();
   ssize_t start = Index;
   int16_t left;
   int16_t right;
@@ -72,13 +72,13 @@ void AudioPlayBuffer::update() {
     }
     i++;
     Time += interval;
-    while (navail > 0 && Time > Data->time(Index - start + nchannels)) {
-      navail -= nchannels;
-      if (increment(nchannels))
-	start -= Data->nbuffer();
+    while (navail > 0 && Time > time(Index - start + nchans)) {
+      navail -= nchans;
+      if (increment(nchans))
+	start -= nbuffer();
     }
   }
-  Time -= Data->time(Index - start);  // keep time mismatch!
+  Time -= time(Index - start);  // keep time mismatch!
 
   transmit(block1, 0);
   release(block1);
@@ -90,17 +90,17 @@ void AudioPlayBuffer::update() {
 
 
 void AudioPlayBuffer::average(int16_t &left, int16_t &right) {
-  uint8_t nchannels = Data->nchannels();
+  uint8_t nchans = nchannels();
   int16_t val = 0;
-  for (uint8_t c=0; c<nchannels; c++)
-    val += Data->buffer()[Index+c]/nchannels;
+  for (uint8_t c=0; c<nchans; c++)
+    val += Data->buffer()[Index+c]/nchans;
   left = val;
   right = val;
 }
 
 
 void AudioPlayBuffer::difference(int16_t &left, int16_t &right) {
-  if (Data->nchannels() > 1) { 
+  if (nchannels() > 1) { 
     int16_t diff = Data->buffer()[Index]/2 - Data->buffer()[Index+1]/2;
     left = diff;
     right = -diff;
@@ -114,7 +114,7 @@ void AudioPlayBuffer::difference(int16_t &left, int16_t &right) {
 
 void AudioPlayBuffer::assign(int16_t &left, int16_t &right) {
   left = Data->buffer()[Index];
-  if (Data->nchannels() > 1)
+  if (nchannels() > 1)
     right = Data->buffer()[Index+1];
   else
     right = left;

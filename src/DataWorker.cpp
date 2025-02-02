@@ -75,7 +75,7 @@ size_t DataWorker::available() const {
   if (cycle == Cycle && index > Index)
     return index - Index;
   else if (cycle == Cycle + 1 && index <= Index)
-    return Data->nbuffer() - Index + index;
+    return nbuffer() - Index + index;
   else {
     if (Verbose > 3) {
       float dt = NoDataTime;
@@ -90,7 +90,7 @@ size_t DataWorker::available() const {
 	Serial.print(",   Producer index: ");
 	Serial.print(index);
 	Serial.print(", Buffer size: ");
-	Serial.println(Data->nbuffer());
+	Serial.println(nbuffer());
       }
       NoDataTime = 0;
     }
@@ -112,7 +112,7 @@ size_t DataWorker::overrun() {
   // compute number of missed samples:
   size_t missed = 0;
   if (cycle > Cycle+1 && index < Index) {
-    missed = Data->nbuffer() - Index + index + (cycle-Cycle-2)*Data->nbuffer();
+    missed = nbuffer() - Index + index + (cycle-Cycle-2)*nbuffer();
     if (Verbose > 2) {
       Serial.print("ERROR in DataWorker::overrun(): overrun 1 by ");
       Serial.print(missed);
@@ -126,11 +126,11 @@ size_t DataWorker::overrun() {
       Serial.print(", Producer index: ");
       Serial.print(index);
       Serial.print(", Buffer size: ");
-      Serial.println(Data->nbuffer());
+      Serial.println(nbuffer());
     }
   }
   else if (cycle > Cycle && index >= Index) {
-    missed = index - Index + (cycle-Cycle-1)*Data->nbuffer();
+    missed = index - Index + (cycle-Cycle-1)*nbuffer();
     if (missed > 0 && Verbose > 2) {
       Serial.print("ERROR in DataWorker::overrun(): overrun 2 by ");
       Serial.print(missed);
@@ -144,7 +144,7 @@ size_t DataWorker::overrun() {
       Serial.print(", Producer index: ");
       Serial.print(index);
       Serial.print(", Buffer size: ");
-      Serial.println(Data->nbuffer());
+      Serial.println(nbuffer());
     }
   }
   if (missed > 0) {
@@ -158,6 +158,36 @@ size_t DataWorker::overrun() {
 
 void DataWorker::setVerbosity(int verbose) {
   Verbose = verbose;
+}
+
+
+uint8_t DataWorker::resolution() const {
+  return Data->resolution();
+}
+
+
+uint8_t DataWorker::dataResolution() const {
+  return Data->dataResolution();
+}
+
+
+uint32_t DataWorker::rate() const {
+  return Data->rate();
+}
+
+
+uint8_t DataWorker::nchannels() const {
+  return Data->nchannels();
+}
+
+
+size_t DataWorker::nbuffer() const {
+  return Data->nbuffer();
+}
+
+
+float DataWorker::bufferTime() const {
+  return Data->bufferTime();
 }
 
 
@@ -188,6 +218,64 @@ void DataWorker::gainStr(char *gains) {
 }
 
 
+size_t DataWorker::frames(float time) const {
+  return floor(time*rate());
+}
+
+
+size_t DataWorker::samples(float time) const {
+  return floor(time*rate())*nchannels();
+}
+
+
+float DataWorker::time(size_t samples) const {
+  return float(samples/nchannels())/rate();
+}
+
+
+void DataWorker::timeStr(size_t samples, char *str) const {
+  float seconds = time(samples);
+  float minutes = floor(seconds/60.0);
+  seconds -= minutes*60;
+  sprintf(str, "%02.0f:%02.0f", minutes, seconds);
+}
+
+
+float DataWorker::sampledTime() const {
+  float sindex = cycle();
+  sindex *= nbuffer();
+  sindex += index();
+  return sindex/nchannels()/rate();
+}
+
+
+size_t DataWorker::currentSample(size_t decr) const {
+  size_t idx = index();
+  if (decr > 0) {
+    idx += nbuffer() - decr*nchannels();
+    while (idx > nbuffer())
+      idx -= nbuffer();
+  }
+  return idx;
+}
+
+
+size_t DataWorker::decrementSample(size_t idx, size_t decr) const {
+  idx += nbuffer() - decr*nchannels();
+  while (idx > nbuffer())
+    idx -= nbuffer();
+  return idx;
+}
+
+
+size_t DataWorker::incrementSample(size_t idx, size_t incr) const {
+  idx += incr*nchannels();
+  while (idx > nbuffer())
+    idx -= nbuffer();
+  return idx;
+}
+
+
 void DataWorker::setWaveHeader(WaveHeader &wave) const {
   if (Producer != 0)
     Producer->setWaveHeader(wave);
@@ -212,14 +300,14 @@ void DataWorker::synchronize(const DataWorker &worker) {
 
 
 bool DataWorker::decrement(size_t indices) {
-  if (indices > Data->nbuffer())
-    indices = Data->nbuffer();
+  if (indices > nbuffer())
+    indices = nbuffer();
   if (indices <= Index) {
     Index -= indices;
     return false;
   }
   else if (Cycle > 0) {
-    Index += Data->nbuffer() - indices;
+    Index += nbuffer() - indices;
     Cycle--;
     return true;
   }
@@ -233,8 +321,8 @@ bool DataWorker::decrement(size_t indices) {
 bool DataWorker::increment(size_t indices) {
   Index += indices;
   bool r = false;
-  while (Index >= Data->nbuffer()) {
-    Index -= Data->nbuffer();
+  while (Index >= nbuffer()) {
+    Index -= nbuffer();
     Cycle++;
     r = true;
   }

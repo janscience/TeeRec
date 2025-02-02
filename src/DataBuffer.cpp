@@ -54,64 +54,6 @@ void DataBuffer::setDMABufferSize(size_t samples) {
 }
 
 
-size_t DataBuffer::frames(float time) const {
-  return floor(time*Rate);
-}
-
-
-size_t DataBuffer::samples(float time) const {
-  return floor(time*Rate)*NChannels;
-}
-
-
-float DataBuffer::time(size_t samples) const {
-  return float(samples/NChannels)/Rate;
-}
-
-
-void DataBuffer::timeStr(size_t samples, char *str) const {
-  float seconds = time(samples);
-  float minutes = floor(seconds/60.0);
-  seconds -= minutes*60;
-  sprintf(str, "%02.0f:%02.0f", minutes, seconds);
-}
-
-
-float DataBuffer::sampledTime() const {
-  float sindex = cycle();
-  sindex *= NBuffer;
-  sindex += index();
-  return sindex/NChannels/Rate;
-}
-
-
-size_t DataBuffer::currentSample(size_t decr) const {
-  size_t idx = index();
-  if (decr > 0) {
-    idx += NBuffer - decr*NChannels;
-    while (idx > NBuffer)
-      idx -= NBuffer;
-  }
-  return idx;
-}
-
-
-size_t DataBuffer::decrementSample(size_t idx, size_t decr) const {
-  idx += NBuffer - decr*NChannels;
-  while (idx > NBuffer)
-    idx -= NBuffer;
-  return idx;
-}
-
-
-size_t DataBuffer::incrementSample(size_t idx, size_t incr) const {
-  idx += incr*NChannels;
-  while (idx > NBuffer)
-    idx -= NBuffer;
-  return idx;
-}
-
-
 void DataBuffer::getData(uint8_t channel, size_t start,
 			 sample_t *buffer, size_t nframes) const {
   if (Rate == 0 || NChannels == 0) {

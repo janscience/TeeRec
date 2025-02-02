@@ -81,10 +81,10 @@ float SDWriter::writeInterval() const {
  
 void SDWriter::setWriteInterval(float time) {
   if (time < 0)
-    WriteInterval = uint(-1000*time*Data->bufferTime()); // fraction of the buffer
+    WriteInterval = uint(-1000*time*bufferTime()); // fraction of the buffer
   else
     WriteInterval = uint(1000*time);                     // time interval in seconds
-  if (0.001*WriteInterval > 0.5*Data->bufferTime())
+  if (0.001*WriteInterval > 0.5*bufferTime())
     Serial.println("WARNING! SDWriter::setWriteInterval() interval larger than half the buffer!");
 }
 
@@ -97,8 +97,8 @@ float SDWriter::writeTime() const {
 void SDWriter::checkTiming(uint32_t t, const char *function,
 			   const char *message) {
   if ((Verbose > 1 && t > MaxWriteTime) ||
-      0.001*t > 0.5*Data->bufferTime()) {
-    if (0.001*t > 0.5*Data->bufferTime())
+      0.001*t > 0.5*bufferTime()) {
+    if (0.001*t > 0.5*bufferTime())
       Serial.print("WARNING");
     else
       Serial.print("------>");
@@ -150,8 +150,7 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
   elapsedMillis t = 0;
   if (samples < 0)
     samples = FileMaxSamples;
-  Wave.setFormat(Data->nchannels(), Data->rate(), Data->resolution(),
-		 Data->dataResolution());
+  Wave.setFormat(nchannels(), rate(), resolution(), dataResolution());
   char gs[16];
   gainStr(gs);
   Wave.setGain(gs);
@@ -225,7 +224,7 @@ ssize_t SDWriter::write() {
   size_t missed = overrun();
   if (missed > 0) {
     uint32_t wt = WriteTime;
-    Serial.printf("ERROR in SDWriter::write() on %sSD card: data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", sdcard()->name(), missed, 100.0*missed/Data->nbuffer(), 1000*Data->time(missed));
+    Serial.printf("ERROR in SDWriter::write() on %sSD card: data overrun! Missed %d samples (%.0f%% of buffer, %.0fms).\n", sdcard()->name(), missed, 100.0*missed/nbuffer(), 1000*time(missed));
     Serial.printf("------> last write on %sSD card %dms ago.\n", sdcard()->name(), wt);
     return -4;
   }
@@ -246,11 +245,12 @@ ssize_t SDWriter::write() {
   size_t index = Producer->index();
   size_t nwrite = 0;
   if (Index >= index) {
-    nwrite = Data->nbuffer() - Index;
+    nwrite = nbuffer() - Index;
     if (FileMaxSamples > 0 && nwrite > FileMaxSamples - FileSamples)
       nwrite = FileMaxSamples - FileSamples;
     if (nwrite > 0) {
-      nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
+      nbytes = DataFile.write((void *)&Data->buffer()[Index],
+			      sizeof(sample_t)*nwrite);
       if (nbytes == 0)
 	return -5;
       checkTiming(WriteTime, "write", "needed %lums for writing end-of-buffer data");
@@ -274,7 +274,8 @@ ssize_t SDWriter::write() {
     nwrite = FileMaxSamples - FileSamples;
   nwrite = (nwrite/MajorSize)*MajorSize;          // write only full blocks
   if (nwrite > 0) {
-    nbytes = DataFile.write((void *)&Data->buffer()[Index], sizeof(sample_t)*nwrite);
+    nbytes = DataFile.write((void *)&Data->buffer()[Index],
+			    sizeof(sample_t)*nwrite);
     if (nbytes == 0)
       return -5;
     WriteTime = 0;
@@ -297,7 +298,7 @@ void SDWriter::start(size_t decr) {
   StartWriteTime = millis();
   if (decr > 0) {
     decrement(decr);
-    int decms = int(1000.0*Data->time(decr));
+    int decms = int(1000.0*time(decr));
     WriteTime += decms;
     StartWriteTime -= decms;
   }
@@ -317,12 +318,12 @@ size_t SDWriter::fileSamples() const {
 
 
 float SDWriter::fileTime() const {
-  return Data->time(FileSamples);
+  return time(FileSamples);
 }
 
 
 void SDWriter::fileTimeStr(char *str) const {
-  Data->timeStr(FileSamples, str);
+  timeStr(FileSamples, str);
 }
 
 
@@ -332,9 +333,9 @@ void SDWriter::setMaxFileSamples(size_t samples) {
 
 
 void SDWriter::setMaxFileTime(float secs) {
-  if (Data->rate() == 0)
+  if (rate() == 0)
     Serial.println("WARNING in SDWriter::setMaxFileTime(): sampling rate not yet set!");
-  setMaxFileSamples(Data->samples(secs));
+  setMaxFileSamples(samples(secs));
 }
 
 
@@ -344,7 +345,7 @@ size_t SDWriter::maxFileSamples() const {
 
 
 float SDWriter::maxFileTime() const {
-  return Data->time(FileMaxSamples);
+  return time(FileMaxSamples);
 }
 
 

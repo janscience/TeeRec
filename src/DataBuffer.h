@@ -84,37 +84,6 @@ public:
   // Inform the DataBuffer about the size of a DMA buffer used to get the data.
   void setDMABufferSize(size_t samples);
 
-  // Number of frames (samples of a single channel) corresponding to
-  // time (in seconds).
-  size_t frames(float time) const;
-
-  // Number of samples (samples of all channel) corresponding to time
-  // (in seconds).
-  size_t samples(float time) const;
-
-  // Time in seconds corresponding to a given number of samples
-  // (not frames, i.e. samples is divided by the number of channels).
-  float time(size_t samples) const;
-
-  // Return time corresponding to samples as a string displaying
-  // minutes and seconds.
-  // str must hold at least 6 characters.
-  void timeStr(size_t sample, char *str) const;
-
-  // Total time the buffer has been fed with samples in seconds.
-  // Can be much larger than bufferTime().
-  float sampledTime() const;
-
-  // Return index to sample right after most current data value in data buffer
-  // optionally decremented by decr frames.
-  size_t currentSample(size_t decr=0) const;
-
-  // Decrement sample index into data buffer by decr frames.
-  size_t decrementSample(size_t idx, size_t decr) const;
-
-  // Increment sample index into data buffer by decr frames.
-  size_t incrementSample(size_t idx, size_t incr) const;
-
   // Get nframes data from a channel starting at sample index start.
   // Assumes start to be the first index of a frame, not the one of the channel.
   void getData(uint8_t channel, size_t start,
