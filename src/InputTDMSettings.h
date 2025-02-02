@@ -34,12 +34,12 @@ public:
   // Return gain in dB.
   // The gain is set from the configuration file but needs to be passed
   // manually to appropriate Control instances.
-  float gain() const { return Gain.value(); };
+  float gainDecibel() const { return Gain.value(); };
   
   // Set gain in dB.
   // The gain is also set from the configuration file but needs to be passed
   // manually to appropriate Control instances.
-  void setGain(float gain);
+  void setGainDecibel(float gain);
 
     
 protected:

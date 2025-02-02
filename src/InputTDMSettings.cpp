@@ -23,7 +23,7 @@ void InputTDMSettings::setNChannels(uint8_t nchannels) {
 }
 
 
-void InputTDMSettings::setGain(float gain) {
+void InputTDMSettings::setGainDecibel(float gain) {
   Gain.setValue(gain);
 }
 
