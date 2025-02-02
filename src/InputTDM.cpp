@@ -417,7 +417,7 @@ void InputTDM::start() {
     if (TDMUse & (1 << bus)) {
       DataHead[bus] = 0;
       DMACounter[bus] = 0;
-      DMA[bus].begin(); // Allocate the DMA channel first
+      DMA[bus].begin(true); // Allocate the DMA channel first
       DMA[bus].disable();
 
       // TODO: should we set & clear the I2S_RCSR_SR bit here?
@@ -492,13 +492,10 @@ void InputTDM::start() {
 
   if (TDMUse > 0)
     Input::start();
-
-  Serial.printf("DMA START Error: %d\n", DMA[0].error());
 }
 
 
 void InputTDM::stop() {
-  Serial.printf("DMA END Error: %d\n", DMA[0].error());
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus)) {
       DMA[bus].disable();
@@ -519,8 +516,12 @@ void InputTDM::stop() {
     I2S2_RCSR = ~(I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR);
     I2S2_TCSR = ~(I2S_TCSR_TE | I2S_TCSR_BCE);
   }
+  /*
+  // this is not good:
   CCM_ANALOG_PLL_AUDIO |= CCM_ANALOG_PLL_AUDIO_POWERDOWN; // switch off PLL
   CCM_ANALOG_PLL_AUDIO &= ~CCM_ANALOG_PLL_AUDIO_ENABLE;   // disable PLL
+  //begin() will not recover the PLL!
+  */
   if (TDMUse & (1 << TDM1)) {
     CCM_CCGR5 &= ~CCM_CCGR5_SAI1(CCM_CCGR_ON);
   }

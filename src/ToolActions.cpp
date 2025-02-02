@@ -589,7 +589,6 @@ void PrintInputAction::configure(Stream &stream, unsigned long timeout,
   stream.printf("Resolution: %ubits", Data.dataResolution());
   stream.println();
   Data.printData(0, nframes, stream);
-  stream.println(nframes);
   stream.println();
 }
 
