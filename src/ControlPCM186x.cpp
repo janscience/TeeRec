@@ -596,15 +596,15 @@ float ControlPCM186x::gainDecibel(OUTPUT_CHANNELS adc) {
 }
 
 
-bool ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float gain) {
+float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float gain) {
   // check gain:
   if (gain < -12.0) {
     Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
-    return false;
+    return NAN;
   }
   if (gain > 40.0) {
     Serial.printf("ControlPCM186x: invalid gain %g > 40dB\n", gain);
-    return false;
+    return NAN;
   }
   // set gains:
   int8_t igain = (int8_t)(2*gain);
@@ -613,38 +613,38 @@ bool ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float gain) {
       unsigned int val = read(PCM186x_PGA_CONTROL_REG);
       val |= 0x40;
       if (!write(PCM186x_PGA_CONTROL_REG, val))
-	return false;
+	return NAN;
       PGALinked = true;
     }
     if (!write(PCM186x_PGA_CH1L_REG, igain))
-      return false;
+      return NAN;
   }
   else {
     if (PGALinked) {
       unsigned int val = read(PCM186x_PGA_CONTROL_REG);
       val &= ~0x40;
       if (!write(PCM186x_PGA_CONTROL_REG, val))
-	return false;
+	return NAN;
       PGALinked = false;
     }
     if (adc & ADC1L) {
       if (!write(PCM186x_PGA_CH1L_REG, igain))
-	return false;
+	return NAN;
     }
     if (adc & ADC1R) {
       if (!write(PCM186x_PGA_CH1R_REG, igain))
-	return false;
+	return NAN;
     }
     if (adc & ADC2L) {
       if (!write(PCM186x_PGA_CH2L_REG, igain))
-	return false;
+	return NAN;
     }
     if (adc & ADC2R) {
       if (!write(PCM186x_PGA_CH2R_REG, igain))
-	return false;
+	return NAN;
     }
   }
-  return true;
+  return 0.5*igain;
 }
 
 
@@ -654,9 +654,10 @@ float ControlPCM186x::gain(OUTPUT_CHANNELS adc) {
 }
 
 
-bool ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
+float ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
   float level = 20.0*log10(gain);
-  return ControlPCM186x::setGainDecibel(adc, level);
+  level = ControlPCM186x::setGainDecibel(adc, level);
+  return pow(10.0, level/20.0);
 }
 
   
@@ -665,9 +666,10 @@ float ControlPCM186x::gainDecibel() {
 }
 		    
 
-bool ControlPCM186x::setGainDecibel(InputTDM &tdm, float level) {
-  if (setGainDecibel(ADCLR, level)) {
-    tdm.setGain(1650.0/gain());
+float ControlPCM186x::setGainDecibel(InputTDM &tdm, float level) {
+  level = setGainDecibel(ADCLR, level);
+  if (!isnan(level)) {
+    tdm.setGain(1650.0/pow(10.0, level/20.0));
     return true;
   }
   return false;
@@ -679,9 +681,10 @@ float ControlPCM186x::gain() {
 }
 		    
 
-bool ControlPCM186x::setGain(InputTDM &tdm, float level) {
-  if (setGain(ADCLR, level)) {
-    tdm.setGain(1650.0/gain());
+float ControlPCM186x::setGain(InputTDM &tdm, float level) {
+  level = setGain(ADCLR, level);
+  if (!isnan(level)) {
+    tdm.setGain(1650.0/level);
     return true;
   }
   return false;

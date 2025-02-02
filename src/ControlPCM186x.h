@@ -170,31 +170,33 @@ public:
   float gainDecibel(OUTPUT_CHANNELS adc);
 
   /* Set gain of one or more adc channels to gain in dB,
-     between -12 and 40 in steps of 0.5. */
-  bool setGainDecibel(OUTPUT_CHANNELS adc, float gain);
+     between -12 and 40 in steps of 0.5.
+     Returns the set gain or NAN on failure. */
+  float setGainDecibel(OUTPUT_CHANNELS adc, float gain);
   
   /* Return the gain set for output channel adc as a factor. */
   float gain(OUTPUT_CHANNELS adc);
 
   /* Set gain of one or more adc channels to gain as a factor,
-     between 0.25 and 100. */
-  bool setGain(OUTPUT_CHANNELS adc, float gain);
+     between 0.25 and 100.
+     Returns the set gain or NAN on failure. */
+  float setGain(OUTPUT_CHANNELS adc, float gain);
   
   /* Return the gain set for all channels in dB. */
   float gainDecibel();
 
   /* Set gain of all channels to gain in dB,
      between -12 and 40 in steps of 0.5.
-     Pass it on to tdm. */
-  bool setGainDecibel(InputTDM &tdm, float gain);
+     Pass the actually set gain on to tdm and return it. */
+  float setGainDecibel(InputTDM &tdm, float gain);
   
   /* Return the gain set for all channels as a factor. */
   float gain();
 
   /* Set gain of all channels to gain as a factor,
      between 0.25 and 100.
-     Pass it on to tdm. */
-  bool setGain(InputTDM &tdm, float gain);
+     Pass the actually set gain on to tdm and return it. */
+  float setGain(InputTDM &tdm, float gain);
 
   /* If smooth then smoothly ramp to new gains. */
   bool setSmoothGainChange(bool smooth=true);
