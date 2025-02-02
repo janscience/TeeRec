@@ -152,21 +152,16 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
   
 void InputTDM::report(Stream &stream) {
   float bt = bufferTime();
-  char bts[20];
-  if (bt < 1.0)
-    sprintf(bts, "%.0fms", 1000.0*bt);
-  else
-    sprintf(bts, "%.2fs", bt);
-  float dt = DMABufferTime();
-  char dts[20];
-  sprintf(dts, "%.1fms", 1000.0*dt);
   stream.println("TDM settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   stream.printf("  resolution: %dbits\n", Bits);
   stream.printf("  channels:   %d\n", NChannels);
   stream.printf("  swap l/r:   %d\n", SwapLR);
-  stream.printf("  buffer:     %s (%d samples)\n", bts, nbuffer());
-  stream.printf("  DMA time:   %s\n", dts);
+  if (bt < 1.0)
+    stream.printf("  buffer:     %.0fms (%d samples)\n", 1000.0*bt, nbuffer());
+  else
+    stream.printf("  buffer:     %.2fs (%d samples)\n", bt, nbuffer());
+  stream.printf("  DMA time:   %.1fms\n", 1000.0*DMABufferTime());
   stream.println();
 }
 
@@ -345,8 +340,8 @@ void InputTDM::begin(Stream &stream) {
       | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	//Select MCLK
 
     // configure transmitter
-    int rsync = 0;
     int tsync = 1;
+    int rsync = 0;
 
     I2S1_TMR = 0;
     I2S1_TCR1 = I2S_TCR1_RFW(4);
@@ -366,9 +361,9 @@ void InputTDM::begin(Stream &stream) {
       | I2S_RCR4_FSE | I2S_RCR4_FSD;
     I2S1_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
-    CORE_PIN23_CONFIG = 3;  //1:MCLK
-    CORE_PIN21_CONFIG = 3;  //1:RX_BCLK
-    CORE_PIN20_CONFIG = 3;  //1:RX_SYNC
+    CORE_PIN23_CONFIG = 3;  // MCLK              on pin 23
+    CORE_PIN21_CONFIG = 3;  // RX_BCLK           on pin 21
+    CORE_PIN20_CONFIG = 3;  // RX_SYNC (LRCLK)   on pin 20
   }
   if (TDMUse & (1 << TDM2)) {
     // clear SAI2_CLK register locations
@@ -383,8 +378,8 @@ void InputTDM::begin(Stream &stream) {
       | (IOMUXC_GPR_GPR1_SAI2_MCLK_DIR | IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL(0));	//Select MCLK
 
     // configure transmitter
-    int rsync = 1;
     int tsync = 0;
+    int rsync = 1;
 
     I2S2_TMR = 0;
     I2S2_TCR1 = I2S_TCR1_RFW(4);
@@ -405,9 +400,9 @@ void InputTDM::begin(Stream &stream) {
       | I2S_RCR4_FSE | I2S_RCR4_FSD;
     I2S2_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
-    CORE_PIN33_CONFIG = 2;  //2:MCLK
-    CORE_PIN4_CONFIG  = 2;  //2:TX_BCLK
-    CORE_PIN3_CONFIG  = 2;  //2:TX_SYNC
+    CORE_PIN33_CONFIG = 2;  // MCLK            on pin 33
+    CORE_PIN4_CONFIG  = 2;  // TX_BCLK         on pin 4
+    CORE_PIN3_CONFIG  = 2;  // TX_SYNC (LRCLK) on pin 3
   }
 #endif
 }
@@ -416,12 +411,14 @@ void InputTDM::begin(Stream &stream) {
 void InputTDM::start() {
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
+  
   // this is begin() from input_tdm.cpp of the Audio library
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus)) {
       DataHead[bus] = 0;
       DMACounter[bus] = 0;
-      DMA[bus].begin(true); // Allocate the DMA channel first
+      DMA[bus].begin(); // Allocate the DMA channel first
+      DMA[bus].disable();
 
       // TODO: should we set & clear the I2S_RCSR_SR bit here?
 #if defined(KINETISK)
@@ -439,18 +436,20 @@ void InputTDM::start() {
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(DMAMUX_SOURCE_I2S0_RX);
 
+      // enable receive RE and bit clock BCE:
       I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
       I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
 #elif defined(__IMXRT1062__)
-      if (bus == TDM2) {
-	CORE_PIN5_CONFIG = 2;  //2:RX_DATA0
-	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
-	DMA[bus].TCD->SADDR = &I2S2_RDR0;
-      }
-      else {
-	CORE_PIN8_CONFIG  = 3;  //RX_DATA0
+      // receive data pin:
+      if (bus == TDM1) {
+	CORE_PIN8_CONFIG  = 3;  // RX_DATA0
 	IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
 	DMA[bus].TCD->SADDR = &I2S1_RDR0;
+      }
+      else if (bus == TDM2) {
+	CORE_PIN5_CONFIG = 2;  // 2:RX_DATA0
+	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
+	DMA[bus].TCD->SADDR = &I2S2_RDR0;
       }
       DMA[bus].TCD->SOFF = 0;
       DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
@@ -464,12 +463,14 @@ void InputTDM::start() {
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
 
-      if (bus == TDM2) {
+      // enable RX RE and bit clock BCE:
+      if (bus == TDM1) {
+	I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
+      }
+      else if (bus == TDM2) {
 	I2S2_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
 	I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
       }
-      else
-	I2S1_RCSR = I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
 #endif
 #if defined(__IMXRT1062__)
       DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
@@ -491,16 +492,42 @@ void InputTDM::start() {
 
   if (TDMUse > 0)
     Input::start();
+
+  Serial.printf("DMA START Error: %d\n", DMA[0].error());
 }
 
 
 void InputTDM::stop() {
+  Serial.printf("DMA END Error: %d\n", DMA[0].error());
   for (int bus=0; bus < 2; bus++) {
     if (TDMUse & (1 << bus)) {
       DMA[bus].disable();
       DMA[bus].detachInterrupt();
     }
   }
+  // disable RX, bit clock, and core clock gate CCG:
+#if defined(KINETISK)
+  if (TDMUse & (1 << TDM1)) {
+    I2S0_RCSR &= ~(I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR);
+    I2S0_TCSR &= ~(I2S_TCSR_TE | I2S_TCSR_BCE);
+  }
+#elif defined(__IMXRT1062__)
+  if (TDMUse & (1 << TDM1)) {
+    I2S1_RCSR = 0;
+  }
+  else if (TDMUse & (1 << TDM2)) {
+    I2S2_RCSR = ~(I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR);
+    I2S2_TCSR = ~(I2S_TCSR_TE | I2S_TCSR_BCE);
+  }
+  CCM_ANALOG_PLL_AUDIO |= CCM_ANALOG_PLL_AUDIO_POWERDOWN; // switch off PLL
+  CCM_ANALOG_PLL_AUDIO &= ~CCM_ANALOG_PLL_AUDIO_ENABLE;   // disable PLL
+  if (TDMUse & (1 << TDM1)) {
+    CCM_CCGR5 &= ~CCM_CCGR5_SAI1(CCM_CCGR_ON);
+  }
+  else if (TDMUse & (1 << TDM2)) {
+    CCM_CCGR5 &= ~CCM_CCGR5_SAI2(CCM_CCGR_ON);
+  }
+#endif
   Input::stop();
 }
 

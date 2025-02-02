@@ -21,6 +21,9 @@ class ControlPCM186x : public Device {
   
 public:
 
+  static const size_t MaxSamplingRates = 5;
+  static const uint32_t SamplingRates[MaxSamplingRates];
+  
   enum INPUT_CHANNELS : uint8_t {
     CHNONE = 0x00,
     CH1L   = 0x01,

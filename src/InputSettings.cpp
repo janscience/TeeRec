@@ -20,7 +20,7 @@ void InputSettings::setRate(uint32_t rate) {
 }
 
 
-void InputSettings::setRateSelection(uint32_t *selection, size_t n) {
+void InputSettings::setRateSelection(const uint32_t *selection, size_t n) {
   Rate.setSelection(selection, n);
 }
 

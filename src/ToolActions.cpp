@@ -578,7 +578,7 @@ void PrintInputAction::configure(Stream &stream, unsigned long timeout,
   stream.print("Record some data ...");
   Data.begin();
   Data.start();
-  delay(tmax);
+  delay(tmax + 10);
   Data.stop();
   stream.println();
   size_t nframes = Data.index()/Data.nchannels();
@@ -589,6 +589,7 @@ void PrintInputAction::configure(Stream &stream, unsigned long timeout,
   stream.printf("Resolution: %ubits", Data.dataResolution());
   stream.println();
   Data.printData(0, nframes, stream);
+  stream.println(nframes);
   stream.println();
 }
 

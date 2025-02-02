@@ -1,5 +1,9 @@
 #include "ControlPCM186x.h"
 
+
+const uint32_t ControlPCM186x::SamplingRates[ControlPCM186x::MaxSamplingRates] =
+  {8000, 16000, 24000, 48000, 96000};
+
 // #define DEBUG 1
 
 // register addresses, MSB is page, LSB is register:

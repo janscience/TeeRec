@@ -32,7 +32,7 @@ public:
   void setRate(uint32_t rate);
 
   // Provide a list of valid sampling rates in Hz.
-  void setRateSelection(uint32_t *selection, size_t n);
+  void setRateSelection(const uint32_t *selection, size_t n);
 
   // Return pregain as a factor.
   // This is the fixed gain of a first amplification stage.
