@@ -221,7 +221,7 @@ void InputADC::clearChannels() {
 
 
 uint8_t InputADC::nchannels(uint8_t adc) const {
-  if ( (ADCUse & (adc+1)) == adc+1 )
+  if ((ADCUse & (adc+1)) == adc+1)
     return NChans[adc];
   return 0;
 }
@@ -240,7 +240,7 @@ void InputADC::channelStr(int8_t pin, char *chan) const {
 void InputADC::channels(uint8_t adc, char *chans) const {
   bool first = true;
   for (uint8_t k=0; k<NChans[adc]; k++) {
-    if ( ! first )
+    if (! first)
       *chans++ = ',';
     chans += analogPin(Channels[adc][k], chans);
     first = false;
@@ -255,7 +255,7 @@ void InputADC::channels(char *chans) const {
   for (uint8_t k=0; k<nchan; k++) {
     for (uint8_t adc=0; adc<2; adc++) {
       if (k < NChans[adc]) {
-        if ( ! first )
+        if (! first)
 	  *chans++ = ',';
         chans += analogPin(Channels[adc][k], chans);
         first = false;
@@ -457,12 +457,12 @@ void InputADC::pinAssignment() {
 bool InputADC::check(uint8_t nchannels, Stream &stream) {
   if (!Input::check(nchannels, stream))
     return false;
-  if ( Rate < 1 ) {
+  if (Rate < 1) {
     stream.println("ERROR: no sampling rate specfied.");
     ADCUse = 0;
     return false;
   }
-  if ( NBuffer < NMajors*MajorSize ) {
+  if (NBuffer < NMajors*MajorSize) {
     stream.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
     ADCUse = 0;
     return false;
@@ -471,7 +471,7 @@ bool InputADC::check(uint8_t nchannels, Stream &stream) {
     stream.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
 		  1000.0*bufferTime());
   for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) == adc+1 ) {
+    if ((ADCUse & (adc+1)) == adc+1) {
       if (NChans[adc] == 0) {
 	stream.println("ERROR: no channels supplied.");
 	ADCUse = 0;
@@ -484,7 +484,7 @@ bool InputADC::check(uint8_t nchannels, Stream &stream) {
 	return false;
       }
       for(uint8_t i=0; i<NChans[adc]; i++) {
-	if ( ! ADConv.adc[adc]->checkPin(Channels[adc][i]) ) {
+	if (! ADConv.adc[adc]->checkPin(Channels[adc][i])) {
 	  stream.printf("ERROR: invalid channel at index %d at ADC%d\n", i, adc);
 	  ADCUse = 0;
 	  return false;
@@ -492,7 +492,7 @@ bool InputADC::check(uint8_t nchannels, Stream &stream) {
       }
     }
   }
-  if ( (ADCUse & 3) == 3 && NChans[0] != NChans[1] ) {
+  if ((ADCUse & 3) == 3 && NChans[0] != NChans[1]) {
     stream.printf("ERROR: number of channels on both ADCs must be the same. ADC0: %d, ADC1: %d\n", NChans[0], NChans[1]);
     ADCUse = 0;
     return false;
@@ -553,7 +553,7 @@ void InputADC::setWaveHeader(WaveHeader &wave) const {
 void InputADC::start() {
   // setup acquisition:
   for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (adc+1)) == adc+1 ) {
+    if ((ADCUse & (adc+1)) == adc+1) {
       DataHead[adc] = 0;
       setupChannels(adc);
       setupADC(adc);
@@ -561,7 +561,7 @@ void InputADC::start() {
     }
   }
   // start timer:
-  if ( (ADCUse & 3) == 3 ) {
+  if ((ADCUse & 3) == 3) {
     DataHead[1] = 1;
 #if defined(ADC_USE_PDB)
     startPDB(Rate*NChans[0]);
@@ -574,7 +574,7 @@ void InputADC::start() {
   }
   else {
     for (uint8_t adc=0; adc<2; adc++) {
-      if ( (ADCUse & (adc+1)) == adc+1 ) {
+      if ((ADCUse & (adc+1)) == adc+1) {
 	ADConv.adc[adc]->startTimer(Rate*NChans[adc]);
 #if defined(ADC_USE_PDB)
 	NVIC_DISABLE_IRQ(IRQ_PDB); // we do not need the PDB interrupt
@@ -594,10 +594,10 @@ void InputADC::start() {
 
 void InputADC::stop() {
   for (uint8_t adc=0; adc<2; adc++) {
-    if ( (ADCUse & (1 << adc)) > 0 ) {
+    if ((ADCUse & (1 << adc)) > 0) {
       ADConv.adc[adc]->disableDMA();
       ADConv.adc[adc]->stopTimer();
-      if ( NChans[adc] > 1 )
+      if (NChans[adc] > 1)
 	DMASwitch[adc].disable();
       DMABuffer[adc].disable();
       DMABuffer[adc].detachInterrupt();
@@ -617,14 +617,14 @@ void InputADC::setupChannels(uint8_t adc) {
   for(uint8_t i=0; i<NChans[adc]; i++) {
 #ifdef TEENSY3
     uint8_t sc1a_pin = 0;
-    if ( adc == 0 )
+    if (adc == 0)
       sc1a_pin = ADConv.channel2sc1aADC0[Channels[adc][i]];
-    else if ( adc == 1 )
+    else if (adc == 1)
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
 #endif
   }
-  if ( NChans[adc] > 1 ) {
+  if (NChans[adc] > 1) {
     // reorder:
     uint8_t temp = SC1AChannels[adc][0];
     for(uint8_t i=1; i<NChans[adc]; i++)
@@ -682,7 +682,7 @@ void InputADC::setupDMA(uint8_t adc) {
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
   DMABuffer[adc].enable();
 
-  if ( NChans[adc] > 1 ) {
+  if (NChans[adc] > 1) {
     DMASwitch[adc].begin();
     DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChans[adc]);
 #ifdef TEENSY3
@@ -699,7 +699,7 @@ void InputADC::isr(uint8_t adc) {
   // takes 31us! (=32kHz) for 256 samples
   size_t dmai = DMAIndex[adc]*MajorSize;
   DMAIndex[adc]++;
-  if ( DMAIndex[adc] >= NMajors)
+  if (DMAIndex[adc] >= NMajors)
     DMAIndex[adc] = 0;
   // transform and copy DMA buffer:
   size_t step = 1;
