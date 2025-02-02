@@ -930,14 +930,14 @@ float ControlPCM186x::readCoefficient(uint8_t address) {
   val = 0;
   for (int n=0; n < 10 && val == 0; n++) {
     val = read(0x0101);
-    delay(10);
+    delay(1);
   }
   write(0x0102, address); // memory address for reading/writing coefficient
   write(0x0101, 0x02);    // bit 0 request=1/check=0 write, bit 1 request=1/check=0 read
   val = 0x02;             // check progress in reading
   for (int n=0; n < 10 && val == 0x02; n++) {
     val = read(0x0101);
-    delay(10);
+    delay(1);
   }
   val = read(0x0108);  // bit[23:16]
   coeff = (val & 0xf0) >> 4;
@@ -1018,8 +1018,10 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
   }
     
   I2CBus->beginTransmission(I2CAddress);
-  I2CBus->write(reg); delay(10);
-  I2CBus->write(val); delay(10);
+  I2CBus->write(reg);
+  delay(WriteDelay);
+  I2CBus->write(val);
+  delay(WriteDelay);
   result = I2CBus->endTransmission();
   if (result != 0) {
 #ifdef DEBUG
@@ -1034,9 +1036,9 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
 uint8_t ControlPCM186x::goToPage(byte page) {
   I2CBus->beginTransmission(I2CAddress);
   I2CBus->write(0x00); // page register
-  delay(10);
+  delay(WriteDelay);
   I2CBus->write(page); // go to page
-  delay(10);
+  delay(WriteDelay);
   uint8_t result = I2CBus->endTransmission();
   if (result == 0)
     CurrentPage = page;

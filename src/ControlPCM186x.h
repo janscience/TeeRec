@@ -238,6 +238,7 @@ protected:
   bool PGALinked;
   int NChannels;
   InputTDM::TDM_BUS Bus;
+  static const int WriteDelay = 1;
   
 };
 
