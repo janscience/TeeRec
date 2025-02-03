@@ -530,13 +530,13 @@ void InputTDM::stop() {
   CCM_ANALOG_PLL_AUDIO |= CCM_ANALOG_PLL_AUDIO_POWERDOWN; // switch off PLL
   CCM_ANALOG_PLL_AUDIO &= ~CCM_ANALOG_PLL_AUDIO_ENABLE;   // disable PLL
   //begin() will not recover the PLL!
-  */
   if (TDMUse & (1 << TDM1)) {
     CCM_CCGR5 &= ~CCM_CCGR5_SAI1(CCM_CCGR_ON);
   }
   else if (TDMUse & (1 << TDM2)) {
     CCM_CCGR5 &= ~CCM_CCGR5_SAI2(CCM_CCGR_ON);
   }
+  */
 #endif
   Input::stop();
 }
