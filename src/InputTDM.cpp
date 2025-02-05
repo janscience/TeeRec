@@ -538,6 +538,7 @@ void InputTDM::stop() {
   }
   */
 #endif
+  TDMUse = 0;
   Input::stop();
 }
 
