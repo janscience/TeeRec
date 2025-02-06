@@ -577,6 +577,16 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
 }
 
 
+float ControlPCM186x::gainToDecibel(float gain) {
+  return 20.0*log10(gain);
+}
+
+
+float ControlPCM186x::gainFromDecibel(float level) {
+  return pow(10.0, level/20.0);
+}
+
+
 float ControlPCM186x::gainDecibel(OUTPUT_CHANNELS adc) {
   int igain = 0x0100;
   if (adc == ADC1L)
@@ -650,14 +660,14 @@ float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float gain) {
 
 float ControlPCM186x::gain(OUTPUT_CHANNELS adc) {
   float level = gainDecibel(adc);
-  return pow(10.0, level/20.0);
+  return gainFromDecibel(level);
 }
 
 
 float ControlPCM186x::setGain(OUTPUT_CHANNELS adc, float gain) {
-  float level = 20.0*log10(gain);
+  float level = gainToDecibel(gain);
   level = ControlPCM186x::setGainDecibel(adc, level);
-  return pow(10.0, level/20.0);
+  return gainFromDecibel(level);
 }
 
   
@@ -669,7 +679,7 @@ float ControlPCM186x::gainDecibel() {
 float ControlPCM186x::setGainDecibel(InputTDM &tdm, float level) {
   level = setGainDecibel(ADCLR, level);
   if (!isnan(level)) {
-    tdm.setGain(1650.0/pow(10.0, level/20.0));
+    tdm.setGain(1650.0/gainFromDecibel(level));
     return true;
   }
   return false;

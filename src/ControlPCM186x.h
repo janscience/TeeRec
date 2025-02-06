@@ -165,6 +165,12 @@ public:
 
   /* The TDM bus on which this PCM186x chip transmits data. */
   InputTDM::TDM_BUS TDMBus() const { return Bus; };
+
+  /* Convert a gain factor to gain level in decibel. */
+  float gainToDecibel(float gain);
+
+  /* Convert a gain level in decibel to a gain factor. */
+  float gainFromDecibel(float level);
   
   /* Return the gain set for output channel adc in dB. */
   float gainDecibel(OUTPUT_CHANNELS adc);
