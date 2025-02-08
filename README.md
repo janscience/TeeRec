@@ -33,7 +33,6 @@ forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-cha
   channels and pin IDs, bit resolution, gain, date and time, Teensy board
   version, and its unique MAC address.
 - Filenames based on date and/or time of the real-time-clock or incremental.
-- Interactive configuration via serial stream or from config file on SD card.
 - Analysis chain on top of data buffer.
 - Audio monitor.
 - Display recorded data on a monitor.
@@ -79,10 +78,6 @@ via the `TeeRec.h` header.
 
 ### Configuration
 
-- [Action](src/Action.h): Base class for configurable menu entries.
-- [Parameter](src/Parameter.h): Actions with configurable name-value pairs of various types.
-- [Configurable](src/Configurable.h): A collection of Actions.
-- [Configurator](src/Configuration.h): Configure configurable class instances from a configuration file.
 - [ToolActions](src/ToolActions.h): Actions for managing configurations, SD cards, and the real-time clock.
 - [ToolMenus](src/ToolMenus.h): Menus with actions for managing configurations, SD cards, and the real-time clock.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
@@ -163,7 +158,6 @@ Demonstrate the usage of some of the provided libraries.
 
 In [utils/](utils) you find some useful python scripts.
 
-- [serialmonitor](utils/serialmonitor.py): serial monitor for the console that automatically detects Teensys connected to USB.
 - [viewwave](utils/viewwave.py): display the traces in a wave file.
 - [spectra](utils/spectra.py): power spectra of traces in wave files.
 - [noise](utils/noise.py): plot and analyse baseline noise levels from wave files.
