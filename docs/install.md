@@ -171,6 +171,7 @@ See [Arduino Library Manager list](https://github.com/arduino/library-registry).
 4. Push the tag to the repository: `git push origin v0.9.0`
 5. On github make a new release for this tag.
 6. The library indexer will detect this new version about once an hour.
-7. Check in the library manager or here: https://www.arduino.cc/reference/en/libraries/teerec/
+7. Check the logs of the library indexer: http://downloads.arduino.cc/libraries/logs/github.com/janscience/TeeRec/
+8. Check the new version in the library manager or here: https://www.arduino.cc/reference/en/libraries/teerec/
 
 
