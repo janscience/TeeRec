@@ -3,7 +3,7 @@
 
 
 DateTimeMenu::DateTimeMenu(RTClock &rtclock) :
-  Configurable("Date & time", Action::StreamInput),
+  Menu("Date & time", Action::StreamInput),
   PrintAct(*this, "Print date & time", rtclock),
   ReportAct(*this, "Report date & time infos", rtclock),
   SetAct(*this, "Set date & time", rtclock) {
@@ -11,7 +11,7 @@ DateTimeMenu::DateTimeMenu(RTClock &rtclock) :
 
 
 ConfigurationMenu::ConfigurationMenu(SDCard &sdcard) :
-  Configurable("Configuration", Action::StreamInput),
+  Menu("Configuration", Action::StreamInput),
   ReportAct(*this, "Print configuration"),
   SaveAct(*this,"Save configuration", sdcard),
   LoadAct(*this, "Load configuration", sdcard),
@@ -20,7 +20,7 @@ ConfigurationMenu::ConfigurationMenu(SDCard &sdcard) :
 
 
 SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
-  Configurable("SD", Action::StreamInput),
+  Menu("SD", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard, settings),
@@ -37,7 +37,7 @@ SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
 
 
 FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
-  Configurable("Firmware", Action::StreamInput),
+  Menu("Firmware", Action::StreamInput),
   ListAct(*this, "List available updates", sdcard),
   UpdateAct(*this, "Update firmware", sdcard) {
 }
@@ -45,7 +45,7 @@ FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
 
 InputMenu::InputMenu(Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
-  Configurable("Analog input", Action::StreamInput),
+  Menu("Analog input", Action::StreamInput),
   ReportAct(*this, "Report input configuration", data, settings,
 	    controls, ncontrols, setupai),
   PrintAct(*this, "Record some data", data, settings,
@@ -57,7 +57,7 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Configurable(name, Action::StreamInput),
+  Menu(name, Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
@@ -77,7 +77,7 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Configurable(name, Action::StreamInput),
+  Menu(name, Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),

@@ -27,7 +27,7 @@ class HelpAction : public Action {
   HelpAction(const char *name);
 
   /* Initialize and add to configuration menu. */
-  HelpAction(Configurable &menu, const char *name);
+  HelpAction(Menu &menu, const char *name);
 
   /* Print help and key-bindings. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
@@ -43,7 +43,7 @@ class TeensyInfoAction : public Action {
   TeensyInfoAction(const char *name);
 
   /* Initialize and add to configuration menu. */
-  TeensyInfoAction(Configurable &menu, const char *name);
+  TeensyInfoAction(Menu &menu, const char *name);
 
   /* Info about Teensy version, serial number and MAC. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
@@ -92,7 +92,7 @@ class ReportConfigAction : public Action {
   ReportConfigAction(const char *name);
 
   /* Initialize and add to configuration menu. */
-  ReportConfigAction(Configurable &menu, const char *name);
+  ReportConfigAction(Menu &menu, const char *name);
 
   /* Report the configuration settings. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
@@ -108,7 +108,7 @@ class SDCardAction : public Action {
   SDCardAction(const char *name, SDCard &sd);
 
   /* Initialize and add to configuration menu. */
-  SDCardAction(Configurable &menu, const char *name, SDCard &sd);
+  SDCardAction(Menu &menu, const char *name, SDCard &sd);
 
  protected:
 
@@ -236,7 +236,7 @@ class SDListRecordingsAction : public SDCardAction {
   SDListRecordingsAction(const char *name, SDCard &sd, Settings &settings);
 
   /* Initialize and add to configuration menu. */
-  SDListRecordingsAction(Configurable &menu, const char *name, SDCard &sd,
+  SDListRecordingsAction(Menu &menu, const char *name, SDCard &sd,
 		 Settings &settings);
 
   /* List all recordings on SD card. */
@@ -293,7 +293,7 @@ class RTCAction : public Action {
   RTCAction(const char *name, RTClock &rtclock);
 
   /* Initialize and add to configuration menu. */
-  RTCAction(Configurable &menu, const char *name, RTClock &rtclock);
+  RTCAction(Menu &menu, const char *name, RTClock &rtclock);
 
  protected:
 
@@ -347,7 +347,7 @@ class DevicesAction : public Action {
 		Device* dev4=0, Device* dev5=0);
 
   /* Initialize and add to configuration menu. */
-  DevicesAction(Configurable &menu, const char *name,
+  DevicesAction(Menu &menu, const char *name,
 		Device* dev0, Device* dev1=0,
 		Device* dev2=0, Device* dev3=0,
 		Device* dev4=0, Device* dev5=0);
@@ -377,7 +377,7 @@ class InputAction : public Action {
 	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
 
   /* Initialize and add to configuration menu. */
-  InputAction(Configurable &menu, const char *name,
+  InputAction(Menu &menu, const char *name,
 	      Input &data, InputSettings &settings,
 	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
 

@@ -7,11 +7,10 @@
 #define Settings_h
 
 
-#include <Configurable.h>
-#include <Parameter.h>
+#include <MicroConfig.h>
 
 
-class Settings : public Configurable {
+class Settings : public Menu {
 
 public:
 

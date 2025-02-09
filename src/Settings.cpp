@@ -5,7 +5,7 @@ Settings::Settings(const char *path, int deviceid, const char *filename,
 		   float filetime, float initialdelay, bool randomblinks,
 		   float pulsefrequency, float displaytime,
 		   float sensorsinterval) :
-  Configurable("Settings"),
+  Menu("Settings"),
   Path(*this, "Path", path),
   ID(*this, "DeviceID", deviceid, 0, 128, "%d"),
   FileName(*this, "FileName", filename),

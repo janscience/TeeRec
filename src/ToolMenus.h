@@ -7,11 +7,10 @@
 #define ToolMenus_h
 
 
-#include <Configurable.h>
 #include <ToolActions.h>
 
 
-class DateTimeMenu : public Configurable {
+class DateTimeMenu : public Menu {
 
 public:
 
@@ -26,7 +25,7 @@ protected:
 };
 
 
-class ConfigurationMenu : public Configurable {
+class ConfigurationMenu : public Menu {
 
 public:
 
@@ -42,7 +41,7 @@ protected:
 };
 
 
-class SDCardMenu : public Configurable {
+class SDCardMenu : public Menu {
 
 public:
 
@@ -60,7 +59,7 @@ protected:
 };
 
 
-class FirmwareMenu : public Configurable {
+class FirmwareMenu : public Menu {
 
 public:
 
@@ -74,7 +73,7 @@ protected:
 };
 
 
-class InputMenu : public Configurable {
+class InputMenu : public Menu {
 
 public:
 
@@ -90,7 +89,7 @@ protected:
 };
 
 
-class DiagnosticMenu : public Configurable {
+class DiagnosticMenu : public Menu {
 
 public:
 

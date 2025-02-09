@@ -8,14 +8,13 @@
 #define InputSettings_h
 
 
-#include <Configurable.h>
-#include <Parameter.h>
+#include <MicroConfig.h>
 
 
 class Input;
 
 
-class InputSettings : public Configurable {
+class InputSettings : public Menu {
 
 public:
 

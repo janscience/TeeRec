@@ -13,7 +13,7 @@ HelpAction::HelpAction(const char *name) :
 }
 
 
-HelpAction::HelpAction(Configurable &menu, const char *name) :
+HelpAction::HelpAction(Menu &menu, const char *name) :
   Action(menu, name, StreamInput) {
 }
 
@@ -31,7 +31,7 @@ TeensyInfoAction::TeensyInfoAction(const char *name) :
 }
 
 
-TeensyInfoAction::TeensyInfoAction(Configurable &menu, const char *name) :
+TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
   Action(menu, name, StreamInput) {
 }
 
@@ -215,7 +215,7 @@ ReportConfigAction::ReportConfigAction(const char *name) :
 }
 
 
-ReportConfigAction::ReportConfigAction(Configurable &menu, const char *name) :
+ReportConfigAction::ReportConfigAction(Menu &menu, const char *name) :
   Action(menu, name, StreamInput) {
 }
 
@@ -232,7 +232,7 @@ SDCardAction::SDCardAction(const char *name, SDCard &sd) :
 }
 
 
-SDCardAction::SDCardAction(Configurable &menu, const char *name, SDCard &sd) : 
+SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd) : 
   Action(menu, name, StreamInput),
   SDC(sd) {
 }
@@ -382,7 +382,7 @@ SDListRecordingsAction::SDListRecordingsAction(const char *name, SDCard &sd,
 }
 
 
-SDListRecordingsAction::SDListRecordingsAction(Configurable &menu,
+SDListRecordingsAction::SDListRecordingsAction(Menu &menu,
 					       const char *name,
 					       SDCard &sd,
 					       Settings &settings) : 
@@ -443,7 +443,7 @@ RTCAction::RTCAction(const char *name, RTClock &rtclock) :
 }
 
 
-RTCAction::RTCAction(Configurable &menu, const char *name, RTClock &rtclock) :
+RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock) :
   Action(menu, name, StreamInput),
   RTC(rtclock) {
 }
@@ -478,7 +478,7 @@ DevicesAction::DevicesAction(const char *name, Device* dev0, Device* dev1,
 }
 
 
-DevicesAction::DevicesAction(Configurable &menu, const char *name,
+DevicesAction::DevicesAction(Menu &menu, const char *name,
 			     Device* dev0, Device* dev1,
 			     Device* dev2, Device* dev3,
 			     Device* dev4, Device* dev5) :
@@ -532,7 +532,7 @@ InputAction::InputAction(const char *name, Input &data,
 }
 
 
-InputAction::InputAction(Configurable &menu, const char *name,
+InputAction::InputAction(Menu &menu, const char *name,
 			 Input &data, InputSettings &settings,
 			 Device** controls, size_t ncontrols,
 			 SetupAI setupai) :
