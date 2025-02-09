@@ -10,15 +10,6 @@ DateTimeMenu::DateTimeMenu(RTClock &rtclock) :
 }
 
 
-ConfigurationMenu::ConfigurationMenu(SDCard &sdcard) :
-  Menu("Configuration", Action::StreamInput),
-  ReportAct(*this, "Print configuration"),
-  SaveAct(*this,"Save configuration", sdcard),
-  LoadAct(*this, "Load configuration", sdcard),
-  RemoveAct(*this, "Erase configuration", sdcard) {
-}
-
-
 SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
   Menu("SD", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),

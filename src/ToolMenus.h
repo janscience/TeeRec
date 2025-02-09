@@ -25,22 +25,6 @@ protected:
 };
 
 
-class ConfigurationMenu : public Menu {
-
-public:
-
-  ConfigurationMenu(SDCard &sdcard);
-
-protected:
-
-  ReportConfigAction ReportAct;
-  SaveConfigAction SaveAct;
-  LoadConfigAction LoadAct;
-  RemoveConfigAction RemoveAct;
-  
-};
-
-
 class SDCardMenu : public Menu {
 
 public:

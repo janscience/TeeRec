@@ -1,5 +1,5 @@
 /*
-  ToolActions - Actions for managing configurations, SD cards, and the real-time clock.
+  ToolActions - Actions for device infos and checks, SD cards, and the real-time clock.
   Created by Jan Benda, August 13th, 2024.
 */
 
@@ -68,22 +68,6 @@ class PSRAMTestAction : public TeensyInfoAction {
 };
 
 
-class ReportConfigAction : public Action {
-
- public:
-
-  /* Initialize and add to default menu. */
-  ReportConfigAction(const char *name);
-
-  /* Initialize and add to configuration menu. */
-  ReportConfigAction(Menu &menu, const char *name);
-
-  /* Report the configuration settings. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
 class SDCardAction : public Action {
 
  public:
@@ -97,42 +81,6 @@ class SDCardAction : public Action {
  protected:
 
   SDCard &SDC; 
-};
-
-
-class SaveConfigAction : public SDCardAction {
-
- public:
-
-  using SDCardAction::SDCardAction;
-
-  /* Save the configuration settings to configuration file. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class LoadConfigAction : public SDCardAction {
-
- public:
-
-  using SDCardAction::SDCardAction;
-
-  /* Load the configuration settings from configuration file. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class RemoveConfigAction : public SDCardAction {
-
- public:
-
-  using SDCardAction::SDCardAction;
-
-  /* Remove the configuration file from SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
 };
 
 
