@@ -107,7 +107,6 @@ via the `TeeRec.h` header.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.
-- [FirmwareUpdate](src/FirmwareUpdate.h): Upload hex file from SD card.
 - [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
 - [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
 - [TeeRecBanner](src/TeeRecBanner.h): ASCII art banner and TeeRec version for output streams.
