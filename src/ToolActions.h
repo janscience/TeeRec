@@ -19,22 +19,6 @@ class Input;
 class InputSettings;
 
 
-class HelpAction : public Action {
-
- public:
-
-  /* Initialize and add to default menu. */
-  HelpAction(const char *name);
-
-  /* Initialize and add to configuration menu. */
-  HelpAction(Menu &menu, const char *name);
-
-  /* Print help and key-bindings. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
 class TeensyInfoAction : public Action {
 
  public:

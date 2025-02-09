@@ -8,24 +8,6 @@
 #include <ToolActions.h>
 
 
-HelpAction::HelpAction(const char *name) :
-  HelpAction(*Configurator::MainConfig->Config, name) {
-}
-
-
-HelpAction::HelpAction(Menu &menu, const char *name) :
-  Action(menu, name, StreamInput) {
-}
-
-
-void HelpAction::execute(Stream &stream, unsigned long timeout,
-			 bool echo, bool detailed) {
-  stream.println("Select menu entries by entering the number followed by 'return'.");
-  stream.println("Go up to the parent menu by entering 'q'.");
-  stream.println();
-}
-
-
 TeensyInfoAction::TeensyInfoAction(const char *name) :
   TeensyInfoAction(*Configurator::MainConfig->Config, name) {
 }
