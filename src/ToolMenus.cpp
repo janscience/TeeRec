@@ -2,23 +2,6 @@
 #include <ToolMenus.h>
 
 
-SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
-  Menu("SD", Action::StreamInput),
-  InfoAct(*this, "SD card info", sdcard),
-  ListRootAct(*this, "List files in root directory", sdcard),
-  ListRecsAct(*this, "List all recordings", sdcard, settings),
-  EraseRecsAct(*this, "Erase all recordings", sdcard, settings),
-  FormatAct(*this, "Format SD card", sdcard),
-  EraseFormatAct(*this, "Erase and format SD card", sdcard) {
-  char name[64];
-  strcpy(name, sdcard.name());
-  if (strlen(name) > 0)
-    name[0] = toupper(name[0]);
-  strcat(name, "SD card");
-  setName(name);
-}
-
-
 InputMenu::InputMenu(Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
   Menu("Analog input", Action::StreamInput),

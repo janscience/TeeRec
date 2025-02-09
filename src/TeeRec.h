@@ -16,6 +16,7 @@
 #include <ToolActions.h>
 #include <ToolMenus.h>
 #include <RTClockMenu.h>
+#include <SDCardMenu.h>
 
 #include <TestSignals.h>
 

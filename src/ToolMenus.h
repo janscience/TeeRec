@@ -7,25 +7,8 @@
 #define ToolMenus_h
 
 
+#include <SDCardMenu.h>
 #include <ToolActions.h>
-
-
-class SDCardMenu : public Menu {
-
-public:
-
-  SDCardMenu(SDCard &sdcard, Settings &settings);
-
-protected:
-
-  SDInfoAction InfoAct;
-  SDListRootAction ListRootAct;
-  SDListRecordingsAction ListRecsAct;
-  SDRemoveRecordingsAction EraseRecsAct;
-  SDFormatAction FormatAct;
-  SDEraseFormatAction EraseFormatAct;
-  
-};
 
 
 class InputMenu : public Menu {
