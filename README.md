@@ -78,14 +78,14 @@ via the `TeeRec.h` header.
 
 ### Configuration
 
-- [ToolActions](src/ToolActions.h): Actions for managing configurations, SD cards, and the real-time clock.
-- [ToolMenus](src/ToolMenus.h): Menus with actions for managing configurations, SD cards, and the real-time clock.
 - [Settings](src/Settings.h): Common configurable settings (file name, path, etc.)
 - [InputSettings](src/InputSettings.h): Configuration settings for any Input class.
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
+- [InputMenu](src/InputMenu.h): Actions and menu for checking and reading analog input data.
 - [RTClockMenu](src/RTClcockMenu.h): Actions and menu for reading and setting the real-time clock.
 - [SDCardMenu](src/SDCardMenu.h): Actions and menu for dealing with SD cards.
+- [DiagnosticMenu](src/DiagnosticMenu.h): Actions and menu for diagnostics of the Teensy board, PSRAM memory, and devices.
 
 ### Audio monitor
 

@@ -13,10 +13,11 @@
 #include <Settings.h>
 #include <InputADCSettings.h>
 #include <InputTDMSettings.h>
-#include <ToolActions.h>
-#include <ToolMenus.h>
+
+#include <InputMenu.h>
 #include <RTClockMenu.h>
 #include <SDCardMenu.h>
+#include <DiagnosticMenu.h>
 
 #include <TestSignals.h>
 

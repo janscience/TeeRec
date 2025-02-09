@@ -1,20 +1,18 @@
 /*
-  ToolActions - Actions for device infos and checks, SD cards, and the real-time clock.
+  DiagnosticMenu - Actions and menu for diagnostics of the Teensy board, PSRAM memory, and devices.
   Created by Jan Benda, August 13th, 2024.
 */
 
-#ifndef ToolActions_h
-#define ToolActions_h
+#ifndef DiagnosticMenu_h
+#define DiagnosticMenu_h
 
 
+#include <SDCardMenu.h>
 #include <MicroConfig.h>
 
 
-class SDCard;
-class Settings;
 class Device;
-class Input;
-class InputSettings;
+class SDCard;
 
 
 class TeensyInfoAction : public Action {
@@ -94,53 +92,31 @@ protected:
 };
 
 
-typedef void (*SetupAI)(Input &aidata, const InputSettings &aisettings,
-		 Device **controls, size_t ncontrols, Stream &stream);
+class DiagnosticMenu : public Menu {
 
-class InputAction : public Action {
+public:
 
- public:
+  DiagnosticMenu(const char *name, SDCard &sdcard, Device* dev0=0,
+		 Device* dev1=0, Device* dev2=0, Device* dev3=0,
+		 Device* dev4=0, Device* dev5=0);
+  DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1,
+		 Device* dev0=0, Device* dev1=0,
+		 Device* dev2=0, Device* dev3=0,
+		 Device* dev4=0, Device* dev5=0);
 
-  /* Initialize and add to default menu. */
-  InputAction(const char *name, Input &data, InputSettings &settings,
-	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
+protected:
 
-  /* Initialize and add to configuration menu. */
-  InputAction(Menu &menu, const char *name,
-	      Input &data, InputSettings &settings,
-	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
+  void setSDCardNames(SDCard &sdcard, Action &checkact,
+		      Action &benchmarkact);
 
- protected:
-
-  Input &Data;
-  InputSettings &Settings;
-  Device **Controls;
-  size_t NControls;
-  SetupAI Setupai;
-};
-
-
-class ReportInputAction : public InputAction {
-
- public:
-
-  using InputAction::InputAction;
-
-  /* Start, report, and stop analog input. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class PrintInputAction : public InputAction {
-
- public:
-
-  using InputAction::InputAction;
-
-  /* Record and print 100ms of data. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  TeensyInfoAction TeensyInfoAct;
+  PSRAMInfoAction PSRAMInfoAct;
+  PSRAMTestAction PSRAMTestAct;
+  SDCheckAction SD0CheckAct;
+  SDBenchmarkAction SD0BenchmarkAct;
+  SDCheckAction SD1CheckAct;
+  SDBenchmarkAction SD1BenchmarkAct;
+  DevicesAction DevicesAct;
 };
 
 

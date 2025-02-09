@@ -1,10 +1,7 @@
 #include <TeensyBoard.h>
-#include <SDWriter.h>
-#include <Settings.h>
 #include <Device.h>
-#include <Input.h>
-#include <InputSettings.h>
-#include <ToolActions.h>
+#include <SDCard.h>
+#include <DiagnosticMenu.h>
 
 
 TeensyInfoAction::TeensyInfoAction(const char *name) :
@@ -244,75 +241,53 @@ void DevicesAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-InputAction::InputAction(const char *name, Input &data,
-			 InputSettings &settings,
-			 Device** controls, size_t ncontrols,
-			 SetupAI setupai) :
-  InputAction(*root()->Config, name, data, settings,
-	      controls, ncontrols, setupai) {
+DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
+			       Device* dev0, Device* dev1,
+			       Device* dev2, Device* dev3,
+			       Device* dev4, Device* dev5) :
+  Menu(name, Action::StreamInput),
+  TeensyInfoAct(*this, "Teensy info"),
+  PSRAMInfoAct(*this, "PSRAM memory info"),
+  PSRAMTestAct(*this, "PSRAM memory test"),
+  SD0CheckAct(*this, "SDc", sdcard),
+  SD0BenchmarkAct(*this, "SDb", sdcard),
+  SD1CheckAct(*this, "SDc", sdcard),
+  SD1BenchmarkAct(*this, "SDb", sdcard),
+  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
+  setSDCardNames(sdcard, SD0CheckAct, SD0BenchmarkAct);
+  SD1CheckAct.disable();
+  SD1BenchmarkAct.disable();
 }
 
 
-InputAction::InputAction(Menu &menu, const char *name,
-			 Input &data, InputSettings &settings,
-			 Device** controls, size_t ncontrols,
-			 SetupAI setupai) :
-  Action(menu, name, StreamInput),
-  Data(data),
-  Settings(settings),
-  Controls(controls),
-  NControls(ncontrols),
-  Setupai(setupai) {
+DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
+			       SDCard &sdcard1,
+			       Device* dev0, Device* dev1,
+			       Device* dev2, Device* dev3,
+			       Device* dev4, Device* dev5) :
+  Menu(name, Action::StreamInput),
+  TeensyInfoAct(*this, "Teensy info"),
+  PSRAMInfoAct(*this, "PSRAM memory info"),
+  PSRAMTestAct(*this, "PSRAM memory test"),
+  SD0CheckAct(*this, "Primary SD card check", sdcard0),
+  SD0BenchmarkAct(*this, "Primary SD card benchmark", sdcard0),
+  SD1CheckAct(*this, "Secondary SD card check", sdcard1),
+  SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1),
+  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
+  setSDCardNames(sdcard0, SD0CheckAct, SD0BenchmarkAct);
+  setSDCardNames(sdcard1, SD1CheckAct, SD1BenchmarkAct);
 }
 
 
-void ReportInputAction::execute(Stream &stream, unsigned long timeout,
-				bool echo, bool detailed) {
-  Data.reset();
-  Settings.configure(&Data);
-  if (Setupai != 0)
-    Setupai(Data, Settings, Controls, NControls, stream);
-  if (!Data.check(0, stream)) {
-    stream.println();
-    return;
-  }
-  Data.begin();
-  Data.start();
-  Data.report(stream);
-  Data.stop();
-  Data.reset();
+void DiagnosticMenu::setSDCardNames(SDCard &sdcard, Action &checkact,
+				    Action &benchmarkact) {
+  char name[64];
+  strcpy(name, sdcard.name());
+  if (strlen(name) > 0)
+    name[0] = toupper(name[0]);
+  strcat(name, "SD card check");
+  checkact.setName(name);
+  name[strlen(name) - 5] = '\0';
+  strcat(name, "benchmark");
+  benchmarkact.setName(name);
 }
-
-
-void PrintInputAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
-  Data.reset();
-  Settings.configure(&Data);
-  if (Setupai != 0)
-    Setupai(Data, Settings, Controls, NControls, stream);
-  if (!Data.check(0, stream)) {
-    stream.println();
-    return;
-  }
-  int tmax = 100;
-  stream.print("Record some data ...");
-  Data.begin();
-  Data.start();
-  delay(tmax + 10);
-  Data.stop();
-  stream.println();
-  size_t nframes = Data.index()/Data.nchannels();
-  if (Data.frames(0.001*tmax) < nframes)
-    nframes = Data.frames(0.001*tmax);
-  stream.printf("Sampling rate: %dHz", Data.rate());
-  stream.println();
-  stream.printf("Resolution: %ubits", Data.dataResolution());
-  stream.println();
-  char gs[32];
-  Data.gainStr(gs);
-  stream.print("Gain: ");
-  stream.println(gs);
-  Data.printData(0, nframes, stream);
-  stream.println();
-}
-
