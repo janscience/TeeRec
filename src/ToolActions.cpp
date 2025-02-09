@@ -1,5 +1,4 @@
 #include <TeensyBoard.h>
-#include <RTClock.h>
 #include <SDWriter.h>
 #include <Settings.h>
 #include <Device.h>
@@ -324,38 +323,6 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
   if (Action::yesno("Do you really want to erase all recordings?",
 		    true, echo, stream))
     SDC.removeFiles(SettingsMenu.path(), stream);
-  stream.println();
-}
-
-
-RTCAction::RTCAction(const char *name, RTClock &rtclock) :
-  RTCAction(*root()->Config, name, rtclock) {
-}
-
-
-RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock) :
-  Action(menu, name, StreamInput),
-  RTC(rtclock) {
-}
-
-
-void PrintRTCAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
-  stream.print("Current time: ");
-  RTC.print(stream);
-  stream.println();
-}
-
-
-void ReportRTCAction::execute(Stream &stream, unsigned long timeout,
-			      bool echo, bool detailed) {
-  RTC.report(stream);
-}
-
-
-void SetRTCAction::execute(Stream &stream, unsigned long timeout,
-			   bool echo, bool detailed) {
-  RTC.set(stream);
   stream.println();
 }
 

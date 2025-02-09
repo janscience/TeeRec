@@ -12,7 +12,6 @@
 
 class SDCard;
 class Settings;
-class RTClock;
 class Device;
 class Input;
 class InputSettings;
@@ -187,58 +186,6 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
   using SDListRecordingsAction::SDListRecordingsAction;
 
   /* Remove all recordings from SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class RTCAction : public Action {
-
- public:
-
-  /* Initialize and add to default menu. */
-  RTCAction(const char *name, RTClock &rtclock);
-
-  /* Initialize and add to configuration menu. */
-  RTCAction(Menu &menu, const char *name, RTClock &rtclock);
-
- protected:
-
-  RTClock &RTC;
-};
-
-
-class PrintRTCAction : public RTCAction {
-
- public:
-
-  using RTCAction::RTCAction;
-
-  /* Print the current time. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class ReportRTCAction : public RTCAction {
-
- public:
-
-  using RTCAction::RTCAction;
-
-  /* Report the time and the status of the real-time clock. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class SetRTCAction : public RTCAction {
-
- public:
-
-  using RTCAction::RTCAction;
-
-  /* Set the real-time clock. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
 };

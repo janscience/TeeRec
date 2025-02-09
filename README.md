@@ -84,6 +84,7 @@ via the `TeeRec.h` header.
 - [InputSettings](src/InputSettings.h): Configuration settings for any Input class.
 - [InputADCSettings](src/InputADCSettings.h): Configuration settings for InputADC.
 - [InputTDMSettings](src/InputTDMSettings.h): Configuration settings for InputTDM.
+- [RTClockMenu](src/RTClcockMenu.h): Actions and menu for reading and setting the real-time clock.
 
 ### Audio monitor
 

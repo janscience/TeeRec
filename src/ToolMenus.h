@@ -10,21 +10,6 @@
 #include <ToolActions.h>
 
 
-class DateTimeMenu : public Menu {
-
-public:
-
-  DateTimeMenu(RTClock &rtclock);
-
-protected:
-
-  PrintRTCAction PrintAct;
-  ReportRTCAction ReportAct;
-  SetRTCAction SetAct;
-  
-};
-
-
 class SDCardMenu : public Menu {
 
 public:

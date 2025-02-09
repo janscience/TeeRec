@@ -2,14 +2,6 @@
 #include <ToolMenus.h>
 
 
-DateTimeMenu::DateTimeMenu(RTClock &rtclock) :
-  Menu("Date & time", Action::StreamInput),
-  PrintAct(*this, "Print date & time", rtclock),
-  ReportAct(*this, "Report date & time infos", rtclock),
-  SetAct(*this, "Set date & time", rtclock) {
-}
-
-
 SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
   Menu("SD", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
