@@ -1,10 +1,10 @@
+#include <MicroConfigBanner.h>
 #include <TeeRecBanner.h>
 
 
 void printTeeRecBanner(const char *software, Stream &stream) {
   stream.println("\n========================================================");
-  // Generated with https://www.ascii-art-generator.org/
-  // Using font "Standard".
+  // Generated with figlet http://www.figlet.org
   stream.println(R"( _____         ____           )");
   stream.println(R"(|_   _|__  ___|  _ \ ___  ___ )");
   stream.println(R"(  | |/ _ \/ _ \ |_) / _ \/ __|)");
@@ -17,6 +17,8 @@ void printTeeRecBanner(const char *software, Stream &stream) {
     software = software + 7;
   stream.print(software);
   stream.println(" by Benda-Lab");
+  stream.print("based on ");
+  stream.println(MICROCONFIG_SOFTWARE);
   stream.println("--------------------------------------------------------");
   stream.println();
 }
