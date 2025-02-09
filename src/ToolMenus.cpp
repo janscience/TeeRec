@@ -27,13 +27,6 @@ SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
 }
 
 
-FirmwareMenu::FirmwareMenu(SDCard &sdcard) :
-  Menu("Firmware", Action::StreamInput),
-  ListAct(*this, "List available updates", sdcard),
-  UpdateAct(*this, "Update firmware", sdcard) {
-}
-
-
 InputMenu::InputMenu(Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
   Menu("Analog input", Action::StreamInput),

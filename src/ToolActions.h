@@ -8,7 +8,6 @@
 
 
 #include <MicroConfig.h>
-#include <FirmwareUpdate.h>
 
 
 class SDCard;
@@ -188,30 +187,6 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
   using SDListRecordingsAction::SDListRecordingsAction;
 
   /* Remove all recordings from SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class ListFirmwareAction : public SDCardAction {
-
- public:
-
-  using SDCardAction::SDCardAction;
-
-  /* List firmware hex files found on SD card */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
-};
-
-
-class UpdateFirmwareAction : public SDCardAction {
-
- public:
-
-  using SDCardAction::SDCardAction;
-
-  /* Upload firmware from SD card */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
 };

@@ -43,20 +43,6 @@ protected:
 };
 
 
-class FirmwareMenu : public Menu {
-
-public:
-
-  FirmwareMenu(SDCard &sdcard);
-
-protected:
-
-  ListFirmwareAction ListAct;
-  UpdateFirmwareAction UpdateAct;
-  
-};
-
-
 class InputMenu : public Menu {
 
 public:

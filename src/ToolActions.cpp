@@ -328,24 +328,6 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void ListFirmwareAction::execute(Stream &stream, unsigned long timeout,
-				 bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
-  listFirmware(SDC, stream);
-  stream.println();
-}
-
-
-void UpdateFirmwareAction::execute(Stream &stream, unsigned long timeout,
-				   bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
-  updateFirmware(SDC, echo, stream);
-  stream.println();
-}
-
-
 RTCAction::RTCAction(const char *name, RTClock &rtclock) :
   RTCAction(*root()->Config, name, rtclock) {
 }
