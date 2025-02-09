@@ -204,7 +204,7 @@ void setup() {
   config.setConfigFile("teerec.cfg");
   config.load(sdcard);
   if (Serial)
-    config.configure(Serial, 10000);
+    config.execute(Serial, 10000);
   config.report();
   setupStorage();
   aisettings.configure(&aidata);

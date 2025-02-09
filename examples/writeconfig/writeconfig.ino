@@ -104,7 +104,7 @@ void setup() {
   config.setConfigFile(CFG_FILE);
   config.load(sdcard);
   if (Serial)
-    config.configure(Serial, 10000);
+    config.execute(Serial, 10000);
   config.report();
   Serial.println();
   blink.switchOff();
