@@ -5,7 +5,7 @@
 #include <RTClock.h>
 #include <PushButtons.h>
 #include <Blink.h>
-#include <Configurator.h>
+#include <MicroConfig.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
 #include <TeeRecBanner.h>
@@ -44,10 +44,10 @@ AudioMonitor audio(aidata, speaker);
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
-Configurator config;
-InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+Menu config("teerec.cfg", &sdcard);
+InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(PATH, 0, FILENAME);
+Settings settings(config, PATH, 0, FILENAME);
 
 RTClock rtclock;
 String prevname; // previous file name
@@ -201,8 +201,7 @@ void setup() {
   rtclock.report();
   setupButtons();
   sdcard.begin();
-  config.setConfigFile("teerec.cfg");
-  config.load(sdcard);
+  config.load();
   if (Serial)
     config.execute(Serial, 10000);
   config.report();

@@ -19,10 +19,7 @@ class InputSettings : public Menu {
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  InputSettings(uint32_t rate=0, float pregain=1);
-
-  // Constructor setting configuration name.
-  InputSettings(const char *name, uint32_t rate=0, float pregain=1);
+  InputSettings(Menu &menu, uint32_t rate=0, float pregain=1);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };

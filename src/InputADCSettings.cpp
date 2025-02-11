@@ -7,22 +7,12 @@ const uint8_t InputADCSettings::BitsSelection[InputADCSettings::NBitsSelection] 
 const uint8_t InputADCSettings::AveragingSelection[InputADCSettings::NAveragingSelection] = {0, 4, 8, 16, 32};
 
 
-InputADCSettings::InputADCSettings(uint32_t rate, uint8_t bits,
+InputADCSettings::InputADCSettings(Menu &menu, uint32_t rate, uint8_t bits,
 				   uint8_t averaging,
 				   ADC_CONVERSION_SPEED conversion_speed,
 				   ADC_SAMPLING_SPEED sampling_speed,
 				   ADC_REFERENCE reference, float pregain) :
-  InputADCSettings("ADC", rate, bits, averaging, conversion_speed,
-		   sampling_speed, reference, pregain) {
-}
-
-
-InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
-				   uint8_t bits, uint8_t averaging,
-				   ADC_CONVERSION_SPEED conversion_speed,
-				   ADC_SAMPLING_SPEED sampling_speed,
-				   ADC_REFERENCE reference, float pregain) :
-  InputSettings(name, rate, pregain),
+  InputSettings(menu, rate, pregain),
   Bits(*this, "Resolution", bits, "%.0f", "bits", "",
        BitsSelection, NBitsSelection),
   Averaging(*this, "Averaging", averaging, "%hu", "", "",

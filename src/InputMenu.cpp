@@ -4,15 +4,6 @@
 #include <InputMenu.h>
 
 
-InputAction::InputAction(const char *name, Input &data,
-			 InputSettings &settings,
-			 Device** controls, size_t ncontrols,
-			 SetupAI setupai) :
-  InputAction(*root()->Config, name, data, settings,
-	      controls, ncontrols, setupai) {
-}
-
-
 InputAction::InputAction(Menu &menu, const char *name,
 			 Input &data, InputSettings &settings,
 			 Device** controls, size_t ncontrols,
@@ -77,9 +68,9 @@ void PrintInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-InputMenu::InputMenu(Input &data, InputSettings &settings,
+InputMenu::InputMenu(Menu &menu, Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
-  Menu("Analog input", Action::StreamInput),
+  Menu(menu, "Analog input", Action::StreamInput),
   ReportAct(*this, "Report input configuration", data, settings,
 	    controls, ncontrols, setupai),
   PrintAct(*this, "Record some data", data, settings,

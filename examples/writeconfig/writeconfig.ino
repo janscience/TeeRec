@@ -9,9 +9,11 @@
 
 #include <RTClockDS1307.h>
 #include <SDCard.h>
-#include <Configurator.h>
-#include <ToolActions.h>
-#include <ToolMenus.h>
+#include <MicroConfig.h>
+#include <SDCardMenu.h>
+#include <RTClockMenu.h>
+#include <InputMenu.h>
+#include <DiagnosticMenu.h>
 #include <Settings.h>
 #if defined(INPUT_ADC)
   #include <InputADC.h>
@@ -55,20 +57,26 @@
 RTClockDS1307 rtclock;
 SDCard sdcard;
 
-Configurator config;
-Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME, INITIAL_DELAY,
-                  RANDOM_BLINKS, PULSE_FREQUENCY, DISPLAY_TIME, SENSORS_TIME);
+Menu config(CONFIG_FILE, &sdcard);
+Settings settings(config, PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
+                  INITIAL_DELAY, RANDOM_BLINKS, PULSE_FREQUENCY,
+		  DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
-InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
-InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
+InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
-DateTimeMenu datetime_menu(rtclock);
-ConfigurationMenu configuration_menu(sdcard);
-SDCardMenu sdcard0_menu(sdcard, settings);
-FirmwareMenu firmware_menu(sdcard);
-DiagnosticMenu diagnostic_menu("Diagnostics", sdcard);
+DateTimeMenu datetime_menu(config, rtclock);
+ConfigurationMenu configuration_menu(config, sdcard);
+SDCardMenu sdcard0_menu(config, sdcard, settings);
+/* TODO:
+InputMenu(config, aidata, aisettings,
+ 	    Device** controls=0, size_t ncontrols=0,
+	    SetupAI setupai=0);
+*/
+FirmwareMenu firmware_menu(config, sdcard);
+DiagnosticMenu diagnostic_menu(config, sdcard, aidata, rtclock);
 HelpAction help_act(config, "Help");
 
 Blink blink(LED_BUILTIN);
@@ -101,8 +109,7 @@ void setup() {
   sdcard.begin(0, DEDICATED_SPI, 40, &SPI1);
 #endif
   sdcard.check();
-  config.setConfigFile(CFG_FILE);
-  config.load(sdcard);
+  config.load();
   if (Serial)
     config.execute(Serial, 10000);
   config.report();

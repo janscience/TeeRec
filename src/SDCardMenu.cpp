@@ -3,11 +3,6 @@
 #include <SDCardMenu.h>
 
 
-SDCardAction::SDCardAction(const char *name, SDCard &sd) :
-  SDCardAction(*Configurator::MainConfig->Config, name, sd) {
-}
-
-
 SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd) : 
   Action(menu, name, StreamInput),
   SDC(sd) {
@@ -94,13 +89,6 @@ void SDListRootAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-SDListRecordingsAction::SDListRecordingsAction(const char *name, SDCard &sd,
-					       Settings &settings) :
-  SDCardAction(name, sd),
-  SettingsMenu(settings) {
-}
-
-
 SDListRecordingsAction::SDListRecordingsAction(Menu &menu,
 					       const char *name,
 					       SDCard &sd,
@@ -139,8 +127,8 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-SDCardMenu::SDCardMenu(SDCard &sdcard, Settings &settings) :
-  Menu("SD", Action::StreamInput),
+SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings) :
+  Menu(menu, "SD", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard, settings),

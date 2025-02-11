@@ -19,7 +19,7 @@
 #include <DeviceID.h>
 #include <Blink.h>
 #include <TestSignals.h>
-#include <Configurator.h>
+#include <MicroConfig.h>
 #include <Settings.h>
 #include <TeeRecBanner.h>
 #ifdef SINGLE_FILE_MTP
@@ -87,14 +87,14 @@ InputTDM aidata(AIBuffer, NAIBuffer);
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
-Configurator config;
-Settings settings(PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
+Menu config("logger.cfg", &sdcard);
+Settings settings(config, PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 	          INITIAL_DELAY, false, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)
-InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
-InputTDMSettings aisettings(SAMPLING_RATE, 8, GAIN, PREGAIN);
+InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
 RTClockDS1307 rtclock;
 DeviceID deviceid(DEVICEID);
@@ -252,8 +252,7 @@ void setup() {
   settings.enable("InitialDelay");
   settings.enable("PulseFreq");
   aisettings.enable("Pregain");
-  config.setConfigFile("logger.cfg");
-  config.load(sdcard);
+  config.load();
   if (Serial)
     config.execute(Serial, 10000);
   config.report();

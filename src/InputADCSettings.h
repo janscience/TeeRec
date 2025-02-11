@@ -17,15 +17,7 @@ class InputADCSettings : public InputSettings {
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  InputADCSettings(uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
-		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
-		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
-		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3,
-		   float pregain=1);
-
-  // Constructor setting configuration name.
-  InputADCSettings(const char *name, uint32_t rate=0,
-		   uint8_t bits=16, uint8_t averaging=4,
+  InputADCSettings(Menu &menu, uint32_t rate=0, uint8_t bits=16, uint8_t averaging=4,
 		   ADC_CONVERSION_SPEED conversion_speed=ADC_CONVERSION_SPEED::HIGH_SPEED,
 		   ADC_SAMPLING_SPEED sampling_speed=ADC_SAMPLING_SPEED::HIGH_SPEED,
 		   ADC_REFERENCE reference=ADC_REFERENCE::REF_3V3,

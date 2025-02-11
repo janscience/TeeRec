@@ -2,13 +2,8 @@
 #include <InputSettings.h>
 
 
-InputSettings::InputSettings(uint32_t rate, float pregain) :
-  InputSettings("ADC", rate, pregain) {
-}
-
-
-InputSettings::InputSettings(const char *name, uint32_t rate, float pregain) :
-  Menu(name),
+InputSettings::InputSettings(Menu &menu, uint32_t rate, float pregain) :
+  Menu(menu, "ADC"),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
   PreGain.disable();

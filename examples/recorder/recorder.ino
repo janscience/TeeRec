@@ -28,7 +28,7 @@
 #include <Display.h>
 #include <AllDisplays.h>       // edit this file for your TFT monitor
 #include <RTClock.h>
-#include <Configurator.h>
+#include <MicroConfig.h>
 #include <Settings.h>
 #include <InputADCSettings.h>
 #include <PushButtons.h>
@@ -80,10 +80,10 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 bool freezePlots = false;
 elapsedMillis screenTime;
 
-Configurator config;
-InputADCSettings aisettings(SAMPLING_RATE, BITS, AVERAGING,
+Menu config("teerec.cfg", &sdcard);
+InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(PATH, 0, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, PATH, 0, FILENAME, FILE_SAVE_TIME,
 		  0, false, PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name
@@ -248,8 +248,7 @@ void setup() {
   sdcard.begin();
   settings.enable("PulseFreq");
   settings.enable("DisplayTime");
-  config.setConfigFile("teerec.cfg");
-  config.load(sdcard);
+  config.load();
   if (Serial)
     config.execute(Serial, 10000);
   config.report();

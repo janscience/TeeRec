@@ -16,11 +16,7 @@ class InputTDMSettings : public InputSettings {
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  InputTDMSettings(uint32_t rate=0, int nchannels=16,
-		   float gain=0, float pregain=1);
-
-  // Constructor setting configuration name.
-  InputTDMSettings(const char *name, uint32_t rate=0, int nchannels=16,
+  InputTDMSettings(Menu &menu, uint32_t rate=0, int nchannels=16,
 		   float gain=0, float pregain=1);
 
   // Return number of channels.

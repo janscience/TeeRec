@@ -19,9 +19,6 @@ class TeensyInfoAction : public Action {
 
  public:
 
-  /* Initialize and add to default menu. */
-  TeensyInfoAction(const char *name);
-
   /* Initialize and add to configuration menu. */
   TeensyInfoAction(Menu &menu, const char *name);
 
@@ -68,11 +65,6 @@ class DevicesAction : public Action {
 
  public:
 
-  /* Initialize and add to default menu. */
-  DevicesAction(const char *name, Device* dev0, Device* dev1=0,
-		Device* dev2=0, Device* dev3=0,
-		Device* dev4=0, Device* dev5=0);
-
   /* Initialize and add to configuration menu. */
   DevicesAction(Menu &menu, const char *name,
 		Device* dev0, Device* dev1=0,
@@ -96,13 +88,12 @@ class DiagnosticMenu : public Menu {
 
 public:
 
-  DiagnosticMenu(const char *name, SDCard &sdcard, Device* dev0=0,
-		 Device* dev1=0, Device* dev2=0, Device* dev3=0,
-		 Device* dev4=0, Device* dev5=0);
-  DiagnosticMenu(const char *name, SDCard &sdcard0, SDCard &sdcard1,
-		 Device* dev0=0, Device* dev1=0,
-		 Device* dev2=0, Device* dev3=0,
-		 Device* dev4=0, Device* dev5=0);
+  DiagnosticMenu(Menu &menu, SDCard &sdcard,
+		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
+		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
+  DiagnosticMenu(Menu &menu, SDCard &sdcard0, SDCard &sdcard1,
+		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
+		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
 
 protected:
 

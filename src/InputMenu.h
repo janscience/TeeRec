@@ -22,11 +22,7 @@ class InputAction : public Action {
 
  public:
 
-  /* Initialize and add to default menu. */
-  InputAction(const char *name, Input &data, InputSettings &settings,
-	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
-
-  /* Initialize and add to configuration menu. */
+  /* Initialize and add to menu. */
   InputAction(Menu &menu, const char *name,
 	      Input &data, InputSettings &settings,
 	      Device** controls=0, size_t ncontrols=0, SetupAI setupai=0);
@@ -69,7 +65,7 @@ class InputMenu : public Menu {
 
 public:
 
-  InputMenu(Input &data, InputSettings &settings,
+  InputMenu(Menu &menu, Input &data, InputSettings &settings,
 	    Device** controls=0, size_t ncontrols=0,
 	    SetupAI setupai=0);
 

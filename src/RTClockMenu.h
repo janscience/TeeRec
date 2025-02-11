@@ -17,10 +17,7 @@ class RTCAction : public Action {
 
  public:
 
-  /* Initialize and add to default menu. */
-  RTCAction(const char *name, RTClock &rtclock);
-
-  /* Initialize and add to configuration menu. */
+  /* Initialize and add to menu. */
   RTCAction(Menu &menu, const char *name, RTClock &rtclock);
 
  protected:
@@ -69,7 +66,7 @@ class RTClockMenu : public Menu {
 
 public:
 
-  RTClockMenu(RTClock &rtclock);
+  RTClockMenu(Menu &menu, RTClock &rtclock);
 
 protected:
 

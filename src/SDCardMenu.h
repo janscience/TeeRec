@@ -18,9 +18,6 @@ class SDCardAction : public Action {
 
  public:
 
-  /* Initialize and add to default menu. */
-  SDCardAction(const char *name, SDCard &sd);
-
   /* Initialize and add to configuration menu. */
   SDCardAction(Menu &menu, const char *name, SDCard &sd);
 
@@ -110,12 +107,9 @@ class SDListRecordingsAction : public SDCardAction {
 
  public:
 
-  /* Initialize and add to default menu. */
-  SDListRecordingsAction(const char *name, SDCard &sd, Settings &settings);
-
   /* Initialize and add to configuration menu. */
   SDListRecordingsAction(Menu &menu, const char *name, SDCard &sd,
-		 Settings &settings);
+			 Settings &settings);
 
   /* List all recordings on SD card. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
@@ -143,7 +137,7 @@ class SDCardMenu : public Menu {
 
 public:
 
-  SDCardMenu(SDCard &sdcard, Settings &settings);
+  SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings);
 
 protected:
 

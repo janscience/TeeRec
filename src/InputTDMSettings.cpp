@@ -2,16 +2,10 @@
 #include <InputTDMSettings.h>
 
 
-InputTDMSettings::InputTDMSettings(uint32_t rate, int nchannels,
-				   float gain, float pregain) :
-  InputTDMSettings("ADC", rate, nchannels, gain, pregain) {
-}
-
-
-InputTDMSettings::InputTDMSettings(const char *name, uint32_t rate,
+InputTDMSettings::InputTDMSettings(Menu &menu, uint32_t rate,
 				   int nchannels,
 				   float gain, float pregain) :
-  InputSettings(name, rate, pregain),
+  InputSettings(menu, rate, pregain),
   NChannels(*this, "NChannels", nchannels, 1, 128, "%hu"),
   Gain(*this, "Gain", gain, "%.1f", "dB") {
   move(&PreGain, 3);

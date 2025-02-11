@@ -14,7 +14,7 @@ class Settings : public Menu {
 
 public:
 
-  Settings(const char *path="recordings", int deviceid=0,
+  Settings(Menu &menu, const char *path="recordings", int deviceid=0,
 	   const char *filename="SDATELNUM.wav", float filetime=10.0,
 	   float initialdelay=0.0, bool randomblinks=false,
 	   float pulsefrequency=500.0, float displaytime=0.005,

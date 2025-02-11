@@ -4,11 +4,6 @@
 #include <DiagnosticMenu.h>
 
 
-TeensyInfoAction::TeensyInfoAction(const char *name) :
-  TeensyInfoAction(*Configurator::MainConfig->Config, name) {
-}
-
-
 TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
   Action(menu, name, StreamInput) {
 }
@@ -188,14 +183,6 @@ void PSRAMTestAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-DevicesAction::DevicesAction(const char *name, Device* dev0, Device* dev1,
-			     Device* dev2, Device* dev3,
-			     Device* dev4, Device* dev5) :
-  DevicesAction(*Configurator::MainConfig->Config, name,
-		dev0, dev1, dev2, dev3, dev4, dev5) {
-}
-
-
 DevicesAction::DevicesAction(Menu &menu, const char *name,
 			     Device* dev0, Device* dev1,
 			     Device* dev2, Device* dev3,
@@ -241,11 +228,11 @@ void DevicesAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
+DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Menu(name, Action::StreamInput),
+  Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
@@ -260,12 +247,12 @@ DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard,
 }
 
 
-DiagnosticMenu::DiagnosticMenu(const char *name, SDCard &sdcard0,
+DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
 			       SDCard &sdcard1,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Menu(name, Action::StreamInput),
+  Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),

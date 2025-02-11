@@ -2,11 +2,6 @@
 #include <RTClockMenu.h>
 
 
-RTCAction::RTCAction(const char *name, RTClock &rtclock) :
-  RTCAction(*root()->Config, name, rtclock) {
-}
-
-
 RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock) :
   Action(menu, name, StreamInput),
   RTC(rtclock) {
@@ -34,8 +29,8 @@ void SetRTCAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-RTClockMenu::RTClockMenu(RTClock &rtclock) :
-  Menu("Date & time", Action::StreamInput),
+RTClockMenu::RTClockMenu(Menu &menu, RTClock &rtclock) :
+  Menu(menu, "Date & time", Action::StreamInput),
   PrintAct(*this, "Print date & time", rtclock),
   ReportAct(*this, "Report date & time infos", rtclock),
   SetAct(*this, "Set date & time", rtclock) {
