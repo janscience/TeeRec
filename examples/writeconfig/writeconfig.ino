@@ -1,6 +1,6 @@
 // select a data source:
-#define INPUT_ADC     // data are recorded from Teensy internal ADCs
-//#define INPUT_TDM     // data are recorded by TI PCM186x chip via TDM
+//#define INPUT_ADC     // data are recorded from Teensy internal ADCs
+#define INPUT_TDM     // data are recorded by TI PCM186x chip via TDM
 
 // select SD card:
 #define SDCARD_BUILTIN
@@ -12,7 +12,6 @@
 #include <MicroConfig.h>
 #include <SDCardMenu.h>
 #include <RTClockMenu.h>
-#include <InputMenu.h>
 #include <DiagnosticMenu.h>
 #include <Settings.h>
 #if defined(INPUT_ADC)
@@ -27,7 +26,7 @@
 
 // Adapt the following parameter values to your needs:
 
-#define CFG_FILE        "teerec.cfg"   // name of configuration file
+#define CONFIG_FILE     "teerec.cfg"   // name of configuration file
 
 // Settings:
 #define PATH            "recordings"   // folder where to store the recordings
@@ -57,26 +56,21 @@
 RTClockDS1307 rtclock;
 SDCard sdcard;
 
-Menu config(CONFIG_FILE, &sdcard);
+Config config(CONFIG_FILE, &sdcard);
 Settings settings(config, PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
                   INITIAL_DELAY, RANDOM_BLINKS, PULSE_FREQUENCY,
-		  DISPLAY_TIME, SENSORS_TIME);
+		              DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
-		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
+		  	                    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
 #elif defined(INPUT_TDM)
 InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
-DateTimeMenu datetime_menu(config, rtclock);
+RTClockMenu datetime_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
-SDCardMenu sdcard0_menu(config, sdcard, settings);
-/* TODO:
-InputMenu(config, aidata, aisettings,
- 	    Device** controls=0, size_t ncontrols=0,
-	    SetupAI setupai=0);
-*/
+SDCardMenu sdcard_menu(config, sdcard, settings);
 FirmwareMenu firmware_menu(config, sdcard);
-DiagnosticMenu diagnostic_menu(config, sdcard, aidata, rtclock);
+DiagnosticMenu diagnostic_menu(config, sdcard, &rtclock);
 HelpAction help_act(config, "Help");
 
 Blink blink(LED_BUILTIN);

@@ -87,7 +87,7 @@ InputTDM aidata(AIBuffer, NAIBuffer);
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
-Menu config("logger.cfg", &sdcard);
+Config config("logger.cfg", &sdcard);
 Settings settings(config, PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
 	          INITIAL_DELAY, false, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)

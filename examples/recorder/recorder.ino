@@ -80,7 +80,7 @@ Adafruit_FT6206 touch = Adafruit_FT6206();
 bool freezePlots = false;
 elapsedMillis screenTime;
 
-Menu config("teerec.cfg", &sdcard);
+Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
 Settings settings(config, PATH, 0, FILENAME, FILE_SAVE_TIME,

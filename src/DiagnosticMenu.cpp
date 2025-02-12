@@ -244,6 +244,8 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
   setSDCardNames(sdcard, SD0CheckAct, SD0BenchmarkAct);
   SD1CheckAct.disable();
   SD1BenchmarkAct.disable();
+  if (dev0 == 0)
+    DevicesAct.disable();
 }
 
 
@@ -263,6 +265,8 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
   DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
   setSDCardNames(sdcard0, SD0CheckAct, SD0BenchmarkAct);
   setSDCardNames(sdcard1, SD1CheckAct, SD1BenchmarkAct);
+  if (dev0 == 0)
+    DevicesAct.disable();
 }
 
 
