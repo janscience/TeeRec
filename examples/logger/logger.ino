@@ -229,7 +229,7 @@ void setupPCM(InputTDM &tdm, ControlPCM186x &pcm, bool offs) {
   pcm.setRate(tdm, aisettings.rate());
   pcm.setupTDM(tdm, CHANNELS, offs);
   pcm.setSmoothGainChange(false);
-  pcm.setGainDecibel(tdm, aisettings.gain());
+  pcm.setGainDecibel(tdm, aisettings.gainDecibel());
   pcm.setFilters(ControlPCM186x::FIR, false);
   Serial.println("configured for 4 channels");
 }
