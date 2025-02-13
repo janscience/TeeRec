@@ -128,18 +128,19 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 
 
 SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings) :
-  Menu(menu, "SD", Action::StreamInput),
+  Menu(menu, "SD card", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard, settings),
   EraseRecsAct(*this, "Erase all recordings", sdcard, settings),
   FormatAct(*this, "Format SD card", sdcard),
   EraseFormatAct(*this, "Erase and format SD card", sdcard) {
-  char name[64];
-  strcpy(name, sdcard.name());
-  if (strlen(name) > 0)
+  if (strlen(sdcard.name()) > 0) {
+    char name[strlen(sdcard.name()) + 8];
+    strcpy(name, sdcard.name());
     name[0] = toupper(name[0]);
-  strcat(name, "SD card");
-  setName(name);
+    strcat(name, "SD card");
+    setName(name);
+  }
 }
 
