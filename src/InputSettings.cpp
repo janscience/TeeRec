@@ -25,7 +25,7 @@ void InputSettings::setPreGain(float pregain) {
 }
 
 
-void InputSettings::configure(Input *input) {
+void InputSettings::configure(Input *input) const {
   if (input == 0)
     return;
   input->setRate(rate());
@@ -33,7 +33,7 @@ void InputSettings::configure(Input *input) {
 }
 
 
-void InputSettings::setConfiguration(Input *input) {
+void InputSettings::setConfiguration(const Input *input) {
   if (input == 0)
     return;
   setRate(input->rate());

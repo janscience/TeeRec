@@ -76,10 +76,10 @@ public:
   ADC_REFERENCE reference() const { return Reference.value(); };
 
   // Apply settings on input.
-  virtual void configure(Input *input);
+  virtual void configure(Input *input) const;
 
   // Transfer settings from input to this InputADCSettings instance.
-  virtual void setConfiguration(Input *input);
+  virtual void setConfiguration(const Input *input);
 
     
 protected:

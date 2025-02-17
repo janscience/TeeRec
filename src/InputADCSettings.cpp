@@ -58,7 +58,7 @@ void InputADCSettings::setReference(ADC_REFERENCE ref) {
 }
 
 
-void InputADCSettings::configure(Input *input) {
+void InputADCSettings::configure(Input *input) const {
   InputADC *adc = static_cast<InputADC *>(input);
   if (adc == 0)
     return;
@@ -71,8 +71,8 @@ void InputADCSettings::configure(Input *input) {
 }
 
 
-void InputADCSettings::setConfiguration(Input *input) {
-  InputADC *adc = static_cast<InputADC *>(input);
+void InputADCSettings::setConfiguration(const Input *input) {
+  const InputADC *adc = static_cast<const InputADC *>(input);
   if (adc == 0)
     return;
   setRate(adc->rate());

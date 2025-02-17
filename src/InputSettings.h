@@ -40,11 +40,11 @@ public:
 
   // Apply settings on input.
   // Default implementation sets the sampling rate.
-  virtual void configure(Input *input);
+  virtual void configure(Input *input) const;
 
   // Transfer settings from input to this InputSettings instance.
   // Default implementation transfers the sampling rate.
-  virtual void setConfiguration(Input *input);
+  virtual void setConfiguration(const Input *input);
 
     
 protected:
