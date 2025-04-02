@@ -61,9 +61,11 @@ class InputTDM : public Input {
   
   // Return in chans the string with the channels
   // in the order they are multiplexed into the buffer.
+  // Must hold MaxChannels bytes.
   virtual void channels(char *chans) const;
   
   // Set string identifying channel pins.
+  // No more than MaxChannels bytes.
   void setChannelStr(const char *cs);
   
   // Clear the channels for a given TDM bus.
@@ -106,6 +108,9 @@ class InputTDM : public Input {
   // Stop data transfer to buffer.
   virtual void stop();
 
+  // Maximum size of channel descriptor string.
+  static const size_t MaxChannels = 256;
+
   
 protected:
   
@@ -122,7 +127,7 @@ protected:
   uint8_t DownSample;
   bool SwapLR;
 
-  char Channels[128];
+  char Channels[MaxChannels];
 
   uint8_t TDMUse;
   uint8_t NChans[2];

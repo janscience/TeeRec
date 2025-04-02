@@ -384,8 +384,8 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 
 
 void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
-  char cs[128];
-  char tdmcs[128];
+  char cs[InputTDM::MaxChannels];
+  char tdmcs[InputTDM::MaxChannels];
   tdm.channels(tdmcs);
   if (strlen(tdmcs) > 0) {
     bool prefix = true;

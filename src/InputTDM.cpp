@@ -81,12 +81,14 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
 
 
 void InputTDM::channels(char *chans) const {
-  strcpy(chans, Channels);
+  strncpy(chans, Channels, MaxChannels);
+  chans[MaxChannels - 1] = '\0';
 }
 
   
 void InputTDM::setChannelStr(const char *cs) {
-  strncpy(Channels, cs, 127);
+  strncpy(Channels, cs, MaxChannels);
+  Channels[MaxChannels - 1] = '\0';
 }
 
 
@@ -153,8 +155,6 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
 
   
 void InputTDM::report(Stream &stream) {
-  char chans[64];
-  channels(chans);
   char gs[16];
   gainStr(gs);
   float bt = bufferTime();
@@ -162,7 +162,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
   stream.printf("  resolution: %dbits\n", Bits);
   stream.printf("  nchannels:  %d\n", NChannels);
-  stream.printf("  channels:   %s\n", chans);
+  stream.printf("  channels:   %s\n", Channels);
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
   stream.printf("  swap l/r:   %d\n", SwapLR);
