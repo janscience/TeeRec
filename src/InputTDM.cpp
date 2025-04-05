@@ -80,13 +80,17 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
 }
 
 
-void InputTDM::channels(char *chans) const {
-  strncpy(chans, Channels, MaxChannels);
-  chans[MaxChannels - 1] = '\0';
+void InputTDM::channels(char *chans, size_t nchans) const {
+  if (strlen(Channels) >= nchans)
+    Serial.printf("ERROR in InputTDM::channels(): strlen of Channels (%d) too large for %d characters!\n", strlen(Channels), nchans);
+  strncpy(chans, Channels, nchans);
+  chans[nchans - 1] = '\0';
 }
 
   
 void InputTDM::setChannelStr(const char *cs) {
+  if (strlen(cs) >= MaxChannels)
+    Serial.printf("ERROR in InputTDM::setChannelStr(): strlen of cs (%d) too large for %d characters!\n", strlen(cs), MaxChannels);
   strncpy(Channels, cs, MaxChannels);
   Channels[MaxChannels - 1] = '\0';
 }

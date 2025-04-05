@@ -287,9 +287,17 @@ const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::channels(char *chans, bool swaplr,
+void ControlPCM186x::channels(char *chans, size_t nchans, bool swaplr,
 			      const char *prefix) {
   *chans = '\0';
+  size_t n = 5;      // strlen of a single channel name plus comma
+  if (prefix != 0)
+    n += strlen(prefix);
+  n *= 2;            // minimum of two channels
+  if (NChannels > 2)
+    n *= 2;          // four channels
+  if (n >= nchans)
+    Serial.printf("ERROR in ControlPCM186x::channels(): size of chans (%d) too small for %d characters!\n", nchans, n);
   if (swaplr) {
     if (prefix != 0)
       strcat(chans, prefix);
@@ -386,8 +394,9 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
   char cs[InputTDM::MaxChannels];
   char tdmcs[InputTDM::MaxChannels];
-  tdm.channels(tdmcs);
+  tdm.channels(tdmcs, InputTDM::MaxChannels);
   if (strlen(tdmcs) > 0) {
+    // already channels in tdm.channels(), need to add prefix:
     bool prefix = true;
     int chipnum = 0;
     char *cp = cs;
@@ -409,13 +418,13 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
     *(cp++) = '\0';
     char ps[6];
     sprintf(ps, "%d-", ++chipnum);
-    char ccs[128];
-    channels(ccs, tdm.swapLR(), ps);
+    char ccs[InputTDM::MaxChannels/2];
+    channels(ccs, InputTDM::MaxChannels/2, tdm.swapLR(), ps);
     strcat(cs, ",");
     strcat(cs, ccs);
   }
   else
-    channels(cs, tdm.swapLR());
+    channels(cs, InputTDM::MaxChannels, tdm.swapLR());
   tdm.setChannelStr(cs);
 }
 

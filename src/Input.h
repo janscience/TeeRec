@@ -21,9 +21,9 @@ class Input : public DataBuffer {
   // DATA_BUFFER macro.
   Input(volatile sample_t *buffer, size_t nbuffer, size_t dmabuffer=0);
 
-  // Return in chans a string with the channels/pins
+  // Return in chans of size nchans a string with the channels/pins
   // in the order they are multiplexed into the buffer.
-  virtual void channels(char *chans) const = 0;
+  virtual void channels(char *chans, size_t nchans) const = 0;
   
   // Clear the channel configuration.
   virtual void clearChannels() = 0;

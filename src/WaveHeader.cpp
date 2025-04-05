@@ -89,7 +89,7 @@ WaveHeader::InfoChunk<N>::InfoChunk(const char *infoid, const char *text) :
 
 template <size_t N>
 void WaveHeader::InfoChunk<N>::set(const char *text) {
-  if (strlen(text) > MaxText)
+  if (strlen(text) >= MaxText)
     Serial.printf("ERROR in WaveHeader::InfoChunk(): string \"%s\" of len %d exceeds buffer size of %d!\n", text, strlen(text), MaxText);
   setSize(strlen(text));
   NBuffer = sizeof(Header) + Header.Size;
@@ -202,7 +202,7 @@ void WaveHeader::setCPUSpeed() {
 
 void WaveHeader::assemble() {
   // riff chunks:
-  const int maxchunks = 16;
+  const int maxchunks = 32;
   int nchunks = 0;
   Chunk *chunks[maxchunks];
   chunks[nchunks++] = &Riff;
@@ -255,8 +255,8 @@ void WaveHeader::assemble() {
   NBuffer += infosize;
   // assemble header buffer:
   if (NBuffer > MaxBuffer) {
+    Serial.printf("ERROR: WaveHeader::assemble(): Header with %d bytes too large! You need to increase MaxBuffer in WaveHeader.\n\n", NBuffer);
     NBuffer = 0;
-    Serial.println("ERROR: WaveHeader::assemble(): Header too large!\n");
   }
   memset(Buffer, 0, sizeof(Buffer));
   uint32_t idx = 0;

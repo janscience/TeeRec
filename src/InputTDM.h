@@ -59,13 +59,12 @@ class InputTDM : public Input {
   // Return number of channels recorded from the given TDM bus.
   uint8_t nchannels(TDM_BUS bus) const { return NChans[bus]; };
   
-  // Return in chans the string with the channels
+  // Return in chans of size nchans the string with the channels
   // in the order they are multiplexed into the buffer.
-  // Must hold MaxChannels bytes.
-  virtual void channels(char *chans) const;
+  virtual void channels(char *chans, size_t nchans) const;
   
   // Set string identifying channel pins.
-  // No more than MaxChannels bytes.
+  // Len of cs must be smaller than MaxChannels bytes.
   void setChannelStr(const char *cs);
   
   // Clear the channels for a given TDM bus.
