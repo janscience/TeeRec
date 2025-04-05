@@ -238,9 +238,9 @@ void InputADC::channelStr(int8_t pin, char *chan) const {
 }
 
 
-void InputADC::channels(uint8_t adc, char *chans, size_t nchans) const {
+void InputADC::channelsStr(uint8_t adc, char *chans, size_t nchans) const {
   if (NChans[adc]*4 >= nchans)
-    Serial.printf("ERROR in InputADC::channels(): size of chans (%d) to small for %d characters\n", nchans, NChans[adc]*4);
+    Serial.printf("ERROR in InputADC::channelsStr(): size of chans (%d) to small for %d characters\n", nchans, NChans[adc]*4);
   bool first = true;
   for (uint8_t k=0; k<NChans[adc]; k++) {
     if (! first)
@@ -252,12 +252,12 @@ void InputADC::channels(uint8_t adc, char *chans, size_t nchans) const {
 }
 
 
-void InputADC::channels(char *chans, size_t nchans) const {
+void InputADC::channelsStr(char *chans, size_t nchans) const {
   size_t n = 0;
   for (uint8_t adc=0; adc<2; adc++)
     n += NChans[adc];
   if (n*4 >= nchans)
-    Serial.printf("ERROR in InputADC::channels(): size of chans (%d) to small for %d characters\n", nchans, n*4);
+    Serial.printf("ERROR in InputADC::channelsStr(): size of chans (%d) to small for %d characters\n", nchans, n*4);
   bool first = true;
   int nchan = NChans[0]>=NChans[1]?NChans[0]:NChans[1];
   for (uint8_t k=0; k<nchan; k++) {
@@ -512,8 +512,8 @@ bool InputADC::check(uint8_t nchannels, Stream &stream) {
 void InputADC::report(Stream &stream) {
   char chans0[48];
   char chans1[48];
-  channels(0, chans0, 48);
-  channels(1, chans1, 48);
+  channelsStr(0, chans0, 48);
+  channelsStr(1, chans1, 48);
   if (chans0[0] == '\0')
     strcpy(chans0, "-");
   if (chans1[0] == '\0')
@@ -543,8 +543,8 @@ void InputADC::report(Stream &stream) {
 
 void InputADC::setWaveHeader(WaveHeader &wave) const {
   DataWorker::setWaveHeader(wave);
-  char cs[100];
-  channels(cs, 100);
+  char cs[128];
+  channelsStr(cs, 128);
   wave.setChannels(cs);
   wave.setAveraging(averaging());
   wave.setConversionSpeed(conversionSpeedShortStr());

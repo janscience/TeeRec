@@ -61,11 +61,11 @@ class InputTDM : public Input {
   
   // Return in chans of size nchans the string with the channels
   // in the order they are multiplexed into the buffer.
-  virtual void channels(char *chans, size_t nchans) const;
+  virtual void channelsStr(char *chans, size_t nchans) const;
   
   // Set string identifying channel pins.
   // Len of cs must be smaller than MaxChannels bytes.
-  void setChannelStr(const char *cs);
+  void setChannelsStr(const char *cs);
   
   // Clear the channels for a given TDM bus.
   void clearChannels(TDM_BUS bus);

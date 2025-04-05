@@ -152,11 +152,11 @@ class InputADC : public Input, public Device {
 
   // Return in chans of size nchans a string with the channels/pins
   // sampled on ADC adc.
-  void channels(uint8_t adc, char *chans, size_t nchans) const;
+  void channelsStr(uint8_t adc, char *chans, size_t nchans) const;
 
   // Return in chans of size nchans a string with the channels/pins
   // sampled from both ADCs in the order they are multiplexed into the buffer.
-  virtual void channels(char *chans, size_t nchans) const;
+  virtual void channelsStr(char *chans, size_t nchans) const;
 
   // If set true, ADC data are scaled to 16bit and are converted to
   // signed integers. Call this *before* setResolution().

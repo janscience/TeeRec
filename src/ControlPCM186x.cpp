@@ -287,8 +287,8 @@ const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::channels(char *chans, size_t nchans, bool swaplr,
-			      const char *prefix) {
+void ControlPCM186x::channelsStr(char *chans, size_t nchans, bool swaplr,
+				 const char *prefix) {
   *chans = '\0';
   size_t n = 5;      // strlen of a single channel name plus comma
   if (prefix != 0)
@@ -394,9 +394,9 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
 void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
   char cs[InputTDM::MaxChannels];
   char tdmcs[InputTDM::MaxChannels];
-  tdm.channels(tdmcs, InputTDM::MaxChannels);
+  tdm.channelsStr(tdmcs, InputTDM::MaxChannels);
   if (strlen(tdmcs) > 0) {
-    // already channels in tdm.channels(), need to add prefix:
+    // already channels in tdm.channelsStr(), need to add prefix:
     bool prefix = true;
     int chipnum = 0;
     char *cp = cs;
@@ -419,13 +419,13 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
     char ps[6];
     sprintf(ps, "%d-", ++chipnum);
     char ccs[InputTDM::MaxChannels/2];
-    channels(ccs, InputTDM::MaxChannels/2, tdm.swapLR(), ps);
+    channelsStr(ccs, InputTDM::MaxChannels/2, tdm.swapLR(), ps);
     strcat(cs, ",");
     strcat(cs, ccs);
   }
   else
-    channels(cs, InputTDM::MaxChannels, tdm.swapLR());
-  tdm.setChannelStr(cs);
+    channelsStr(cs, InputTDM::MaxChannels, tdm.swapLR());
+  tdm.setChannelsStr(cs);
 }
 
 

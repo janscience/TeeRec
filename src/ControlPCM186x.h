@@ -114,8 +114,8 @@ public:
      as a string in chans with maximum nchans characters.
      If swaplr then left and right channels are swapped.
      If provided, prepend prefix to each channel. */
-  void channels(char *chans, size_t nchans, bool swaplr=false,
-		const char *prefix=0);
+  void channelsStr(char *chans, size_t nchans, bool swaplr=false,
+		   const char *prefix=0);
   
   /* Set input channel for output adc. */
   bool setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
