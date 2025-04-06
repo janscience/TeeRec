@@ -160,7 +160,7 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
   
 void InputTDM::report(Stream &stream) {
   char gs[16];
-  gainStr(gs);
+  gainStr(gs, 16);
   float bt = bufferTime();
   stream.println("TDM settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);

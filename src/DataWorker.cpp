@@ -213,8 +213,9 @@ void DataWorker::setUnit(const char *unit) {
 }
 
 
-void DataWorker::gainStr(char *gains) {
-  sprintf(gains, "%.2f%s", gain(), unit());
+void DataWorker::gainStr(char *gains, size_t ngains) {
+  snprintf(gains, ngains, "%.2f%s", gain(), unit());
+  gains[ngains - 1] = '\0';
 }
 
 

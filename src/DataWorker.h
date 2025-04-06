@@ -71,7 +71,7 @@ public:
   // the raw data (normalized to one) to result in the unit().
   float gain() const { return Gain/PreGain; };
 
-  // Set the gain of the recorded data. That is the factor needed to
+  // Set the gain of the recorded data. This is the factor needed to
   // normalize the raw integer data to a range of one.
   // The gain is also passed on to all consumers.
   virtual void setGain(float gain);
@@ -93,8 +93,9 @@ public:
   // The unit is also passed on to all consumers.
   virtual void setUnit(const char *unit);
   
-  /* Return the current gain and unit as a string in gains. */
-  virtual void gainStr(char *gains);
+  /* Return the current gain and unit as a string in gains
+     that holds at maximum ngains characters. */
+  virtual void gainStr(char *gains, size_t ngains);
 
   // Number of frames (samples of a single channel) corresponding to
   // time (in seconds).
@@ -108,7 +109,7 @@ public:
   // (not frames, i.e. samples is divided by the number of channels).
   float time(size_t samples) const;
 
-  // Return time corresponding to samples as a string displaying
+  // Return in str time corresponding to samples as a string displaying
   // minutes and seconds.
   // str must hold at least 6 characters.
   void timeStr(size_t sample, char *str) const;

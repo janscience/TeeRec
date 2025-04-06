@@ -152,7 +152,7 @@ bool SDWriter::openWave(const char *fname, int32_t samples,
     samples = FileMaxSamples;
   Wave.setFormat(nchannels(), rate(), resolution(), dataResolution());
   char gs[16];
-  gainStr(gs);
+  gainStr(gs, 16);
   Wave.setGain(gs);
   setWaveHeader(Wave);    // recursively calls setWaveHeader on all producers.
   Wave.setData(samples);

@@ -519,7 +519,7 @@ void InputADC::report(Stream &stream) {
   if (chans1[0] == '\0')
     strcpy(chans1, "-");
   char gs[16];
-  gainStr(gs);
+  gainStr(gs, 16);
   float bt = bufferTime();
   stream.println("ADC settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);

@@ -59,8 +59,8 @@ void PrintInputAction::execute(Stream &stream, unsigned long timeout,
   stream.println();
   stream.printf("Resolution: %ubits", Data.dataResolution());
   stream.println();
-  char gs[32];
-  Data.gainStr(gs);
+  char gs[16];
+  Data.gainStr(gs, 16);
   stream.print("Gain: ");
   stream.println(gs);
   Data.printData(0, nframes, stream);
