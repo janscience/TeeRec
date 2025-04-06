@@ -177,10 +177,10 @@ public:
   /* Return the gain set for output channel adc in dB. */
   float gainDecibel(OUTPUT_CHANNELS adc);
 
-  /* Set gain of one or more adc channels to gain in dB,
+  /* Set gain of one or more adc channels to level dB,
      between -12 and 40 in steps of 0.5.
-     Returns the set gain or NAN on failure. */
-  float setGainDecibel(OUTPUT_CHANNELS adc, float gain);
+     Returns the set gain level in dB or NAN on failure. */
+  float setGainDecibel(OUTPUT_CHANNELS adc, float level);
   
   /* Return the gain set for output channel adc as a factor. */
   float gain(OUTPUT_CHANNELS adc);
@@ -194,7 +194,7 @@ public:
   float gainDecibel();
 
   /* Set gain of all channels to gain in dB,
-     between -12 and 40 in steps of 0.5.
+     between -12 and 40dB in steps of 0.5dB.
      Pass the actually set gain on to tdm and return it. */
   float setGainDecibel(InputTDM &tdm, float gain);
   

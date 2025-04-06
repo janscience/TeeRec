@@ -615,18 +615,18 @@ float ControlPCM186x::gainDecibel(OUTPUT_CHANNELS adc) {
 }
 
 
-float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float gain) {
-  // check gain:
-  if (gain < -12.0) {
-    Serial.printf("ControlPCM186x: invalid gain %g < 12dB\n", gain);
+float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float level) {
+  // check level:
+  if (level < -12.0) {
+    Serial.printf("ControlPCM186x: invalid level %g < 12dB\n", level);
     return NAN;
   }
-  if (gain > 40.0) {
-    Serial.printf("ControlPCM186x: invalid gain %g > 40dB\n", gain);
+  if (level > 40.0) {
+    Serial.printf("ControlPCM186x: invalid level %g > 40dB\n", level);
     return NAN;
   }
-  // set gains:
-  int8_t igain = (int8_t)(2*gain);
+  // set levels:
+  int8_t igain = (int8_t)(2*level);
   if (adc == ADCLR) {
     if (!PGALinked) {
       unsigned int val = read(PCM186x_PGA_CONTROL_REG);
@@ -689,9 +689,9 @@ float ControlPCM186x::setGainDecibel(InputTDM &tdm, float level) {
   level = setGainDecibel(ADCLR, level);
   if (!isnan(level)) {
     tdm.setGain(1650.0/gainFromDecibel(level));
-    return true;
+    return level;
   }
-  return false;
+  return NAN;
 }
 
   
@@ -700,13 +700,13 @@ float ControlPCM186x::gain() {
 }
 		    
 
-float ControlPCM186x::setGain(InputTDM &tdm, float level) {
-  level = setGain(ADCLR, level);
-  if (!isnan(level)) {
-    tdm.setGain(1650.0/level);
-    return true;
+float ControlPCM186x::setGain(InputTDM &tdm, float gain) {
+  gain = setGain(ADCLR, gain);
+  if (!isnan(gain)) {
+    tdm.setGain(1650.0/gain);
+    return gain;
   }
-  return false;
+  return NAN;
 }
 
 
