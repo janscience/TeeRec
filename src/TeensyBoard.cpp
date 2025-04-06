@@ -172,8 +172,11 @@ const char *teensyMAC(void) {
 
 int analogPin(int8_t pin, char *pins) {
   for (int p=0; p<NAPins; p++) {
-    if (APins[p] == pin)
-      return sprintf(pins, "A%d", p);
+    if (APins[p] == pin) {
+      int n = snprintf(pins, 4, "A%d", p);
+      pins[3] = '\0';
+      return n;
+    }
   }
   pins[0] = '\0';
   return 0;

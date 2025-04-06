@@ -63,7 +63,9 @@ void Device::setI2CBus(const TwoWire &wire, unsigned int address) {
   if (strlen(busStr()) + 5 >= MaxStr)
     Serial.printf("ERROR in Device::setI2CBus(): number of characters %d of identifier longer than %d!\n", strlen(busStr()) + 5, MaxStr);
   strcpy(Identifier, busStr());
-  sprintf(Identifier + strlen(Identifier), " %x", address);
+  snprintf(Identifier + strlen(Identifier), MaxStr - strlen(Identifier),
+	   " %x", address);
+  Identifier[MaxStr - 1] = '\0';
 }
 
 
@@ -84,7 +86,9 @@ void Device::setSPIBus(const SPIClass &spi, unsigned int cspin) {
   if (strlen(busStr()) + 3 >= MaxStr)
     Serial.printf("ERROR in Device::setSPIBus(): number of characters %d of identifier longer than %d!\n", strlen(busStr()) + 3, MaxStr);
   strcpy(Identifier, busStr());
-  sprintf(Identifier + strlen(Identifier), " %d", cspin);
+  snprintf(Identifier + strlen(Identifier), MaxStr - strlen(Identifier),
+	   " %d", cspin);
+  Identifier[MaxStr - 1] = '\0';
 }
 
 

@@ -41,8 +41,9 @@ void SDFormatAction::format(const char *erases, bool erase,
     bool keep = false;
     if (SDC.exists(root()->configFile())) {
       char request[256];
-      sprintf(request, "Should the configuration file \"%s\" be kept?",
-	      root()->configFile());
+      snprintf(request, 256, "Should the configuration file \"%s\" be kept?",
+	       root()->configFile());
+      request[255] = '\0';
       keep = Action::yesno(request, true, echo, stream);
     }
     stream.println();

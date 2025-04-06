@@ -292,10 +292,10 @@ void SDCard::report(Stream &stream) {
   if (!checkAvailability(stream))
     return;
   
-  char types[10];
+  char types[16];
   cardType(types);
 
-  char files[10];
+  char files[16];
   int ft = sdfs.fatType();
   if (ft > 32)
     strcpy(files, "exFAT");

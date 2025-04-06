@@ -20,7 +20,7 @@ void DeviceID::setID(int id) {
 
 
 String DeviceID::makeStr(const String &str) const {
-  char ids[6];
+  char ids[16];
   String istr = str;
   if (istr.indexOf("IDAA") >= 0) {
     ids[2] = '\0';

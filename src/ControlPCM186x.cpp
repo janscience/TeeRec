@@ -417,7 +417,7 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
     }
     *(cp++) = '\0';
     char ps[6];
-    sprintf(ps, "%d-", ++chipnum);
+    snprintf(ps, 6, "%d-", ++chipnum);
     char ccs[InputTDM::MaxChannels/2];
     channelsStr(ccs, InputTDM::MaxChannels/2, tdm.swapLR(), ps);
     strcat(cs, ",");

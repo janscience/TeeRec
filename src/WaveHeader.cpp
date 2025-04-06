@@ -128,9 +128,11 @@ void WaveHeader::setFormat(uint8_t nchannels, uint32_t samplerate,
   Format.set(nchannels, samplerate, dataresolution);
   DataResolution = dataresolution;
   char bs[6];
-  sprintf(bs, "%u", resolution);
+  snprintf(bs, 6, "%u", resolution);
+  bs[3] = '\0';
   Bits.set(bs);
-  sprintf(bs, "%u", dataresolution);
+  snprintf(bs, 6, "%u", dataresolution);
+  bs[3] = '\0';
   DataBits.set(bs);
   DataBits.Use = (dataresolution != Format.Format.bitsPerSample);
 }
@@ -143,7 +145,8 @@ void WaveHeader::setChannels(const char *chans) {
 
 void WaveHeader::setAveraging(uint8_t num) {
   char ns[4];
-  sprintf(ns, "%u", num);
+  snprintf(ns, 4, "%u", num);
+  ns[3] = '\0';
   Averaging.set(ns);
 }
 
@@ -195,7 +198,8 @@ void WaveHeader::clearSoftware() {
 
 void WaveHeader::setCPUSpeed() {
   char cpuf[8];
-  sprintf(cpuf, "%ldMHz", teensySpeed());
+  snprintf(cpuf, 8, "%ldMHz", teensySpeed());
+  cpuf[7] = '\0';
   CPUSpeed.set(cpuf);
 }
 
