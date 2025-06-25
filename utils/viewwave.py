@@ -71,12 +71,20 @@ def unwrap(data, thresh=-0.01):
 
 
 def plot_traces(path, channel, toffs, tmax, step, gain, unwrapd, raw,
-                autoy, metadata_title, save):
+                diff, autoy, metadata_title, save):
     data, rate = load_wave(path)
     #data, rate = load_bin(path, 48000, 4, 4)
     if data is None:
         print('file "%s" is empty!' % path)
         return
+    if diff:
+        if unwrapd:
+            data0 = 2**15*unwrap(data[:, 0]/2**15)
+            data1 = 2**15*unwrap(data[:, 1]/2**15)
+            data = data1 - data0
+        else:
+            data = data[:, 1] - data[:, 0]
+        data = data.reshape(len(data), 1)
     basename = os.path.basename(path)
     pins = []
     title = basename
@@ -177,6 +185,8 @@ if __name__ == '__main__':
                         help='write info section from metadata into title of plot')
     parser.add_argument('-u', dest='unwrap', action='store_true', 
                         help='Unwrap clipped data using unwrap() from audioio package')
+    parser.add_argument('-d', dest='diff', action='store_true', 
+                        help='Take the difference between the first two channels')
     parser.add_argument('-s', dest='save', action='store_true',
                         help='save plot to png file')
     parser.add_argument('file', nargs='+', type=str,
@@ -192,6 +202,7 @@ if __name__ == '__main__':
     if unwrapd:
         gain = True
     raw = args.raw
+    diff = args.diff
     autoy = args.autoy
     metadata_title = args.metadata
     save = args.save
@@ -200,4 +211,4 @@ if __name__ == '__main__':
     plt.rcParams['axes.ymargin'] = 0.02
     for path in args.file:
         plot_traces(path, channel, toffs, tmax, step, gain, unwrapd, raw,
-                    autoy, metadata_title, save)
+                    diff, autoy, metadata_title, save)
