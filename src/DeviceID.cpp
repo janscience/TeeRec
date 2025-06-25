@@ -22,16 +22,17 @@ void DeviceID::setID(int id) {
 String DeviceID::makeStr(const String &str) const {
   char ids[16];
   String istr = str;
+  int ida = ID - 1;
   if (istr.indexOf("IDAA") >= 0) {
     ids[2] = '\0';
-    ids[1] = char('A' + (ID % 26));
-    ids[0] = char('A' + (ID / 26));
+    ids[1] = char('A' + (ida % 26));
+    ids[0] = char('A' + (ida / 26));
     istr.replace("IDAA", ids);
   }
   else if (istr.indexOf("IDA") >= 0) {
     ids[2] = '\0';
-    ids[1] = char('A' + (ID % 26));
-    ids[0] = char('A' + (ID / 26));
+    ids[1] = char('A' + (ida % 26));
+    ids[0] = char('A' + (ida / 26));
     if (ids[0] == 'A')
       istr.replace("IDA", ids + 1);
     else

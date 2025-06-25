@@ -48,8 +48,8 @@ public:
   //   Use "ID2" or "ID3" to pad the ID with zeros to two or three digits,
   //   e.g. "103", "14", "07" for "ID2" or "103", "014", "007" of "ID3".
   // - "IDA" by the device identifier as alphabetical characters,
-  //   e.g. "DY", "N", "H".
-  //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AH".
+  //   e.g. "DY", "N", "G".
+  //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AG".
   String makeStr(const String &str) const;
 
   // Print device identifier on stream.
