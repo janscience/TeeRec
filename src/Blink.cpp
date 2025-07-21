@@ -294,9 +294,9 @@ void Blink::clearSwitchTimes() {
 
 void Blink::switchOn(bool on) {
   if (on != On) {
-    if (Pin1 >=0)
+    if (Pin1 >= 0)
       digitalWrite(Pin1, Invert1 != on);
-    if (Pin2 >=0)
+    if (Pin2 >= 0)
       digitalWrite(Pin2, Invert2 != on);
     if (NSwitchTimes < MaxTimes) {
       SwitchTimes[NSwitchTimes] = millis();
