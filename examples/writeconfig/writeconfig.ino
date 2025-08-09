@@ -70,7 +70,7 @@ RTClockMenu datetime_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
 SDCardMenu sdcard_menu(config, sdcard, settings);
 FirmwareMenu firmware_menu(config, sdcard);
-DiagnosticMenu diagnostic_menu(config, sdcard, &rtclock);
+DiagnosticMenu diagnostic_menu(config, sdcard, 0, &rtclock);
 HelpAction help_act(config, "Help");
 
 Blink blink(LED_BUILTIN);
