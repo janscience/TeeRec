@@ -9,9 +9,15 @@
   DeviceID class can be used to read in this device ID. Use this ID
   for naming files, for example, via the makeStr() method.
 
-  The switches are connected between Teensy pins and 3.3V. The Teensy
-  pins are also connected via pull-down resistance to ground. In order
-  to reduce power consumption, the 3.3V to the switches can be
+  The switches can be directly connected between Teensy pins and
+  ground. Then you should configure the Teensy pins as INPUT_PULLUP
+  (default of the setPins() functions).
+
+  Alternatively, the switches can be connected between Teensy pins and
+  3.3V. Then the Teensy pins need to be connected via pull-down
+  resistance to ground. Configure these pins as normal INPUT by
+  setting the pullup argument in the setPins() functions to false. In
+  order to reduce power consumption, the 3.3V to the switches can be
   supplied from a dedicated digital pin. Then the switches (and
   pulldown resistances) are only powered when reading out the device
   ID.
@@ -58,21 +64,33 @@ public:
   // Set the pins that have switches connected.
   // The first pin in the array is bit 0.
   // Terminate the array with a negative number.
-  void setPins(const int *pins);
+  // If the switches connect the pins directly to ground,
+  // then the pins need to be configured with pullup and are inverted.
+  // Otherwise, they are configured as normal input and are not
+  // inverted.
+  void setPins(const int *pins, bool pullup=true);
 
   // Set the powerpin that supplies the switches with power and
-  // the pins that have switches connected.
+  // set the pins that have switches connected.
   // The first pin in the array is bit 0.
   // Terminate the array with a negative number.
-  void setPins(int powerpin, const int *pins);
+  // If the switches connect the pins directly to ground,
+  // then the pins need to be configured with pullup and are inverted.
+  // Otherwise, they are configured as normal input and are not
+  // inverted.
+  void setPins(int powerpin, const int *pins, bool pullup=true);
 
   // Read out the device ID from DIP switches.
   // That is, supply power via the power pin, sequentally read in the
   // states of the pins, and return the number encoded by these bits.
-  // If no pins were specified or all pins are zero, the do no set the
+  // If no pins were specified, they do no set the
   // device ID and return -1.
   // On success returns the read in device ID.
-  int read();
+  // If nozero and the readin device ID is zero, then
+  // two to the power of the number of pins is returned -
+  // this is the highest number the bits can encode plus one.
+  // If a stream is provided, print debug messages.
+  int read(bool nozero=true, Stream *stream=0);
 
   
 protected:
@@ -83,6 +101,7 @@ protected:
 
   int NPins;          // number of pins.
   int Pins[MaxPins];  // the pins.
+  bool Pullup;        // Input pins are configured as pullup and are inverted.
   int PowerPin;       // the pin providing power to the switches.
   int PowerDelay;     // the delay in ms between providing power and reading out the pins (default 2ms).
 
