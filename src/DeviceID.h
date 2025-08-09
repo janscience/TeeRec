@@ -56,7 +56,10 @@ public:
   // - "IDA" by the device identifier as alphabetical characters,
   //   e.g. "DY", "N", "G".
   //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AG".
-  String makeStr(const String &str) const;
+  // If nozero and the device ID is zero, then
+  // two to the power of the number of pins is used instead -
+  // this is the highest number the bits can encode plus one.
+  String makeStr(const String &str, bool nozero=true) const;
 
   // Print device identifier on stream.
   void report(Stream &stream=Serial) const;
@@ -86,11 +89,7 @@ public:
   // If no pins were specified, they do no set the
   // device ID and return -1.
   // On success returns the read in device ID.
-  // If nozero and the readin device ID is zero, then
-  // two to the power of the number of pins is returned -
-  // this is the highest number the bits can encode plus one.
-  // If a stream is provided, print debug messages.
-  int read(bool nozero=true, Stream *stream=0);
+  int read(Stream *stream=0);
 
   
 protected:

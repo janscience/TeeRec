@@ -20,10 +20,13 @@ void DeviceID::setID(int id) {
 }
 
 
-String DeviceID::makeStr(const String &str) const {
+String DeviceID::makeStr(const String &str, bool nozero) const {
+  int id = ID;
+  if (id == 0 && nozero)
+    id = 1 << NPins;
+  int ida = id - 1;
   char ids[16];
   String istr = str;
-  int ida = ID - 1;
   if (istr.indexOf("IDAA") >= 0) {
     ids[2] = '\0';
     ids[1] = char('A' + (ida % 26));
@@ -40,15 +43,15 @@ String DeviceID::makeStr(const String &str) const {
       istr.replace("IDA", ids);
   }
   else if (istr.indexOf("ID3") >= 0) {
-    sprintf(ids, "%03d", ID);
+    sprintf(ids, "%03d", id);
     istr.replace("ID3", ids);
   }
   else if (istr.indexOf("ID2") >= 0) {
-    sprintf(ids, "%02d", ID);
+    sprintf(ids, "%02d", id);
     istr.replace("ID2", ids);
   }
   else if (istr.indexOf("ID") >= 0) {
-    sprintf(ids, "%d", ID);
+    sprintf(ids, "%d", id);
     istr.replace("ID", ids);
   }
   return istr;
@@ -95,7 +98,7 @@ void DeviceID::setPins(int powerpin, const int *pins, bool pullup) {
 }
 
 
-int DeviceID::read(bool nozero, Stream *stream) {
+int DeviceID::read(Stream *stream) {
   if (NPins == 0)
     return -1;
   if (PowerPin >= 0) {
@@ -126,11 +129,6 @@ int DeviceID::read(bool nozero, Stream *stream) {
     digitalWrite(PowerPin, 0);
   if (stream != 0)
     stream->printf("Read DeviceID: #%02X = %02d\n", r, r);
-  if (r == 0 && nozero) {
-    r = 1 << NPins;
-    if (stream != 0)
-      stream->printf("Set DeviceID to: #%02X = %02d\n", r, r);
-  }
   ID = r;
   Source = 3;
   return ID;
