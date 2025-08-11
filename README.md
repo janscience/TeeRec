@@ -104,8 +104,9 @@ via the `TeeRec.h` header.
 
 - [RTClock](src/RTClock.h): Time and date strings from the [onboard
   real time clock](https://www.pjrc.com/teensy/td_libs_Time.html).
-- [RTClockDS1307](src/RTClockDS1307.h): Use external [DS1307, DS1337 and DS3231
-  chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html) real time clock.
+- [RTClockDS1307](src/RTClockDS1307.h): Use external [DS1307, DS1337, DS3231,
+  and MAX31328 chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html)
+  real time clock.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.
