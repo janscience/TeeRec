@@ -43,7 +43,7 @@ class RTClock : public Device {
   bool check(Stream &stream=Serial);
 
   // Set real-time clock to time t.
-  void set(time_t t);
+  virtual void set(time_t t);
   
   // Set real-time clock to the given time.
   // If from_start is true, the time the sketch is already running is

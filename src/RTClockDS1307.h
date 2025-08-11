@@ -31,7 +31,7 @@ class RTClockDS1307 : public RTClock {
   virtual bool begin();
 
   // Set real-time clock to t.
-  void set(time_t t);
+  virtual void set(time_t t);
 
 };
 
