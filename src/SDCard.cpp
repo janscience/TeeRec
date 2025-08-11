@@ -142,9 +142,10 @@ bool SDCard::dataDir(const char *path) {
   }
   else {
     for (int i=1; i<=99; i++) {
-      *num = '\0';
+      size_t n = num - path;
       char new_path[MaxDir];
-      snprintf(new_path, MaxDir, "%s%02d%s", path, i, num + 3);
+      memcpy(new_path, path, n);
+      snprintf(new_path + n, MaxDir - n, "%02d%s", i, num + 3);
       new_path[MaxDir - 1] = '\0';
       npath = new_path;
       if (! exists(npath)) {
@@ -179,49 +180,70 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
   if (!checkAvailability(stream))
     return;
   
-  SdFile file;
-  FsFile dir = sdfs.open(path);
-  if (!dir) {
-    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
-    return;
-  }
-  stream.printf("Files in \"%s\" on %sSD card:\n", path, Name);
+  stream.printf("Files on %sSD card:\n", Name);
+  stream.println("  size (bytes) name");
   float file_sizes = 0.0;
-  int n = 0;
-  while (file.openNext(&dir, O_RDONLY)) {
-    char fname[200];
-    file.getName(fname, 200);
-    if (!file.isDir()) {
-      if (n == 0 && list_sizes)
-	stream.println("  size (bytes) name");
-      stream.print("  ");
-      if (list_sizes) {
-	stream.printf("%12lu ", file.fileSize());
-	file_sizes += 1e-6*file.fileSize();
-      }
-      stream.println(fname);
-      n++;
-    }
-    else if (list_dirs) {
-      if (n == 0 && list_sizes)
-	stream.println("  size (bytes) name");
-      stream.print("  ");
-      if (list_sizes) {
-	stream.printf("%12lu ", file.fileSize());
-	file_sizes += 1e-6*file.fileSize();
-      }
-      stream.print(fname);
-      stream.println("/");
-      n++;
-    }
+  int n_files = 0;
+  char *num = strstr(path, "NUM");
+  char new_path[MaxDir];
+  int n = -1;
+  if (num != NULL) {
+    n = num - path;
+    memcpy(new_path, path, n);
   }
-  if (n == 0)
+  for (int i=1; i<=99; i++) {
+    const char *npath = path;
+    if (num != NULL) {
+      snprintf(new_path + n, MaxDir - n, "%02d%s", i, num + 3);
+      new_path[MaxDir - 1] = '\0';
+      npath = new_path;
+    }
+    FsFile dir = sdfs.open(npath);
+    if (!dir) {
+      if (num == NULL) {
+	stream.printf("Folder \"%s\" does not exist on %s SD card.\n", npath, Name);
+	return;
+      }
+      else
+	break;
+    }
+    stream.printf("Files in \"%s\":\n", npath);
+    SdFile file;
+    while (file.openNext(&dir, O_RDONLY)) {
+      char fname[200];
+      file.getName(fname, 200);
+      if (!file.isDir()) {
+	stream.print("  ");
+	if (list_sizes) {
+	  stream.printf("%12lu ", file.fileSize());
+	  file_sizes += 1e-6*file.fileSize();
+	}
+	stream.println(fname);
+	n_files++;
+      }
+      else if (list_dirs) {
+	stream.print("  ");
+	if (list_sizes) {
+	  stream.printf("%12lu ", file.fileSize());
+	  file_sizes += 1e-6*file.fileSize();
+	}
+	stream.print(fname);
+	stream.println("/");
+	n_files++;
+      }
+    }
+    if (num == NULL)
+      break;
+    else
+      stream.println();
+  }
+  if (n_files == 0)
     stream.printf("No files found.\n");
   else {
-    if (n > 1)
-      stream.printf("%d files found", n);
+    if (n_files > 1)
+      stream.printf("%d files found", n_files);
     else
-      stream.printf("%d file found", n);
+      stream.printf("%d file found", n_files);
     if (list_sizes)
       stream.printf(" (%.3f MB).\n", file_sizes);
     else
