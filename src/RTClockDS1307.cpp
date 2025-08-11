@@ -14,7 +14,7 @@ bool RTClockDS1307::begin() {
   tmElements_t tm;
   if (RTC.read(tm) && RTC.chipPresent()) {
     setI2CBus(Wire, DS1307_CTRL_ID);
-    setChip("DS1307/DS1337/DS3231");
+    setChip("DS1307/DS1337/DS3231/MAX31328");
     // only DS3231 has temperature at 0x11:
     Wire.beginTransmission(DS1307_CTRL_ID);
     Wire.write((uint8_t)0x11); 
@@ -24,7 +24,7 @@ bool RTClockDS1307::begin() {
 	int8_t temp1 = Wire.read(); 
 	Wire.read();
 	if (temp1 != 0) // let's assume a temperature != 0 ...
-	  setChip("DS3231");
+	  setChip("DS3231/MAX31328");
 	else
 	  setChip("DS1307/DS1337");
       }
