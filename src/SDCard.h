@@ -70,12 +70,17 @@ class SDCard : public SDClass {
 
   // Make directory if it does not exist and
   // make it the currrent working directory.
-  // Return true on succes.
+  // If path contains NUM, NUM is replaced by the lowest two-digit number
+  // making it a directory, that does not exist.
+  // Return true on success.
   bool dataDir(const char *path);
 
   // Reset current working directory to root.
-  // Return true on succes.
+  // Return true on success.
   bool rootDir();
+
+  // Return name of current working directory.
+  const char *workingDir() const { return WorkingDir; };
 
   // List all files in path (non-recursively).
   // If list_dirs, then also list directories.
@@ -139,6 +144,9 @@ class SDCard : public SDClass {
 
   static const size_t MaxName = 32;
   char Name[MaxName];
+
+  static const size_t MaxDir = 64;
+  char WorkingDir[MaxDir];
 
   bool Available;
   int SDIOCSPin;

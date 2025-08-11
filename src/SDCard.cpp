@@ -11,6 +11,7 @@ SDCard::SDCard(const char *name) :
     strcpy(Name, name);
     strcat(Name, " ");
   }
+  strcpy(WorkingDir, "");
 }
 
 
@@ -133,10 +134,32 @@ bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;
   sdfs.chvol();
-  if (! exists(path))
-    mkdir(path);
+  const char *npath = path;
+  char *num = strstr(path, "NUM");
+  if (num == NULL) {
+    if (! exists(npath))
+      mkdir(npath);
+  }
+  else {
+    for (int i=1; i<=99; i++) {
+      *num = '\0';
+      char new_path[MaxDir];
+      snprintf(new_path, MaxDir, "%s%02d%s", path, i, num + 3);
+      new_path[MaxDir - 1] = '\0';
+      npath = new_path;
+      if (! exists(npath)) {
+	mkdir(npath);
+	break;
+      }
+    }
+  }
   NameCounter = 0;
-  return sdfs.chdir(path);
+  bool r = sdfs.chdir(npath);
+  if (r) {
+    strncpy(WorkingDir, npath, MaxDir);
+    WorkingDir[MaxDir - 1] = '\0';
+  }
+  return r;
 }
 
 
@@ -144,7 +167,10 @@ bool SDCard::rootDir() {
   if (! Available)
     return false;
   sdfs.chvol();
-  return sdfs.chdir("/");
+  bool r = sdfs.chdir("/");
+  if (r)
+    strcpy(WorkingDir, "/");
+  return r;
 }
 
 
