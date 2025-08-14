@@ -176,78 +176,109 @@ bool SDCard::rootDir() {
 
 
 void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
-		       Stream &stream) {
+                       Stream &stream) {
   if (!checkAvailability(stream))
     return;
   
+  SdFile file;
+  FsFile dir = sdfs.open(path);
+  if (!dir) {
+    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
+    return;
+  }
   stream.printf("Files on %sSD card:\n", Name);
-  stream.println("  size (bytes) name");
+  if (list_sizes)
+    stream.println("  size (bytes) name");
+  stream.printf("Files in \"%s\":\n", path);
   float file_sizes = 0.0;
   int n_files = 0;
-  char *num = strstr(path, "NUM");
-  char new_path[MaxDir];
-  int n = -1;
-  if (num != NULL) {
-    n = num - path;
-    memcpy(new_path, path, n);
-  }
-  for (int i=1; i<=99; i++) {
-    const char *npath = path;
-    if (num != NULL) {
-      snprintf(new_path + n, MaxDir - n, "%02d%s", i, num + 3);
-      new_path[MaxDir - 1] = '\0';
-      npath = new_path;
-    }
-    FsFile dir = sdfs.open(npath);
-    if (!dir) {
-      if (num == NULL) {
-	stream.printf("Folder \"%s\" does not exist on %s SD card.\n", npath, Name);
-	return;
+  while (file.openNext(&dir, O_RDONLY)) {
+    char fname[200];
+    file.getName(fname, 200);
+    if (!file.isDir() || list_dirs) {
+      stream.print("  ");
+      if (list_sizes) {
+        stream.printf("%12lu ", file.fileSize());
+        file_sizes += 1e-6*file.fileSize();
       }
-      else
-	break;
-    }
-    stream.printf("Files in \"%s\":\n", npath);
-    SdFile file;
-    while (file.openNext(&dir, O_RDONLY)) {
-      char fname[200];
-      file.getName(fname, 200);
-      if (!file.isDir()) {
-	stream.print("  ");
-	if (list_sizes) {
-	  stream.printf("%12lu ", file.fileSize());
-	  file_sizes += 1e-6*file.fileSize();
-	}
-	stream.println(fname);
-	n_files++;
-      }
-      else if (list_dirs) {
-	stream.print("  ");
-	if (list_sizes) {
-	  stream.printf("%12lu ", file.fileSize());
-	  file_sizes += 1e-6*file.fileSize();
-	}
+      if (file.isDir()) {
 	stream.print(fname);
 	stream.println("/");
-	n_files++;
       }
+      else
+	stream.println(fname);
+      n_files++;
     }
-    if (num == NULL)
-      break;
-    else
-      stream.println();
   }
   if (n_files == 0)
-    stream.printf("No files found.\n");
+    stream.println("no files.");
   else {
     if (n_files > 1)
-      stream.printf("%d files found", n_files);
+      stream.printf("%d files", n_files);
     else
-      stream.printf("%d file found", n_files);
+      stream.printf("%d file", n_files);
     if (list_sizes)
       stream.printf(" (%.3f MB).\n", file_sizes);
     else
       stream.println(".");
+  }
+}
+
+
+void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
+			     Stream &stream) {
+  if (!checkAvailability(stream))
+    return;
+  
+  FsFile dir = sdfs.open(path);
+  if (!dir) {
+    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
+    return;
+  }
+  stream.printf("Files on %sSD card:\n", Name);
+  if (list_sizes)
+    stream.println("  size (bytes) name");
+  SdFile subdir;
+  while (subdir.openNext(&dir, O_RDONLY)) {
+    if (!subdir.isDir())
+      continue;
+    char subdir_name[200];
+    subdir.getName(subdir_name, 200);
+    stream.printf("Files in \"%s\":\n", subdir_name);
+    float file_sizes = 0.0;
+    int n_files = 0;
+    SdFile file;
+    while (file.openNext(&subdir, O_RDONLY)) {
+      char fname[200];
+      file.getName(fname, 200);
+      if (!file.isDir() || list_dirs) {
+	stream.print("  ");
+	if (list_sizes) {
+	  stream.printf("%12lu ", file.fileSize());
+	  file_sizes += 1e-6*file.fileSize();
+	}
+	if (file.isDir()) {
+	  stream.print(fname);
+	  stream.println("/");
+	}
+	else
+	  stream.println(fname);
+	n_files++;
+      }
+    }
+    if (n_files == 0)
+      stream.println("no files.");
+    else {
+      if (n_files > 1)
+	stream.printf("%d files", n_files);
+      else
+	stream.printf("%d file", n_files);
+      if (list_sizes)
+	stream.printf(" (%.3f MB).\n", file_sizes);
+      else
+	stream.println(".");
+    }
+    stream.println();
   }
 }
 

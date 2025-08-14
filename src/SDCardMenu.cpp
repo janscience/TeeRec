@@ -105,8 +105,7 @@ void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
     return;
   if (!SDC.checkAvailability(stream))
     return;
-  SDC.listFiles(SettingsMenu.path(), false, true, stream);
-  stream.println();
+  SDC.listDirectories("/", false, true, stream);
 }
 
 

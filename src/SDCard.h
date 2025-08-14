@@ -88,6 +88,12 @@ class SDCard : public SDClass {
   void listFiles(const char *path, bool list_dirs=false, bool list_sizes=false,
 		 Stream &stream=Serial);
 
+  // List all directories in path and their content (non-recursively).
+  // If list_dirs, then also list subdirectories.
+  // If list_sizes, then also print out file sizes in bytes.
+  void listDirectories(const char *path, bool list_dirs=false,
+		       bool list_sizes=false, Stream &stream=Serial);
+
   // Remove all files in path (non-recursively).
   void removeFiles(const char *path, Stream &stream=Serial);
 
