@@ -98,7 +98,7 @@ class SDCard : public SDClass {
   void listDirectories(const char *path, bool list_dirs=false,
 		       bool list_sizes=false, Stream &stream=Serial);
 
-  // Remove all files in path (non-recursively).
+  // Remove all files in path (non-recursively) and remove path.
   void removeFiles(const char *path, Stream &stream=Serial);
 
   // Write the card type in types, that should hold at least 8 characters.

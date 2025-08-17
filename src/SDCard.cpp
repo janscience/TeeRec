@@ -275,13 +275,18 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
   stream.printf("Files on %sSD card:\n", Name);
   if (list_sizes)
     stream.println("  size (bytes) name");
+  char latest_folder[128];
+  latestDir(path, latest_folder, 128);
   SdFile subdir;
   while (subdir.openNext(&dir, O_RDONLY)) {
     if (!subdir.isDir())
       continue;
     char subdir_name[200];
     subdir.getName(subdir_name, 200);
-    stream.printf("Files in \"%s\":\n", subdir_name);
+    if (strcmp(subdir_name, latest_folder) == 0)
+      stream.printf("Files in \"%s\" (newest):\n", subdir_name);
+    else
+      stream.printf("Files in \"%s\":\n", subdir_name);
     float file_sizes = 0.0;
     int n_files = 0;
     SdFile file;
@@ -354,6 +359,8 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     stream.printf("Removed %d file.\n", n);
   else
     stream.printf("Removed %d files.\n", n);
+  if (dir.rmdir())
+    stream.printf("Removed folder \"%s\".\n", path);
 }
 
 

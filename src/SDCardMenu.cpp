@@ -113,20 +113,18 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
     return;
   if (!SDC.checkAvailability(stream))
     return;
-  char folder[128];
-  SDC.latestDir("/", folder, 128);
-  stream.printf("LATEST FOLDER: %s\n", folder);
-  /*
-    TODO
-  if (! SDC.exists(Settings.path())) {
-    stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());
+  char folder[64];
+  SDC.latestDir("/", folder, 64);
+  if (strlen(folder) == 0) {
+    stream.print("No folder exists that can be removed.\n\n");
     return;
   }
-  stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
-  if (Action::yesno("Do you really want to erase all recordings?",
-		    true, echo, stream))
-    SDC.removeFiles(Settings.path(), stream);
-  */
+  stream.printf("Erase all files in folder \"%s\".\n", folder);
+  char msg[128];
+  sprintf(msg, "Do you really want to erase all recordings in \"%s\"?",
+	  folder);
+  if (Action::yesno(msg, true, echo, stream))
+    SDC.removeFiles(folder, stream);
   stream.println();
 }
 
