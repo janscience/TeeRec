@@ -108,16 +108,11 @@ class SDListRecordingsAction : public SDCardAction {
  public:
 
   /* Initialize and add to configuration menu. */
-  SDListRecordingsAction(Menu &menu, const char *name, SDCard &sd,
-			 Settings &settings);
+  SDListRecordingsAction(Menu &menu, const char *name, SDCard &sd);
 
   /* List all recordings on SD card. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
-
- protected:
-  
-  Settings &SettingsMenu;
 };
 
 

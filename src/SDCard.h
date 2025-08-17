@@ -82,7 +82,11 @@ class SDCard : public SDClass {
   // Return name of current working directory.
   const char *workingDir() const { return WorkingDir; };
 
-  // List all files in path (non-recursively).
+  // Return in folder with maximum nfolder characters
+  // the subfolder in path that was created last (is the newest).
+  void latestDir(const char *path, char *folder, size_t nfolder);
+
+  // List all files and directories in path (non-recursively).
   // If list_dirs, then also list directories.
   // If list_sizes, then also print out file sizes in bytes.
   void listFiles(const char *path, bool list_dirs=false, bool list_sizes=false,

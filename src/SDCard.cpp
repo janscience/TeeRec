@@ -1,4 +1,13 @@
+#include <TimeLib.h>
 #include <SDCard.h>
+
+
+// needed by SdFat to set creation/modification/access times
+void SDCardDateTime(uint16_t* date, uint16_t* time) {
+  time_t t = now();
+  *date = FS_DATE(year(t), month(t), day(t));
+  *time = FS_TIME(hour(t), minute(t), second(t));
+}
 
 
 SDCard::SDCard(const char *name) :
@@ -137,8 +146,10 @@ bool SDCard::dataDir(const char *path) {
   const char *npath = path;
   char *num = strstr(path, "NUM");
   if (num == NULL) {
-    if (! exists(npath))
+    if (! exists(npath)) {
+      SdFile::dateTimeCallback(SDCardDateTime);
       mkdir(npath);
+    }
   }
   else {
     for (int i=1; i<=99; i++) {
@@ -149,6 +160,7 @@ bool SDCard::dataDir(const char *path) {
       new_path[MaxDir - 1] = '\0';
       npath = new_path;
       if (! exists(npath)) {
+	SdFile::dateTimeCallback(SDCardDateTime);
 	mkdir(npath);
 	break;
       }
@@ -172,6 +184,31 @@ bool SDCard::rootDir() {
   if (r)
     strcpy(WorkingDir, "/");
   return r;
+}
+
+
+void SDCard::latestDir(const char *path,
+		       char *folder, size_t nfolder) {
+  folder[0] = '\0';
+  if (!checkAvailability())
+    return;
+  
+  SdFile file;
+  FsFile dir = sdfs.open(path);
+  if (!dir)
+    return;
+  uint16_t ldate = 0;
+  uint16_t ltime = 0;
+  while (file.openNext(&dir, O_RDONLY)) {
+    uint16_t fdate;
+    uint16_t ftime;
+    file.getCreateDateTime(&fdate, &ftime);
+    if ((fdate > ldate) || ((fdate == ldate) && (ftime > ltime))) {
+      file.getName(folder, nfolder);
+      ldate = fdate;
+      ltime = ftime;
+    }
+  }
 }
 
 
@@ -293,7 +330,8 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     stream.printf("Folder \"%s\" does not exist on %sSD card.\n", path, Name);
     return;
   }
-  stream.printf("Erase all files in \"%s\" on %sSD card:\n", path, Name);
+  stream.printf("Erase files on %sSD card:\n", Name);
+  stream.printf("Erase all files in \"%s\":\n", path);
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
@@ -677,16 +715,19 @@ void SDCard::resetFileCounter() {
 
 
 FsFile SDCard::openRead(const char *path) {
+  SdFile::dateTimeCallback(SDCardDateTime);
   return sdfs.open(path, O_READ);
 }
 
 
 FsFile SDCard::openWrite(const char *path) {
+  SdFile::dateTimeCallback(SDCardDateTime);
   return sdfs.open(path, O_WRONLY | O_CREAT | O_TRUNC );
 }
 
 
 FsFile SDCard::openAppend(const char *path) {
+  SdFile::dateTimeCallback(SDCardDateTime);
   return sdfs.open(path, O_WRONLY | O_CREAT | O_AT_END);
 }
 

@@ -92,10 +92,8 @@ void SDListRootAction::execute(Stream &stream, unsigned long timeout,
 
 SDListRecordingsAction::SDListRecordingsAction(Menu &menu,
 					       const char *name,
-					       SDCard &sd,
-					       Settings &settings) : 
-  SDCardAction(menu, name, sd),
-  SettingsMenu(settings) {
+					       SDCard &sd) : 
+  SDCardAction(menu, name, sd) {
 }
 
 
@@ -115,14 +113,20 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
     return;
   if (!SDC.checkAvailability(stream))
     return;
-  if (! SDC.exists(SettingsMenu.path())) {
+  char folder[128];
+  SDC.latestDir("/", folder, 128);
+  stream.printf("LATEST FOLDER: %s\n", folder);
+  /*
+    TODO
+  if (! SDC.exists(Settings.path())) {
     stream.printf("Folder \"%s\" does not exist.\n\n", SettingsMenu.path());
     return;
   }
   stream.printf("Erase all files in folder \"%s\".\n", SettingsMenu.path());
   if (Action::yesno("Do you really want to erase all recordings?",
 		    true, echo, stream))
-    SDC.removeFiles(SettingsMenu.path(), stream);
+    SDC.removeFiles(Settings.path(), stream);
+  */
   stream.println();
 }
 
@@ -131,8 +135,8 @@ SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings) :
   Menu(menu, "SD card", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
-  ListRecsAct(*this, "List all recordings", sdcard, settings),
-  EraseRecsAct(*this, "Erase all recordings", sdcard, settings),
+  ListRecsAct(*this, "List all recordings", sdcard),
+  EraseRecsAct(*this, "Erase all recordings", sdcard),
   FormatAct(*this, "Format SD card", sdcard),
   EraseFormatAct(*this, "Erase and format SD card", sdcard) {
   if (strlen(sdcard.name()) > 0) {

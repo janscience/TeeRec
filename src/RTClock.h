@@ -8,7 +8,8 @@
   Uses the Teensy on-board real-time clock. You just need to attach a
   3.3V battery to VBAT to make it work.
   
-  For using a DS1307, DS1337 or DS3231 chip, see RTClockDS1307.h.
+  For using a DS1307, DS1337 DS3231, or MAX31328 chip,
+  see RTClockDS1307.h.
 */
 
 #ifndef RTClock_h
@@ -102,8 +103,8 @@ class RTClock : public Device {
   // Print current time on stream.
   void print(Stream &stream=Serial) const;
 
-  // Print current time, real time provider, and potential error message
-  // on stream.
+  // Print current time, real time provider, and potential error
+  // message on stream.
   void report(Stream &stream=Serial) const;
 
 };
