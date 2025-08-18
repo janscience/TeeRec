@@ -219,6 +219,22 @@ void RTClock::time(char *str, time_t t, bool brief, bool dash) const {
 }
 
 
+void RTClock::timeHM(char *str, time_t t, bool brief, bool dash) const {
+  str[0] = '\0';
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return;
+    t = now();
+  }
+  if (brief)
+    sprintf(str, "%02d%02d", hour(t), minute(t));
+  else if (dash)
+    sprintf(str, "%02d-%02d", hour(t), minute(t));
+  else
+    sprintf(str, "%02d:%02d", hour(t), minute(t));
+}
+
+
 void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) const {
   str[0] = '\0';
   if (t == 0) {
@@ -238,6 +254,25 @@ void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) const {
 }
 
 
+void RTClock::dateTimeHM(char *str, time_t t, bool brief, bool dash) const {
+  str[0] = '\0';
+  if (t == 0) {
+    if (timeStatus() == timeNotSet)
+      return;
+    t = now();
+  }
+  if (brief)
+    sprintf(str, "%04d%02d%02dT%02d%02d",
+	    year(t), month(t), day(t), hour(t), minute(t));
+  else if (dash)
+    sprintf(str, "%04d-%02d-%02dT%02d-%02d",
+	    year(t), month(t), day(t), hour(t), minute(t));
+  else
+    sprintf(str, "%04d-%02d-%02dT%02d:%02d",
+	    year(t), month(t), day(t), hour(t), minute(t));
+}
+
+
 String RTClock::makeStr(const String &str, time_t t, bool dash) const {
   char ts[20];
   String tstr = str;
@@ -246,7 +281,15 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
       return "";
     t = now();
   }
-  if (tstr.indexOf("SDATETIME") >= 0) {
+  if (tstr.indexOf("SDATETIMEM") >= 0) {
+    dateTimeHM(ts, t, true);
+    tstr.replace("SDATETIMEM", ts);
+  }
+  else if (tstr.indexOf("DATETIMEM") >= 0) {
+    dateTimeHM(ts, t, false, dash);
+    tstr.replace("DATETIMEM", ts);
+  }
+  else if (tstr.indexOf("SDATETIME") >= 0) {
     dateTime(ts, t, true);
     tstr.replace("SDATETIME", ts);
   }
@@ -261,6 +304,14 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
   else if (tstr.indexOf("DATE") >= 0) {
     date(ts, t, false);
     tstr.replace("DATE", ts);
+  }
+  else if (tstr.indexOf("STIMEM") >= 0) {
+    timeHM(ts, t, true);
+    tstr.replace("STIMEM", ts);
+  }
+  else if (tstr.indexOf("TIMEM") >= 0) {
+    timeHM(ts, t, false, dash);
+    tstr.replace("TIMEM", ts);
   }
   else if (tstr.indexOf("STIME") >= 0) {
     time(ts, t, true);
