@@ -22,6 +22,9 @@ class SDCard : public SDClass {
   // End usage of SD card.
   virtual ~SDCard();
 
+  // The name of the SD card, as passed to the constructor.
+  const char *name() const { return Name; };
+
 #ifdef BUILTIN_SDCARD
   // Initialize built in SD card on SDIO bus.
   // Return true on success.
@@ -47,31 +50,30 @@ class SDCard : public SDClass {
   // End usage of SD card.
   void end();
 
-  // Begin SD card usage with the same begin() command as before.
+  // End and then begin SD card usage with the same begin() command as before.
   bool restart();
 
-  // Availability of a SD card. 
+  // Availability of SD card at the time of calling a begin() function. 
   bool available() const { return Available; };
 
-  // Check availability of SD card.
+  // Check availability of SD card using the available() function.
   // If not present, print out error message on stream.
   bool checkAvailability(Stream &stream=Serial);
-
-  // The name of the SD card, as passed to the constructor.
-  const char *name() const { return Name; };
-
-  // True if SD card is busy.
-  bool isBusy();
 
   // Check, whether SD card is available, has enough free space (in
   // Bytes) and can be written.
   // If not, it tries to restart the SD card.
   bool check(float minfree=1024*1024, Stream &stream=Serial);
 
+  // True if SD card is busy.
+  bool isBusy();
+
   // Make directory if it does not exist and
   // make it the currrent working directory.
   // If path contains NUM, NUM is replaced by the lowest two-digit number
   // making it a directory, that does not exist.
+  // An optional digit following NUM specifies the number of decimals
+  // used to format the string, e.g. NUM3 is replaced by "001", "002", etc.
   // Return true on success.
   bool dataDir(const char *path);
 
@@ -86,8 +88,8 @@ class SDCard : public SDClass {
   // the subfolder in path that was created last (is the newest).
   void latestDir(const char *path, char *folder, size_t nfolder);
 
-  // List all files and directories in path (non-recursively).
-  // If list_dirs, then also list directories.
+  // List all files in path (non-recursively).
+  // If list_dirs, then also list directories in path.
   // If list_sizes, then also print out file sizes in bytes.
   void listFiles(const char *path, bool list_dirs=false, bool list_sizes=false,
 		 Stream &stream=Serial);
@@ -113,31 +115,40 @@ class SDCard : public SDClass {
   // Serial number of the SD card as hex string (minimum size of 9 characters).
   void serial(char *s);
 
-  // Report SD card infos, capacity and available space.
+  // Report SD card infos, capacity and available space on stream.
   void report(Stream &stream=Serial);
 
-  // Run a benchmark test and report data rates for writing and reading.
+  // Run a benchmark test and report data rates for
+  // writing and reading on stream.
   // Write and read buffers of size bufer_size bytes
   // of a file_size MB large file for repeats times.
   void benchmark(size_t buffer_size=512, uint32_t file_size=10,
 		 int repeats=2, Stream &stream=Serial);
 
-  // Flash erase all data.
+  // Flash erase all data and report progress on stream.
   void erase(Stream &stream=Serial);
   
   // Format the SD card, but keep the specified (small) file.
+  // Progress is reported on stream.
   // If erase_card, flash erase all data first.
   void format(const char *path=0, bool erase_card=false,
 	      Stream &stream=Serial);
 
-  // Replace NUM in fname by "01", "02", "03" etc., 'ANUM' by 'aa', 'ab', 'ac' etc. 
-  // such that it specifies a non existing file. 
-  // If no SD card is available, or if no unique file can be found, return an empty string.
-  // Takes about 1-2ms.
-  String incrementFileName(const String &fname);
+  // Replace NUM in fname by "01", "02", "03", etc.,
+  // ANUM by "aa", "ab", "ac", etc. 
+  // such that it specifies a non existing file.
+  // An optional digit following NUM specifies the number of decimals
+  // used to format the string, e.g. NUM3 is replaced by "001", "002", etc.
+  // If no SD card is available, or if no unique file can be found,
+  // return an empty string.
+  // This works for only a single fname. You cannot call this function
+  // with different fname to increment two or more file names in parallel.
+  // Overflows are reported on stream and an empty string is returned.
+  String incrementFileName(const String &fname, Stream &stream=Serial);
 
   // Reset the counter that is used by incrementFileName().
-  // Call it, whenever the filename changes, for example, because of a new date.
+  // Call it, whenever the filename changes, for example,
+  // because of a new date.
   void resetFileCounter();
 
   // Open file on SD card for reading.

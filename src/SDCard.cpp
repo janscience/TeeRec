@@ -93,11 +93,6 @@ bool SDCard::checkAvailability(Stream &stream) {
 }
 
 
-bool SDCard::isBusy() {
-  return sdfs.isBusy();
-}
-
-
 bool SDCard::check(float minfree, Stream &stream) {
   if (minfree < 512)
     minfree = 512.0;
@@ -139,6 +134,11 @@ bool SDCard::check(float minfree, Stream &stream) {
 }
 
 
+bool SDCard::isBusy() {
+  return sdfs.isBusy();
+}
+
+
 bool SDCard::dataDir(const char *path) {
   if (! Available)
     return false;
@@ -152,11 +152,17 @@ bool SDCard::dataDir(const char *path) {
     }
   }
   else {
+    int offs = 3;
+    int width = 2;
+    if (isdigit(*(num + 3))) {
+      width = *(num + 3) - '0';
+      offs = 4;
+    }
     for (int i=1; i<=99; i++) {
       size_t n = num - path;
       char new_path[MaxDir];
       memcpy(new_path, path, n);
-      snprintf(new_path + n, MaxDir - n, "%02d%s", i, num + 3);
+      snprintf(new_path + n, MaxDir - n, "%0*d%s", width, i, num + offs);
       new_path[MaxDir - 1] = '\0';
       npath = new_path;
       if (! exists(npath)) {
@@ -661,7 +667,7 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
 }
 
 
-String SDCard::incrementFileName(const String &fname) {
+String SDCard::incrementFileName(const String &fname, Stream &stream) {
   if (! Available)
     return "";
   int numinx = -1;
@@ -673,9 +679,11 @@ String SDCard::incrementFileName(const String &fname) {
   }
   int width = 2;
   char nums[6] = "NUM";
-  if (num && numinx+4 < (int)fname.length() && isdigit(fname[numinx+3])) {
-      width = fname[numinx+3] - '0';
-      nums[3] = fname[numinx+3];
+  if (num &&
+      numinx + 4 < (int)fname.length() &&
+      isdigit(fname[numinx + 3])) {
+      width = fname[numinx + 3] - '0';
+      nums[3] = fname[numinx + 3];
       nums[4] = '\0';
   }
   String aa("aa");
@@ -688,7 +696,8 @@ String SDCard::incrementFileName(const String &fname) {
 	aa[1] = char('a' + ((NameCounter-1) % 26));
 	uint16_t major = (NameCounter-1) / 26;
 	if (major > 25) {
-	  Serial.printf("WARNING: file name overflow on %sSD card.\n", Name);
+	  stream.printf("WARNING: file name overflow on %sSD card for \"%s\".\n",
+			Name, fname);
 	  return "";
 	}
 	aa[0] = char('a' + major);
@@ -699,13 +708,14 @@ String SDCard::incrementFileName(const String &fname) {
 	int maxn = 1;
 	for (int w=0; w<width; w++)
 	  maxn *= 10;
-	maxn -= 1;
 	if (NameCounter > maxn) {
-	  Serial.printf("WARNING: file name overflow on %sSD card.\n", Name);
+	  stream.printf("WARNING: file name overflow on %sSD card for \"%s\".\n",
+			Name, fname);
 	  return "";
 	}
 	volatile int nn_size = sizeof(nn); // avoid truncation warning: https://stackoverflow.com/a/70938456
 	snprintf(nn, nn_size, "%0*d", width, NameCounter);
+	nn[11] = '\0';
 	name.replace(nums, nn);
       }
     } while (sdfs.exists(name.c_str()));
