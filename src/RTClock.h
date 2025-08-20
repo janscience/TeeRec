@@ -84,33 +84,25 @@ class RTClock : public Device {
   // str needs to hold 9 characters.
   // If time equals zero, then get current time (`time = now()`).
   // If brief, without the colons. If dash, replace colons by dashes.
-  void time(char *str, time_t time=0, bool brief=false, bool dash=false) const;
-
-  // String with time in the format HH:MM.
-  // str needs to hold 6 characters.
-  // If time equals zero, then get current time (`time = now()`).
-  // If brief, without the colon. If dash, replace colon by dash.
-  void timeHM(char *str, time_t time=0, bool brief=false, bool dash=false) const;
+  // If not seconds, just print hours and minutes without seconds
+  // in the format HH:MM
+  void time(char *str, time_t time=0, bool brief=false,
+	    bool dash=false, bool seconds=true) const;
 
   // String with date and time in the format YYYY-MM-DDTHH:MM:SS.
   // str needs to hold 20 characters.
   // If time equals zero, then get current time (`time = now()`).
   // If brief, without the dashes and colons. If dash, replace colons by dashes.
-  void dateTime(char *str, time_t time=0,
-		bool brief=false, bool dash=false) const;
-
-  // String with date and time in the format YYYY-MM-DDTHH:MM.
-  // str needs to hold 17 characters.
-  // If time equals zero, then get current time (`time = now()`).
-  // If brief, without the dashes and colons. If dash, replace colons by dashes.
-  void dateTimeHM(char *str, time_t time=0,
-		  bool brief=false, bool dash=false) const;
+  // If not seconds, just print hours and minutes without seconds
+  // in the format YYYY-MM-DDTHH:MM
+  void dateTime(char *str, time_t time=0, bool brief=false,
+		bool dash=false, bool seconds=true) const;
 
   // Replace in str, DATE, TIME, TIMEM, DATETIME, DATETIMEM by the
   // respective strings of date and time.
   // SDATE, STIME, STIMEM, SDATETIME, SDATETIMEM are replaced by the
   // corresponding brief (short) versions without dashes or colons.
-  // TIME is hh:mm:ss, TIMEM is hh:mm, likewise for DATETIME and DATETIMEM.
+  // TIME is HH:MM:SS, TIMEM is HH:MM, likewise for DATETIME and DATETIMEM.
   // If time equals zero, then get current time (`time = now()`).
   // If dash, replace colons by dashes.
   String makeStr(const String &str, time_t time=0, bool dash=false) const;

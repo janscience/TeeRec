@@ -203,73 +203,63 @@ void RTClock::date(char *str, time_t t, bool brief) const {
 }
 
 
-void RTClock::time(char *str, time_t t, bool brief, bool dash) const {
+void RTClock::time(char *str, time_t t, bool brief,
+		   bool dash, bool seconds) const {
   str[0] = '\0';
   if (t == 0) {
     if (timeStatus() == timeNotSet)
       return;
     t = now();
   }
-  if (brief)
-    sprintf(str, "%02d%02d%02d", hour(t), minute(t), second(t));
-  else if (dash)
-    sprintf(str, "%02d-%02d-%02d", hour(t), minute(t), second(t));
-  else
-    sprintf(str, "%02d:%02d:%02d", hour(t), minute(t), second(t));
+  if (seconds) {
+    if (brief)
+      sprintf(str, "%02d%02d%02d", hour(t), minute(t), second(t));
+    else if (dash)
+      sprintf(str, "%02d-%02d-%02d", hour(t), minute(t), second(t));
+    else
+      sprintf(str, "%02d:%02d:%02d", hour(t), minute(t), second(t));
+  }
+  else {
+    if (brief)
+      sprintf(str, "%02d%02d", hour(t), minute(t));
+    else if (dash)
+      sprintf(str, "%02d-%02d", hour(t), minute(t));
+    else
+      sprintf(str, "%02d:%02d", hour(t), minute(t));
+  }
 }
 
 
-void RTClock::timeHM(char *str, time_t t, bool brief, bool dash) const {
+void RTClock::dateTime(char *str, time_t t, bool brief,
+		       bool dash, bool seconds) const {
   str[0] = '\0';
   if (t == 0) {
     if (timeStatus() == timeNotSet)
       return;
     t = now();
   }
-  if (brief)
-    sprintf(str, "%02d%02d", hour(t), minute(t));
-  else if (dash)
-    sprintf(str, "%02d-%02d", hour(t), minute(t));
-  else
-    sprintf(str, "%02d:%02d", hour(t), minute(t));
-}
-
-
-void RTClock::dateTime(char *str, time_t t, bool brief, bool dash) const {
-  str[0] = '\0';
-  if (t == 0) {
-    if (timeStatus() == timeNotSet)
-      return;
-    t = now();
+  if (seconds) {
+    if (brief)
+      sprintf(str, "%04d%02d%02dT%02d%02d%02d",
+	      year(t), month(t), day(t), hour(t), minute(t), second(t));
+    else if (dash)
+      sprintf(str, "%04d-%02d-%02dT%02d-%02d-%02d",
+	      year(t), month(t), day(t), hour(t), minute(t), second(t));
+    else
+      sprintf(str, "%04d-%02d-%02dT%02d:%02d:%02d",
+	      year(t), month(t), day(t), hour(t), minute(t), second(t));
   }
-  if (brief)
-    sprintf(str, "%04d%02d%02dT%02d%02d%02d",
-	    year(t), month(t), day(t), hour(t), minute(t), second(t));
-  else if (dash)
-    sprintf(str, "%04d-%02d-%02dT%02d-%02d-%02d",
-	    year(t), month(t), day(t), hour(t), minute(t), second(t));
-  else
-    sprintf(str, "%04d-%02d-%02dT%02d:%02d:%02d",
-	    year(t), month(t), day(t), hour(t), minute(t), second(t));
-}
-
-
-void RTClock::dateTimeHM(char *str, time_t t, bool brief, bool dash) const {
-  str[0] = '\0';
-  if (t == 0) {
-    if (timeStatus() == timeNotSet)
-      return;
-    t = now();
+  else {
+    if (brief)
+      sprintf(str, "%04d%02d%02dT%02d%02d",
+	      year(t), month(t), day(t), hour(t), minute(t));
+    else if (dash)
+      sprintf(str, "%04d-%02d-%02dT%02d-%02d",
+	      year(t), month(t), day(t), hour(t), minute(t));
+    else
+      sprintf(str, "%04d-%02d-%02dT%02d:%02d",
+	      year(t), month(t), day(t), hour(t), minute(t));
   }
-  if (brief)
-    sprintf(str, "%04d%02d%02dT%02d%02d",
-	    year(t), month(t), day(t), hour(t), minute(t));
-  else if (dash)
-    sprintf(str, "%04d-%02d-%02dT%02d-%02d",
-	    year(t), month(t), day(t), hour(t), minute(t));
-  else
-    sprintf(str, "%04d-%02d-%02dT%02d:%02d",
-	    year(t), month(t), day(t), hour(t), minute(t));
 }
 
 
@@ -282,19 +272,19 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
     t = now();
   }
   if (tstr.indexOf("SDATETIMEM") >= 0) {
-    dateTimeHM(ts, t, true);
+    dateTime(ts, t, true, dash, false);
     tstr.replace("SDATETIMEM", ts);
   }
   else if (tstr.indexOf("DATETIMEM") >= 0) {
-    dateTimeHM(ts, t, false, dash);
+    dateTime(ts, t, false, dash, false);
     tstr.replace("DATETIMEM", ts);
   }
   else if (tstr.indexOf("SDATETIME") >= 0) {
-    dateTime(ts, t, true);
+    dateTime(ts, t, true, dash, true);
     tstr.replace("SDATETIME", ts);
   }
   else if (tstr.indexOf("DATETIME") >= 0) {
-    dateTime(ts, t, false, dash);
+    dateTime(ts, t, false, dash, true);
     tstr.replace("DATETIME", ts);
   }
   else if (tstr.indexOf("SDATE") >= 0) {
@@ -306,19 +296,19 @@ String RTClock::makeStr(const String &str, time_t t, bool dash) const {
     tstr.replace("DATE", ts);
   }
   else if (tstr.indexOf("STIMEM") >= 0) {
-    timeHM(ts, t, true);
+    time(ts, t, true, dash, false);
     tstr.replace("STIMEM", ts);
   }
   else if (tstr.indexOf("TIMEM") >= 0) {
-    timeHM(ts, t, false, dash);
+    time(ts, t, false, dash, false);
     tstr.replace("TIMEM", ts);
   }
   else if (tstr.indexOf("STIME") >= 0) {
-    time(ts, t, true);
+    time(ts, t, true, dash, true);
     tstr.replace("STIME", ts);
   }
   else if (tstr.indexOf("TIME") >= 0) {
-    time(ts, t, false, dash);
+    time(ts, t, false, dash, true);
     tstr.replace("TIME", ts);
   }
   return tstr;
