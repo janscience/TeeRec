@@ -129,12 +129,35 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
+void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
+				      bool echo, bool detailed) {
+  if (disabled(StreamInput))
+    return;
+  if (!SDC.checkAvailability(stream))
+    return;
+  char folder[64];
+  SDC.latestDir("/", folder, 64);
+  if (strlen(folder) == 0) {
+    stream.print("No folder exists that can be cleaned.\n\n");
+    return;
+  }
+  stream.printf("Clean up files in folder \"%s\".\n", folder);
+  char msg[128];
+  sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
+	  folder);
+  if (Action::yesno(msg, true, echo, stream))
+    SDC.cleanDir(folder, 1, stream);
+  stream.println();
+}
+
+
 SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings) :
   Menu(menu, "SD card", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard),
-  EraseRecsAct(*this, "Erase all recordings", sdcard),
+  CleanRecsAct(*this, "Clean recent recordings", sdcard),
+  EraseRecsAct(*this, "Erase recent recordings", sdcard),
   FormatAct(*this, "Format SD card", sdcard),
   EraseFormatAct(*this, "Erase and format SD card", sdcard) {
   if (strlen(sdcard.name()) > 0) {

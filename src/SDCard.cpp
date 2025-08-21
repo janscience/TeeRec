@@ -206,6 +206,8 @@ void SDCard::latestDir(const char *path,
   uint16_t ldate = 0;
   uint16_t ltime = 0;
   while (file.openNext(&dir, O_RDONLY)) {
+    if (! file.isDir())
+      continue;
     uint16_t fdate;
     uint16_t ftime;
     file.getCreateDateTime(&fdate, &ftime);
@@ -215,6 +217,48 @@ void SDCard::latestDir(const char *path,
       ltime = ftime;
     }
   }
+}
+
+
+int SDCard::cleanDir(const char *path, uint64_t min_size,
+		     Stream &stream) {
+  if (!checkAvailability(stream))
+    return 0;
+  
+  SdFile file;
+  FsFile dir = sdfs.open(path);
+  if (!dir) {
+    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
+    return 0;
+  }
+  FsFile trash = sdfs.open(path);
+  int n = 0;
+  while (file.openNext(&dir, O_RDONLY)) {
+    if (file.isDir())
+      continue;
+    if (file.fileSize() < min_size) {
+      if (! dir.exists("trash")) {
+	bool r = dir.mkdir(&trash, "trash");
+	stream.printf("mkdir trash %d\n", r);
+      }
+      char fname[64];
+      file.getName(fname, 64);
+      char old_name[128];
+      strcpy(old_name, path);
+      strcat(old_name, "/");
+      strcat(old_name, fname);
+      char new_name[128];
+      strcpy(new_name, path);
+      strcat(new_name, "/trash/");
+      strcat(new_name, fname);
+      if (sdfs.rename(old_name, new_name))
+	stream.printf("moved file %s to %s.\n", fname, new_name);
+      else
+	stream.printf("failed to move file %s to trash/.\n", fname);
+      n++;
+    }
+  }
+  return n;
 }
 
 
@@ -236,8 +280,8 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
   float file_sizes = 0.0;
   int n_files = 0;
   while (file.openNext(&dir, O_RDONLY)) {
-    char fname[200];
-    file.getName(fname, 200);
+    char fname[64];
+    file.getName(fname, 64);
     if (!file.isDir() || list_dirs) {
       stream.print("  ");
       if (list_sizes) {
@@ -287,8 +331,8 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
   while (subdir.openNext(&dir, O_RDONLY)) {
     if (!subdir.isDir())
       continue;
-    char subdir_name[200];
-    subdir.getName(subdir_name, 200);
+    char subdir_name[64];
+    subdir.getName(subdir_name, 64);
     if (strcmp(subdir_name, latest_folder) == 0)
       stream.printf("Files in \"%s\" (newest):\n", subdir_name);
     else
@@ -297,8 +341,8 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
     int n_files = 0;
     SdFile file;
     while (file.openNext(&subdir, O_RDONLY)) {
-      char fname[200];
-      file.getName(fname, 200);
+      char fname[64];
+      file.getName(fname, 64);
       if (!file.isDir() || list_dirs) {
 	stream.print("  ");
 	if (list_sizes) {
@@ -346,8 +390,8 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
-      char fname[200];
-      file.getName(fname, 200);
+      char fname[64];
+      file.getName(fname, 64);
       if (dir.remove(fname)) {
 	stream.print("  erased ");
 	stream.println(fname);

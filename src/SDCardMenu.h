@@ -116,6 +116,18 @@ class SDListRecordingsAction : public SDCardAction {
 };
 
 
+class SDCleanRecordingsAction : public SDListRecordingsAction {
+
+ public:
+
+  using SDListRecordingsAction::SDListRecordingsAction;
+
+  /* Move files in latest recordings directory smaller than 1 byte to trash. */
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
+};
+
+
 class SDRemoveRecordingsAction : public SDListRecordingsAction {
 
  public:
@@ -139,6 +151,7 @@ protected:
   SDInfoAction InfoAct;
   SDListRootAction ListRootAct;
   SDListRecordingsAction ListRecsAct;
+  SDCleanRecordingsAction CleanRecsAct;
   SDRemoveRecordingsAction EraseRecsAct;
   SDFormatAction FormatAct;
   SDEraseFormatAction EraseFormatAct;
