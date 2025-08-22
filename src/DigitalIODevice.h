@@ -31,20 +31,20 @@ class DigitalIODevice: public Device {
   // Return true if device is available.
   virtual bool available() const;
 
-  // set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
+  // Set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
   // for pin.
   // If inverted, then invert the meaning of LOW and HIGH for this pin.
   void setMode(uint8_t pin, uint8_t mode, bool inverted);
 
-  // set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
+  // Set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
   // for pin.
   // Do not change previously set invertedness.
   virtual void setMode(uint8_t pin, uint8_t mode);
 
-  // read val (LOW or HIGH) from pin.
+  // Read val (LOW or HIGH) from pin.
   virtual uint8_t read(uint8_t pin);
 
-  // write val (LOW or HIGH) to pin.
+  // Write val (LOW or HIGH) to pin.
   virtual void write(uint8_t pin, uint8_t val);
   
 
