@@ -107,6 +107,7 @@ via the `TeeRec.h` header.
 - [RTClockDS1307](src/RTClockDS1307.h): Use external [DS1307, DS1337, DS3231,
   and MAX31328 chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html)
   real time clock.
+- [DigitalIODevice](src/DigitalIODevice.h): Base class for operating a digital input/output devices.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.

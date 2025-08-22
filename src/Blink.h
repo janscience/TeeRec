@@ -8,6 +8,7 @@
 
 
 #include <Arduino.h>
+#include <DigitalIODevice.h>
 
 
 class Blink {
@@ -15,20 +16,41 @@ class Blink {
  public:
 
   // Initialize Blink. At some point you need to specify the pin to be
-  // used for controling a LED via setPin() or setPin2().
-  Blink();
+  // used for controling a LED via setPin().
+  Blink(const char *name);
 
-  // Control LEDs on pin1 and/or pin2. If invert, LOW is on.
-  Blink(int pin1, bool invert1=false, int pin2=-1, bool invert2=false);
+  // Control LEDs on internal pin1 and/or pin2. If invert, LOW is on.
+  Blink(const char *name, int pin1, bool invert1=false,
+	int pin2=-1, bool invert2=false);
+
+  // Control LEDs on internal pin1 and pin2 on a digital IO device.
+  // If invert, LOW is on.
+  Blink(const char *name, int pin1, bool invert1,
+	DigitalIODevice &dev2, int pin2, bool invert2=false);
+
+  // Control LEDs on pin on a digital IO device. If invert, LOW is on.
+  Blink(const char *name, DigitalIODevice &dev, int pin, bool invert=false);
+
+  // Control LEDs on pin1 and pin2 on digital IO devices. If invert, LOW is on.
+  Blink(const char *name, DigitalIODevice &dev1, int pin1, bool invert1,
+	DigitalIODevice &dev2, int pin2, bool invert2=false);
 
   // Switch off LED.
   ~Blink();
 
-  // Set pin of primary LED. If invert, LOW is on.
-  void setPin(int pin=LED_BUILTIN, bool invert=false);
+  // Name of this Blink instance.
+  const char *name() const { return Name; };
 
-  // Set pin of secondary LED. If invert, LOW is on.
-  void setPin2(int pin=LED_BUILTIN, bool invert=false);
+  // Set pin for an LED on an internal pin of the microcontroller.
+  // If invert, LOW is on.
+  void setPin(uint8_t pin=LED_BUILTIN, bool invert=false);
+
+  // Set pin for an LED on a digital IO device if it is available.
+  // If invert, LOW is on.
+  void setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
+
+  // Report digital IO devices and pins used for blinking on stream.
+  void report(Stream &stream=Serial);
 
   // Reset pin configuration
   // (in case the pin mode was reconfigured by something else).
@@ -171,11 +193,16 @@ class Blink {
 
   
  protected:
-  
-  int Pin1;
-  int Pin2;
-  bool Invert1;
-  bool Invert2;
+
+  static const size_t MaxName = 16;
+  char Name[MaxName];
+
+  static DigitalIODevice *InternIOs;
+
+  static const uint8_t MaxPins = 4;
+  DigitalIODevice *Devices[MaxPins];
+  uint8_t Pins[MaxPins];
+  uint8_t NPins;
   bool On;
   uint32_t Times[2][MaxTimes];
   uint32_t  Delay;

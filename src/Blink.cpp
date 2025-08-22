@@ -1,15 +1,13 @@
-#include <Arduino.h>
 #include "Blink.h"
 
+
+DigitalIODevice *Blink::InternIOs = 0;
 
 volatile uint64_t Blink::PRNGState = 123456;
 
 
-Blink::Blink() :
-  Pin1(-1),
-  Pin2(-1),
-  Invert1(false),
-  Invert2(false),
+Blink::Blink(const char *name) :
+  NPins(0),
   On(false),
   Delay(0),
   Random(false),
@@ -20,14 +18,46 @@ Blink::Blink() :
   OffTime(150),
   NSwitchTimes(0),
   SwitchOverflow(false) {
+  strncpy(Name, name, MaxName);
+  Name[MaxName - 1] = '\0';
   memset(Times, 0, sizeof(Times));
 }
 
 
-Blink::Blink(int pin1, bool invert1, int pin2, bool invert2) :
-  Blink() {
-  setPin(pin1, invert1);
-  setPin2(pin2, invert2);
+Blink::Blink(const char *name, int pin1, bool invert1,
+	     int pin2, bool invert2) :
+  Blink(name) {
+  if (pin1 >= 0)
+    setPin(pin1, invert1);
+  if (pin2 >= 0)
+    setPin(pin2, invert2);
+}
+
+
+Blink::Blink(const char *name, int pin1, bool invert1,
+	     DigitalIODevice &dev2, int pin2, bool invert2) :
+  Blink(name) {
+  if (pin1 >= 0)
+    setPin(pin1, invert1);
+  if (pin2 >= 0)
+    setPin(dev2, pin2, invert2);
+}
+
+
+Blink::Blink(const char *name, DigitalIODevice &dev, int pin, bool invert) :
+  Blink(name) {
+  if (pin >= 0)
+    setPin(dev, pin, invert);
+}
+
+
+Blink::Blink(const char *name, DigitalIODevice &dev1, int pin1, bool invert1,
+	     DigitalIODevice &dev2, int pin2, bool invert2) :
+  Blink(name) {
+  if (pin1 >= 0)
+    setPin(dev1, pin1, invert1);
+  if (pin2 >= 0)
+    setPin(dev2, pin2, invert2);
 }
 
 
@@ -36,31 +66,43 @@ Blink::~Blink() {
 }
 
 
-void Blink::setPin(int pin, bool invert) {
-  Pin1 = pin;
-  Invert1 = invert;
-  if (Pin1 >= 0) {
-    pinMode(Pin1, OUTPUT);
-    switchOff();
-  }
+void Blink::setPin(uint8_t pin, bool invert) {
+  if (InternIOs == 0)
+    InternIOs = new DigitalIODevice();
+  setPin(*InternIOs, pin, invert);
 }
 
 
-void Blink::setPin2(int pin, bool invert) {
-  Pin2 = pin;
-  Invert2 = invert;
-  if (Pin2 >= 0) {
-    pinMode(Pin2, OUTPUT);
-    switchOff();
+void Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
+  if (NPins >= MaxPins)
+    return;
+  if (!device.available())
+    return;
+  Devices[NPins] = &device;
+  Pins[NPins] = pin;
+  Devices[NPins]->setMode(Pins[NPins], OUTPUT, invert);
+  NPins += 1;
+  On = true;
+  switchOff();
+}
+
+
+void Blink::report(Stream &stream) {
+  if (NPins == 0)
+    stream.printf("no pins initialized for %s\n", Name);
+  else {
+    stream.printf("%d pin%s initialized for %s:\n",
+		  NPins, NPins > 1 ? "s" : "", Name);
+    for (uint8_t k=0; k<NPins; k++)
+      stream.printf("  pin %02d on device %s\n", Pins[k], Devices[k]->chip());
   }
+  stream.println();
 }
 
 
 void Blink::reset() {
-  if (Pin1 >= 0)
-    pinMode(Pin1, OUTPUT);
-  if (Pin2 >= 0)
-    pinMode(Pin2, OUTPUT);
+  for (uint8_t k=0; k<NPins; k++)
+    Devices[k]->setMode(Pins[k], OUTPUT);
 }
 
 
@@ -294,10 +336,8 @@ void Blink::clearSwitchTimes() {
 
 void Blink::switchOn(bool on) {
   if (on != On) {
-    if (Pin1 >= 0)
-      digitalWrite(Pin1, Invert1 != on);
-    if (Pin2 >= 0)
-      digitalWrite(Pin2, Invert2 != on);
+    for (uint8_t k=0; k<NPins; k++)
+      Devices[k]->write(Pins[k], on);
     if (NSwitchTimes < MaxTimes) {
       SwitchTimes[NSwitchTimes] = millis();
       SwitchStates[NSwitchTimes] = on;
