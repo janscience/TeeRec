@@ -99,7 +99,7 @@ InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 RTClockDS1307 rtclock;
 DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 
 int restarts = 0;
 

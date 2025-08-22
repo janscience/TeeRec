@@ -94,7 +94,7 @@ InputADC aidata(AIBuffer, NAIBuffer);
 
 SDCard sdcard;
 SDWriter file(sdcard, aidata);
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 Watchdog watchdog;
 
 

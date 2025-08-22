@@ -73,7 +73,7 @@ FirmwareMenu firmware_menu(config, sdcard);
 DiagnosticMenu diagnostic_menu(config, sdcard, 0, &rtclock);
 HelpAction help_act(config, "Help");
 
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 
 
 void setup() {

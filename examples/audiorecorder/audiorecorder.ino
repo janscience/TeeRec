@@ -54,7 +54,7 @@ String prevname; // previous file name
 int restarts = 0;
 
 PushButtons buttons;
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 
 
 void setupAudio() {

@@ -89,13 +89,12 @@ void Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
 
 void Blink::report(Stream &stream) {
   if (NPins == 0)
-    stream.printf("no pins initialized for %s\n", Name);
-  else {
-    stream.printf("%d pin%s initialized for %s:\n",
-		  NPins, NPins > 1 ? "s" : "", Name);
-    for (uint8_t k=0; k<NPins; k++)
-      stream.printf("  pin %02d on device %s\n", Pins[k], Devices[k]->chip());
-  }
+    stream.print("no pins");
+  else
+    stream.printf("%d pin%s", NPins, NPins > 1 ? "s" : "");
+  stream.printf(" initialized for %s indicator:\n", Name);
+  for (uint8_t k=0; k<NPins; k++)
+    stream.printf("  pin %02d on device %s\n", Pins[k], Devices[k]->chip());
   stream.println();
 }
 

@@ -18,7 +18,7 @@ float rate = 100000.0;
 // ---------------------------------------------------------------------------
 
 Waveform wave;
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 PushButtons buttons;
 
 

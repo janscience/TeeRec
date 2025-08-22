@@ -1,7 +1,7 @@
 #include <Blink.h>
 
 
-Blink blink(LED_BUILTIN);
+Blink blink("status", LED_BUILTIN);
 elapsedMillis Time;
 
 
