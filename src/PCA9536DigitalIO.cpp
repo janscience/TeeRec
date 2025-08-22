@@ -43,7 +43,7 @@ uint8_t PCA9536DigitalIO::read(uint8_t pin) {
   if (I2CBus->endTransmission() == 0) {
     I2CBus->requestFrom(PCA9536_ADDR, 1);
     if (I2CBus->available() == 1) {
-      unt8_t x = I2CBus->read();
+      uint8_t x = I2CBus->read();
       return ((x & (1 << pin)) > 0) != Inverted[pin];
     }
   }
