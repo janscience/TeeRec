@@ -283,9 +283,9 @@ void Blink::clear() {
 }
 
 
-void Blink::update() {
+void Blink::update(bool allow_on) {
   if (Delay > 0) {
-    if (Time > Delay) {
+    if (Time > Delay and allow_on) {
       Time -= Delay;
       switchOn();
       Delay = 0;
@@ -294,7 +294,8 @@ void Blink::update() {
   }
   if (State == 0 && Index == 0 && Times[State][Index] == 0)
     return;
-  if (Time > Times[State][Index]) {
+  if ((Time > Times[State][Index]) &&
+      (((Index%2 == 1) && allow_on) || (Index%2 != 1))) {
     Time -= Times[State][Index];
     switchOn(Index%2 == 1);
     Index++;

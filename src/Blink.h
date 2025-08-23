@@ -167,7 +167,8 @@ class Blink {
   
   // Orchestrate all the blinking set by the above functions.
   // Call this function as often as possible in your loop().
-  void update();
+  // As long not allow_on, do not switch LEDs on.
+  void update(bool allow_on=true);
 
   // Delay sketch by delayms milliseconds while blinking.
   void delay(uint32_t delayms);
