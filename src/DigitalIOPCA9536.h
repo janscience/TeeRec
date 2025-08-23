@@ -1,22 +1,22 @@
 /*
-  PCA9536DigitalIO - Controling the PCA9536 digital input/output device.
+  DigitalIOPCA9536 - Controling the PCA9536 digital input/output device.
   Created by Jan Benda, August 22th, 2025.
 */
 
-#ifndef PCA9536DigitalIO_h
-#define PCA9536DigitalIO_h
+#ifndef DigitalIOPCA9536_h
+#define DigitalIOPCA9536_h
 
 
 #include <Wire.h>
 #include <DigitalIODevice.h>
 
 
-class PCA9536DigitalIO: public DigitalIODevice {
+class DigitalIOPCA9536: public DigitalIODevice {
 
  public:
 
   // Initialize the PCA9536 digital IO device on I2C bus.
-  PCA9536DigitalIO(TwoWire &wire=Wire);
+  DigitalIOPCA9536(TwoWire &wire=Wire);
   
   // Initialize PCA9536 digital IO device on I2C bus.
   void begin(TwoWire &wire=Wire);

@@ -1,7 +1,7 @@
 #include <Blink.h>
-#include <PCA9536DigitalIO.h>
+#include <DigitalIOPCA9536.h>
 
-PCA9536DigitalIO gpio;
+DigitalIOPCA9536 gpio;
 
 Blink blink("status", LED_BUILTIN);
 elapsedMillis Time;

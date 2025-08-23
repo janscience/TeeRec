@@ -108,7 +108,7 @@ via the `TeeRec.h` header.
   and MAX31328 chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html)
   real time clock.
 - [DigitalIODevice](src/DigitalIODevice.h): Base class for operating a digital input/output devices.
-- [PCA9536DigitalIO](src/PCA9536DigitalIO.h): Controling the PCA9536 digital input/output device.
+- [DigitalIOPCA9536](src/DigitalIOPCA9536.h): Controling the PCA9536 digital input/output device.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.

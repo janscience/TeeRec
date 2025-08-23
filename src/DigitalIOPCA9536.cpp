@@ -1,17 +1,17 @@
-#include <PCA9536DigitalIO.h>
+#include <DigitalIOPCA9536.h>
 
 
 #define PCA9536_ADDR 0x41
 
 
-PCA9536DigitalIO::PCA9536DigitalIO(TwoWire &wire) :
+DigitalIOPCA9536::DigitalIOPCA9536(TwoWire &wire) :
   DigitalIODevice() {
   setChip("PCA9536");
   begin(wire);
 }
 
 
-void PCA9536DigitalIO::begin(TwoWire &wire) {
+void DigitalIOPCA9536::begin(TwoWire &wire) {
   Mode = 0xff;
   Bits = 0;
   I2CBus = &wire;
@@ -21,7 +21,7 @@ void PCA9536DigitalIO::begin(TwoWire &wire) {
 }
 
 
-void PCA9536DigitalIO::setMode(uint8_t pin, uint8_t mode) {
+void DigitalIOPCA9536::setMode(uint8_t pin, uint8_t mode) {
   if (mode == INPUT)
     Mode |= 1 << pin;
   else
@@ -33,7 +33,7 @@ void PCA9536DigitalIO::setMode(uint8_t pin, uint8_t mode) {
 }
 
 
-uint8_t PCA9536DigitalIO::read(uint8_t pin) {
+uint8_t DigitalIOPCA9536::read(uint8_t pin) {
   I2CBus->beginTransmission(PCA9536_ADDR);
   I2CBus->write((uint8_t)0x00); 
   if (I2CBus->endTransmission() == 0) {
@@ -47,7 +47,7 @@ uint8_t PCA9536DigitalIO::read(uint8_t pin) {
 }
 
 
-void PCA9536DigitalIO::write(uint8_t pin, uint8_t val) {
+void DigitalIOPCA9536::write(uint8_t pin, uint8_t val) {
   if (val != Inverted[pin])
     Bits |= 1 << pin;
   else
