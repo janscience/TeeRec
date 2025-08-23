@@ -193,6 +193,9 @@ class Blink {
   // Manually switch LED off.
   void switchOff();
 
+  // Return true if LEDs are currently switched on.
+  bool isOn() const;
+
   // A random number between 0 and 1.
   static float urand(void);
   

@@ -362,6 +362,11 @@ void Blink::switchOff() {
 }
 
 
+bool Blink::isOn() const {
+  return On;
+}
+
+
 float Blink::urand(void) {
   // modified from https://forum.pjrc.com/threads/61125-Teensy-4-1-Random-Number-Generator?p=243895&viewfull=1#post243895
   uint64_t  x = PRNGState;
