@@ -146,12 +146,14 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("PCM186x");
+  // check I2C device presence:
+  wire.begin();
+  I2CBus->beginTransmission(I2CAddress);
+  Available = (I2CBus->endTransmission() == 0);
 }
 
 
 bool ControlPCM186x::begin() {
-  setI2CBus(*I2CBus, I2CAddress);
-
   // check I2C device presence:
   I2CBus->beginTransmission(I2CAddress);
   if (I2CBus->endTransmission() != 0)
