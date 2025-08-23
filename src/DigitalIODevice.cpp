@@ -7,11 +7,7 @@ DigitalIODevice::DigitalIODevice() :
   setInternBus();
   setChip("Teensy");
   memset(Inverted, 0, sizeof(Inverted));
-}
-
-
-bool DigitalIODevice::available() const {
-  return true;
+  Available = true;
 }
 
 

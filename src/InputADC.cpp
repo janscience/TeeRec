@@ -120,6 +120,7 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
   setDeviceType("input");
   setInternBus();
   setChip("ADC");
+  Available = true;
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
     DMAIndex[adc] = 0;
@@ -155,11 +156,6 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
   InputADC(buffer, nbuffer) {
   setChannels(0, channels0);
   setChannels(1, channels1);
-}
-
-
-bool InputADC::available() const {
-  return true;
 }
 
 

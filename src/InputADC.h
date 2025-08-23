@@ -107,9 +107,6 @@ class InputADC : public Input, public Device {
   InputADC(volatile sample_t *buffer, size_t nbuffer,
 	   const int8_t *channels0, const int8_t *channels1);
   
-  // Return true.
-  virtual bool available() const;
-  
   // Configure for acquisition of a single channel.
   // channel is a pin specifier like A6, A19.
   // Use pinAssignment() to see which pins are available for each ADC.

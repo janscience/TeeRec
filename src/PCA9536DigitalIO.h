@@ -21,9 +21,6 @@ class PCA9536DigitalIO: public DigitalIODevice {
   // Initialize PCA9536 digital IO device on I2C bus.
   void begin(TwoWire &wire=Wire);
 
-  // Return true if device is available.
-  virtual bool available() const;
-
   // Set mode (INPUT, OUTPUT) for pin.
   virtual void setMode(uint8_t pin, uint8_t mode);
 

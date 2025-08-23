@@ -139,7 +139,6 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   Device(),
   I2CBus(&wire),
   I2CAddress(address),
-  Available(0),
   CurrentPage(10),
   PGALinked(false),
   NChannels(0),
@@ -152,12 +151,16 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
 
 bool ControlPCM186x::begin() {
   setI2CBus(*I2CBus, I2CAddress);
+
+  // check I2C device presence:
+  I2CBus->beginTransmission(I2CAddress);
+  if (I2CBus->endTransmission() != 0)
+    return false;
+  
   // power up:
   uint8_t val = 0x70;
-  if (!write(PCM186x_PWRDN_CTRL_REG, val)) {
-    Available = 1;
+  if (!write(PCM186x_PWRDN_CTRL_REG, val))
     return false;
-  }
 
   // setup clocks for BCK input slave PLL mode
   // (section 9.3.9.4.4 in data sheet):
@@ -167,10 +170,8 @@ bool ControlPCM186x::begin() {
   val += 0x08;          // ADC_CLK_SRC = PLL
   val += 0x00;          // MST_MODE = slave
   val += 0x20;          // MST_SCK_SRC = PLL
-  if (!write(PCM186x_CLK_MODE_REG, val)) {
-    Available = 1;
+  if (!write(PCM186x_CLK_MODE_REG, val))
     return false;
-  }
   
   // enable filters:
   // PCM186x_DSP_CTRL_REG 0x71  plus page 1 registers?
@@ -178,7 +179,7 @@ bool ControlPCM186x::begin() {
   // disable micbias:
   // PCM186x_MIC_BIAS_CTRL_REG  0x0315
   
-  Available = 2;
+  Available = true;
   return true;
 }
 
@@ -192,16 +193,6 @@ bool ControlPCM186x::begin(TwoWire &wire, uint8_t address) {
   I2CAddress = address;
   I2CBus = &wire;
   return begin();
-}
-
-
-bool ControlPCM186x::available() const {
-  if (Available > 0)
-    return (Available > 1);
-  // check for acknowledge signal on I2C bus:
-  I2CBus->beginTransmission(I2CAddress);
-  int error = I2CBus->endTransmission();
-  return (error == 0);
 }
 
 

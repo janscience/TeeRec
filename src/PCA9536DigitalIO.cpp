@@ -16,12 +16,8 @@ void PCA9536DigitalIO::begin(TwoWire &wire) {
   Bits = 0;
   I2CBus = &wire;
   setI2CBus(wire, PCA9536_ADDR);
-}
-
-
-bool PCA9536DigitalIO::available() const {
   I2CBus->beginTransmission(PCA9536_ADDR);
-  return (I2CBus->endTransmission() == 0);
+  Available = (I2CBus->endTransmission() == 0);
 }
 
 

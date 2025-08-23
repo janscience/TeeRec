@@ -14,15 +14,11 @@ RTClock::RTClock() :
   setInternBus();
   setChip("Teensy-RTC");
   setSyncProvider(getTeensyRTCTime);
+  Available = true;
 }
 
 
 bool RTClock::begin() {
-  return true;
-}
-
-
-bool RTClock::available() const {
   return true;
 }
 

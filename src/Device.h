@@ -56,7 +56,10 @@ class Device {
   virtual const char* identifier() const;
 
   // Return true if device is available.
-  virtual bool available() const = 0;
+  // The default implementation returns the member variable Available.
+  // So usually it is sufficient to set the Available variable once
+  // when initializing the device.
+  virtual bool available() const;
   
   // Report properties of device on stream.
   virtual void report(Stream &stream=Serial);
@@ -95,6 +98,7 @@ protected:
   static const int MaxStr = 32;
   char Chip[MaxStr];
   char Identifier[MaxStr];
+  bool Available;
   
 };
 

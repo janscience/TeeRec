@@ -25,11 +25,9 @@ class DigitalIODevice: public Device {
 
  public:
 
-  // Initialize the DigitalIO device (the microcontroller itself).
+  // Initialize the DigitalIO device (the microcontroller itself,
+  // and set member variable Available to true).
   DigitalIODevice();
-
-  // Return true if device is available.
-  virtual bool available() const;
 
   // Set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
   // for pin.

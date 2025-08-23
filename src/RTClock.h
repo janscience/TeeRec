@@ -36,9 +36,6 @@ class RTClock : public Device {
   // The default implementation return true.
   virtual bool begin();
 
-  // True if real-time clock is available (always true).
-  virtual bool available() const;
-
   // Check whether clock is available and set.
   // If not print message to stream.
   bool check(Stream &stream=Serial);

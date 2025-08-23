@@ -97,9 +97,6 @@ public:
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1);
   
-  // Return true if PCM chip is available.
-  virtual bool available() const;
-  
   // Set sampling rate per channel in Hertz.
   void setRate(InputTDM &tdm, uint32_t rate);
 
@@ -250,7 +247,6 @@ protected:
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
-  uint8_t Available;
   uint8_t CurrentPage;
   bool PGALinked;
   int NChannels;

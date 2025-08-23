@@ -20,7 +20,8 @@ Device::Device() :
   Address(0),
   Pin(-1),
   Chip(""),
-  Identifier("") {
+  Identifier(""),
+  Available(false) {
   setDeviceType("unknown");
 }
 
@@ -121,6 +122,11 @@ const char* Device::identifier() const {
 void Device::setIdentifier(const char *identifier) {
   strncpy(Identifier, identifier, MaxStr);
   Identifier[MaxStr - 1] = '\0';
+}
+
+
+bool Device::available() const {
+  return Available;
 }
 
 
