@@ -3,7 +3,7 @@
 
 DigitalIODevice::DigitalIODevice() :
   Device() {
-  setDeviceType("DigitalIO");
+  setDeviceType("gpio");
   setInternBus();
   setChip("Teensy");
   memset(Inverted, 0, sizeof(Inverted));
