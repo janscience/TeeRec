@@ -12,7 +12,7 @@ void setup() {
   while (!Serial && millis() < 2000) {};
   Wire2.begin();
   gpio.begin(Wire2);
-  blink.setPin(gpio, 1);
+  blink.setPin(gpio, 0);
   blink.report();
   //blink.setDouble();
   blink.setMultiple(5);
