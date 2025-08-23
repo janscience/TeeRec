@@ -52,6 +52,9 @@ class Blink {
   // Remove all pins.
   void clearPins();
 
+  // True if at least one pin is controlled by this. 
+  bool available() const { return NPins > 0; };
+
   // Report digital IO devices and pins used for blinking on stream.
   void report(Stream &stream=Serial);
 
