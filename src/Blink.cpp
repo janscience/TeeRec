@@ -87,6 +87,13 @@ void Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
 }
 
 
+void Blink::clearPins() {
+  On = true;
+  switchOff();
+  NPins = 0;
+}
+
+
 void Blink::report(Stream &stream) {
   if (NPins == 0)
     stream.print("no pins");

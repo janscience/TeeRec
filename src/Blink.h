@@ -49,6 +49,9 @@ class Blink {
   // If invert, LOW is on.
   void setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
 
+  // Remove all pins.
+  void clearPins();
+
   // Report digital IO devices and pins used for blinking on stream.
   void report(Stream &stream=Serial);
 
