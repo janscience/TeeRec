@@ -1,7 +1,7 @@
 #include <PCA9536DigitalIO.h>
 
 
-#define PCA9536_ADDR 0x82
+#define PCA9536_ADDR 0x41
 
 
 PCA9536DigitalIO::PCA9536DigitalIO(TwoWire &wire) :
