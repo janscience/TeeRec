@@ -66,24 +66,26 @@ Blink::~Blink() {
 }
 
 
-void Blink::setPin(uint8_t pin, bool invert) {
+uint8_t Blink::setPin(uint8_t pin, bool invert) {
   if (InternIOs == 0)
     InternIOs = new DigitalIODevice();
-  setPin(*InternIOs, pin, invert);
+  return setPin(*InternIOs, pin, invert);
 }
 
 
-void Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
+uint8_t Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
   if (NPins >= MaxPins)
     return;
   if (!device.available())
     return;
   Devices[NPins] = &device;
   Pins[NPins] = pin;
+  Enabled[NPins] = true;
   Devices[NPins]->setMode(Pins[NPins], OUTPUT, invert);
   NPins += 1;
   On = true;
   switchOff();
+  return NPins - 1;
 }
 
 
@@ -94,14 +96,36 @@ void Blink::clearPins() {
 }
 
 
+void Blink::enablePin(uint8_t index, bool enable=true) {
+  if (index >= NPins)
+    return;
+  if (Enabled[index] == enable)
+    return;
+  if (!enable)
+    Devices[index]->write(Pins[index], LOW);
+  Enabled[index] = enable;
+}
+
+
+void Blink::disablePin(uint8_t index) {
+  enablePin(index, false);
+}
+
+
 void Blink::report(Stream &stream) {
   if (NPins == 0)
     stream.print("no pins");
   else
     stream.printf("%d pin%s", NPins, NPins > 1 ? "s" : "");
   stream.printf(" initialized for %s indicator:\n", Name);
-  for (uint8_t k=0; k<NPins; k++)
-    stream.printf("  pin %02d on device %s\n", Pins[k], Devices[k]->chip());
+  for (uint8_t k=0; k<NPins; k++) {
+    if (Enabled[k])
+      stream.printf("  pin %02d on device %s\n",
+		    Pins[k], Devices[k]->chip());
+    else
+      stream.printf("  pin %02d on device %s (disabled)\n",
+		    Pins[k], Devices[k]->chip());
+  }
   stream.println();
 }
 
@@ -343,8 +367,10 @@ void Blink::clearSwitchTimes() {
 
 void Blink::switchOn(bool on) {
   if (on != On) {
-    for (uint8_t k=0; k<NPins; k++)
-      Devices[k]->write(Pins[k], on);
+    for (uint8_t k=0; k<NPins; k++) {
+      if (Enabled[k])
+	Devices[k]->write(Pins[k], on);
+    }
     if (NSwitchTimes < MaxTimes) {
       SwitchTimes[NSwitchTimes] = millis();
       SwitchStates[NSwitchTimes] = on;

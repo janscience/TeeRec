@@ -43,14 +43,22 @@ class Blink {
 
   // Set pin for an LED on an internal pin of the microcontroller.
   // If invert, LOW is on.
-  void setPin(uint8_t pin=LED_BUILTIN, bool invert=false);
+  // Returns the index of the pin.
+  uint8_t setPin(uint8_t pin=LED_BUILTIN, bool invert=false);
 
   // Set pin for an LED on a digital IO device if it is available.
   // If invert, LOW is on.
-  void setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
+  // Returns the index of the pin.
+  uint8_t setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
 
   // Remove all pins.
   void clearPins();
+
+  // Enable pin.
+  void enablePin(uint8_t index, bool enable=true);
+
+  // Switch LED on this pin off and disable it.
+  void disablePin(uint8_t index);
 
   // True if at least one pin is controlled by this. 
   bool available() const { return NPins > 0; };
@@ -212,6 +220,7 @@ class Blink {
   static const uint8_t MaxPins = 4;
   DigitalIODevice *Devices[MaxPins];
   uint8_t Pins[MaxPins];
+  bool Enabled[MaxPins];
   uint8_t NPins;
   bool On;
   uint32_t Times[2][MaxTimes];
