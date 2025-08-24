@@ -18,7 +18,7 @@ public:
 	   const char *filename="SDATELNUM.wav", float filetime=10.0,
 	   float initialdelay=0.0, bool randomblinks=false,
 	   float pulsefrequency=500.0, float displaytime=0.005,
-	   float sensorsinterval=10.0);
+	   float sensorsinterval=10.0, float blinktimeout=0.0);
 
   static const size_t MaxStr = 128;
 
@@ -58,6 +58,12 @@ public:
   /* Set whether LED should blink randomly. */
   void setRandomBlinks(bool random);
 
+  /* Time in seconds after which the status LEDs are switched off. */
+  float blinkTimeout() const { return BlinkTimeout.value(); };
+
+  /* Set time after which the status LEDs are switched off to time seconds. */
+  void setBlinkTimeout(float time);
+
   /* Base frequency of generated test pulses. */
   float pulseFrequency() const { return PulseFrequency.value(); };
 
@@ -85,6 +91,7 @@ protected:
   NumberParameter<float> FileTime;
   NumberParameter<float> InitialDelay;
   BoolParameter RandomBlinks;
+  NumberParameter<float> BlinkTimeout;
   NumberParameter<float> PulseFrequency;
   NumberParameter<float> DisplayTime;
   NumberParameter<float> SensorsInterval;
