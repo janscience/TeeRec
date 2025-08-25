@@ -66,18 +66,18 @@ Blink::~Blink() {
 }
 
 
-uint8_t Blink::setPin(uint8_t pin, bool invert) {
+int8_t Blink::setPin(uint8_t pin, bool invert) {
   if (InternIOs == 0)
     InternIOs = new DigitalIODevice();
   return setPin(*InternIOs, pin, invert);
 }
 
 
-uint8_t Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
+int8_t Blink::setPin(DigitalIODevice &device, uint8_t pin, bool invert) {
   if (NPins >= MaxPins)
-    return;
+    return -1;
   if (!device.available())
-    return;
+    return -1;
   Devices[NPins] = &device;
   Pins[NPins] = pin;
   Enabled[NPins] = true;
@@ -96,7 +96,7 @@ void Blink::clearPins() {
 }
 
 
-void Blink::enablePin(uint8_t index, bool enable=true) {
+void Blink::enablePin(uint8_t index, bool enable) {
   if (index >= NPins)
     return;
   if (Enabled[index] == enable)

@@ -43,13 +43,13 @@ class Blink {
 
   // Set pin for an LED on an internal pin of the microcontroller.
   // If invert, LOW is on.
-  // Returns the index of the pin.
-  uint8_t setPin(uint8_t pin=LED_BUILTIN, bool invert=false);
+  // Returns the index of the pin. On error -1 is returned.
+  int8_t setPin(uint8_t pin=LED_BUILTIN, bool invert=false);
 
   // Set pin for an LED on a digital IO device if it is available.
   // If invert, LOW is on.
-  // Returns the index of the pin.
-  uint8_t setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
+  // Returns the index of the pin. On error -1 is returned.
+  int8_t setPin(DigitalIODevice &device, uint8_t pin, bool invert=false);
 
   // Remove all pins.
   void clearPins();
