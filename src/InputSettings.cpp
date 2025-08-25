@@ -10,6 +10,14 @@ InputSettings::InputSettings(Menu &menu, uint32_t rate, float pregain) :
 }
 
 
+InputSettings::InputSettings(const char *name, uint32_t rate, float pregain) :
+  Menu(name),
+  Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f") {
+  PreGain.disable();
+}
+
+
 void InputSettings::setRate(uint32_t rate) {
   Rate.setValue(rate);
 }

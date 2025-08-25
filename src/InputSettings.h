@@ -20,6 +20,9 @@ public:
 
   // Constructor. Sets configuration name to "ADC".
   InputSettings(Menu &menu, uint32_t rate=0, float pregain=1);
+  
+  // Constructor. Sets configuration name.
+  InputSettings(const char *name, uint32_t rate=0, float pregain=1);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };

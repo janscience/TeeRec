@@ -33,6 +33,32 @@ InputADCSettings::InputADCSettings(Menu &menu, uint32_t rate, uint8_t bits,
 }
 
 
+InputADCSettings::InputADCSettings(const char *name, uint32_t rate,
+				   uint8_t bits, uint8_t averaging,
+				   ADC_CONVERSION_SPEED conversion_speed,
+				   ADC_SAMPLING_SPEED sampling_speed,
+				   ADC_REFERENCE reference, float pregain) :
+  InputSettings(name, rate, pregain),
+  Bits(*this, "Resolution", bits, "%.0f", "bits", "",
+       BitsSelection, NBitsSelection),
+  Averaging(*this, "Averaging", averaging, "%hu", "", "",
+	    AveragingSelection, NAveragingSelection),
+  ConversionSpeed(*this, "Conversion", conversion_speed,
+		  InputADC::ConversionEnums,
+		  InputADC::ConversionShortStrings,
+		  InputADC::MaxConversions),
+  SamplingSpeed(*this, "Sampling", sampling_speed,
+		InputADC::SamplingEnums,
+		InputADC::SamplingShortStrings,
+		InputADC::MaxSamplings),
+  Reference(*this, "Reference", reference,
+	    InputADC::ReferenceEnums,
+	    InputADC::ReferenceStrings,
+	    InputADC::MaxReferences) {
+  move(&PreGain, 6);
+}
+
+
 void InputADCSettings::setResolution(uint8_t bits) {
   Bits.setValue(bits);
 }
