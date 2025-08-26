@@ -63,6 +63,9 @@ class Blink {
   // True if at least one pin is controlled by this. 
   bool available() const { return NPins > 0; };
 
+  // The number of pins controlled by this.
+  uint8_t nPins() const { return NPins; };
+
   // Report digital IO devices and pins used for blinking on stream.
   void report(Stream &stream=Serial);
 
