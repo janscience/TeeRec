@@ -33,7 +33,8 @@ class Analyzer {
   // True if the data provided to analyze() are continuous.
   bool continuous() const;
 
-  // Set sampling rate of data. This is done by AnalysisChain::start().
+  // Set whether the data provided are continous.
+  // This is done by AnalysisChain::start().
   void setContinuous(bool continuous);
 
   // Set sampling rate of data. This is done by AnalysisChain::start().
@@ -46,6 +47,7 @@ class Analyzer {
   virtual void stop();
 
   // Analyze data of nchannels channels each holding nframes frames of data.
+  // The sampling rate of the data are stored in the member variable Rate.
   // Note that this function is allowed to modify the data in place.
   virtual void analyze(sample_t **data, uint8_t nchannels, size_t nframes) = 0;
   

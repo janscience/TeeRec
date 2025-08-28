@@ -23,6 +23,8 @@ AnalysisChain::~AnalysisChain() {
 
 
 void AnalysisChain::add(Analyzer &analyzer) {
+  if (NAnalyzer + 1 >= MaxAnalyzer)
+    return;
   Analyzers[NAnalyzer++] = &analyzer;
 }
 
