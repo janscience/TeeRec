@@ -103,7 +103,6 @@ void DataBuffer::printData(size_t start, size_t nframes,
 			   Stream &stream) const {
   if (Rate == 0 || NChannels == 0)
     return;
-  start *= NChannels;
   bool check = (start < index());
   for (size_t k=0; k<nframes; k++) {
     if (start >= NBuffer) {
@@ -126,7 +125,6 @@ void DataBuffer::printData(uint8_t channel, size_t start, size_t nframes,
 			   Stream &stream) const {
   if (Rate == 0 || NChannels == 0)
     return;
-  start *= NChannels;
   bool check = (start < index());
   start += channel;
   for (size_t k=0; k<nframes; k++) {

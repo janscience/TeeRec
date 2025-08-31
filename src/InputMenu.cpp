@@ -68,12 +68,66 @@ void PrintInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
+void StartInputAction::execute(Stream &stream, unsigned long timeout,
+			       bool echo, bool detailed) {
+  Data.reset();
+  Settings.configure(&Data);
+  if (Setupai != 0)
+    Setupai(Data, Settings, Controls, NControls, stream);
+  if (!Data.check(0, stream)) {
+    stream.println();
+    return;
+  }
+  stream.println("Start recording ...");
+  Data.begin();
+  Data.start();
+  stream.println();
+}
+
+
+void GetInputAction::execute(Stream &stream, unsigned long timeout,
+			     bool echo, bool detailed) {
+  int tmax = 100;
+  stream.println("Get data ...");
+  size_t nframes = Data.frames(0.001*tmax);
+  size_t start = Data.currentSample(nframes);
+  stream.printf("  nframes = %6d\n", nframes);
+  stream.printf("  start   = %6d\n", start);
+  stream.printf("  index   = %6d\n", Data.index());
+  stream.println();
+  stream.printf("Sampling rate: %dHz", Data.rate());
+  stream.println();
+  stream.printf("Resolution: %ubits", Data.dataResolution());
+  stream.println();
+  char gs[16];
+  Data.gainStr(gs, 16);
+  stream.print("Gain: ");
+  stream.println(gs);
+  Data.printData(start, nframes, stream);
+  stream.println();
+}
+
+
+void StopInputAction::execute(Stream &stream, unsigned long timeout,
+			       bool echo, bool detailed) {
+  stream.println("Stop recording ...");
+  Data.stop();
+  stream.println();
+}
+
+
 InputMenu::InputMenu(Menu &menu, Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
   Menu(menu, "Analog input", Action::StreamInput),
   ReportAct(*this, "Report input configuration", data, settings,
 	    controls, ncontrols, setupai),
   PrintAct(*this, "Record some data", data, settings,
+	   controls, ncontrols, setupai),
+  StartAct(*this, "Start recording", data, settings,
+	   controls, ncontrols, setupai),
+  GetAct(*this, "Get data from running recording", data, settings,
+	   controls, ncontrols, setupai),
+  StopAct(*this, "Stop recording", data, settings,
 	   controls, ncontrols, setupai) {
 }
 

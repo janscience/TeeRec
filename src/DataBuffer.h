@@ -94,11 +94,11 @@ public:
   void getData(uint8_t channel, size_t start,
 	       float *buffer, size_t nframes) const;
 
-  // Print nframes samples of all channels starting at frame start.
+  // Print nframes samples of all channels starting at sample start.
   // Each line is one frame with channels separated by ';'.
   void printData(size_t start, size_t nframes, Stream &stream=Serial) const;
 
-  // Print nframes samples of the specified channel starting at frame start.
+  // Print nframes samples of the specified channel starting at sample start.
   void printData(uint8_t channel, size_t start, size_t nframes,
 		 Stream &stream=Serial) const;
 

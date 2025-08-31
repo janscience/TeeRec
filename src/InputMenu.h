@@ -61,6 +61,42 @@ class PrintInputAction : public InputAction {
 };
 
 
+class StartInputAction : public InputAction {
+
+ public:
+
+  using InputAction::InputAction;
+
+  /* Start data acquisition with current settings. */
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
+};
+
+
+class GetInputAction : public InputAction {
+
+ public:
+
+  using InputAction::InputAction;
+
+  /* Print 100ms of data. */
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
+};
+
+
+class StopInputAction : public InputAction {
+
+ public:
+
+  using InputAction::InputAction;
+
+  /* Stop acquisition. */
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
+};
+
+
 class InputMenu : public Menu {
 
 public:
@@ -73,6 +109,9 @@ protected:
 
   ReportInputAction ReportAct;
   PrintInputAction PrintAct;
+  StartInputAction StartAct;
+  GetInputAction GetAct;
+  StopInputAction StopAct;
   
 };
 
