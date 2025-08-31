@@ -10,7 +10,7 @@
 #include <Arduino.h>
 
 
-#define TEEREC_SOFTWARE "TeeRec version 0.10.0"
+#define TEEREC_SOFTWARE "TeeRec version 0.11.0"
 
 
 void printTeeRecBanner(const char *software=NULL, Stream &stream=Serial);
