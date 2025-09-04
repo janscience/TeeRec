@@ -79,7 +79,7 @@ def days_table(bits=16):
 
 print('''# Data rates
 
-The following tables given an overview on expected data rates in
+The following tables give an overview on expected data rates in
 dependence on bit resolution, number of channels, and sampling rate.
 Use these numbers for selecting appropriate storing capacities and
 write speeds of SD cards.
