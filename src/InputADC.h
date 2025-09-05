@@ -67,7 +67,11 @@ class InputADC : public Input, public Device {
 
   static InputADC *ADCC;
   
+#if defined(ADC_TEENSY_4)
+  static const size_t MaxChannels = 1;
+#else
   static const size_t MaxChannels = 8;
+#endif
 
 #if defined(ADC_TEENSY_4)
   static const size_t MaxConversions = 5;
@@ -307,7 +311,9 @@ class InputADC : public Input, public Device {
   static const size_t NMajors = 2;
   static DMASetting DMASettings[2][NMajors];
   DMAChannel DMABuffer[2]; // DMA channel for ADCBuffer
+#ifdef TEENSY3
   DMAChannel DMASwitch[2]; // DMA channel for switching pins
+#endif
   volatile size_t DMAIndex[2];     // currently active ADCBuffer segment
   volatile size_t DMACounter[2];   // total count of ADCBuffer segments
   volatile static DMAMEM uint16_t ADCBuffer[2][NMajors*MajorSize];

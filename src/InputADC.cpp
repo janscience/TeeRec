@@ -178,6 +178,8 @@ void InputADC::setChannel(uint8_t adc, int8_t channel) {
 void InputADC::addChannel(uint8_t adc, int8_t channel) {
   if (channel < 0)
     return;
+  if (NChans[adc] >= MaxChannels)
+    return;
   Channels[adc][NChans[adc]++] = channel;
   NChannels = 0;
   for (uint8_t adc=0; adc<2; adc++)
@@ -596,8 +598,10 @@ void InputADC::stop() {
     if ((ADCUse & (1 << adc)) > 0) {
       ADConv.adc[adc]->disableDMA();
       ADConv.adc[adc]->stopTimer();
+#ifdef TEENSY3
       if (NChans[adc] > 1)
 	DMASwitch[adc].disable();
+#endif
       DMABuffer[adc].disable();
       DMABuffer[adc].detachInterrupt();
     }
@@ -612,16 +616,15 @@ uint8_t InputADC::adcs() const {
 
 
 void InputADC::setupChannels(uint8_t adc) {
+#ifdef TEENSY3
   // translate to SC1A code:
   for(uint8_t i=0; i<NChans[adc]; i++) {
-#ifdef TEENSY3
     uint8_t sc1a_pin = 0;
     if (adc == 0)
       sc1a_pin = ADConv.channel2sc1aADC0[Channels[adc][i]];
     else if (adc == 1)
       sc1a_pin = ADConv.channel2sc1aADC1[Channels[adc][i]];
     SC1AChannels[adc][i] = (sc1a_pin & ADC_SC1A_CHANNELS) + ADC_SC1_AIEN;
-#endif
   }
   if (NChans[adc] > 1) {
     // reorder:
@@ -630,6 +633,7 @@ void InputADC::setupChannels(uint8_t adc) {
       SC1AChannels[adc][i-1] = SC1AChannels[adc][i];
     SC1AChannels[adc][NChans[adc]-1] = temp;
   }
+#endif
   // configure for input:
   for(uint8_t i=0; i<NChans[adc]; i++)
     pinMode(Channels[adc][i], INPUT);
@@ -668,6 +672,8 @@ void InputADC::setupDMA(uint8_t adc) {
   for (size_t mi=0; mi<NMajors; mi++) {
 #ifdef TEENSY3
     DMASettings[adc][mi].source(adc==0?ADC0_RA:ADC1_RA);
+#else
+    DMASettings[adc][mi].source(adc==0?ADC1_R0:ADC2_R0);
 #endif
     DMASettings[adc][mi].destinationBuffer(&ADCBuffer[adc][mi*MajorSize], sizeof(uint16_t)*MajorSize);
     DMASettings[adc][mi].transferSize(sizeof(uint16_t));
@@ -677,20 +683,22 @@ void InputADC::setupDMA(uint8_t adc) {
   DMABuffer[adc] = DMASettings[adc][0];
 #ifdef TEENSY3
   DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1);
+#else
+  DMABuffer[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC1:DMAMUX_SOURCE_ADC2);
 #endif
   DMABuffer[adc].attachInterrupt(adc==0?DMAISR0:DMAISR1);
   DMABuffer[adc].enable();
 
+#ifdef TEENSY3
   if (NChans[adc] > 1) {
     DMASwitch[adc].begin();
     DMASwitch[adc].sourceCircular(SC1AChannels[adc], NChans[adc]);
-#ifdef TEENSY3
     DMASwitch[adc].destination(adc==0?ADC0_SC1A:ADC1_SC1A); // this switches channels
     DMASwitch[adc].transferSize(1);
     DMASwitch[adc].triggerAtHardwareEvent(adc==0?DMAMUX_SOURCE_ADC0:DMAMUX_SOURCE_ADC1); 
-#endif
     DMASwitch[adc].enable();
   }
+#endif
 }
 
 
