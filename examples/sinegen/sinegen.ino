@@ -10,10 +10,13 @@ float rate = 100000.0;
 
 // ----- pins: ---------------------------------------------------------------
 
-#define FREQ_UP_PIN     1
-#define FREQ_DOWN_PIN   2
-#define AMPL_UP_PIN     3
-#define AMPL_DOWN_PIN   4
+//#define DAC_PIN         A21 // Teensy 3.5
+#define DAC_PIN         A14 // Teensy 3.2
+
+#define FREQ_UP_PIN     0
+#define FREQ_DOWN_PIN   1
+#define AMPL_UP_PIN     2
+#define AMPL_DOWN_PIN   3
 
 // ---------------------------------------------------------------------------
 
@@ -59,7 +62,7 @@ void setup() {
   buttons.add(AMPL_UP_PIN, INPUT_PULLUP, amplitude_up);
   buttons.add(AMPL_DOWN_PIN, INPUT_PULLUP, amplitude_down);
   wave.setup(rate);
-  wave.start(A21, freq, 1.0);
+  wave.start(DAC_PIN, freq, 1.0);
   wave.setAmplitude(ampl);
 }
 
