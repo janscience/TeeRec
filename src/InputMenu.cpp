@@ -89,12 +89,13 @@ void GetInputAction::execute(Stream &stream, unsigned long timeout,
 			     bool echo, bool detailed) {
   int tmax = 100;
   stream.println("Get data ...");
+  if (!Data.running()) {
+    stream.println("    ERROR: recording not running!");
+    stream.println();
+    return;
+  }
   size_t nframes = Data.frames(0.001*tmax);
   size_t start = Data.currentSample(nframes);
-  stream.printf("  nframes = %6d\n", nframes);
-  stream.printf("  start   = %6d\n", start);
-  stream.printf("  index   = %6d\n", Data.index());
-  stream.println();
   stream.printf("Sampling rate: %dHz", Data.rate());
   stream.println();
   stream.printf("Resolution: %ubits", Data.dataResolution());
