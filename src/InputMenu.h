@@ -105,8 +105,6 @@ public:
 	    Device** controls=0, size_t ncontrols=0,
 	    SetupAI setupai=0);
 
-protected:
-
   ReportInputAction ReportAct;
   PrintInputAction PrintAct;
   StartInputAction StartAct;

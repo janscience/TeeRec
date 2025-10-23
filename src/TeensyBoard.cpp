@@ -31,6 +31,13 @@ long teensySpeed() {
 }
 
 
+const char *teensySpeedStr() {
+  static char Speed[12];
+  sprintf(Speed, "%ldMHz", teensySpeed());
+  return Speed;
+}
+
+
 #if defined(__IMXRT1062__)
 extern "C" uint32_t set_arm_clock(uint32_t frequency);
 #endif

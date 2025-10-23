@@ -146,8 +146,6 @@ public:
 
   SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings);
 
-protected:
-
   SDInfoAction InfoAct;
   SDListRootAction ListRootAct;
   SDListRecordingsAction ListRecsAct;

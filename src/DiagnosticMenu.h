@@ -16,16 +16,12 @@ class DeviceID;
 class SDCard;
 
 
-class TeensyInfoAction : public Action {
+class TeensyInfoAction : public InfoAction {
 
  public:
 
   /* Initialize and add to configuration menu. */
   TeensyInfoAction(Menu &menu, const char *name);
-
-  /* Info about Teensy version, serial number and MAC. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
 };
 
 
@@ -76,6 +72,9 @@ class DevicesAction : public Action {
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
 
+  /* Return device at index. Return zero for invalid index. */
+  Device *device(size_t index);
+
 protected:
 
   static const size_t MaxDevices = 6;
@@ -116,11 +115,6 @@ public:
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
 
-protected:
-
-  void setSDCardNames(SDCard &sdcard, Action &checkact,
-		      Action &benchmarkact);
-
   TeensyInfoAction TeensyInfoAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
@@ -130,6 +124,11 @@ protected:
   SDBenchmarkAction SD1BenchmarkAct;
   DevicesAction DevicesAct;
   DeviceIDAction DeviceIDAct;
+
+protected:
+
+  void setSDCardNames(SDCard &sdcard, Action &checkact,
+		      Action &benchmarkact);
 };
 
 

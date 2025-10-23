@@ -46,8 +46,11 @@
 // Return string with name of Teensy board.
 const char *teensyBoard();
 
-// Return string with CPU speed of Teensy board in MHz.
+// Return CPU speed of Teensy board in MHz.
 long teensySpeed();
+
+// Return string with CPU speed of Teensy board in MHz.
+const char *teensySpeedStr();
 
 // Set the speed of the CPU in MHz.
 void setTeensySpeed(long speed);

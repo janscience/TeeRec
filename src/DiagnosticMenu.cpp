@@ -6,18 +6,11 @@
 
 
 TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
-  Action(menu, name, StreamInput) {
-}
-
-
-void TeensyInfoAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
-  stream.println("Teensy development board:");
-  stream.printf("  board        : %s\n", teensyBoard());
-  stream.printf("  CPU speed    : %ldMHz\n", teensySpeed());
-  stream.printf("  serial number: %s\n", teensySN());
-  stream.printf("  MAC address  : %s\n", teensyMAC());
-  stream.println();
+  InfoAction(menu, name, StreamInput) {
+  add("Board", teensyBoard());
+  add("CPU speed", teensySpeedStr());
+  add("Serial number", teensySN());
+  add("MAC address", teensyMAC());
 }
 
 
@@ -226,6 +219,13 @@ void DevicesAction::execute(Stream &stream, unsigned long timeout,
   if (navailable == 0)
     stream.println("  no device available!");
   stream.println();
+}
+
+
+Device *DevicesAction::device(size_t index) {
+  if (index >= NDevices)
+    return 0;
+  return Devices[index];
 }
 
 

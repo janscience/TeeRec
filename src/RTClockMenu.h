@@ -68,8 +68,6 @@ public:
 
   RTClockMenu(Menu &menu, RTClock &rtclock);
 
-protected:
-
   PrintRTCAction PrintAct;
   ReportRTCAction ReportAct;
   SetRTCAction SetAct;
