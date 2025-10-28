@@ -2,8 +2,9 @@
 #include <RTClockMenu.h>
 
 
-RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock) :
-  Action(menu, name, StreamInput),
+RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock,
+		     unsigned int roles) :
+  Action(menu, name, roles),
   RTC(rtclock) {
 }
 
@@ -16,9 +17,20 @@ void PrintRTCAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void ReportRTCAction::execute(Stream &stream, unsigned long timeout,
-			      bool echo, bool detailed) {
-  RTC.report(stream);
+ReportRTCAction::ReportRTCAction(Menu &menu, const char *name,
+				 RTClock &rtclock) :
+  RTCAction(menu, name, rtclock, StreamInput | Report) {
+}
+
+
+void ReportRTCAction::report(Stream &stream, unsigned int roles,
+			     size_t indent, size_t w, bool descend) const {
+  if (disabled(roles))
+    return;
+  if (descend)
+    RTC.report(stream, indent, indentation());
+  else
+    Action::report(stream, roles, indent, w, descend);
 }
 
 

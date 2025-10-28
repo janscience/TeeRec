@@ -19,7 +19,8 @@ class SDCardAction : public Action {
  public:
 
   /* Initialize and add to configuration menu. */
-  SDCardAction(Menu &menu, const char *name, SDCard &sd);
+  SDCardAction(Menu &menu, const char *name, SDCard &sd,
+	       unsigned int roles=StreamInput);
 
  protected:
 
@@ -31,11 +32,12 @@ class SDInfoAction : public SDCardAction {
 
  public:
 
-  using SDCardAction::SDCardAction;
+  /* Initialize and add to configuration menu. */
+  SDInfoAction(Menu &menu, const char *name, SDCard &sd);
 
   /* Report SD card infos, capacity and available space. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void report(Stream &stream=Serial, unsigned int roles=AllRoles,
+		      size_t indent=0, size_t w=0, bool descend=true) const;
 };
 
 
@@ -107,8 +109,7 @@ class SDListRecordingsAction : public SDCardAction {
 
  public:
 
-  /* Initialize and add to configuration menu. */
-  SDListRecordingsAction(Menu &menu, const char *name, SDCard &sd);
+  using SDCardAction::SDCardAction;
 
   /* List all recordings on SD card. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,

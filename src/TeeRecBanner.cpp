@@ -16,7 +16,7 @@ void printTeeRecBanner(const char *software, Stream &stream) {
   if (strlen(software) > 6 && strncmp(software, "TeeRec", 6) == 0)
     software = software + 7;
   stream.print(software);
-  stream.println(" by Benda-Lab");
+  stream.println(" by ThunderLab");
   stream.print("based on ");
   stream.println(MICROCONFIG_SOFTWARE);
   stream.println("--------------------------------------------------------");

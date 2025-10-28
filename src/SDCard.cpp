@@ -462,7 +462,8 @@ void SDCard::serial(char *s) {
 }
 
 
-void SDCard::report(Stream &stream) {
+void SDCard::report(Stream &stream, size_t indent,
+		    size_t indent_delta) {
   if (!checkAvailability(stream))
     return;
   
@@ -488,20 +489,24 @@ void SDCard::report(Stream &stream) {
     return;
   }
   
-  stream.printf("%sSD card:\n", Name);
-  stream.printf("  Manufacturer ID   : %x\n", cid.mid);
-  stream.printf("  OEM ID            : %c%c\n", cid.oid[0], cid.oid[1]);
-  stream.printf("  Product           : %c%c%c%c%c\n", cid.pnm[0],
-		cid.pnm[1], cid.pnm[2], cid.pnm[3], cid.pnm[4]);
-  stream.printf("  Version           : %d.%d\n", cid.prv_n, cid.prv_m);
-  stream.printf("  Serial number     : %lx\n", cid.psn);
-  stream.printf("  Manufacturing date: %d/%d\n", cid.mdt_month,
-		2000 + cid.mdt_year_low + 10*cid.mdt_year_high);
-  stream.printf("  Type              : %s\n", types);
-  stream.printf("  File system       : %s\n", files);
-  stream.printf("  Capacity          : %.3f GB\n", 1e-9 * cap);
-  stream.printf("  Available         : %.3f GB\n", 1e-9 * free());
-  stream.println();
+  stream.printf("%*s%sSD card:\n", indent, "", Name);
+  indent += indent_delta;
+  stream.printf("%*sManufacturer ID   : %x\n", indent, "", cid.mid);
+  stream.printf("%*sOEM ID            : %c%c\n", indent, "",
+		cid.oid[0], cid.oid[1]);
+  stream.printf("%*sProduct           : %c%c%c%c%c\n", indent, "",
+		cid.pnm[0], cid.pnm[1], cid.pnm[2], cid.pnm[3], cid.pnm[4]);
+  stream.printf("%*sVersion           : %d.%d\n", indent, "",
+		cid.prv_n, cid.prv_m);
+  stream.printf("%*sSerial number     : %lx\n", indent, "", cid.psn);
+  stream.printf("%*sManufacturing date: %d/%d\n", indent, "",
+		cid.mdt_month, 2000 + cid.mdt_year_low + 10*cid.mdt_year_high);
+  stream.printf("%*sType              : %s\n", indent, "", types);
+  stream.printf("%*sFile system       : %s\n", indent, "", files);
+  stream.printf("%*sCapacity          : %.3f GB\n", indent, "",
+		1e-9 * cap);
+  stream.printf("%*sAvailable         : %.3f GB\n", indent, "",
+		1e-9 * free());
 }
 
 

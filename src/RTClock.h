@@ -109,7 +109,8 @@ class RTClock : public Device {
 
   // Print current time, real time provider, and potential error
   // message on stream.
-  void report(Stream &stream=Serial) const;
+  void report(Stream &stream=Serial, size_t indent=0,
+	      size_t indent_delta=2) const;
 
 };
 

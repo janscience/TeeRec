@@ -318,16 +318,22 @@ void RTClock::print(Stream &stream) const {
 }
 
 
-void RTClock::report(Stream &stream) const {
+void RTClock::report(Stream &stream, size_t indent,
+		     size_t indent_delta) const {
   char times[20];
   dateTime(times);
-  stream.printf("RTC (%s) current time: %s\n", chip(), times);
-  if (timeStatus() != timeSet) {
-    if (timeStatus() == timeNotSet)
-      stream.println(" - time has never been set!");
-    else if (timeStatus() == timeNeedsSync)
-      stream.println(" -  time needs to be synchronized with RTC!");
-  }
-  stream.println();
+  stream.printf("%*sReal-time clock:\n", indent, "");
+  indent += indent_delta;
+  stream.printf("%*sCurrent time: %s\n", indent, "", times);
+  stream.printf("%*sChip:         %s\n", indent, "", chip());
+  stream.printf("%*sStatus:       ", indent, "");
+  if (timeStatus() == timeSet)
+    stream.println("time is set");
+  else if (timeStatus() == timeNotSet)
+    stream.println("time has never been set");
+  else if (timeStatus() == timeNeedsSync)
+    stream.println("time needs to be synchronized with RTC");
+  else
+    stream.println("unknown");
 }
 

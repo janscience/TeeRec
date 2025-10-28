@@ -18,7 +18,8 @@ class RTCAction : public Action {
  public:
 
   /* Initialize and add to menu. */
-  RTCAction(Menu &menu, const char *name, RTClock &rtclock);
+  RTCAction(Menu &menu, const char *name, RTClock &rtclock,
+	    unsigned int roles=StreamInput);
 
  protected:
 
@@ -42,11 +43,13 @@ class ReportRTCAction : public RTCAction {
 
  public:
 
-  using RTCAction::RTCAction;
+
+  /* Initialize and add to menu. */
+  ReportRTCAction(Menu &menu, const char *name, RTClock &rtclock);
 
   /* Report the time and the status of the real-time clock. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void report(Stream &stream=Serial, unsigned int roles=AllRoles,
+		      size_t indent=0, size_t w=0, bool descend=true) const;
 };
 
 

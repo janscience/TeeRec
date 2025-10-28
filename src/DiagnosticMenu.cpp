@@ -5,8 +5,13 @@
 #include <DiagnosticMenu.h>
 
 
+#ifdef TEENSY41
+extern "C" uint8_t external_psram_size;
+#endif
+
+
 TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
-  InfoAction(menu, name, StreamInput) {
+  InfoAction(menu, name, StreamIO | Report) {
   add("Board", teensyBoard());
   add("CPU speed", teensySpeedStr());
   add("Serial number", teensySN());
@@ -14,28 +19,28 @@ TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
 }
 
 
-#ifdef TEENSY41
-extern "C" uint8_t external_psram_size;
-#endif
-
-void PSRAMInfoAction::execute(Stream &stream, unsigned long timeout,
-			      bool echo, bool detailed) {
+PSRAMInfoAction::PSRAMInfoAction(Menu &menu, const char *name) :
+  InfoAction(menu, name, StreamIO | Report) {
+  uint8_t size = 0;
+  CCMStr[0] = '\0';
 #ifdef TEENSY41
   // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
-  stream.println("EXTMEM PSRAM Memory:");
-  uint8_t size = external_psram_size;
-  if (size == 0) {
-    stream.println("  no external PSRAM memory installed.\n");
-    return;
+  size = external_psram_size;
+  if (size > 0) {
+    const float clocks[4] = {396.0f, 720.0f, 664.62f, 528.0f};
+    const float frequency = clocks[(CCM_CBCMR >> 8) & 3] / (float)(((CCM_CBCMR >> 29) & 7) + 1);
+    sprintf(CCMStr, "%08lX (%.1f MHz)", CCM_CBCMR, frequency);
   }
-  const float clocks[4] = {396.0f, 720.0f, 664.62f, 528.0f};
-  const float frequency = clocks[(CCM_CBCMR >> 8) & 3] / (float)(((CCM_CBCMR >> 29) & 7) + 1);
-  stream.printf("  size     : %u MB\n", size);
-  stream.printf("  CCM_CBCMR: %08X (%.1f MHz)\n", CCM_CBCMR, frequency);
-  stream.println();
-#else
-  stream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
 #endif
+  sprintf(SizeStr, "%u MB", size);
+  add("Size", SizeStr);
+  if (strlen(CCMStr) > 0)
+    add("CCM_CBCMR", CCMStr);
+}
+
+
+PSRAMTestAction::PSRAMTestAction(Menu &menu, const char *name) : 
+  Action(menu, name, StreamIO) {
 }
 
 
@@ -181,7 +186,7 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
 			     Device* dev0, Device* dev1,
 			     Device* dev2, Device* dev3,
 			     Device* dev4, Device* dev5) :
-  Action(menu, name, StreamInput) {
+  Action(menu, name, StreamIO | Report) {
   if (dev0 != 0)
     Devices[NDevices++] = dev0;
   if (dev1 != 0)
@@ -194,6 +199,34 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
     Devices[NDevices++] = dev4;
   if (dev5 != 0)
     Devices[NDevices++] = dev5;
+}
+
+
+void DevicesAction::report(Stream &stream, unsigned int roles,
+			   size_t indent, size_t w, bool descend) const {
+  if (disabled(roles))
+    return;
+  if (descend) {
+    if (strlen(name()) > 0) {
+      stream.printf("%*s%s:\n", indent, "", name());
+      indent += indentation();
+    }
+    w = 0;
+    for (size_t k=0; k<NDevices; k++) {
+      if (Devices[k]->available() && (strlen(Devices[k]->deviceType()) > w))
+	w = strlen(Devices[k]->deviceType());
+    }
+    for (size_t k=0; k<NDevices; k++) {
+      if (Devices[k]->available()) {
+	size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
+	stream.printf("%*s%s:%*s %s (%s)\n", indent, "",
+		      Devices[k]->deviceType(), kw, "",
+		      Devices[k]->chip(), Devices[k]->identifier());
+      }
+    }
+  }
+  else if (strlen(name()) > 0)
+    Action::report(stream, roles, indent, w, descend);
 }
 
 
@@ -236,10 +269,16 @@ DeviceIDAction::DeviceIDAction(Menu &menu, const char *name,
 }
 
 
-void DeviceIDAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
-  DevID->read();
-  DevID->report();
+void DeviceIDAction::report(Stream &stream, unsigned int roles,
+			    size_t indent, size_t w, bool descend) const {
+  if (disabled(roles))
+    return;
+  if (descend) {
+    DevID->read();
+    DevID->report();
+  }
+  else
+    Action::report(stream, roles, indent, w, descend);
 }
 
 

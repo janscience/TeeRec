@@ -25,23 +25,26 @@ class TeensyInfoAction : public InfoAction {
 };
 
 
-class PSRAMInfoAction : public TeensyInfoAction {
+class PSRAMInfoAction : public InfoAction {
 
  public:
 
-  using TeensyInfoAction::TeensyInfoAction;
+  /* Initialize and add to configuration menu. */
+  PSRAMInfoAction(Menu &menu, const char *name);
 
-  /* Info about Teensy 4.1 PSRAM memory. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+ protected:
+  
+  char SizeStr[8];
+  char CCMStr[24];
 };
 
 
-class PSRAMTestAction : public TeensyInfoAction {
+class PSRAMTestAction : public Action {
 
  public:
 
-  using TeensyInfoAction::TeensyInfoAction;
+  /* Initialize and add to configuration menu. */
+  PSRAMTestAction(Menu &menu, const char *name);
 
   /* Test Teensy 4.1 PSRAM memory. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
@@ -69,6 +72,10 @@ class DevicesAction : public Action {
 		Device* dev4=0, Device* dev5=0);
 
   /* Print device infos. */
+  virtual void report(Stream &stream=Serial, unsigned int roles=AllRoles,
+		      size_t indent=0, size_t w=0, bool descend=true) const;
+
+  /* Print more detailed device info. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
 
@@ -93,8 +100,8 @@ class DeviceIDAction : public Action {
 		 DeviceID *deviceid);
 
   /* Read and print device ID. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void report(Stream &stream=Serial, unsigned int roles=AllRoles,
+		      size_t indent=0, size_t w=0, bool descend=true) const;
 
 protected:
 

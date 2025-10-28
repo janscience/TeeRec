@@ -3,32 +3,37 @@
 #include <SDCardMenu.h>
 
 
-SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd) : 
-  Action(menu, name, StreamInput),
+SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd,
+			   unsigned int roles) : 
+  Action(menu, name, roles),
   SDC(sd) {
 }
 
 
-void SDInfoAction::execute(Stream &stream, unsigned long timeout,
-			   bool echo, bool detailed) {
-  if (disabled(StreamInput))
+SDInfoAction::SDInfoAction(Menu &menu, const char *name, SDCard &sd) : 
+  SDCardAction(menu, name, sd, StreamInput | Report) {
+}
+
+
+void SDInfoAction::report(Stream &stream, unsigned int roles,
+			  size_t indent, size_t w, bool descend) const {
+  if (disabled(roles))
     return;
-  SDC.report(stream);
+  if (descend)
+    SDC.report(stream, indent, indentation());
+  else
+    Action::report(stream, roles, indent, w, descend);
 }
 
 
 void SDCheckAction::execute(Stream &stream, unsigned long timeout,
 			    bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   SDC.check(1024*1024, stream);
 }
 
 
 void SDBenchmarkAction::execute(Stream &stream, unsigned long timeout,
 				bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   SDC.benchmark(512, 10, 2, stream);
 }
 
@@ -59,8 +64,6 @@ void SDFormatAction::format(const char *erases, bool erase,
 
 void SDFormatAction::execute(Stream &stream, unsigned long timeout,
 			     bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Formatting will destroy all data on the SD card.");
@@ -70,8 +73,6 @@ void SDFormatAction::execute(Stream &stream, unsigned long timeout,
 
 void SDEraseFormatAction::execute(Stream &stream, unsigned long timeout,
 				  bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Erasing and formatting will destroy all data on the SD card.");
@@ -81,8 +82,6 @@ void SDEraseFormatAction::execute(Stream &stream, unsigned long timeout,
 
 void SDListRootAction::execute(Stream &stream, unsigned long timeout,
 			       bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   SDC.listFiles("/", true, true, stream);
@@ -90,17 +89,8 @@ void SDListRootAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-SDListRecordingsAction::SDListRecordingsAction(Menu &menu,
-					       const char *name,
-					       SDCard &sd) : 
-  SDCardAction(menu, name, sd) {
-}
-
-
 void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				     bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   SDC.listDirectories("/", false, true, stream);
@@ -109,8 +99,6 @@ void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
 
 void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				       bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   char folder[64];
@@ -131,8 +119,6 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 
 void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				      bool echo, bool detailed) {
-  if (disabled(StreamInput))
-    return;
   if (!SDC.checkAvailability(stream))
     return;
   char folder[64];

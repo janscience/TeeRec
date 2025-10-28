@@ -256,7 +256,7 @@ void setup() {
   if (Serial)
     config.execute(Serial, 10000);
   config.report();
-  deviceid.report();
+  Serial.println();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);
 #if defined(INPUT_TDM)
