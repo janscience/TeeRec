@@ -58,7 +58,8 @@ String DeviceID::makeStr(const String &str, bool nozero) const {
 }
 
 
-void DeviceID::report(Stream &stream) const {
+void DeviceID::report(Stream &stream, size_t indent,
+		      size_t indent_delta) const {
   char ss[20];
   switch (Source) {
   case 1:
@@ -73,7 +74,10 @@ void DeviceID::report(Stream &stream) const {
   default:
     strcpy(ss, "not set");
   }
-  stream.printf("Device identifier (%s): %d (#%02X)\n\n", ss, ID, ID);
+  stream.printf("%*sDevice identifier:\n", indent, "");
+  indent += indent_delta;
+  stream.printf("%*sValue:  %d (#%02X)\n", indent, "", ID, ID);
+  stream.printf("%*sSource: %s\n", indent, "", ss);
 }
 
 
