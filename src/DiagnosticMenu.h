@@ -22,6 +22,9 @@ class TeensyInfoAction : public InfoAction {
 
   /* Initialize and add to configuration menu. */
   TeensyInfoAction(Menu &menu, const char *name);
+  
+  /* Update CPU speed. */
+  void update();
 };
 
 
@@ -121,6 +124,9 @@ public:
 		 DeviceID *devid,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
+
+  /* Update CPU speed. */
+  void updateCPUSpeed();
 
   TeensyInfoAction TeensyInfoAct;
   PSRAMInfoAction PSRAMInfoAct;

@@ -19,6 +19,11 @@ TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
 }
 
 
+void TeensyInfoAction::update() {
+  setValue("CPU speed", teensySpeedStr());
+}
+
+
 PSRAMInfoAction::PSRAMInfoAction(Menu &menu, const char *name) :
   InfoAction(menu, name, StreamIO | Report) {
   uint8_t size = 0;
@@ -218,7 +223,7 @@ void DevicesAction::report(Stream &stream, unsigned int roles,
     }
     for (size_t k=0; k<NDevices; k++) {
       if (Devices[k]->available()) {
-	size_t kw = w >= strlen(name()) ? w - strlen(name()) : 0;
+	size_t kw = w >= strlen(Devices[k]->deviceType()) ? w - strlen(Devices[k]->deviceType()) : 0;
 	stream.printf("%*s%s:%*s %s (%s)\n", indent, "",
 		      Devices[k]->deviceType(), kw, "",
 		      Devices[k]->chip(), Devices[k]->identifier());
@@ -264,7 +269,7 @@ Device *DevicesAction::device(size_t index) {
 
 DeviceIDAction::DeviceIDAction(Menu &menu, const char *name,
 			       DeviceID *deviceid) :
-  Action(menu, name, StreamInput),
+  Action(menu, name, StreamInput | Report),
   DevID(deviceid){
 }
 
@@ -275,7 +280,7 @@ void DeviceIDAction::report(Stream &stream, unsigned int roles,
     return;
   if (descend) {
     DevID->read();
-    DevID->report();
+    DevID->report(stream, indent, indentation());
   }
   else
     Action::report(stream, roles, indent, w, descend);
@@ -328,6 +333,11 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
     DevicesAct.disable();
   if (devid == 0)
     DeviceIDAct.disable();
+}
+
+
+void DiagnosticMenu::updateCPUSpeed() {
+  TeensyInfoAct.update();
 }
 
 
