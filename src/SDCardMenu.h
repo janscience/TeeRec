@@ -117,15 +117,23 @@ class SDListRecordingsAction : public SDCardAction {
 };
 
 
-class SDCleanRecordingsAction : public SDListRecordingsAction {
+class SDCleanRecordingsAction : public SDCardAction {
 
  public:
 
-  using SDListRecordingsAction::SDListRecordingsAction;
+  /* Initialize and add to configuration menu. */
+  SDCleanRecordingsAction(Menu &menu, const char *name, SDCard &sd,
+			  unsigned int roles=StreamInput);
 
   /* Move files in latest recordings directory smaller than 1 byte to trash. */
   virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
 		       bool echo=true, bool detailed=false);
+
+  void setRemove(bool remove=true);
+
+ protected:
+  
+  bool Remove;
 };
 
 

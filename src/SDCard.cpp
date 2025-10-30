@@ -221,7 +221,7 @@ void SDCard::latestDir(const char *path,
 
 
 int SDCard::cleanDir(const char *path, uint64_t min_size,
-		     Stream &stream) {
+		     bool remove, Stream &stream) {
   if (!checkAvailability(stream))
     return 0;
   
@@ -231,34 +231,109 @@ int SDCard::cleanDir(const char *path, uint64_t min_size,
     stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
     return 0;
   }
-  FsFile trash = sdfs.open(path);
-  int n = 0;
+  stream.printf("Clean directory on %sSD card:\n", Name);
+  if (remove)
+    stream.printf("Erase small files in \"%s\"/:\n", path);
+  else
+    stream.printf("Move small files in \"%s/\" to trash/:\n", path);
+  // 1. number of small and large files:
+  int n_small = 0;
+  int n_large = 0;
   while (file.openNext(&dir, O_RDONLY)) {
-    if (file.isDir())
-      continue;
-    if (file.fileSize() < min_size) {
-      if (! dir.exists("trash")) {
-	bool r = dir.mkdir(&trash, "trash");
-	stream.printf("mkdir trash %d\n", r);
-      }
-      char fname[64];
-      file.getName(fname, 64);
-      char old_name[128];
-      strcpy(old_name, path);
-      strcat(old_name, "/");
-      strcat(old_name, fname);
-      char new_name[128];
-      strcpy(new_name, path);
-      strcat(new_name, "/trash/");
-      strcat(new_name, fname);
-      if (sdfs.rename(old_name, new_name))
-	stream.printf("moved file %s to %s.\n", fname, new_name);
+    if (!file.isDir() && file.fileSize() < min_size)
+      n_small++;
+    else
+      n_large++;
+  }
+  dir.close();
+  int n_moved = 0;
+  if (n_small == 0)
+    stream.print("  no small files found.\n");
+  else {
+    // 2. names of small files:
+    char file_names[n_small][64];
+    int k = 0;
+    dir = sdfs.open(path);
+    while (file.openNext(&dir, O_RDONLY)) {
+      if (!file.isDir() && file.fileSize() < min_size)
+	file.getName(file_names[k++], 64);
+    }
+    dir.close();
+    // 3. make trash directory:
+    if (!remove) {
+      dir = sdfs.open(path);
+      FsFile trash = sdfs.open(path);
+      if (dir.mkdir(&trash, "trash"))
+	stream.printf("  created directory \"%s/trash/\"\n", path);
       else
-	stream.printf("failed to move file %s to trash/.\n", fname);
-      n++;
+	stream.printf("  failed to create directory \"%s/trash/\"\n", path);
+      trash.close();
+      dir.close();
+    }
+    // 4. move/remove small files:
+    dir = sdfs.open(path);
+    for (k=0; k<n_small; k++) {
+      if (remove) {
+	if (dir.remove(file_names[k])) {
+	  stream.printf("  erased small file \"%s/%s\"\n", path, file_names[k]);
+	  n_moved++;
+	}
+	else {
+	  stream.printf("  failed to erase small file \"%s/%s\"\n",
+			path, file_names[k]);
+	  n_large++;
+	}
+      }
+      else {
+	char old_name[128];
+	strcpy(old_name, path);
+	strcat(old_name, "/");
+	strcat(old_name, file_names[k]);
+	char new_name[128];
+	strcpy(new_name, path);
+	strcat(new_name, "/trash/");
+	strcat(new_name, file_names[k]);
+	if (sdfs.rename(old_name, new_name)) {
+	  stream.printf("  moved small file \"%s\" to \"%s\".\n",
+			file_names[k], new_name);
+	  n_moved++;
+	}
+	else {
+	  stream.printf("  failed to move small file \"%s\" to \"%s\".\n",
+			file_names[k], new_name);
+	  n_large++;
+	}
+      }
+    }
+    dir.close();
+  }
+  // 5. move/remove empty directory:
+  if (n_large == 0) {
+    if (remove) {
+      if (sdfs.rmdir(path)) {
+	stream.printf("removed directory \"%s/\".\n", path);
+	n_moved++;
+      }
+      else
+	stream.printf("failed to remove directory \"%s/\".\n", path);
+    }
+    else {
+      if (sdfs.mkdir("trash"))
+	stream.print("created directory \"/trash/\"\n");
+      char new_name[128];
+      strcat(new_name, "trash/");
+      strcat(new_name, path);
+      if (sdfs.rename(path, new_name)) {
+	stream.printf("moved directory \"%s\" to \"/trash/\".\n",
+		      path);
+	n_moved++;
+      }
+      else
+	stream.printf("failed to move directory \"%s\" to \"/trash/\".\n",
+		      path);
     }
   }
-  return n;
+  return n_moved;
 }
 
 
@@ -385,7 +460,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
     return;
   }
   stream.printf("Erase files on %sSD card:\n", Name);
-  stream.printf("Erase all files in \"%s\":\n", path);
+  stream.printf("Erase all files in \"%s\"/:\n", path);
   int n = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     if (!file.isDir()) {
@@ -396,7 +471,7 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
 	n++;
       }
       else
-	stream.printf("  Failed to erase file %s\n", fname);
+	stream.printf("  failed to erase file %s\n", fname);
     }
   }
   if (n == 0)

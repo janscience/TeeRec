@@ -93,7 +93,7 @@ void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				     bool echo, bool detailed) {
   if (!SDC.checkAvailability(stream))
     return;
-  SDC.listDirectories("/", false, true, stream);
+  SDC.listDirectories("/", true, true, stream);
   stream.println();
 }
 
@@ -118,6 +118,20 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
+SDCleanRecordingsAction::SDCleanRecordingsAction(Menu &menu,
+						 const char *name,
+						 SDCard &sd,
+						 unsigned int roles) :
+  SDCardAction(menu, name, sd, roles),
+  Remove(false) {
+}
+
+
+void SDCleanRecordingsAction::setRemove(bool remove) {
+  Remove = remove;
+}
+
+
 void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				      bool echo, bool detailed) {
   if (!SDC.checkAvailability(stream))
@@ -130,10 +144,14 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
   }
   stream.printf("Clean up files in folder \"%s\".\n", folder);
   char msg[128];
-  sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
-	  folder);
+  if (Remove)
+    sprintf(msg, "Do you really want to erase small files in \"%s\"?",
+	    folder);
+  else
+    sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
+	    folder);
   if (Action::yesno(msg, true, echo, stream))
-    SDC.cleanDir(folder, 1, stream);
+    SDC.cleanDir(folder, 2048, Remove, stream);
   stream.println();
 }
 

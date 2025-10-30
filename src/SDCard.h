@@ -88,9 +88,10 @@ class SDCard : public SDClass {
   // the subfolder in path that was created last (is the newest).
   void latestDir(const char *path, char *folder, size_t nfolder);
 
-  // Move files in path that are smaller than min_size bytes to trash/.
-  // Return number of moved files.
-  int cleanDir(const char *path, uint64_t min_size=1,
+  // Remove or move files in path that are smaller than min_size bytes
+  // to trash/.
+  // Return number of removed or moved files.
+  int cleanDir(const char *path, uint64_t min_size=1, bool remove=false,
 	       Stream &stream=Serial);
 
   // List all files in path (non-recursively).
