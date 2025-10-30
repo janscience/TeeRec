@@ -273,10 +273,9 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
     return;
   }
-  stream.printf("Files on %sSD card:\n", Name);
+  stream.printf("Files in \"%s\" on %sSD card:\n", path, Name);
   if (list_sizes)
-    stream.println("  size (bytes) name");
-  stream.printf("Files in \"%s\":\n", path);
+    stream.print("  size (bytes)  name\n");
   float file_sizes = 0.0;
   int n_files = 0;
   while (file.openNext(&dir, O_RDONLY)) {
@@ -285,20 +284,18 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     if (!file.isDir() || list_dirs) {
       stream.print("  ");
       if (list_sizes) {
-        stream.printf("%12lu ", file.fileSize());
+        stream.printf("%12lu  ", file.fileSize());
         file_sizes += 1e-6*file.fileSize();
       }
-      if (file.isDir()) {
-	stream.print(fname);
-	stream.println("/");
-      }
+      if (file.isDir())
+	stream.printf("%s/\n", fname);
       else
-	stream.println(fname);
+	stream.printf("%s\n", fname);
       n_files++;
     }
   }
   if (n_files == 0)
-    stream.println("no files.");
+    stream.print("\nno files found.\n");
   else {
     if (n_files > 1)
       stream.printf("%d files", n_files);
@@ -307,7 +304,7 @@ void SDCard::listFiles(const char *path, bool list_dirs, bool list_sizes,
     if (list_sizes)
       stream.printf(" (%.3f MB).\n", file_sizes);
     else
-      stream.println(".");
+      stream.print(".\n");
   }
 }
 
@@ -324,9 +321,10 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
   }
   stream.printf("Files on %sSD card:\n", Name);
   if (list_sizes)
-    stream.println("  size (bytes) name");
+    stream.print("  size (bytes)  name\n");
   char latest_folder[128];
   latestDir(path, latest_folder, 128);
+  int n_dirs = 0;
   SdFile subdir;
   while (subdir.openNext(&dir, O_RDONLY)) {
     if (!subdir.isDir())
@@ -346,20 +344,18 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
       if (!file.isDir() || list_dirs) {
 	stream.print("  ");
 	if (list_sizes) {
-	  stream.printf("%12lu ", file.fileSize());
+	  stream.printf("%12lu  ", file.fileSize());
 	  file_sizes += 1e-6*file.fileSize();
 	}
-	if (file.isDir()) {
-	  stream.print(fname);
-	  stream.println("/");
-	}
+	if (file.isDir())
+	  stream.printf("%s/\n", fname);
 	else
-	  stream.println(fname);
+	  stream.printf("%s\n", fname);
 	n_files++;
       }
     }
     if (n_files == 0)
-      stream.println("no files.");
+      stream.print("no files.\n");
     else {
       if (n_files > 1)
 	stream.printf("%d files", n_files);
@@ -368,10 +364,13 @@ void SDCard::listDirectories(const char *path, bool list_dirs, bool list_sizes,
       if (list_sizes)
 	stream.printf(" (%.3f MB).\n", file_sizes);
       else
-	stream.println(".");
+	stream.print(".\n");
     }
-    stream.println();
+    stream.print("\n");
+    n_dirs++;
   }
+  if (n_dirs == 0)
+    stream.print("\nno directories found.\n");
 }
 
 
@@ -393,18 +392,15 @@ void SDCard::removeFiles(const char *path, Stream &stream) {
       char fname[64];
       file.getName(fname, 64);
       if (dir.remove(fname)) {
-	stream.print("  erased ");
-	stream.println(fname);
+	stream.printf("  erased %s\n", fname);
 	n++;
       }
-      else {
-	stream.print("  Failed to erase file ");
-	stream.println(fname);
-      }
+      else
+	stream.printf("  Failed to erase file %s\n", fname);
     }
   }
   if (n == 0)
-    stream.println("No files found.");
+    stream.print("no files found.\n");
   else if (n == 1)
     stream.printf("Removed %d file.\n", n);
   else

@@ -94,6 +94,7 @@ void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
   if (!SDC.checkAvailability(stream))
     return;
   SDC.listDirectories("/", false, true, stream);
+  stream.println();
 }
 
 
