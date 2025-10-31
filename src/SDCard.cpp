@@ -139,19 +139,29 @@ bool SDCard::isBusy() {
 }
 
 
-bool SDCard::dataDir(const char *path) {
+bool SDCard::dataDir(const char *path, bool new_dir) {
   if (! Available)
     return false;
+  char old_path[MaxDir];
+  char new_path[MaxDir];
   sdfs.chvol();
+  const char *opath = path;
   const char *npath = path;
-  char *num = strstr(path, "NUM");
+  char *num = strstr(opath, "NUM");
   if (num == NULL) {
     if (! exists(npath)) {
       SdFile::dateTimeCallback(SDCardDateTime);
       mkdir(npath);
     }
+    else if (new_dir) {
+      strncpy(old_path, opath, MaxDir);
+      old_path[MaxDir - 1] = '\0';
+      strcat(old_path, "-NUM1");
+      opath = old_path;
+      num = strstr(opath, "NUM");
+    }
   }
-  else {
+  if (num != NULL) {
     int offs = 3;
     int width = 2;
     if (isdigit(*(num + 3))) {
@@ -159,9 +169,8 @@ bool SDCard::dataDir(const char *path) {
       offs = 4;
     }
     for (int i=1; i<=99; i++) {
-      size_t n = num - path;
-      char new_path[MaxDir];
-      memcpy(new_path, path, n);
+      size_t n = num - opath;
+      memcpy(new_path, opath, n);
       snprintf(new_path + n, MaxDir - n, "%0*d%s", width, i, num + offs);
       new_path[MaxDir - 1] = '\0';
       npath = new_path;

@@ -68,14 +68,14 @@ class SDCard : public SDClass {
   // True if SD card is busy.
   bool isBusy();
 
-  // Make directory if it does not exist and
-  // make it the currrent working directory.
+  // Make directory path and make it the currrent working directory.
+  // If new_dir and path already exists, then add "-NUM" to path.
   // If path contains NUM, NUM is replaced by the lowest two-digit number
   // making it a directory, that does not exist.
   // An optional digit following NUM specifies the number of decimals
   // used to format the string, e.g. NUM3 is replaced by "001", "002", etc.
   // Return true on success.
-  bool dataDir(const char *path);
+  bool dataDir(const char *path, bool new_dir=false);
 
   // Reset current working directory to root.
   // Return true on success.
