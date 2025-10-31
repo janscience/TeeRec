@@ -9,24 +9,31 @@
 
 #include <MicroConfig.h>
 
+class DeviceID;
+
 
 class Settings : public Menu {
 
 public:
 
-  Settings(Menu &menu, const char *path="recordings", int deviceid=0,
-	   const char *filename="SDATELNUM.wav", float filetime=10.0,
-	   float initialdelay=0.0, bool randomblinks=false,
+  Settings(Menu &menu, const char *label="logger", int deviceid=0,
+	   const char *path="recordings", const char *filename="SDATELNUM.wav",
+	   float filetime=10.0, float initialdelay=0.0, bool randomblinks=false,
 	   float pulsefrequency=500.0, float displaytime=0.005,
 	   float sensorsinterval=10.0, float blinktimeout=0.0);
 
-  static const size_t MaxStr = 128;
+  Settings(Menu &menu, const char *path="recordings", const char *filename="SDATELNUM.wav",
+	   float filetime=10.0, float initialdelay=0.0, bool randomblinks=false,
+	   float pulsefrequency=500.0, float displaytime=0.005,
+	   float sensorsinterval=10.0, float blinktimeout=0.0);
 
-  /* Path on SD card where to store the data. */
-  const char *path() const { return Path.value(); };
+  static const size_t MaxStr = 64;
 
-  /* Set path on SD card where to store the data to path. */
-  void setPath(const char *path);
+  /* Label to be used for naming the recordings. */
+  const char *label() const { return Label.value(); };
+
+  /* Set label for naming the recordings to label. */
+  void setLabel(const char *label);
 
   /* Device identifier. */
   int deviceID() const { return ID.value(); };
@@ -34,11 +41,20 @@ public:
   /* Set device identifier to id. */
   void setDeviceID(int id);
 
+  /* Path on SD card where to store the data. */
+  const char *path() const { return Path.value(); };
+
+  /* Set path on SD card where to store the data to path. */
+  void setPath(const char *path);
+
   /* File name to be used to save the recorded data. */
   const char *fileName() const { return FileName.value(); };
 
   /* Set name template to be used to save the recorded data to fname. */
   void setFileName(const char *fname);
+
+  /* Replace LABEL and ID in path and filename by the respective strings. */
+  void preparePaths(const DeviceID &deviceid);
 
   /* Time in seconds the files will record data. */
   float fileTime() const { return FileTime.value(); };
@@ -85,8 +101,9 @@ public:
 
 protected:
 
-  StringParameter<MaxStr> Path;
   NumberParameter<int> ID;
+  StringParameter<MaxStr> Label;
+  StringParameter<MaxStr> Path;
   StringParameter<MaxStr> FileName;
   NumberParameter<float> FileTime;
   NumberParameter<float> InitialDelay;

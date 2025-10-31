@@ -1,4 +1,3 @@
-#include <Settings.h>
 #include <SDCard.h>
 #include <SDCardMenu.h>
 
@@ -170,7 +169,7 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings) :
+SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard) :
   Menu(menu, "SD card", Action::StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),

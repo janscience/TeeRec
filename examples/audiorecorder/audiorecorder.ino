@@ -47,7 +47,7 @@ SDWriter file(sdcard, aidata);
 Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(config, PATH, 0, FILENAME);
+Settings settings(config, PATH, FILENAME);
 
 RTClock rtclock;
 String prevname; // previous file name

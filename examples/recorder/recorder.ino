@@ -33,7 +33,7 @@
 #include <InputADCSettings.h>
 #include <PushButtons.h>
 #include <TestSignals.h>
-#include <TeeRecBanner>
+#include <TeeRecBanner.h>
   
 
 // Default settings: ---------------------------------------------------
@@ -83,7 +83,7 @@ elapsedMillis screenTime;
 Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(config, PATH, 0, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, PATH, FILENAME, FILE_SAVE_TIME,
 		  0, false, PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name

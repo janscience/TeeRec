@@ -8,6 +8,7 @@
 
 
 #include <Arduino.h>
+#include <InputADC.h>
 #include <Display.h>
 
 
@@ -128,8 +129,8 @@ void AIsplashScreen(Display &screen,
   String samplspeed = aidata.samplingSpeedShortStr();
   char chans0[50];
   char chans1[50];
-  aidata.channels(0, chans0);
-  aidata.channels(1, chans1);
+  aidata.channelStr(0, chans0);
+  aidata.channelStr(1, chans1);
   if (chans0[0] == '\0')
     strcpy(chans0, "-");
   if (chans1[0] == '\0')

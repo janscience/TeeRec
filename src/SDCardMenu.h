@@ -11,7 +11,6 @@
 
 
 class SDCard;
-class Settings;
 
 
 class SDCardAction : public Action {
@@ -158,7 +157,7 @@ class SDCardMenu : public Menu {
 
 public:
 
-  SDCardMenu(Menu &menu, SDCard &sdcard, Settings &settings);
+  SDCardMenu(Menu &menu, SDCard &sdcard);
 
   SDInfoAction InfoAct;
   SDListRootAction ListRootAct;

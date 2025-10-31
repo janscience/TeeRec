@@ -29,9 +29,10 @@
 #define CONFIG_FILE     "teerec.cfg"   // name of configuration file
 
 // Settings:
-#define PATH            "recordings"   // folder where to store the recordings
+#define LABEL           "rec"             // device identifier
 #define DEVICEID        1                 // device identifier
-#define FILENAME        "recID-NUM4.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define PATH            "recordings"      // folder where to store the recordings
+#define FILENAME        "LABELID-NUM4.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
 #define FILE_SAVE_TIME  10   // seconds
 #define RANDOM_BLINKS   false
 #define INITIAL_DELAY   10.0  // seconds
@@ -57,9 +58,9 @@ RTClockDS1307 rtclock;
 SDCard sdcard;
 
 Config config(CONFIG_FILE, &sdcard);
-Settings settings(config, PATH, DEVICEID, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, LABEL, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
                   INITIAL_DELAY, RANDOM_BLINKS, PULSE_FREQUENCY,
-		              DISPLAY_TIME, SENSORS_TIME);
+                  DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 		  	                    CONVERSION, SAMPLING, REFERENCE, PREGAIN);
@@ -68,7 +69,7 @@ InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 #endif
 RTClockMenu datetime_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
-SDCardMenu sdcard_menu(config, sdcard, settings);
+SDCardMenu sdcard_menu(config, sdcard);
 FirmwareMenu firmware_menu(config, sdcard);
 DiagnosticMenu diagnostic_menu(config, sdcard, 0, &rtclock);
 HelpAction help_act(config, "Help");
@@ -79,6 +80,7 @@ Blink blink("status", LED_BUILTIN);
 void setup() {
   // enable parameter that also should go into the configuration file:
   settings.enable("InitialDelay");
+  settings.enable("BlinkTimeout");
   settings.enable("RandomBlinks");
   settings.enable("PulseFreq");
   settings.enable("DisplayTime");
