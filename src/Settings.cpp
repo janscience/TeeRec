@@ -8,8 +8,8 @@ Settings::Settings(Menu &menu, const char *label, int deviceid,
 		   float pulsefrequency, float displaytime,
 		   float sensorsinterval, float blinktimeout) :
   Menu(menu, "Settings"),
-  ID(*this, "DeviceID", deviceid, -1, 127, "%d"),
   Label(*this, "Label", label),
+  ID(*this, "DeviceID", deviceid, -1, 127, "%d"),
   Path(*this, "Path", path),
   FileName(*this, "FileName", filename),
   FileTime(*this, "FileTime", filetime, 1.0, 8640.0, "%.0f", "s"),
@@ -40,14 +40,14 @@ Settings::Settings(Menu &menu, const char *path, const char *filename,
   ID.disable();
 }
 
-								
-void Settings::setDeviceID(int id) {
-  ID.setValue(id);
-}
-
 
 void Settings::setLabel(const char *label) {
   Path.setValue(label);
+}
+
+								
+void Settings::setDeviceID(int id) {
+  ID.setValue(id);
 }
 
 

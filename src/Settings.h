@@ -101,8 +101,8 @@ public:
 
 protected:
 
-  NumberParameter<int> ID;
   StringParameter<MaxStr> Label;
+  NumberParameter<int> ID;
   StringParameter<MaxStr> Path;
   StringParameter<MaxStr> FileName;
   NumberParameter<float> FileTime;
