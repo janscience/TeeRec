@@ -151,7 +151,7 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
     sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
 	    folder);
   if (Action::yesno(msg, true, echo, stream))
-    SDC.cleanDir(folder, 2048, ".wav", true, Remove, stream);
+    SDC.cleanDir(folder, 1024, ".wav", true, Remove, stream);
   stream.println();
 }
 
