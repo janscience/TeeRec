@@ -90,9 +90,15 @@ class SDCard : public SDClass {
 
   // Remove or move files in path that are smaller than min_size bytes
   // to trash/.
+  // If suffix is given, the files names must also end with suffix.
+  // If associated also remove or move files whose name starts with
+  // the same string as the ones of the small files without suffix.
+  // If remove, remove those files, otherwise create thrash
+  // directories and move them there.
   // Return number of removed or moved files.
-  int cleanDir(const char *path, uint64_t min_size=1, bool remove=false,
-	       Stream &stream=Serial);
+  // The idea is to remove recordings that ended prematurely.
+  int cleanDir(const char *path, uint64_t min_size=1, const char *suffix="",
+	       bool associated=false, bool remove=false, Stream &stream=Serial);
 
   // List all files in path (non-recursively).
   // If list_dirs, then also list directories in path.
