@@ -123,14 +123,28 @@ SDCleanRecordingsAction::SDCleanRecordingsAction(Menu &menu,
 						 SDCard &sd,
 						 unsigned int roles) :
   SDCardAction(menu, name, sd, roles),
+  MinSize(1024),
+  Suffix(".wav"),
   Remove(false) {
 }
-
 
 void SDCleanRecordingsAction::setRemove(bool remove) {
   Remove = remove;
 }
 
+void SDCleanRecordingsAction::setMinSize(uint64_t min_size) {
+  MinSize = min_size;
+}
+
+void SDCleanRecordingsAction::setSuffix(const char *suffix) {
+  Suffix = suffix;
+}
+
+void SDCleanRecordingsAction::set(uint64_t min_size, const char *suffix, bool remove) {
+  setMinSize(min_size);
+  setSuffix(suffix);
+  setRemove(remove);
+}
 
 void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
 				      bool echo, bool detailed) {
@@ -151,7 +165,7 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
     sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
 	    folder);
   if (Action::yesno(msg, true, echo, stream))
-    SDC.cleanDir(folder, 1024, ".wav", true, Remove, stream);
+    SDC.cleanDir(folder, MinSize, Suffix, strlen(Suffix) > 0, Remove, stream);
   stream.println();
 }
 

@@ -130,9 +130,14 @@ class SDCleanRecordingsAction : public SDCardAction {
 		       bool echo=true, bool detailed=false);
 
   void setRemove(bool remove=true);
+  void setMinSize(uint64_t min_size);
+  void setSuffix(const char *suffix);
+  void set(uint64_t min_size, const char *suffix="", bool remove=true);
 
  protected:
-  
+
+  uint64_t MinSize;
+  const char *Suffix;
   bool Remove;
 };
 
