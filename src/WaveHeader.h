@@ -25,20 +25,38 @@ public:
   void setFormat(uint8_t nchannels, uint32_t samplerate,
 		 uint16_t resolution, uint16_t dataresolution);
 
+  // Return string describing analog input pins.
+  const char *channels() const { return Channels.text(); };
+
   // Set analog input pins.
   void setChannels(const char *chans);
 
-  // Set number of averages.
+  // Return string describing number of averages per sample.
+  const char *averaging() const { return Averaging.text(); };
+
+  // Set number of averages per sample.
   void setAveraging(uint8_t num);
+
+  // Return string describing conversion speed.
+  const char *conversionSpeed() const { return Conversion.text(); };
 
   // Set string describing conversion speed.
   void setConversionSpeed(const char *conversion);
 
+  // Return string describing sampling speed.
+  const char *samplingSpeed() const { return Sampling.text(); };
+
   // Set string describing sampling speed.
   void setSamplingSpeed(const char *sampling);
 
+  // Return string describing voltage reference.
+  const char *reference() const { return Reference.text(); };
+
   // Set string describing voltage reference.
   void setReference(const char *ref);
+
+  // Return string describing overall gain.
+  const char *gain() const { return Gain.text(); };
 
   // Set string describing overall gain.
   void setGain(const char *gain);
@@ -47,17 +65,26 @@ public:
   // Call this *after* setFormat().
   void setData(int32_t samples=0);
 
+  // Return string describing start time of recording.
+  const char *dateTime() const { return DateTime.text(); };
+
   // Set date and time of recording.
   void setDateTime(const char *datetime);
 
   // Clear date and time of recording.
   void clearDateTime();
 
+  // Return string describing software.
+  const char *software() const { return Software.text(); };
+
   // Set name of software.
   void setSoftware(const char *software);
 
   // Clear name of software.
   void clearSoftware();
+
+  // Return string describing CPU speed.
+  const char *cpuSpeed() const { return CPUSpeed.text(); };
 
   // Set CPU speed to current CPU speed.
   void setCPUSpeed();
@@ -114,6 +141,7 @@ protected:
   template <size_t N=32> class InfoChunk : public Chunk {
   public:
     InfoChunk(const char *infoid, const char *text);
+    const char *text() const { return Text; };
     void set(const char *text);
     void clear();
     static const size_t MaxText = N;
