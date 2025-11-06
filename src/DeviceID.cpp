@@ -76,7 +76,7 @@ void DeviceID::report(Stream &stream, size_t indent,
   }
   stream.printf("%*sDevice identifier:\n", indent, "");
   indent += indent_delta;
-  stream.printf("%*sValue:  %d (#%02X)\n", indent, "", ID, ID);
+  stream.printf("%*sValue:  %d\n", indent, "", ID);
   stream.printf("%*sSource: %s\n", indent, "", ss);
 }
 
