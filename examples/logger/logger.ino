@@ -264,7 +264,7 @@ void setup() {
   aisettings.enable("Pregain");
   config.load();
   if (Serial)
-    config.execute(Serial, Serial, 10000);
+    config.execute();
   config.report();
   Serial.println();
   setupTestSignals(signalPins, settings.pulseFrequency());
