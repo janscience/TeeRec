@@ -19,6 +19,7 @@ class Device {
   enum BUS {
     UNKNOWN,
     INTERN,
+    SINGLEWIRE,
     ONEWIRE,
     I2C0,
     I2C1,
@@ -29,7 +30,7 @@ class Device {
     SPI2
   };
   
-  static const char *BusStrings[10];
+  static const char *BusStrings[11];
 
   // Initialize the device.
   Device();
@@ -45,9 +46,15 @@ class Device {
 
   // Address on I2C bus.
   virtual unsigned int address() const;
+  
+  // Address on I2C bus as a string.
+  virtual const char *addressStr() const { return AddressStr; };
 
   // Pin of OneWire bus or chip select pin of device on SPI bus.
   virtual int pin() const;
+  
+  // Pin as a string.
+  virtual const char *pinStr() const { return PinStr; };
 
   // Return name of device (chip) model as character array.
   virtual const char* chip() const;
@@ -55,14 +62,26 @@ class Device {
   // Return unique identifier of device as character array.
   virtual const char* identifier() const;
 
+  // The number of key-value pairs available in the device's metadata.
+  virtual size_t metadata() const { return NKeyVals; };
+
+  // Return key of the index-th metadata entry.
+  virtual const char *key(size_t index) const { return Keys[index]; };
+
+  // Return value of the index-th metadata entry.
+  virtual const char *value(size_t index) const { return Values[index]; };
+
   // Return true if device is available.
   // The default implementation returns the member variable Available.
   // So usually it is sufficient to set the Available variable once
   // when initializing the device.
   virtual bool available() const;
   
-  // Report properties of device on stream.
+  // Report properties of device in one line on stream.
   virtual void report(Stream &stream=Serial);
+
+  /* Write the device's chip and all the key-value pairs to stream (if available()). */
+  virtual void write(Stream &stream=Serial, size_t indent=0, size_t indent_incr=4) const;
 
   
 protected:
@@ -71,7 +90,11 @@ protected:
   void setDeviceType(const char *devicetype);
 
   // Set internal bus.
-  void setInternBus() { Bus = BUS::INTERN; };
+  void setInternBus();
+
+  // Set SingleWire bus and its data pin.
+  // Also set identifier to bus name plus data pin.
+  void setSingleWireBus(int pin);
 
   // Set OneWire bus and its data pin.
   void setOneWireBus(int pin);
@@ -90,15 +113,39 @@ protected:
   // Set the unique identifier of the chip.
   void setIdentifier(const char *identifier);
 
+  // If key already exists, the set value of this key.
+  // Otherwise, add a new key-value pair to the device's metadata.
+  // The strings are not copied, only pointers are stored.
+  // Make sure to pass in static strings.
+  // Return the index of the set or added key-value pair.
+  // If nothing was added, return -1.
+  int add(const char *key, const char *value);
+
+  // Set value of key-value pair at index.
+  // Return true on success, i.e. when index is valid.
+  bool setValue(size_t index, const char *value);
+
+  // Set value of key-value pair.
+  // Return the index of key on succes, otherwise -1.
+  int setValue(const char *key, const char *value);
+
   BUS Bus;
   unsigned int Address;
   int Pin;
   static const int MaxType = 8;
   char DeviceType[MaxType];
+  static const int MaxPin = 5;
+  char AddressStr[MaxPin + 1];
+  char PinStr[MaxPin + 1];
   static const int MaxStr = 32;
   char Chip[MaxStr];
   char Identifier[MaxStr];
   bool Available;
+  
+  static const size_t MaxKeyVals = 8;
+  const char *Keys[MaxKeyVals];
+  const char *Values[MaxKeyVals];
+  size_t NKeyVals;
   
 };
 
