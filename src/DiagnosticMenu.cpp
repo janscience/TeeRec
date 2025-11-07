@@ -216,18 +216,9 @@ void DevicesAction::report(Stream &stream, unsigned int roles,
       stream.printf("%*s%s:\n", indent, "", name());
       indent += indentation();
     }
-    w = 0;
     for (size_t k=0; k<NDevices; k++) {
-      if (Devices[k]->available() && (strlen(Devices[k]->deviceType()) > w))
-	w = strlen(Devices[k]->deviceType());
-    }
-    for (size_t k=0; k<NDevices; k++) {
-      if (Devices[k]->available()) {
-	size_t kw = w >= strlen(Devices[k]->deviceType()) ? w - strlen(Devices[k]->deviceType()) : 0;
-	stream.printf("%*s%s:%*s %s (%s)\n", indent, "",
-		      Devices[k]->deviceType(), kw, "",
-		      Devices[k]->chip(), Devices[k]->identifier());
-      }
+      if (Devices[k]->available())
+	Devices[k]->write(stream, indent, indentation());
     }
   }
   else if (strlen(name()) > 0)

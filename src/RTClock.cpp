@@ -318,14 +318,18 @@ void RTClock::print(Stream &stream) const {
 }
 
 
-void RTClock::report(Stream &stream, size_t indent,
-		     size_t indent_delta) const {
+void RTClock::write(Stream &stream, size_t indent,
+		     size_t indent_incr) const {
   char times[20];
   dateTime(times);
   stream.printf("%*sReal-time clock:\n", indent, "");
-  indent += indent_delta;
+  indent += indent_incr;
+  size_t w = 12;
+  for (size_t k=0; k<NKeyVals; k++) {
+    size_t kw = w >= strlen(Keys[k]) ? w - strlen(Keys[k]) : 0;
+    stream.printf("%*s%s:%*s %s\n", indent, "", Keys[k], kw, "", Values[k]);
+  }
   stream.printf("%*sCurrent time: %s\n", indent, "", times);
-  stream.printf("%*sChip:         %s\n", indent, "", chip());
   stream.printf("%*sStatus:       ", indent, "");
   if (timeStatus() == timeSet)
     stream.println("time is set");

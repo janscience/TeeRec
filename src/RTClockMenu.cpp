@@ -19,7 +19,7 @@ void PrintRTCAction::execute(Stream &stream, unsigned long timeout,
 
 ReportRTCAction::ReportRTCAction(Menu &menu, const char *name,
 				 RTClock &rtclock) :
-  RTCAction(menu, name, rtclock, StreamInput | Report) {
+  RTCAction(menu, name, rtclock) {
 }
 
 
@@ -28,7 +28,7 @@ void ReportRTCAction::report(Stream &stream, unsigned int roles,
   if (disabled(roles))
     return;
   if (descend)
-    RTC.report(stream, indent, indentation());
+    RTC.write(stream, indent, indentation());
   else
     Action::report(stream, roles, indent, w, descend);
 }

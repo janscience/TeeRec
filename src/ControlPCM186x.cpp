@@ -4,6 +4,11 @@
 const uint32_t ControlPCM186x::SamplingRates[ControlPCM186x::MaxSamplingRates] =
   {8000, 16000, 24000, 48000, 96000};
 
+const char *ControlPCM186x::PolarityStrings[2] = {"non inverted", "inverted"};
+const char *ControlPCM186x::LowpassStrings[2] = {"classic FIR", "low-latency IIR"};
+const char *ControlPCM186x::OnOffStrings[2] = {"off", "on"};
+
+
 // #define DEBUG 1
 
 // register addresses, MSB is page, LSB is register:
@@ -142,7 +147,8 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   CurrentPage(10),
   PGALinked(false),
   NChannels(0),
-  Bus(bus) {
+  Bus(bus),
+  GainStr("") {
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("PCM186x");
@@ -575,6 +581,7 @@ bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
     if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
       return false;
   }
+  add("Polarity", PolarityStrings[polarity]);
   return true;
 }
 
@@ -656,6 +663,9 @@ float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float level) {
 	return NAN;
     }
   }
+  snprintf(GainStr, 8, "%.1fdB", 0.5*igain);
+  GainStr[7] = '\0';
+  add("Gain", GainStr);
   return 0.5*igain;
 }
 
@@ -710,6 +720,7 @@ bool ControlPCM186x::setSmoothGainChange(bool smooth) {
     val |= 0x80;    // SMOOTH
   if (!write(PCM186x_PGA_CONTROL_REG, val))
     return false;
+  add("Smooth gain change", OnOffStrings[smooth]);
   return true;
 }
 
@@ -723,6 +734,8 @@ bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
     val |= 0x01;    // HPF_EN
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
+  add("Lowpass", LowpassStrings[lowpass]);
+  add("Highpass", OnOffStrings[highpass]);
   return true;
 }
 

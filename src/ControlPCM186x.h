@@ -252,6 +252,11 @@ protected:
   int NChannels;
   InputTDM::TDM_BUS Bus;
   static const int WriteDelay = 1;
+
+  static const char *PolarityStrings[2];
+  static const char *LowpassStrings[2];
+  static const char *OnOffStrings[2];
+  char GainStr[8];
   
 };
 

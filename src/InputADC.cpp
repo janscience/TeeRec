@@ -325,6 +325,7 @@ uint8_t InputADC::averaging(void) const {
 
 void InputADC::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
   ConversionSpeed = speed;
+  add("Conversion speed", conversionSpeedStr());
 }
 
 
@@ -343,7 +344,7 @@ const char *InputADC::conversionSpeedShortStr(ADC_CONVERSION_SPEED speed) {
     if (ConversionEnums[j] == speed)
       return ConversionShortStrings[j];
   }
-  return (const char *)"none";
+  return (const char *)"NONE";
 }
 
 
@@ -366,6 +367,7 @@ ADC_CONVERSION_SPEED InputADC::conversionSpeedEnum(const char *conversion) {
 
 void InputADC::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
   SamplingSpeed = speed;
+  add("Sampling speed", samplingSpeedStr());
 }
 
 
@@ -412,6 +414,7 @@ void InputADC::setReference(ADC_REFERENCE ref) {
   if (Reference == ADC_REFERENCE::REF_1V2)
     range = 1200.0;
 #endif
+  add("Reference", referenceStr());
   setGain(0.5*range);
 }
 

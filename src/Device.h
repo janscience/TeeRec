@@ -142,7 +142,7 @@ protected:
   char Identifier[MaxStr];
   bool Available;
   
-  static const size_t MaxKeyVals = 8;
+  static const size_t MaxKeyVals = 12;
   const char *Keys[MaxKeyVals];
   const char *Values[MaxKeyVals];
   size_t NKeyVals;
