@@ -14,26 +14,28 @@ SDInfoAction::SDInfoAction(Menu &menu, const char *name, SDCard &sd) :
 }
 
 
-void SDInfoAction::report(Stream &stream, unsigned int roles,
-			  size_t indent, size_t w, bool descend) const {
+void SDInfoAction::write(Stream &stream, unsigned int roles,
+			 size_t indent, size_t width, bool descend) const {
   if (disabled(roles))
     return;
   if (descend)
     SDC.report(stream, indent, indentation());
   else
-    Action::report(stream, roles, indent, w, descend);
+    Action::write(stream, roles, indent, width, descend);
 }
 
 
-void SDCheckAction::execute(Stream &stream, unsigned long timeout,
-			    bool echo, bool detailed) {
-  SDC.check(1024*1024, stream);
+void SDCheckAction::execute(Stream &instream, Stream &outstream,
+			    unsigned long timeout, bool echo,
+			    bool detailed) {
+  SDC.check(1024*1024, outstream);
 }
 
 
-void SDBenchmarkAction::execute(Stream &stream, unsigned long timeout,
-				bool echo, bool detailed) {
-  SDC.benchmark(512, 10, 2, stream);
+void SDBenchmarkAction::execute(Stream &instream, Stream &outstream,
+				unsigned long timeout, bool echo,
+				bool detailed) {
+  SDC.benchmark(512, 10, 2, outstream);
 }
 
 
@@ -61,59 +63,64 @@ void SDFormatAction::format(const char *erases, bool erase,
 }
 
 
-void SDFormatAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDFormatAction::execute(Stream &instream, Stream &outstream,
+			     unsigned long timeout, bool echo,
+			     bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
-  stream.println("Formatting will destroy all data on the SD card.");
-  format("", false, echo, stream);
+  outstream.println("Formatting will destroy all data on the SD card.");
+  format("", false, echo, outstream);
 }
 
 
-void SDEraseFormatAction::execute(Stream &stream, unsigned long timeout,
-				  bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDEraseFormatAction::execute(Stream &instream, Stream &outstream,
+				  unsigned long timeout, bool echo,
+				  bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
-  stream.println("Erasing and formatting will destroy all data on the SD card.");
-  format(" erase and", true, echo, stream);
+  outstream.println("Erasing and formatting will destroy all data on the SD card.");
+  format(" erase and", true, echo, outstream);
 }
 
 
-void SDListRootAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDListRootAction::execute(Stream &instream, Stream &outstream,
+			       unsigned long timeout, bool echo,
+			       bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
-  SDC.listFiles("/", true, true, stream);
-  stream.println();
+  SDC.listFiles("/", true, true, outstream);
+  outstream.println();
 }
 
 
-void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				     bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDListRecordingsAction::execute(Stream &instream, Stream &outstream,
+				     unsigned long timeout, bool echo,
+				     bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
-  SDC.listDirectories("/", true, true, stream);
-  stream.println();
+  SDC.listDirectories("/", true, true, outstream);
+  outstream.println();
 }
 
 
-void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				       bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDRemoveRecordingsAction::execute(Stream &instream, Stream &outstream,
+				       unsigned long timeout, bool echo,
+				       bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
   char folder[64];
   SDC.latestDir("/", folder, 64);
   if (strlen(folder) == 0) {
-    stream.print("No folder exists that can be removed.\n\n");
+    outstream.print("No folder exists that can be removed.\n\n");
     return;
   }
-  stream.printf("Erase all files in folder \"%s\".\n", folder);
+  outstream.printf("Erase all files in folder \"%s\".\n", folder);
   char msg[128];
   sprintf(msg, "Do you really want to erase all recordings in \"%s\"?",
 	  folder);
-  if (Action::yesno(msg, true, echo, stream))
-    SDC.removeFiles(folder, stream);
-  stream.println();
+  if (Action::yesno(msg, true, echo, instream, outstream))
+    SDC.removeFiles(folder, outstream);
+  outstream.println();
 }
 
 
@@ -145,17 +152,18 @@ void SDCleanRecordingsAction::set(uint64_t min_size, const char *suffix, bool re
   setRemove(remove);
 }
 
-void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				      bool echo, bool detailed) {
-  if (!SDC.checkAvailability(stream))
+void SDCleanRecordingsAction::execute(Stream &instream, Stream &outstream,
+				      unsigned long timeout, bool echo,
+				      bool detailed) {
+  if (!SDC.checkAvailability(outstream))
     return;
   char folder[64];
   SDC.latestDir("/", folder, 64);
   if (strlen(folder) == 0) {
-    stream.print("No folder exists that can be cleaned.\n\n");
+    outstream.print("No folder exists that can be cleaned.\n\n");
     return;
   }
-  stream.printf("Clean up files in folder \"%s\".\n", folder);
+  outstream.printf("Clean up files in folder \"%s\".\n", folder);
   char msg[128];
   if (Remove)
     sprintf(msg, "Do you really want to erase small files in \"%s\"?",
@@ -163,9 +171,10 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
   else
     sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
 	    folder);
-  if (Action::yesno(msg, true, echo, stream))
-    SDC.cleanDir(folder, MinSize, Suffix, strlen(Suffix) > 0, Remove, stream);
-  stream.println();
+  if (Action::yesno(msg, true, echo, instream, outstream))
+    SDC.cleanDir(folder, MinSize, Suffix, strlen(Suffix) > 0,
+		 Remove, outstream);
+  outstream.println();
 }
 
 

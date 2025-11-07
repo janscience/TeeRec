@@ -107,7 +107,7 @@ void setup() {
   sdcard.check();
   config.load();
   if (Serial)
-    config.execute(Serial, 10000);
+    config.execute(Serial, Serial, 10000);
   config.report();
   Serial.println();
   blink.switchOff();

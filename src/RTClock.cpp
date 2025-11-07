@@ -144,21 +144,23 @@ bool RTClock::set(char *datetime, bool from_start) {
 }
 
 
-bool RTClock::set(Stream &stream) {
+bool RTClock::set(Stream &instream, Stream &outstream) {
   while (true) {
-    stream.print("Enter date and time in ISO format (YYYY-MM-DDThh:mm:dd): ");
-    while (stream.available() == 0)
+    outstream.print("Enter date and time in ISO format (YYYY-MM-DDThh:mm:dd): ");
+    while (instream.available() == 0) {
       yield();
+      delay(1);
+    }
     char datetime[32];
-    stream.readBytesUntil('\n', datetime, 32);
-    stream.println(datetime);
+    instream.readBytesUntil('\n', datetime, 32);
+    outstream.println(datetime);
     if (strlen(datetime) == 0 || datetime[0] == 'q')
       return false;
     memset(datetime + strlen(datetime), '\0', 32 - strlen(datetime));
     if (set(datetime)) {
       char times[20];
       dateTime(times);
-      stream.printf("\nSuccessfully set real-time clock to: %s\n", times);
+      outstream.printf("\nSuccessfully set real-time clock to: %s\n", times);
       return true;
     }
   }

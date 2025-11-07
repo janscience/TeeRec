@@ -34,8 +34,9 @@ class PrintRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Print the current time. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 
@@ -48,8 +49,8 @@ class ReportRTCAction : public RTCAction {
   ReportRTCAction(Menu &menu, const char *name, RTClock &rtclock);
 
   /* Report the time and the status of the real-time clock. */
-  virtual void report(Stream &stream=Serial, unsigned int roles=AllRoles,
-		      size_t indent=0, size_t w=0, bool descend=true) const;
+  virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
+		     size_t indent=0, size_t width=0, bool descend=true) const;
 };
 
 
@@ -60,8 +61,9 @@ class SetRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Set the real-time clock. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 

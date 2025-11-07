@@ -57,9 +57,9 @@ class RTClock : public Device {
   // Return true if the time was successfully set.
   bool set(char *datetime, bool from_start=false);
 
-  // Set real-time clock interactively from stream.
+  // Set real-time clock interactively from streams.
   // Return true if the time was successfully set.
-  bool set(Stream &stream=Serial);
+  bool set(Stream &instream=Serial, Stream &outstream=Serial);
 
   // Set the current time from a file path on the sdcard.
   // If the file was found and the time set, the file is deleted.

@@ -250,7 +250,7 @@ void setup() {
   settings.enable("DisplayTime");
   config.load();
   if (Serial)
-    config.execute(Serial, 10000);
+    config.execute(Serial, Serial, 10000);
   config.report();
   setupTestSignals(signalPins, settings.pulseFrequency());
   aisettings.configure(&aidata);

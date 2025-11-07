@@ -203,7 +203,7 @@ void setup() {
   sdcard.begin();
   config.load();
   if (Serial)
-    config.execute(Serial, 10000);
+    config.execute(Serial, Serial, 10000);
   config.report();
   setupStorage();
   aisettings.configure(&aidata);

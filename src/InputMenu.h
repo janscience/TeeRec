@@ -44,8 +44,9 @@ class ReportInputAction : public InputAction {
   using InputAction::InputAction;
 
   /* Start, report, and stop analog input. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 
@@ -56,8 +57,9 @@ class PrintInputAction : public InputAction {
   using InputAction::InputAction;
 
   /* Record and print 100ms of data. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 
@@ -68,8 +70,9 @@ class StartInputAction : public InputAction {
   using InputAction::InputAction;
 
   /* Start data acquisition with current settings. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 
@@ -80,8 +83,9 @@ class GetInputAction : public InputAction {
   using InputAction::InputAction;
 
   /* Print 100ms of data. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 
@@ -92,8 +96,9 @@ class StopInputAction : public InputAction {
   using InputAction::InputAction;
 
   /* Stop acquisition. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
+		       unsigned long timeout=0, bool echo=true,
+		       bool detailed=false);
 };
 
 

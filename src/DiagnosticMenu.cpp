@@ -105,14 +105,15 @@ bool PSRAMTestAction::checkRandom(uint32_t seed, Stream &stream) {
 }
 
 
-void PSRAMTestAction::execute(Stream &stream, unsigned long timeout,
-			      bool echo, bool detailed) {
+void PSRAMTestAction::execute(Stream &instream, Stream &outstream,
+			      unsigned long timeout, bool echo,
+			      bool detailed) {
 #ifdef TEENSY41
   // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
   uint8_t size = external_psram_size;
-  stream.println("EXTMEM Memory Test:");
+  outstream.println("EXTMEM Memory Test:");
   if (size == 0) {
-    stream.println("  no external PSRAM memory installed.\n");
+    outstream.println("  no external PSRAM memory installed.\n");
     return;
   }
   long orig_speed = teensySpeed();
@@ -120,69 +121,69 @@ void PSRAMTestAction::execute(Stream &stream, unsigned long timeout,
   MemoryBegin = (uint32_t *)(0x70000000);
   MemoryEnd = (uint32_t *)(0x70000000 + size * 1048576);
   elapsedMillis msec = 0;
-  if (!checkFixed(0x5A698421, stream)) return;
-  if (!checkRandom(2976674124ul, stream)) return;
-  if (!checkRandom(1438200953ul, stream)) return;
-  if (!checkRandom(3413783263ul, stream)) return;
-  if (!checkRandom(1900517911ul, stream)) return;
-  if (!checkRandom(1227909400ul, stream)) return;
-  if (!checkRandom(276562754ul, stream)) return;
-  if (!checkRandom(146878114ul, stream)) return;
-  if (!checkRandom(615545407ul, stream)) return;
-  if (!checkRandom(110497896ul, stream)) return;
-  if (!checkRandom(74539250ul, stream)) return;
-  if (!checkRandom(4197336575ul, stream)) return;
-  if (!checkRandom(2280382233ul, stream)) return;
-  if (!checkRandom(542894183ul, stream)) return;
-  if (!checkRandom(3978544245ul, stream)) return;
-  if (!checkRandom(2315909796ul, stream)) return;
-  if (!checkRandom(3736286001ul, stream)) return;
-  if (!checkRandom(2876690683ul, stream)) return;
-  if (!checkRandom(215559886ul, stream)) return;
-  if (!checkRandom(539179291ul, stream)) return;
-  if (!checkRandom(537678650ul, stream)) return;
-  if (!checkRandom(4001405270ul, stream)) return;
-  if (!checkRandom(2169216599ul, stream)) return;
-  if (!checkRandom(4036891097ul, stream)) return;
-  if (!checkRandom(1535452389ul, stream)) return;
-  if (!checkRandom(2959727213ul, stream)) return;
-  if (!checkRandom(4219363395ul, stream)) return;
-  if (!checkRandom(1036929753ul, stream)) return;
-  if (!checkRandom(2125248865ul, stream)) return;
-  if (!checkRandom(3177905864ul, stream)) return;
-  if (!checkRandom(2399307098ul, stream)) return;
-  if (!checkRandom(3847634607ul, stream)) return;
-  if (!checkRandom(27467969ul, stream)) return;
-  if (!checkRandom(520563506ul, stream)) return;
-  if (!checkRandom(381313790ul, stream)) return;
-  if (!checkRandom(4174769276ul, stream)) return;
-  if (!checkRandom(3932189449ul, stream)) return;
-  if (!checkRandom(4079717394ul, stream)) return;
-  if (!checkRandom(868357076ul, stream)) return;
-  if (!checkRandom(2474062993ul, stream)) return;
-  if (!checkRandom(1502682190ul, stream)) return;
-  if (!checkRandom(2471230478ul, stream)) return;
-  if (!checkRandom(85016565ul, stream)) return;
-  if (!checkRandom(1427530695ul, stream)) return;
-  if (!checkRandom(1100533073ul, stream)) return;
-  if (!checkFixed(0x55555555, stream)) return;
-  if (!checkFixed(0x33333333, stream)) return;
-  if (!checkFixed(0x0F0F0F0F, stream)) return;
-  if (!checkFixed(0x00FF00FF, stream)) return;
-  if (!checkFixed(0x0000FFFF, stream)) return;
-  if (!checkFixed(0xAAAAAAAA, stream)) return;
-  if (!checkFixed(0xCCCCCCCC, stream)) return;
-  if (!checkFixed(0xF0F0F0F0, stream)) return;
-  if (!checkFixed(0xFF00FF00, stream)) return;
-  if (!checkFixed(0xFFFF0000, stream)) return;
-  if (!checkFixed(0xFFFFFFFF, stream)) return;
-  if (!checkFixed(0x00000000, stream)) return;
+  if (!checkFixed(0x5A698421, outstream)) return;
+  if (!checkRandom(2976674124ul, outstream)) return;
+  if (!checkRandom(1438200953ul, outstream)) return;
+  if (!checkRandom(3413783263ul, outstream)) return;
+  if (!checkRandom(1900517911ul, outstream)) return;
+  if (!checkRandom(1227909400ul, outstream)) return;
+  if (!checkRandom(276562754ul, outstream)) return;
+  if (!checkRandom(146878114ul, outstream)) return;
+  if (!checkRandom(615545407ul, outstream)) return;
+  if (!checkRandom(110497896ul, outstream)) return;
+  if (!checkRandom(74539250ul, outstream)) return;
+  if (!checkRandom(4197336575ul, outstream)) return;
+  if (!checkRandom(2280382233ul, outstream)) return;
+  if (!checkRandom(542894183ul, outstream)) return;
+  if (!checkRandom(3978544245ul, outstream)) return;
+  if (!checkRandom(2315909796ul, outstream)) return;
+  if (!checkRandom(3736286001ul, outstream)) return;
+  if (!checkRandom(2876690683ul, outstream)) return;
+  if (!checkRandom(215559886ul, outstream)) return;
+  if (!checkRandom(539179291ul, outstream)) return;
+  if (!checkRandom(537678650ul, outstream)) return;
+  if (!checkRandom(4001405270ul, outstream)) return;
+  if (!checkRandom(2169216599ul, outstream)) return;
+  if (!checkRandom(4036891097ul, outstream)) return;
+  if (!checkRandom(1535452389ul, outstream)) return;
+  if (!checkRandom(2959727213ul, outstream)) return;
+  if (!checkRandom(4219363395ul, outstream)) return;
+  if (!checkRandom(1036929753ul, outstream)) return;
+  if (!checkRandom(2125248865ul, outstream)) return;
+  if (!checkRandom(3177905864ul, outstream)) return;
+  if (!checkRandom(2399307098ul, outstream)) return;
+  if (!checkRandom(3847634607ul, outstream)) return;
+  if (!checkRandom(27467969ul, outstream)) return;
+  if (!checkRandom(520563506ul, outstream)) return;
+  if (!checkRandom(381313790ul, outstream)) return;
+  if (!checkRandom(4174769276ul, outstream)) return;
+  if (!checkRandom(3932189449ul, outstream)) return;
+  if (!checkRandom(4079717394ul, outstream)) return;
+  if (!checkRandom(868357076ul, outstream)) return;
+  if (!checkRandom(2474062993ul, outstream)) return;
+  if (!checkRandom(1502682190ul, outstream)) return;
+  if (!checkRandom(2471230478ul, outstream)) return;
+  if (!checkRandom(85016565ul, outstream)) return;
+  if (!checkRandom(1427530695ul, outstream)) return;
+  if (!checkRandom(1100533073ul, outstream)) return;
+  if (!checkFixed(0x55555555, outstream)) return;
+  if (!checkFixed(0x33333333, outstream)) return;
+  if (!checkFixed(0x0F0F0F0F, outstream)) return;
+  if (!checkFixed(0x00FF00FF, outstream)) return;
+  if (!checkFixed(0x0000FFFF, outstream)) return;
+  if (!checkFixed(0xAAAAAAAA, outstream)) return;
+  if (!checkFixed(0xCCCCCCCC, outstream)) return;
+  if (!checkFixed(0xF0F0F0F0, outstream)) return;
+  if (!checkFixed(0xFF00FF00, outstream)) return;
+  if (!checkFixed(0xFFFF0000, outstream)) return;
+  if (!checkFixed(0xFFFFFFFF, outstream)) return;
+  if (!checkFixed(0x00000000, outstream)) return;
   setTeensySpeed(orig_speed);
-  stream.printf("test ran for %.2f seconds\n", (float)msec / 1000.0f);
-  stream.println("All memory tests passed :-)"); 
-  stream.println();
+  outstream.printf("test ran for %.2f seconds\n", (float)msec / 1000.0f);
+  outstream.println("All memory tests passed :-)"); 
+  outstream.println();
 #else
-  stream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
+  outstream.printf("%s does not support external PSRAM memory\n\n", teensyBoard());
 #endif
 }
 
@@ -207,8 +208,8 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
 }
 
 
-void DevicesAction::report(Stream &stream, unsigned int roles,
-			   size_t indent, size_t w, bool descend) const {
+void DevicesAction::write(Stream &stream, unsigned int roles,
+			  size_t indent, size_t width, bool descend) const {
   if (disabled(roles))
     return;
   if (descend) {
@@ -222,12 +223,13 @@ void DevicesAction::report(Stream &stream, unsigned int roles,
     }
   }
   else if (strlen(name()) > 0)
-    Action::report(stream, roles, indent, w, descend);
+    Action::write(stream, roles, indent, width, descend);
 }
 
 
-void DevicesAction::execute(Stream &stream, unsigned long timeout,
-			    bool echo, bool detailed) {
+void DevicesAction::execute(Stream &instream, Stream &outstream,
+			    unsigned long timeout, bool echo,
+			    bool detailed) {
   size_t navailable = 0;
   for (size_t k=0; k<NDevices; k++) {
     if (Devices[k]->available())
@@ -237,17 +239,17 @@ void DevicesAction::execute(Stream &stream, unsigned long timeout,
   char ds[2] = {'\0', '\0'};
   if (NDevices != 1)
     ds[0] = 's';
-  stream.printf("%d of %d device%s available:\n",
-                navailable, NDevices, ds);
+  outstream.printf("%d of %d device%s available:\n",
+		   navailable, NDevices, ds);
   for (size_t k=0; k<NDevices; k++) {
     if (Devices[k]->available()) {
-      stream.print("  ");
-      Devices[k]->Device::report(stream);
+      outstream.print("  ");
+      Devices[k]->Device::report(outstream);
     }
   }
   if (navailable == 0)
-    stream.println("  no device available!");
-  stream.println();
+    outstream.println("  no device available!");
+  outstream.println();
 }
 
 
@@ -265,8 +267,8 @@ DeviceIDAction::DeviceIDAction(Menu &menu, const char *name,
 }
 
 
-void DeviceIDAction::report(Stream &stream, unsigned int roles,
-			    size_t indent, size_t w, bool descend) const {
+void DeviceIDAction::write(Stream &stream, unsigned int roles,
+			   size_t indent, size_t width, bool descend) const {
   if (disabled(roles))
     return;
   if (descend) {
@@ -274,7 +276,7 @@ void DeviceIDAction::report(Stream &stream, unsigned int roles,
     DevID->report(stream, indent, indentation());
   }
   else
-    Action::report(stream, roles, indent, w, descend);
+    Action::write(stream, roles, indent, width, descend);
 }
 
 
