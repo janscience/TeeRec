@@ -779,6 +779,7 @@ void SDCard::erase(Stream &stream) {
   uint16_t n = 0;
   
   stream.printf("Erase %sSD card:\n", Name);
+  sdfs.card()->syncDevice();
   nsectors = sdfs.card()->sectorCount();
   do {
     last_block = first_block + ERASE_SIZE - 1;
