@@ -34,7 +34,7 @@ class SDInfoAction : public SDCardAction {
   /* Initialize and add to configuration menu. */
   SDInfoAction(Menu &menu, const char *name, SDCard &sd);
 
-  /* Report SD card infos, capacity and available space. */
+  /* Write SD card infos, capacity and available space to stream. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
 		     size_t indent=0, size_t width=0, bool descend=true) const;
 };
@@ -47,9 +47,8 @@ class SDCheckAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Check SD card access. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 
@@ -60,9 +59,8 @@ class SDBenchmarkAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Run a benchmark test and report data rates for writing and reading. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 
@@ -73,9 +71,8 @@ class SDFormatAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Format SD card. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 
  protected:
 
@@ -90,9 +87,8 @@ class SDEraseFormatAction : public SDFormatAction {
   using SDFormatAction::SDFormatAction;
 
   /* Erase and format SD card. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 
@@ -103,9 +99,8 @@ class SDListRootAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List files and directories of the root directory. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 
@@ -116,9 +111,8 @@ class SDListRecordingsAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List all recordings on SD card. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 
@@ -131,9 +125,8 @@ class SDCleanRecordingsAction : public SDCardAction {
 			  unsigned int roles=StreamInput);
 
   /* Move files in latest recordings directory smaller than 1 byte to trash. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 
   void setRemove(bool remove=true);
   void setMinSize(uint64_t min_size);
@@ -155,9 +148,8 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
   using SDListRecordingsAction::SDListRecordingsAction;
 
   /* Remove all recordings from SD card. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 };
 
 

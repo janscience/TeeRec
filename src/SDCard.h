@@ -127,9 +127,9 @@ class SDCard : public SDClass {
   // Serial number of the SD card as hex string (minimum size of 9 characters).
   void serial(char *s);
 
-  // Report SD card infos, capacity and available space on stream with
+  // Write SD card infos, capacity and available space to stream with
   // identation.
-  void report(Stream &stream=Serial, size_t indent=0, size_t indent_delta=2);
+  void write(Stream &stream=Serial, size_t indent=0, size_t indent_delta=4);
 
   // Run a benchmark test and report data rates for
   // writing and reading on stream.

@@ -58,8 +58,8 @@ String DeviceID::makeStr(const String &str, bool nozero) const {
 }
 
 
-void DeviceID::report(Stream &stream, size_t indent,
-		      size_t indent_delta) const {
+void DeviceID::write(Stream &stream, size_t indent,
+		     size_t indent_delta) const {
   char ss[20];
   switch (Source) {
   case 1:

@@ -600,8 +600,8 @@ void SDCard::serial(char *s) {
 }
 
 
-void SDCard::report(Stream &stream, size_t indent,
-		    size_t indent_delta) {
+void SDCard::write(Stream &stream, size_t indent,
+		   size_t indent_delta) {
   if (!checkAvailability(stream))
     return;
   

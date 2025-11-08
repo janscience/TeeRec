@@ -50,9 +50,8 @@ class PSRAMTestAction : public Action {
   PSRAMTestAction(Menu &menu, const char *name);
 
   /* Test Teensy 4.1 PSRAM memory. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 
  protected:
 
@@ -80,9 +79,8 @@ class DevicesAction : public Action {
 		     size_t indent=0, size_t width=0, bool descend=true) const;
 
   /* Print more detailed device info. */
-  virtual void execute(Stream &instream=Serial, Stream &outstream=Serial,
-		       unsigned long timeout=0, bool echo=true,
-		       bool detailed=false);
+  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
+		       bool echo=true, bool detailed=false);
 
   /* Return device at index. Return zero for invalid index. */
   Device *device(size_t index);
