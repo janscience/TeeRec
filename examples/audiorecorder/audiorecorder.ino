@@ -22,8 +22,9 @@
 int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-#define PATH          "recordings" // folder where to store the recordings
-#define FILENAME      "teerecID-SDATETIME.wav" // may include ID, IDA, DATE, SDATE, TIME, STIME,
+#define DEVICEID        1                 // device identifier
+#define PATH            "recordings" // folder where to store the recordings
+#define FILENAME        "teerecID-SDATETIME.wav" // may include ID, IDA, DATE, SDATE, TIME, STIME,
 
 // Pin assignment: ----------------------------------------------------
 
@@ -47,7 +48,7 @@ SDWriter file(sdcard, aidata);
 Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(config, PATH, FILENAME);
+Settings settings(config, DEVICEID, PATH, FILENAME);
 
 RTClock rtclock;
 String prevname; // previous file name

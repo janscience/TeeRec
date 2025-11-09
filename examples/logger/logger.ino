@@ -54,7 +54,6 @@
   #define PREGAIN 1.0           // gain factor of a preamplifier.
 #endif
 
-#define LABEL         "logger"      // device identifier
 #define DEVICEID      1             // may be used for naming files
 #define PATH          "recordings"  // folder where to store the recordings
 #ifdef SINGLE_FILE_MTP
@@ -96,8 +95,8 @@ String prevname; // previous file name
 Blink blink("status", LED_BUILTIN);
 
 Config config("logger.cfg", &sdcard);
-Settings settings(config, LABEL, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
-	          INITIAL_DELAY, false, PULSE_FREQUENCY, 0.0, 0.0);
+Settings settings(config, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
+	          INITIAL_DELAY, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 		  	    CONVERSION, SAMPLING, REFERENCE, PREGAIN);

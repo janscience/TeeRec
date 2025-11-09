@@ -16,24 +16,13 @@ class Settings : public Menu {
 
 public:
 
-  Settings(Menu &menu, const char *label="logger", int deviceid=0,
-	   const char *path="recordings", const char *filename="SDATELNUM.wav",
-	   float filetime=10.0, float initialdelay=0.0, bool randomblinks=false,
+  Settings(Menu &menu, int deviceid=0, const char *path="recordings",
+	   const char *filename="SDATELNUM.wav",
+	   float filetime=10.0, float initialdelay=0.0,
 	   float pulsefrequency=500.0, float displaytime=0.005,
-	   float sensorsinterval=10.0, float blinktimeout=0.0);
-
-  Settings(Menu &menu, const char *path="recordings", const char *filename="SDATELNUM.wav",
-	   float filetime=10.0, float initialdelay=0.0, bool randomblinks=false,
-	   float pulsefrequency=500.0, float displaytime=0.005,
-	   float sensorsinterval=10.0, float blinktimeout=0.0);
+	   float sensorsinterval=10.0);
 
   static const size_t MaxStr = 64;
-
-  /* Label to be used for naming the recordings. */
-  const char *label() const { return Label.value(); };
-
-  /* Set label for naming the recordings to label. */
-  void setLabel(const char *label);
 
   /* Device identifier. */
   int deviceID() const { return ID.value(); };
@@ -53,7 +42,7 @@ public:
   /* Set name template to be used to save the recorded data to fname. */
   void setFileName(const char *fname);
 
-  /* Replace LABEL and ID in path and filename by the respective strings. */
+  /* Replace ID in path and filename by the respective strings. */
   void preparePaths(const DeviceID &deviceid);
 
   /* Time in seconds the files will record data. */
@@ -67,18 +56,6 @@ public:
 
   /* Set initial delay to time seconds. */
   void setInitialDelay(float time);
-
-  /* Whether LED should blink randomly and be stored to file. */
-  bool randomBlinks() const { return RandomBlinks.value(); };
-
-  /* Set whether LED should blink randomly. */
-  void setRandomBlinks(bool random);
-
-  /* Time in seconds after which the status LEDs are switched off. */
-  float blinkTimeout() const { return BlinkTimeout.value(); };
-
-  /* Set time after which the status LEDs are switched off to time seconds. */
-  void setBlinkTimeout(float time);
 
   /* Base frequency of generated test pulses. */
   float pulseFrequency() const { return PulseFrequency.value(); };
@@ -101,14 +78,11 @@ public:
 
 protected:
 
-  StringParameter<MaxStr> Label;
   NumberParameter<int> ID;
   StringParameter<MaxStr> Path;
   StringParameter<MaxStr> FileName;
   NumberParameter<float> FileTime;
   NumberParameter<float> InitialDelay;
-  BoolParameter RandomBlinks;
-  NumberParameter<float> BlinkTimeout;
   NumberParameter<float> PulseFrequency;
   NumberParameter<float> DisplayTime;
   NumberParameter<float> SensorsInterval;
