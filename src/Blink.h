@@ -60,6 +60,12 @@ class Blink {
   // Switch LED on this pin off and disable it.
   void disablePin(uint8_t index);
 
+  // Enable all pins.
+  void enablePins(bool enable=true);
+
+  // Switch all LEDs off and disable all pins.
+  void disablePins();
+
   // True if at least one pin is controlled by this. 
   bool available() const { return NPins > 0; };
 

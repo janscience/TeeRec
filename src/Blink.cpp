@@ -112,6 +112,22 @@ void Blink::disablePin(uint8_t index) {
 }
 
 
+void Blink::enablePins(bool enable) {
+  for (uint8_t k=0; k<NPins; k++) {
+    if (Enabled[k] == enable)
+      continue;
+    if (!enable)
+      Devices[k]->write(Pins[k], LOW);
+    Enabled[k] = enable;
+  }
+}
+
+
+void Blink::disablePins() {
+  enablePins(false);
+}
+
+
 void Blink::report(Stream &stream) {
   if (NPins == 0)
     stream.print("no pins");
