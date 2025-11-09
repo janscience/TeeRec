@@ -56,7 +56,7 @@ public:
   void setConversionSpeed(ADC_CONVERSION_SPEED speed);
 
   // The conversion speed.
-  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed.value(); };
+  ADC_CONVERSION_SPEED conversionSpeed() const { return ConversionSpeed.enumValue(); };
   
   // Set the sampling speed.
   // Increase the sampling speed for low impedance sources, 
@@ -72,7 +72,7 @@ public:
   void setSamplingSpeed(ADC_SAMPLING_SPEED speed);
 
   // The sampling speed.
-  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed.value(); };
+  ADC_SAMPLING_SPEED samplingSpeed() const { return SamplingSpeed.enumValue(); };
 
   // Set the voltage preference.
   // One of ADC_REFERENCE::REF_3V3 (default), ADC_REFERENCE::REF_1V2, or ADC_REFERENCE::REF_EXT
@@ -80,7 +80,7 @@ public:
   void setReference(ADC_REFERENCE ref);
 
   // The voltage reference.
-  ADC_REFERENCE reference() const { return Reference.value(); };
+  ADC_REFERENCE reference() const { return Reference.enumValue(); };
 
   // Apply settings on input.
   virtual void configure(Input *input) const;

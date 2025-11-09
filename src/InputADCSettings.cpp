@@ -70,17 +70,17 @@ void InputADCSettings::setAveraging(uint8_t num) {
 
 
 void InputADCSettings::setConversionSpeed(ADC_CONVERSION_SPEED speed) {
-  ConversionSpeed.setValue(speed);
+  ConversionSpeed.setEnumValue(speed);
 }
 
 
 void InputADCSettings::setSamplingSpeed(ADC_SAMPLING_SPEED speed) {
-  SamplingSpeed.setValue(speed);
+  SamplingSpeed.setEnumValue(speed);
 }
 
 
 void InputADCSettings::setReference(ADC_REFERENCE ref) {
-  Reference.setValue(ref);
+  Reference.setEnumValue(ref);
 }
 
 

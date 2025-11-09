@@ -86,7 +86,7 @@ void Settings::setInitialDelay(float time) {
 
 
 void Settings::setRandomBlinks(bool random) {
-  RandomBlinks.setValue(random);
+  RandomBlinks.setBoolValue(random);
 }
 
 
