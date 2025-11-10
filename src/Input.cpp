@@ -17,7 +17,7 @@ bool Input::check(uint8_t nchannels, Stream &stream) {
     return false;
   }
   if (nchannels > 0 && NChannels != nchannels) {
-    stream.printf("ERROR: number of configured channels %d does not match number of required channels %d\n", NChannels, nchannels);
+    stream.printf("ERROR: number of configured channels %d does not match number of requested channels %d\n", NChannels, nchannels);
     Rate = 0;
     NChannels = 0;
     return false;

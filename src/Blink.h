@@ -73,7 +73,12 @@ class Blink {
   uint8_t nPins() const { return NPins; };
 
   // Report digital IO devices and pins used for blinking on stream.
-  void report(Stream &stream=Serial);
+  void report(Stream &stream=Serial) const;
+
+  // Write name, digital IO devices, and pins used for blinking on stream
+  // with indentation.
+  void write(Stream &stream=Serial, size_t indent=0,
+	     size_t indent_incr=4) const;
 
   // Reset pin configuration
   // (in case the pin mode was reconfigured by something else).

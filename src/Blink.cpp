@@ -128,21 +128,32 @@ void Blink::disablePins() {
 }
 
 
-void Blink::report(Stream &stream) {
+void Blink::report(Stream &stream) const {
   if (NPins == 0)
     stream.print("no pins");
   else
     stream.printf("%d pin%s", NPins, NPins > 1 ? "s" : "");
   stream.printf(" initialized for %s indicator:\n", Name);
   for (uint8_t k=0; k<NPins; k++) {
+    stream.printf("  pin %02d on device %s", Pins[k], Devices[k]->chip());
     if (Enabled[k])
-      stream.printf("  pin %02d on device %s\n",
-		    Pins[k], Devices[k]->chip());
+      stream.println();
     else
-      stream.printf("  pin %02d on device %s (disabled)\n",
-		    Pins[k], Devices[k]->chip());
+      stream.println(" (disabled)");
   }
   stream.println();
+}
+
+
+void Blink::write(Stream &stream, size_t indent, size_t indent_incr) const {
+  if (NPins == 0)
+    return;
+  stream.printf("%*s%s:\n", indent, "", Name);
+  indent += indent_incr;
+  for (uint8_t k=0; k<NPins; k++) {
+    stream.printf("%*sP%d: pin %02d on device %s\n", indent, "",
+		  k, Pins[k], Devices[k]->chip());
+  }
 }
 
 

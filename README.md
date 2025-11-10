@@ -86,6 +86,7 @@ via the `TeeRec.h` header.
 - [RTClockMenu](src/RTClcockMenu.h): Actions and menu for reading and setting the real-time clock.
 - [SDCardMenu](src/SDCardMenu.h): Actions and menu for dealing with SD cards.
 - [DiagnosticMenu](src/DiagnosticMenu.h): Actions and menu for diagnostics of the Teensy board, PSRAM memory, and devices.
+- [BlinkAction](src/BlinkAction.h): Action reporting Blink pins.
 
 ### Audio monitor
 
@@ -97,21 +98,29 @@ via the `TeeRec.h` header.
 - [AnalysisChain](src/AnalysisChain.h): Coordinate analysis of data snippets via Analyzer.
 - [Analyzer](src/Analyzer.h): Base class for analyzers called by AnalysisChain.
 
-### Utilities
-
-- [Display](src/Display.h): Display data on a TFT monitor.
-- [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
+### Real-time clock
 
 - [RTClock](src/RTClock.h): Time and date strings from the [onboard
   real time clock](https://www.pjrc.com/teensy/td_libs_Time.html).
 - [RTClockDS1307](src/RTClockDS1307.h): Use external [DS1307, DS1337, DS3231,
   and MAX31328 chips](https://www.pjrc.com/teensy/td_libs_DS1307RTC.html)
   real time clock.
+
+### LEDs and buttons
+
 - [DigitalIODevice](src/DigitalIODevice.h): Base class for operating a digital input/output devices.
 - [DigitalIOPCA9536](src/DigitalIOPCA9536.h): Controling the PCA9536 digital input/output device.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
 - [DeviceID](src/DeviceID.h): Read out a device identifier.
+
+### TFT monitor
+
+- [Display](src/Display.h): Display data on a TFT monitor.
+- [AllDisplays](src/AllDisplays.h): Include selected TFT library for the examples.
+
+### Utilities
+
 - [TestSignals](src/TestSignals.h): Generate test signals on pulse-width modulation and DAC pins.
 - [TeensyBoard](src/TeensyBoard.h): Find out which Teensy board we are running on.
 - [TeeRecBanner](src/TeeRecBanner.h): ASCII art banner and TeeRec version for output streams.
