@@ -9,8 +9,7 @@ RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock,
 }
 
 
-void PrintRTCAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
+void PrintRTCAction::execute(Stream &stream) {
   stream.print("Current time: ");
   RTC.print(stream);
   stream.println();
@@ -34,8 +33,7 @@ void ReportRTCAction::write(Stream &stream, unsigned int roles,
 }
 
 
-void SetRTCAction::execute(Stream &stream, unsigned long timeout,
-			   bool echo, bool detailed) {
+void SetRTCAction::execute(Stream &stream) {
   RTC.set(stream);
   stream.println();
 }

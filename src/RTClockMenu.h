@@ -34,8 +34,7 @@ class PrintRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Print the current time. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -60,8 +59,7 @@ class SetRTCAction : public RTCAction {
   using RTCAction::RTCAction;
 
   /* Set the real-time clock. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 

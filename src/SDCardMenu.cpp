@@ -25,30 +25,28 @@ void SDInfoAction::write(Stream &stream, unsigned int roles,
 }
 
 
-void SDCheckAction::execute(Stream &stream, unsigned long timeout,
-			    bool echo, bool detailed) {
+void SDCheckAction::execute(Stream &stream) {
   SDC.check(1024*1024, stream);
 }
 
 
-void SDBenchmarkAction::execute(Stream &stream, unsigned long timeout,
-				bool echo, bool detailed) {
+void SDBenchmarkAction::execute(Stream &stream) {
   SDC.benchmark(512, 10, 2, stream);
 }
 
 
 void SDFormatAction::format(const char *erases, bool erase,
-			    bool echo, Stream &stream) {
+			    Stream &stream) {
   char request[64];
   sprintf(request, "Do you really want to%s format the SD card?", erases);
-  if (Action::yesno(request, false, echo, stream)) {
+  if (Action::yesno(request, false, echo(), stream)) {
     bool keep = false;
     if (SDC.exists(root()->configFile())) {
       char request[256];
       snprintf(request, 256, "Should the configuration file \"%s\" be kept?",
 	       root()->configFile());
       request[255] = '\0';
-      keep = Action::yesno(request, true, echo, stream);
+      keep = Action::yesno(request, true, echo(), stream);
     }
     stream.println();
     const char *path = NULL;
@@ -61,26 +59,23 @@ void SDFormatAction::format(const char *erases, bool erase,
 }
 
 
-void SDFormatAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
+void SDFormatAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Formatting will destroy all data on the SD card.");
-  format("", false, echo, stream);
+  format("", false, stream);
 }
 
 
-void SDEraseFormatAction::execute(Stream &stream, unsigned long timeout,
-				  bool echo, bool detailed) {
+void SDEraseFormatAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   stream.println("Erasing and formatting will destroy all data on the SD card.");
-  format(" erase and", true, echo, stream);
+  format(" erase and", true, stream);
 }
 
 
-void SDListRootAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
+void SDListRootAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   SDC.listFiles("/", true, true, stream);
@@ -88,8 +83,7 @@ void SDListRootAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				     bool echo, bool detailed) {
+void SDListRecordingsAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   SDC.listDirectories("/", true, true, stream);
@@ -97,8 +91,7 @@ void SDListRecordingsAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				       bool echo, bool detailed) {
+void SDRemoveRecordingsAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   char folder[64];
@@ -111,7 +104,7 @@ void SDRemoveRecordingsAction::execute(Stream &stream, unsigned long timeout,
   char msg[128];
   sprintf(msg, "Do you really want to erase all recordings in \"%s\"?",
 	  folder);
-  if (Action::yesno(msg, true, echo, stream))
+  if (Action::yesno(msg, true, echo(), stream))
     SDC.removeFiles(folder, stream);
   stream.println();
 }
@@ -145,8 +138,7 @@ void SDCleanRecordingsAction::set(uint64_t min_size, const char *suffix, bool re
   setRemove(remove);
 }
 
-void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
-				      bool echo, bool detailed) {
+void SDCleanRecordingsAction::execute(Stream &stream) {
   if (!SDC.checkAvailability(stream))
     return;
   char folder[64];
@@ -163,7 +155,7 @@ void SDCleanRecordingsAction::execute(Stream &stream, unsigned long timeout,
   else
     sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
 	    folder);
-  if (Action::yesno(msg, true, echo, stream))
+  if (Action::yesno(msg, true, echo(), stream))
     SDC.cleanDir(folder, MinSize, Suffix, strlen(Suffix) > 0, Remove, stream);
   stream.println();
 }

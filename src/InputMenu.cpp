@@ -17,8 +17,7 @@ InputAction::InputAction(Menu &menu, const char *name,
 }
 
 
-void ReportInputAction::execute(Stream &stream, unsigned long timeout,
-				bool echo, bool detailed) {
+void ReportInputAction::execute(Stream &stream) {
   Data.reset();
   Settings.configure(&Data);
   if (Setupai != 0)
@@ -35,8 +34,7 @@ void ReportInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void PrintInputAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
+void PrintInputAction::execute(Stream &stream) {
   Data.reset();
   Settings.configure(&Data);
   if (Setupai != 0)
@@ -68,8 +66,7 @@ void PrintInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void StartInputAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
+void StartInputAction::execute(Stream &stream) {
   Data.reset();
   Settings.configure(&Data);
   if (Setupai != 0)
@@ -85,8 +82,7 @@ void StartInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void GetInputAction::execute(Stream &stream, unsigned long timeout,
-			     bool echo, bool detailed) {
+void GetInputAction::execute(Stream &stream) {
   int tmax = 100;
   stream.println("Get data ...");
   if (!Data.running()) {
@@ -109,8 +105,7 @@ void GetInputAction::execute(Stream &stream, unsigned long timeout,
 }
 
 
-void StopInputAction::execute(Stream &stream, unsigned long timeout,
-			       bool echo, bool detailed) {
+void StopInputAction::execute(Stream &stream) {
   stream.println("Stop recording ...");
   Data.stop();
   stream.println();

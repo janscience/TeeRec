@@ -47,8 +47,7 @@ class SDCheckAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Check SD card access. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -59,8 +58,7 @@ class SDBenchmarkAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Run a benchmark test and report data rates for writing and reading. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -71,12 +69,11 @@ class SDFormatAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* Format SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 
  protected:
 
-  void format(const char *erases, bool erase, bool echo, Stream &stream);
+  void format(const char *erases, bool erase, Stream &stream);
 };
 
 
@@ -87,8 +84,7 @@ class SDEraseFormatAction : public SDFormatAction {
   using SDFormatAction::SDFormatAction;
 
   /* Erase and format SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -99,8 +95,7 @@ class SDListRootAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List files and directories of the root directory. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -111,8 +106,7 @@ class SDListRecordingsAction : public SDCardAction {
   using SDCardAction::SDCardAction;
 
   /* List all recordings on SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -124,9 +118,8 @@ class SDCleanRecordingsAction : public SDCardAction {
   SDCleanRecordingsAction(Menu &menu, const char *name, SDCard &sd,
 			  unsigned int roles=StreamInput);
 
-  /* Move files in latest recordings directory smaller than 1 byte to trash. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  /* Move files in latest recordings directory smaller than 1 kB to trash. */
+  virtual void execute(Stream &stream=Serial);
 
   void setRemove(bool remove=true);
   void setMinSize(uint64_t min_size);
@@ -148,8 +141,7 @@ class SDRemoveRecordingsAction : public SDListRecordingsAction {
   using SDListRecordingsAction::SDListRecordingsAction;
 
   /* Remove all recordings from SD card. */
-  virtual void execute(Stream &stream=Serial, unsigned long timeout=0,
-		       bool echo=true, bool detailed=false);
+  virtual void execute(Stream &stream=Serial);
 };
 
 

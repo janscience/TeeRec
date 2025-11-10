@@ -105,8 +105,7 @@ bool PSRAMTestAction::checkRandom(uint32_t seed, Stream &stream) {
 }
 
 
-void PSRAMTestAction::execute(Stream &stream, unsigned long timeout,
-			      bool echo, bool detailed) {
+void PSRAMTestAction::execute(Stream &stream) {
 #ifdef TEENSY41
   // from https://github.com/PaulStoffregen/teensy41_psram_memtest/blob/master/teensy41_psram_memtest.ino:
   uint8_t size = external_psram_size;
@@ -226,8 +225,7 @@ void DevicesAction::write(Stream &stream, unsigned int roles,
 }
 
 
-void DevicesAction::execute(Stream &stream, unsigned long timeout,
-			    bool echo, bool detailed) {
+void DevicesAction::execute(Stream &stream) {
   size_t navailable = 0;
   for (size_t k=0; k<NDevices; k++) {
     if (Devices[k]->available())
