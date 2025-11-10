@@ -400,6 +400,7 @@ int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
 		      path);
     }
   }
+  sdfs.card()->syncDevice();
   return n_removed;
 }
 
