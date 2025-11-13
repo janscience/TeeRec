@@ -25,6 +25,22 @@ class TeensyInfoAction : public InfoAction {
   
   /* Update CPU speed. */
   void update();
+
+ protected:
+
+  char EEPROMLength[16];
+};
+
+
+class EEPROMHexdumpAction : public Action {
+
+ public:
+
+  /* Initialize and add to configuration menu. */
+  EEPROMHexdumpAction(Menu &menu, const char *name);
+  
+  virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
+		     size_t indent=0, size_t width=0, bool descend=true) const;
 };
 
 
@@ -127,6 +143,7 @@ public:
   void updateCPUSpeed();
 
   TeensyInfoAction TeensyInfoAct;
+  EEPROMHexdumpAction EEPROMHexdumpAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
   SDCheckAction SD0CheckAct;

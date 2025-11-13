@@ -1,3 +1,4 @@
+#include <EEPROM.h>
 #include <TeensyBoard.h>
 #include <Device.h>
 #include <SDCard.h>
@@ -11,16 +12,47 @@ extern "C" uint8_t external_psram_size;
 
 
 TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
-  InfoAction(menu, name, StreamIO | Report) {
+  InfoAction(menu, name, StreamIO | Report),
+  EEPROMLength("") {
+  snprintf(EEPROMLength, 16, "%ubytes", EEPROM.length());
   add("Board", teensyBoard());
   add("CPU speed", teensySpeedStr());
   add("Serial number", teensySN());
   add("MAC address", teensyMAC());
+  add("EEPROM size", EEPROMLength);
 }
 
 
 void TeensyInfoAction::update() {
   setValue("CPU speed", teensySpeedStr());
+}
+
+
+EEPROMHexdumpAction::EEPROMHexdumpAction(Menu &menu, const char *name) : 
+  Action(menu, name, StreamIO) {
+}
+
+
+void EEPROMHexdumpAction::write(Stream &stream, unsigned int roles,
+				size_t indent, size_t width,
+				bool descend) const {
+  unsigned int i=0;
+  while (i < EEPROM.length()) {
+    stream.printf("%04x  ", i);
+    for (unsigned int j=0; j < 2 && i + 8*j < EEPROM.length(); j++) {
+      for (unsigned int k=0; k < 8 && i + 8*j + k < EEPROM.length(); k++)
+	stream.printf("%02x ", EEPROM[i + 8*j + k]);
+      stream.print(" ");
+    }
+    stream.printf("|");
+    for (unsigned int j=0; j < 16 && i < EEPROM.length(); j++)
+      if (EEPROM[i] > 0x10 && EEPROM[i] < 0x80)
+	stream.printf("%c", EEPROM[i++]);
+      else
+	stream.print('.');
+    stream.print("|\n");
+  }
+  stream.println();
 }
 
 
@@ -283,6 +315,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
 			       Device* dev4, Device* dev5) :
   Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
+  EEPROMHexdumpAct(*this, "EEPROM memory content"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
   SD0CheckAct(*this, "SDc", sdcard),
@@ -308,6 +341,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
 			       Device* dev4, Device* dev5) :
   Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
+  EEPROMHexdumpAct(*this, "EEPROM memory content"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
   SD0CheckAct(*this, "Primary SD card check", sdcard0),
