@@ -38,9 +38,21 @@ class EEPROMHexdumpAction : public Action {
 
   /* Initialize and add to configuration menu. */
   EEPROMHexdumpAction(Menu &menu, const char *name);
+
+  /* Hexdump of EEPROM memory. */
+  virtual void execute(Stream &stream=Serial);
+};
+
+
+class EEPROMClearAction : public Action {
+
+ public:
+
+  /* Initialize and add to configuration menu. */
+  EEPROMClearAction(Menu &menu, const char *name);
   
-  virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
+  /* Write 0xFF to all EEPROM memory. */
+  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -144,6 +156,7 @@ public:
 
   TeensyInfoAction TeensyInfoAct;
   EEPROMHexdumpAction EEPROMHexdumpAct;
+  EEPROMClearAction EEPROMClearAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
   SDCheckAction SD0CheckAct;

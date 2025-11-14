@@ -33,25 +33,42 @@ EEPROMHexdumpAction::EEPROMHexdumpAction(Menu &menu, const char *name) :
 }
 
 
-void EEPROMHexdumpAction::write(Stream &stream, unsigned int roles,
-				size_t indent, size_t width,
-				bool descend) const {
+void EEPROMHexdumpAction::execute(Stream &stream) {
   unsigned int i=0;
   while (i < EEPROM.length()) {
     stream.printf("%04x  ", i);
-    for (unsigned int j=0; j < 2 && i + 8*j < EEPROM.length(); j++) {
-      for (unsigned int k=0; k < 8 && i + 8*j + k < EEPROM.length(); k++)
-	stream.printf("%02x ", EEPROM[i + 8*j + k]);
+    for (unsigned int j=0; j < 2; j++) {
+      for (unsigned int k=0; k < 8; k++) {
+	if (i + 8*j + k < EEPROM.length())
+	  stream.printf("%02x ", EEPROM.read(i + 8*j + k));
+	else
+	  stream.print("   ");
+      }
       stream.print(" ");
     }
     stream.printf("|");
-    for (unsigned int j=0; j < 16 && i < EEPROM.length(); j++)
-      if (EEPROM[i] > 0x10 && EEPROM[i] < 0x80)
-	stream.printf("%c", EEPROM[i++]);
-      else
-	stream.print('.');
+    for (unsigned int j=0; j < 16 && i < EEPROM.length(); j++) {
+      uint8_t c = EEPROM.read(i);
+      if (c < 0x20 || c >= 0x7f)
+	c = '.';
+      stream.printf("%c", c);
+      i++;
+    }
     stream.print("|\n");
   }
+  stream.println();
+}
+
+
+EEPROMClearAction::EEPROMClearAction(Menu &menu, const char *name) : 
+  Action(menu, name, StreamIO) {
+}
+
+
+void EEPROMClearAction::execute(Stream &stream) {
+  for (unsigned int i=0; i < EEPROM.length(); i++)
+    EEPROM.update(i, 0xff);
+  stream.printf("Wrote 0xFF to all %u EEPROM memory cells.\n", EEPROM.length());
   stream.println();
 }
 
@@ -316,6 +333,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
   Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   EEPROMHexdumpAct(*this, "EEPROM memory content"),
+  EEPROMClearAct(*this, "Clear EEPROM memory"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
   SD0CheckAct(*this, "SDc", sdcard),
@@ -342,6 +360,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
   Menu(menu, "Diagnostics", Action::StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   EEPROMHexdumpAct(*this, "EEPROM memory content"),
+  EEPROMClearAct(*this, "Clear EEPROM memory"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
   SD0CheckAct(*this, "Primary SD card check", sdcard0),
