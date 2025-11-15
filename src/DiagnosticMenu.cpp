@@ -66,10 +66,13 @@ EEPROMClearAction::EEPROMClearAction(Menu &menu, const char *name) :
 
 
 void EEPROMClearAction::execute(Stream &stream) {
-  for (unsigned int i=0; i < EEPROM.length(); i++)
-    EEPROM.update(i, 0xff);
-  stream.printf("Wrote 0xFF to all %u EEPROM memory cells.\n", EEPROM.length());
-  stream.println();
+  if (Action::yesno("Do you really want to clear the full EEPROM memory?", false, echo(), stream)) {
+    for (unsigned int i=0; i < EEPROM.length(); i++)
+      EEPROM.update(i, 0xff);
+    stream.printf("Wrote 0xFF to all %u EEPROM memory cells.\n",
+		  EEPROM.length());
+    stream.println();
+  }
 }
 
 
