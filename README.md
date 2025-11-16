@@ -86,7 +86,7 @@ via the `TeeRec.h` header.
 - [RTClockMenu](src/RTClcockMenu.h): Actions and menu for reading and setting the real-time clock.
 - [SDCardMenu](src/SDCardMenu.h): Actions and menu for dealing with SD cards.
 - [DiagnosticMenu](src/DiagnosticMenu.h): Actions and menu for diagnostics of the Teensy board, PSRAM memory, and devices.
-- [BlinkAction](src/BlinkAction.h): Action reporting Blink pins.
+- [BlinkMenu](src/BlinkMenu.h): Menu for reporting and testing Blink pins.
 
 ### Audio monitor
 
