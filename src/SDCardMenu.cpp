@@ -100,7 +100,6 @@ void SDRemoveRecordingsAction::execute(Stream &stream) {
     stream.print("No folder exists that can be removed.\n\n");
     return;
   }
-  stream.printf("Erase all files in folder \"%s\".\n", folder);
   char msg[128];
   sprintf(msg, "Do you really want to erase all recordings in \"%s\"?",
 	  folder);
@@ -150,11 +149,9 @@ void SDCleanRecordingsAction::execute(Stream &stream) {
   stream.printf("Clean up files in folder \"%s\".\n", folder);
   char msg[128];
   if (Remove)
-    sprintf(msg, "Do you really want to erase small files in \"%s\"?",
-	    folder);
+    strcpy(msg, "Do you really want to erase small files in this folder?");
   else
-    sprintf(msg, "Do you really want to move small files in \"%s\" to trash/?",
-	    folder);
+    strcpy(msg, "Do you really want to move small files in this folder to trash/?");
   if (Action::yesno(msg, true, echo(), stream))
     SDC.cleanDir(folder, MinSize, Suffix, strlen(Suffix) > 0, Remove, stream);
   stream.println();
