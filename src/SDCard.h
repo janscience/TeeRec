@@ -154,12 +154,10 @@ class SDCard : public SDClass {
   // - "IDA" by the device identifier as alphabetical characters,
   //   e.g. "DY", "N", "G".
   //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AG".
-  // - If the device identifier is negative, do not replace any ID strings.
-  // - If maxid is larger than zero and the device identifier is zero, then
-  //   set the device identifier to maxid.
   // - LABEL by the label string if it is a non-empty string.
+  // If the device identifier is negative, do not replace any ID strings.
   static String preparePath(const String &path, int deviceid=-1,
-			    int maxid=0, const char *label=0);
+			    const char *label=0);
 
   // Replace NUM in fname by "01", "02", "03", etc.,
   // ANUM by "aa", "ab", "ac", etc. 

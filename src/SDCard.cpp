@@ -858,15 +858,13 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
 
 
 String SDCard::preparePath(const String &path, int deviceid,
-			       int maxid, const char *label) {
+			   const char *label) {
   String istr = path;
   // set label:
   if (label != 0 and strlen(label) > 0)
     istr.replace("LABEL", label);
   // set device identifier:
   if (deviceid >= 0) {
-    if (deviceid == 0 && maxid > 0)
-      deviceid = maxid;
     int ida = deviceid - 1;
     char ids[16];
     if (istr.indexOf("IDAA") >= 0) {

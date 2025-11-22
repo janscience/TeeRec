@@ -45,10 +45,10 @@ void Settings::setFileName(const char *fname) {
 
 void Settings::preparePaths() {
   // path:
-  String s = SDCard::preparePath(Path.value(), ID.value(), 0, Label.value());
+  String s = SDCard::preparePath(Path.value(), ID.value(), Label.value());
   Path.setValue(s.c_str());
   // filename:
-  s = SDCard::preparePath(FileName.value(), ID.value(), 0, Label.value());
+  s = SDCard::preparePath(FileName.value(), ID.value(), Label.value());
   FileName.setValue(s.c_str());
 }
 
