@@ -9,20 +9,25 @@
 
 #include <MicroConfig.h>
 
-class DeviceID;
-
 
 class Settings : public Menu {
 
 public:
 
-  Settings(Menu &menu, int deviceid=0, const char *path="recordings",
+  Settings(Menu &menu, const char *label="logger", int deviceid=0,
+	   const char *path="recordings",
 	   const char *filename="SDATELNUM.wav",
 	   float filetime=10.0, float initialdelay=0.0,
 	   float pulsefrequency=500.0, float displaytime=0.005,
 	   float sensorsinterval=10.0);
 
   static const size_t MaxStr = 64;
+
+  /* Label to be used for naming the recordings. */
+  const char *label() const { return Label.value(); };
+
+  /* Set label for naming the recordings to label. */
+  void setLabel(const char *label);
 
   /* Device identifier. */
   int deviceID() const { return ID.value(); };
@@ -42,8 +47,8 @@ public:
   /* Set name template to be used to save the recorded data to fname. */
   void setFileName(const char *fname);
 
-  /* Replace ID in path and filename by the respective strings. */
-  void preparePaths(const DeviceID &deviceid);
+  /* Replace LABEL and ID in path and filename by the respective strings. */
+  void preparePaths();
 
   /* Time in seconds the files will record data. */
   float fileTime() const { return FileTime.value(); };
@@ -78,6 +83,7 @@ public:
 
 protected:
 
+  StringParameter<MaxStr> Label;
   NumberParameter<int> ID;
   StringParameter<MaxStr> Path;
   StringParameter<MaxStr> FileName;

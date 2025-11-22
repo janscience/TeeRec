@@ -29,10 +29,11 @@
 #define CONFIG_FILE     "teerec.cfg"   // name of configuration file
 
 // Settings:
+#define LABEL           "teerec"          // may be used for naming files
 #define DEVICEID        1                 // device identifier
-#define PATH            "recordings"      // folder where to store the recordings
-#define FILENAME        "recID-NUM4.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-#define FILE_SAVE_TIME  10   // seconds
+#define PATH            "recordings"      // folder where to store the recordings, may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM
+#define FILENAME        "LABELID-NUM4.wav"  // may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM, ANUM, NUM 
+#define FILE_SAVE_TIME  10    // seconds
 #define INITIAL_DELAY   10.0  // seconds
 #define PULSE_FREQUENCY 230   // Hertz
 #define DISPLAY_TIME  0.005   // seconds
@@ -56,7 +57,7 @@ RTClockDS1307 rtclock;
 SDCard sdcard;
 
 Config config(CONFIG_FILE, &sdcard);
-Settings settings(config, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, LABEL, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
                   INITIAL_DELAY, PULSE_FREQUENCY, DISPLAY_TIME, SENSORS_TIME);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,

@@ -12,7 +12,6 @@
 
 
 class Device;
-class DeviceID;
 class SDCard;
 
 
@@ -120,34 +119,14 @@ protected:
 };
 
 
-class DeviceIDAction : public Action {
-
- public:
-
-  /* Initialize and add to configuration menu. */
-  DeviceIDAction(Menu &menu, const char *name,
-		 DeviceID *deviceid);
-
-  /* Read and print device ID. */
-  virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
-
-protected:
-
-  DeviceID *DevID;
-  
-};
-
-
 class DiagnosticMenu : public Menu {
 
 public:
 
-  DiagnosticMenu(Menu &menu, SDCard &sdcard, DeviceID *devid,
+  DiagnosticMenu(Menu &menu, SDCard &sdcard,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
   DiagnosticMenu(Menu &menu, SDCard &sdcard0, SDCard &sdcard1,
-		 DeviceID *devid,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
 
@@ -164,7 +143,6 @@ public:
   SDCheckAction SD1CheckAct;
   SDBenchmarkAction SD1BenchmarkAct;
   DevicesAction DevicesAct;
-  DeviceIDAction DeviceIDAct;
 
 protected:
 

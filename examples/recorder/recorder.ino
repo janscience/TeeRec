@@ -51,11 +51,12 @@ int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input p
 #define UPDATE_SCREEN 500   // milliseconds
 #define DISPLAY_TIME  0.005 // seconds
 
-bool logging = false;           // keep saving to files
-#define DEVICEID        1                 // device identifier
-#define PATH            "recordings" // folder where to store the recordings
-#define FILENAME        "SDATELNUM"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
-#define FILE_SAVE_TIME  10   // seconds
+bool logging = false;                // keep saving to files
+#define LABEL           "rec"        // may be used for naming files
+#define DEVICEID        1            // device identifier
+#define PATH            "recordings" // folder where to store the recordings, may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM
+#define FILENAME        "SDATELNUM"  // may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM, ANUM, NUM
+#define FILE_SAVE_TIME  10           // seconds
 
 #define START_PIN 24
 
@@ -84,7 +85,7 @@ elapsedMillis screenTime;
 Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(config, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, LABEL, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
 		  0, PULSE_FREQUENCY, DISPLAY_TIME);
 RTClock rtclock;
 String prevname; // previous file name
@@ -125,6 +126,7 @@ bool openNextFile() {
 
 
 void setupStorage() {
+  settings.preparePaths();
   if (file.available())
     file.sdcard()->dataDir(settings.path());
   file.setWriteInterval();

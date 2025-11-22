@@ -16,7 +16,6 @@
 #endif
 #include <SDWriter.h>
 #include <RTClockDS1307.h>
-#include <DeviceID.h>
 #include <Blink.h>
 #include <TestSignals.h>
 #include <MicroConfig.h>
@@ -54,12 +53,13 @@
   #define PREGAIN 1.0           // gain factor of a preamplifier.
 #endif
 
+#define LABEL         "logger"      // may be used for naming files
 #define DEVICEID      1             // may be used for naming files
-#define PATH          "recordings"  // folder where to store the recordings
+#define PATH          "recordings"  // folder where to store the recordings, may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM
 #ifdef SINGLE_FILE_MTP
-#define FILENAME      "recNUM.wav"  // may include ID, IDA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "recNUM.wav"  // may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM, ANUM, NUM
 #else
-#define FILENAME      "loggerID-SDATELNUM.wav"  // may include DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, ANUM, NUM
+#define FILENAME      "loggerID-SDATELNUM.wav"  // may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM, ANUM, NUM
 #endif
 #define FILE_SAVE_TIME 10   // seconds
 
@@ -90,12 +90,11 @@ SDCard sdcard;
 SDWriter file(sdcard, aidata);
 
 RTClockDS1307 rtclock;
-DeviceID deviceid(DEVICEID);
 String prevname; // previous file name
 Blink blink("status", LED_BUILTIN);
 
 Config config("logger.cfg", &sdcard);
-Settings settings(config, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
+Settings settings(config, LABEL, DEVICEID, PATH, FILENAME, FILE_SAVE_TIME,
 	          INITIAL_DELAY, PULSE_FREQUENCY, 0.0, 0.0);
 #if defined(INPUT_ADC)
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
@@ -106,7 +105,7 @@ InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 RTClockMenu rtclock_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
 SDCardMenu sdcard_menu(config, sdcard);
-DiagnosticMenu diagnostic_menu(config, sdcard, &deviceid, &rtclock);
+DiagnosticMenu diagnostic_menu(config, sdcard, &rtclock);
 HelpAction help_act(config, "Help");
 
 int restarts = 0;
@@ -150,8 +149,7 @@ bool openNextFile() {
 void setupStorage() {
   if (settings.fileTime() > 30)
     blink.setTiming(5000);
-  deviceid.setID(settings.deviceID());
-  settings.preparePaths(deviceid);
+  settings.preparePaths();
   if (file.sdcard()->dataDir(settings.path()))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.path());
   file.setWriteInterval();

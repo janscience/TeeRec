@@ -147,6 +147,20 @@ class SDCard : public SDClass {
   void format(const char *path=0, bool erase_card=false,
 	      Stream &stream=Serial);
 
+  // Replace in path:
+  // - "ID" by the device identifier, e.g. "103", "14", "7".
+  //   Use "ID2" or "ID3" to pad the ID with zeros to two or three digits,
+  //   e.g. "103", "14", "07" for "ID2" or "103", "014", "007" of "ID3".
+  // - "IDA" by the device identifier as alphabetical characters,
+  //   e.g. "DY", "N", "G".
+  //   Use "IDAA" to always use 2 characters: e.g. "DY", "AN", "AG".
+  // - If the device identifier is negative, do not replace any ID strings.
+  // - If maxid is larger than zero and the device identifier is zero, then
+  //   set the device identifier to maxid.
+  // - LABEL by the label string if it is a non-empty string.
+  static String preparePath(const String &path, int deviceid=-1,
+			    int maxid=0, const char *label=0);
+
   // Replace NUM in fname by "01", "02", "03", etc.,
   // ANUM by "aa", "ab", "ac", etc. 
   // such that it specifies a non existing file.

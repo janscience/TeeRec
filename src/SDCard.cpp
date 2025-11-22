@@ -857,6 +857,50 @@ void SDCard::format(const char *path, bool erase_card, Stream &stream) {
 }
 
 
+String SDCard::preparePath(const String &path, int deviceid,
+			       int maxid, const char *label) {
+  String istr = path;
+  // set label:
+  if (label != 0 and strlen(label) > 0)
+    istr.replace("LABEL", label);
+  // set device identifier:
+  if (deviceid >= 0) {
+    if (deviceid == 0 && maxid > 0)
+      deviceid = maxid;
+    int ida = deviceid - 1;
+    char ids[16];
+    if (istr.indexOf("IDAA") >= 0) {
+      ids[2] = '\0';
+      ids[1] = char('A' + (ida % 26));
+      ids[0] = char('A' + (ida / 26));
+      istr.replace("IDAA", ids);
+    }
+    else if (istr.indexOf("IDA") >= 0) {
+      ids[2] = '\0';
+      ids[1] = char('A' + (ida % 26));
+      ids[0] = char('A' + (ida / 26));
+      if (ids[0] == 'A')
+	istr.replace("IDA", ids + 1);
+      else
+	istr.replace("IDA", ids);
+    }
+    else if (istr.indexOf("ID3") >= 0) {
+      sprintf(ids, "%03d", deviceid);
+      istr.replace("ID3", ids);
+    }
+    else if (istr.indexOf("ID2") >= 0) {
+      sprintf(ids, "%02d", deviceid);
+      istr.replace("ID2", ids);
+    }
+    else if (istr.indexOf("ID") >= 0) {
+      sprintf(ids, "%d", deviceid);
+      istr.replace("ID", ids);
+    }
+  }
+  return istr;
+}
+
+
 String SDCard::incrementFileName(const String &fname, Stream &stream) {
   if (! Available)
     return "";

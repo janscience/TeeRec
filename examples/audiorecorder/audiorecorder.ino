@@ -22,9 +22,10 @@
 int8_t channels0 [] =  {A14, A15, -1, A2, A3, A4, A5, A6, A7, A8, A9};      // input pins for ADC0, terminate with -1
 int8_t channels1 [] =  {-1, A16, A17, A18, A19, A20, A13, A12, A11};  // input pins for ADC1, terminate with -1
 
-#define DEVICEID        1                 // device identifier
-#define PATH            "recordings" // folder where to store the recordings
-#define FILENAME        "teerecID-SDATETIME.wav" // may include ID, IDA, DATE, SDATE, TIME, STIME,
+#define LABEL           "teerec"        // may be used for naming files
+#define DEVICEID        1            // device identifier
+#define PATH            "recordings" // folder where to store the recordings, may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM
+#define FILENAME        "LABELID-SDATETIME.wav" // may include LABEL, ID, ID2, ID3, IDA, IDAA, DATE, SDATE, TIME, STIME, DATETIME, SDATETIME, SDATETIMEM, ANUM, NUM
 
 // Pin assignment: ----------------------------------------------------
 
@@ -48,7 +49,7 @@ SDWriter file(sdcard, aidata);
 Config config("teerec.cfg", &sdcard);
 InputADCSettings aisettings(config, SAMPLING_RATE, BITS, AVERAGING,
 			    CONVERSION, SAMPLING, REFERENCE);
-Settings settings(config, DEVICEID, PATH, FILENAME);
+Settings settings(config, LABEL, DEVICEID, PATH, FILENAME);
 
 RTClock rtclock;
 String prevname; // previous file name
@@ -143,6 +144,7 @@ void setupStorage() {
   prevname = "";
   if (settings.fileTime() > 30)
     blink.setTiming(5000);
+  settings.preparePaths();
   if (file.sdcard()->dataDir(settings.path()))
     Serial.printf("Save recorded data in folder \"%s\".\n\n", settings.path());
   file.setWriteInterval();

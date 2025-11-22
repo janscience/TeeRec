@@ -38,7 +38,6 @@ forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-cha
 - Display recorded data on a monitor.
 - Generate test signals.
 - React to push buttons.
-- Read out a device identifier.
 - Feedback by blinking the LED.
 
 For slow acquisition of environmental sensor readings see [ESensors
@@ -112,7 +111,6 @@ via the `TeeRec.h` header.
 - [DigitalIOPCA9536](src/DigitalIOPCA9536.h): Controling the PCA9536 digital input/output device.
 - [Blink](src/Blink.h): Blinking LEDs.
 - [PushButtons](src/PushButtons.h): Manage and query push buttons with callback functions.
-- [DeviceID](src/DeviceID.h): Read out a device identifier.
 
 ### TFT monitor
 
@@ -164,7 +162,6 @@ Demonstrate the usage of some of the provided libraries.
 
 - [blink](examples/blink): Demonstrate usage of Blink class.
 - [pushbuttons](examples/pushbuttons): Demonstrate usage of PushButtons class.
-- [deviceid](examples/deviceid): Demonstrate usage of DeviceID class.
 
 
 ## Utilities

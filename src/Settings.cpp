@@ -1,13 +1,14 @@
-#include <DeviceID.h>
+#include <SDCard.h>
 #include <Settings.h>
 
 
-Settings::Settings(Menu &menu, int deviceid,
+Settings::Settings(Menu &menu, const char *label, int deviceid,
 		   const char *path, const char *filename, float filetime,
 		   float initialdelay, float pulsefrequency,
 		   float displaytime, float sensorsinterval) :
   Menu(menu, "Settings"),
-  ID(*this, "DeviceID", deviceid, -1, 127, "%d"),
+  Label(*this, "Label", label),
+  ID(*this, "DeviceID", deviceid, 1, 1024, "%d"),
   Path(*this, "Path", path),
   FileName(*this, "FileName", filename),
   FileTime(*this, "FileTime", filetime, 1.0, 8640.0, "%.0f", "s"),
@@ -15,11 +16,15 @@ Settings::Settings(Menu &menu, int deviceid,
   PulseFrequency(*this, "PulseFreq", pulsefrequency, 1e-2, 1e8, "%.0f", "Hz"),
   DisplayTime(*this, "DisplayTime", displaytime, 0.001, 10, "%.0f", "s", "ms"),
   SensorsInterval(*this, "SensorsInterval", sensorsinterval, 0.001, 1e8, "%.1f", "s") {
-  ID.setSpecial(-1, "device");
   InitialDelay.disable();
   PulseFrequency.disable();
   DisplayTime.disable();
   SensorsInterval.disable();
+}
+
+
+void Settings::setLabel(const char *label) {
+  Label.setValue(label);
 }
 
 								
@@ -38,14 +43,12 @@ void Settings::setFileName(const char *fname) {
 }
 
 
-void Settings::preparePaths(const DeviceID &deviceid) {
+void Settings::preparePaths() {
   // path:
-  String s = Path.value();
-  s = deviceid.makeStr(s);
+  String s = SDCard::preparePath(Path.value(), ID.value(), 0, Label.value());
   Path.setValue(s.c_str());
   // filename:
-  s = FileName.value();
-  s = deviceid.makeStr(s);
+  s = SDCard::preparePath(FileName.value(), ID.value(), 0, Label.value());
   FileName.setValue(s.c_str());
 }
 
