@@ -6,7 +6,7 @@ InputTDMSettings::InputTDMSettings(Menu &menu, uint32_t rate,
 				   int nchannels,
 				   float gain, float pregain) :
   InputSettings(menu, rate, pregain),
-  NChannels(*this, "NChannels", nchannels, 1, 128, "%hu"),
+  NChannels(*this, "NChannels", nchannels, 1, 128, "%hu", 0, 0, Admin),
   Gain(*this, "Gain", gain, "%.1f", "dB") {
   move(&PreGain, 3);
 }
