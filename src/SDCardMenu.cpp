@@ -10,7 +10,7 @@ SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd,
 
 
 SDInfoAction::SDInfoAction(Menu &menu, const char *name, SDCard &sd) : 
-  SDCardAction(menu, name, sd, StreamInput | Report) {
+  SDCardAction(menu, name, sd, StreamIO | Report) {
 }
 
 
