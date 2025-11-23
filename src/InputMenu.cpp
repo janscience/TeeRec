@@ -8,7 +8,7 @@ InputAction::InputAction(Menu &menu, const char *name,
 			 Input &data, InputSettings &settings,
 			 Device** controls, size_t ncontrols,
 			 SetupAI setupai) :
-  Action(menu, name, StreamInput),
+  Action(menu, name),
   Data(data),
   Settings(settings),
   Controls(controls),
@@ -114,7 +114,7 @@ void StopInputAction::execute(Stream &stream) {
 
 InputMenu::InputMenu(Menu &menu, Input &data, InputSettings &settings,
 		     Device** controls, size_t ncontrols, SetupAI setupai) :
-  Menu(menu, "Analog input", Action::StreamInput),
+  Menu(menu, "Analog input", StreamInput),
   ReportAct(*this, "Report input configuration", data, settings,
 	    controls, ncontrols, setupai),
   PrintAct(*this, "Record some data", data, settings,

@@ -10,14 +10,12 @@ SDCardAction::SDCardAction(Menu &menu, const char *name, SDCard &sd,
 
 
 SDInfoAction::SDInfoAction(Menu &menu, const char *name, SDCard &sd) : 
-  SDCardAction(menu, name, sd, StreamIO | Report) {
+  SDCardAction(menu, name, sd, ReportRoles) {
 }
 
 
 void SDInfoAction::write(Stream &stream, unsigned int roles,
 			 size_t indent, size_t width) const {
-  if (disabled(roles))
-    return;
   SDC.write(stream, indent, indentation());
 }
 
@@ -112,9 +110,8 @@ void SDRemoveRecordingsAction::execute(Stream &stream) {
 
 SDCleanRecordingsAction::SDCleanRecordingsAction(Menu &menu,
 						 const char *name,
-						 SDCard &sd,
-						 unsigned int roles) :
-  SDCardAction(menu, name, sd, roles),
+						 SDCard &sd) :
+  SDCardAction(menu, name, sd),
   MinSize(1024),
   Suffix(".wav"),
   Remove(false) {
@@ -160,7 +157,7 @@ void SDCleanRecordingsAction::execute(Stream &stream) {
 
 
 SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard) :
-  Menu(menu, "SD card", Action::StreamInput),
+  Menu(menu, "SD card", StreamInput),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard),

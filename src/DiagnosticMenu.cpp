@@ -11,7 +11,7 @@ extern "C" uint8_t external_psram_size;
 
 
 TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
-  InfoAction(menu, name, StreamIO | Report),
+  InfoAction(menu, name),
   EEPROMLength("") {
   snprintf(EEPROMLength, 16, "%ubytes", EEPROM.length());
   add("Board", teensyBoard());
@@ -28,7 +28,7 @@ void TeensyInfoAction::update() {
 
 
 EEPROMHexdumpAction::EEPROMHexdumpAction(Menu &menu, const char *name) : 
-  Action(menu, name, StreamIO) {
+  Action(menu, name) {
 }
 
 
@@ -60,7 +60,7 @@ void EEPROMHexdumpAction::execute(Stream &stream) {
 
 
 EEPROMClearAction::EEPROMClearAction(Menu &menu, const char *name) : 
-  Action(menu, name, StreamIO) {
+  Action(menu, name) {
 }
 
 
@@ -76,7 +76,7 @@ void EEPROMClearAction::execute(Stream &stream) {
 
 
 PSRAMInfoAction::PSRAMInfoAction(Menu &menu, const char *name) :
-  InfoAction(menu, name, StreamIO | Report) {
+  InfoAction(menu, name) {
   uint8_t size = 0;
   CCMStr[0] = '\0';
 #ifdef TEENSY41
@@ -96,7 +96,7 @@ PSRAMInfoAction::PSRAMInfoAction(Menu &menu, const char *name) :
 
 
 PSRAMTestAction::PSRAMTestAction(Menu &menu, const char *name) : 
-  Action(menu, name, StreamIO) {
+  Action(menu, name) {
 }
 
 
@@ -241,7 +241,7 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
 			     Device* dev0, Device* dev1,
 			     Device* dev2, Device* dev3,
 			     Device* dev4, Device* dev5) :
-  Action(menu, name, StreamIO | Report) {
+  Action(menu, name, ReportRoles) {
   if (dev0 != 0)
     Devices[NDevices++] = dev0;
   if (dev1 != 0)
@@ -259,8 +259,6 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
 
 void DevicesAction::write(Stream &stream, unsigned int roles,
 			  size_t indent, size_t width) const {
-  if (disabled(roles))
-    return;
   if (name() != 0 && strlen(name()) > 0) {
     stream.printf("%*s%s:\n", indent, "", name());
     indent += indentation();
@@ -307,7 +305,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Menu(menu, "Diagnostics", Action::StreamInput),
+  Menu(menu, "Diagnostics", StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   EEPROMHexdumpAct(*this, "EEPROM memory content"),
   EEPROMClearAct(*this, "Clear EEPROM memory"),
@@ -331,7 +329,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
-  Menu(menu, "Diagnostics", Action::StreamInput),
+  Menu(menu, "Diagnostics", StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   EEPROMHexdumpAct(*this, "EEPROM memory content"),
   EEPROMClearAct(*this, "Clear EEPROM memory"),

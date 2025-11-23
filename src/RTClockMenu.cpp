@@ -2,9 +2,8 @@
 #include <RTClockMenu.h>
 
 
-RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock,
-		     unsigned int roles) :
-  Action(menu, name, roles),
+RTCAction::RTCAction(Menu &menu, const char *name, RTClock &rtclock) :
+  Action(menu, name),
   RTC(rtclock) {
 }
 
@@ -24,8 +23,6 @@ ReportRTCAction::ReportRTCAction(Menu &menu, const char *name,
 
 void ReportRTCAction::write(Stream &stream, unsigned int roles,
 			    size_t indent, size_t width) const {
-  if (disabled(roles))
-    return;
   RTC.write(stream, indent, indentation());
 }
 
@@ -37,7 +34,7 @@ void SetRTCAction::execute(Stream &stream) {
 
 
 RTClockMenu::RTClockMenu(Menu &menu, RTClock &rtclock) :
-  Menu(menu, "Date & time", Action::StreamInput),
+  Menu(menu, "Date & time", StreamInput),
   PrintAct(*this, "Print date & time", rtclock),
   ReportAct(*this, "Report date & time infos", rtclock),
   SetAct(*this, "Set date & time", rtclock) {

@@ -6,7 +6,7 @@ ListLEDsAction::ListLEDsAction(Menu &menu, const char *name,
 			       Blink* blink0, Blink* blink1,
 			       Blink* blink2, Blink* blink3,
 			       Blink* blink4, Blink* blink5) :
-  Action(menu, name, StreamIO | Report) {
+  Action(menu, name, ReportRoles) {
   if (blink0 != 0)
     Blinks[NBlinks++] = blink0;
   if (blink1 != 0)
@@ -24,8 +24,6 @@ ListLEDsAction::ListLEDsAction(Menu &menu, const char *name,
 
 void ListLEDsAction::write(Stream &stream, unsigned int roles,
 			   size_t indent, size_t width) const {
-  if (disabled(roles))
-    return;
   stream.printf("%*s%s:\n", indent, "", "LEDs");
   indent += indentation();
   for (size_t k=0; k<NBlinks; k++)
@@ -39,7 +37,7 @@ BlinkLEDsAction::BlinkLEDsAction(Menu &menu, const char *name,
 				 Blink* blink4, Blink* blink5) :
   ListLEDsAction(menu, name, blink0, blink1, blink2,
 		 blink3, blink4, blink5) {
-  disable(StreamOutput | Report);
+  setRoles(ActionRoles);
 }
 
 
@@ -75,7 +73,7 @@ void BlinkLEDsAction::execute(Stream &stream) {
 
 BlinkMenu::BlinkMenu(Menu &menu, Blink *blink0, Blink *blink1, Blink *blink2,
 	    Blink *blink3, Blink *blink4, Blink *blink5) :
-  Menu(menu, "LEDs", Action::StreamIO),
+  Menu(menu, "LEDs", StreamInput),
   ListAct(*this, "List LED pins", blink0, blink1, blink2,
 	  blink3, blink4, blink5),
   BlinkAct(*this, "Blink LEDs", blink0, blink1, blink2,

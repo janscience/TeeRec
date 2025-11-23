@@ -18,8 +18,7 @@ class RTCAction : public Action {
  public:
 
   /* Initialize and add to menu. */
-  RTCAction(Menu &menu, const char *name, RTClock &rtclock,
-	    unsigned int roles=StreamIO);
+  RTCAction(Menu &menu, const char *name, RTClock &rtclock);
 
  protected:
 

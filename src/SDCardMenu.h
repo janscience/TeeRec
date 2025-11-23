@@ -19,7 +19,7 @@ class SDCardAction : public Action {
 
   /* Initialize and add to configuration menu. */
   SDCardAction(Menu &menu, const char *name, SDCard &sd,
-	       unsigned int roles=StreamInput);
+	       unsigned int roles=ActionRoles);
 
  protected:
 
@@ -115,8 +115,7 @@ class SDCleanRecordingsAction : public SDCardAction {
  public:
 
   /* Initialize and add to configuration menu. */
-  SDCleanRecordingsAction(Menu &menu, const char *name, SDCard &sd,
-			  unsigned int roles=StreamInput);
+  SDCleanRecordingsAction(Menu &menu, const char *name, SDCard &sd);
 
   /* Move files in latest recordings directory smaller than 1 kB to trash. */
   virtual void execute(Stream &stream=Serial);
