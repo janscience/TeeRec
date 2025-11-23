@@ -36,7 +36,7 @@ class SDInfoAction : public SDCardAction {
 
   /* Write SD card infos, capacity and available space to stream. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
+		     size_t indent=0, size_t width=0) const;
 };
 
 

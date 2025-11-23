@@ -23,13 +23,10 @@ ReportRTCAction::ReportRTCAction(Menu &menu, const char *name,
 
 
 void ReportRTCAction::write(Stream &stream, unsigned int roles,
-			    size_t indent, size_t width, bool descend) const {
+			    size_t indent, size_t width) const {
   if (disabled(roles))
     return;
-  if (descend)
-    RTC.write(stream, indent, indentation());
-  else
-    Action::write(stream, roles, indent, width, descend);
+  RTC.write(stream, indent, indentation());
 }
 
 

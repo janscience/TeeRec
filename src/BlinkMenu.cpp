@@ -23,17 +23,13 @@ ListLEDsAction::ListLEDsAction(Menu &menu, const char *name,
 
 
 void ListLEDsAction::write(Stream &stream, unsigned int roles,
-			   size_t indent, size_t width, bool descend) const {
+			   size_t indent, size_t width) const {
   if (disabled(roles))
     return;
-  if (descend) {
-    stream.printf("%*s%s:\n", indent, "", "LEDs");
-    indent += indentation();
-    for (size_t k=0; k<NBlinks; k++)
-      Blinks[k]->write(stream, indent, indentation());
-  }
-  else if (strlen(name()) > 0)
-    Action::write(stream, roles, indent, width, descend);
+  stream.printf("%*s%s:\n", indent, "", "LEDs");
+  indent += indentation();
+  for (size_t k=0; k<NBlinks; k++)
+    Blinks[k]->write(stream, indent, indentation());
 }
 
 
@@ -44,12 +40,6 @@ BlinkLEDsAction::BlinkLEDsAction(Menu &menu, const char *name,
   ListLEDsAction(menu, name, blink0, blink1, blink2,
 		 blink3, blink4, blink5) {
   disable(StreamOutput | Report);
-}
-
-
-void BlinkLEDsAction::write(Stream &stream, unsigned int roles,
-			    size_t indent, size_t width, bool descend) const {
-  Action::write(stream, roles, indent, width, descend);
 }
 
 

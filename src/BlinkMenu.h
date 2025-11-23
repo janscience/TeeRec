@@ -24,7 +24,7 @@ class ListLEDsAction : public Action {
 
   /* Print blink infos. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
+		     size_t indent=0, size_t width=0) const;
 
   /* Return Blink at index. Return zero for invalid index. */
   Blink *blink(size_t index);
@@ -46,10 +46,6 @@ class BlinkLEDsAction : public ListLEDsAction {
   BlinkLEDsAction(Menu &menu, const char *name,
 		  Blink *blink0, Blink *blink1=0, Blink *blink2=0,
 		  Blink *blink3=0, Blink *blink4=0, Blink *blink5=0);
-  
-  /* Write action name. */
-  virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
 
   /* Blink LEDs. */
   void execute(Stream &stream);

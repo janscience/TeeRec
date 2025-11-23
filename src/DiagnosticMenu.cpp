@@ -258,21 +258,17 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
 
 
 void DevicesAction::write(Stream &stream, unsigned int roles,
-			  size_t indent, size_t width, bool descend) const {
+			  size_t indent, size_t width) const {
   if (disabled(roles))
     return;
-  if (descend) {
-    if (strlen(name()) > 0) {
-      stream.printf("%*s%s:\n", indent, "", name());
-      indent += indentation();
-    }
-    for (size_t k=0; k<NDevices; k++) {
-      if (Devices[k]->available())
-	Devices[k]->write(stream, indent, indentation());
-    }
+  if (name() != 0 && strlen(name()) > 0) {
+    stream.printf("%*s%s:\n", indent, "", name());
+    indent += indentation();
   }
-  else if (strlen(name()) > 0)
-    Action::write(stream, roles, indent, width, descend);
+  for (size_t k=0; k<NDevices; k++) {
+    if (Devices[k]->available())
+      Devices[k]->write(stream, indent, indentation());
+  }
 }
 
 

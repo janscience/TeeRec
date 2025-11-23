@@ -102,7 +102,7 @@ class DevicesAction : public Action {
 
   /* Print device infos. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
+		     size_t indent=0, size_t width=0) const;
 
   /* Print more detailed device info. */
   virtual void execute(Stream &stream=Serial);

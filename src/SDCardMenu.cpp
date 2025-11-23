@@ -15,13 +15,10 @@ SDInfoAction::SDInfoAction(Menu &menu, const char *name, SDCard &sd) :
 
 
 void SDInfoAction::write(Stream &stream, unsigned int roles,
-			 size_t indent, size_t width, bool descend) const {
+			 size_t indent, size_t width) const {
   if (disabled(roles))
     return;
-  if (descend)
-    SDC.write(stream, indent, indentation());
-  else
-    Action::write(stream, roles, indent, width, descend);
+  SDC.write(stream, indent, indentation());
 }
 
 

@@ -48,7 +48,7 @@ class ReportRTCAction : public RTCAction {
 
   /* Report the time and the status of the real-time clock. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
-		     size_t indent=0, size_t width=0, bool descend=true) const;
+		     size_t indent=0, size_t width=0) const;
 };
 
 
