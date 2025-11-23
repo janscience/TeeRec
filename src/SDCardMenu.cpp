@@ -24,6 +24,10 @@ void SDInfoAction::write(Stream &stream, unsigned int roles,
 
 void SDCheckAction::execute(Stream &stream) {
   SDC.check(1024*1024, stream);
+  if (gui()) {
+    SDC.write(stream, 0, indentation());
+    stream.println();
+  }
 }
 
 
