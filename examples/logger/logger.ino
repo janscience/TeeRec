@@ -21,6 +21,7 @@
 #include <MicroConfig.h>
 #include <Settings.h>
 #include <RTClockMenu.h>
+#include <SDCardMenu.h>
 #include <DiagnosticMenu.h>
 #include <TeeRecBanner.h>
 #ifdef SINGLE_FILE_MTP
@@ -105,7 +106,7 @@ InputTDMSettings aisettings(config, SAMPLING_RATE, 8, GAIN, PREGAIN);
 RTClockMenu rtclock_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
 SDCardMenu sdcard_menu(config, sdcard);
-DiagnosticMenu diagnostic_menu(config, sdcard, &rtclock);
+DiagnosticMenu diagnostic_menu(config, &rtclock);
 HelpAction help_act(config, "Help");
 
 int restarts = 0;
@@ -259,6 +260,7 @@ void setup() {
   settings.enable("InitialDelay");
   settings.enable("PulseFreq");
   aisettings.enable("Pregain");
+  config.get();
   config.load();
   if (Serial)
     config.execute();

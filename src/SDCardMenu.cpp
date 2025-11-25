@@ -158,13 +158,15 @@ void SDCleanRecordingsAction::execute(Stream &stream) {
 
 SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard) :
   Menu(menu, "SD card", StreamInput),
+  CheckAct(*this, "Check SD card availability", sdcard),
   InfoAct(*this, "SD card info", sdcard),
   ListRootAct(*this, "List files in root directory", sdcard),
   ListRecsAct(*this, "List all recordings", sdcard),
   CleanRecsAct(*this, "Clean recent recordings", sdcard),
   EraseRecsAct(*this, "Erase recent recordings", sdcard),
   FormatAct(*this, "Format SD card", sdcard),
-  EraseFormatAct(*this, "Erase and format SD card", sdcard) {
+  EraseFormatAct(*this, "Erase and format SD card", sdcard),
+  BenchmarkAct(*this, "Run benchmark test", sdcard) {
   if (strlen(sdcard.name()) > 0) {
     char name[strlen(sdcard.name()) + 8];
     strcpy(name, sdcard.name());
@@ -173,4 +175,3 @@ SDCardMenu::SDCardMenu(Menu &menu, SDCard &sdcard) :
     setName(name);
   }
 }
-

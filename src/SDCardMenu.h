@@ -150,6 +150,7 @@ public:
 
   SDCardMenu(Menu &menu, SDCard &sdcard);
 
+  SDCheckAction CheckAct;
   SDInfoAction InfoAct;
   SDListRootAction ListRootAct;
   SDListRecordingsAction ListRecsAct;
@@ -157,7 +158,7 @@ public:
   SDRemoveRecordingsAction EraseRecsAct;
   SDFormatAction FormatAct;
   SDEraseFormatAction EraseFormatAct;
-  
+  SDBenchmarkAction BenchmarkAct;
 };
 
 

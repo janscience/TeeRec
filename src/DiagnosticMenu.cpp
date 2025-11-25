@@ -1,7 +1,6 @@
 #include <EEPROM.h>
 #include <TeensyBoard.h>
 #include <Device.h>
-#include <SDCard.h>
 #include <DiagnosticMenu.h>
 
 
@@ -301,7 +300,7 @@ Device *DevicesAction::device(size_t index) {
 }
 
 
-DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
+DiagnosticMenu::DiagnosticMenu(Menu &menu,
 			       Device* dev0, Device* dev1,
 			       Device* dev2, Device* dev3,
 			       Device* dev4, Device* dev5) :
@@ -311,37 +310,7 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard,
   EEPROMClearAct(*this, "Clear EEPROM memory"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
-  SD0CheckAct(*this, "SDc", sdcard),
-  SD0BenchmarkAct(*this, "SDb", sdcard),
-  SD1CheckAct(*this, "SDc", sdcard),
-  SD1BenchmarkAct(*this, "SDb", sdcard),
   DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
-  setSDCardNames(sdcard, SD0CheckAct, SD0BenchmarkAct);
-  SD1CheckAct.disable();
-  SD1BenchmarkAct.disable();
-  if (dev0 == 0)
-    DevicesAct.disable();
-}
-
-
-DiagnosticMenu::DiagnosticMenu(Menu &menu, SDCard &sdcard0,
-			       SDCard &sdcard1,
-			       Device* dev0, Device* dev1,
-			       Device* dev2, Device* dev3,
-			       Device* dev4, Device* dev5) :
-  Menu(menu, "Diagnostics", StreamInput),
-  TeensyInfoAct(*this, "Teensy info"),
-  EEPROMHexdumpAct(*this, "EEPROM memory content"),
-  EEPROMClearAct(*this, "Clear EEPROM memory"),
-  PSRAMInfoAct(*this, "PSRAM memory info"),
-  PSRAMTestAct(*this, "PSRAM memory test"),
-  SD0CheckAct(*this, "Primary SD card check", sdcard0),
-  SD0BenchmarkAct(*this, "Primary SD card benchmark", sdcard0),
-  SD1CheckAct(*this, "Secondary SD card check", sdcard1),
-  SD1BenchmarkAct(*this, "Secondary SD card benchmark", sdcard1),
-  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
-  setSDCardNames(sdcard0, SD0CheckAct, SD0BenchmarkAct);
-  setSDCardNames(sdcard1, SD1CheckAct, SD1BenchmarkAct);
   if (dev0 == 0)
     DevicesAct.disable();
 }
@@ -351,16 +320,3 @@ void DiagnosticMenu::updateCPUSpeed() {
   TeensyInfoAct.update();
 }
 
-
-void DiagnosticMenu::setSDCardNames(SDCard &sdcard, Action &checkact,
-				    Action &benchmarkact) {
-  char name[64];
-  strcpy(name, sdcard.name());
-  if (strlen(name) > 0)
-    name[0] = toupper(name[0]);
-  strcat(name, "SD card check");
-  checkact.setName(name);
-  name[strlen(name) - 5] = '\0';
-  strcat(name, "benchmark");
-  benchmarkact.setName(name);
-}

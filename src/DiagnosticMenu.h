@@ -7,12 +7,10 @@
 #define DiagnosticMenu_h
 
 
-#include <SDCardMenu.h>
 #include <MicroConfig.h>
 
 
 class Device;
-class SDCard;
 
 
 class TeensyInfoAction : public InfoAction {
@@ -123,10 +121,7 @@ class DiagnosticMenu : public Menu {
 
 public:
 
-  DiagnosticMenu(Menu &menu, SDCard &sdcard,
-		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
-		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
-  DiagnosticMenu(Menu &menu, SDCard &sdcard0, SDCard &sdcard1,
+  DiagnosticMenu(Menu &menu,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
 
@@ -138,16 +133,7 @@ public:
   EEPROMClearAction EEPROMClearAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
-  SDCheckAction SD0CheckAct;
-  SDBenchmarkAction SD0BenchmarkAct;
-  SDCheckAction SD1CheckAct;
-  SDBenchmarkAction SD1BenchmarkAct;
   DevicesAction DevicesAct;
-
-protected:
-
-  void setSDCardNames(SDCard &sdcard, Action &checkact,
-		      Action &benchmarkact);
 };
 
 

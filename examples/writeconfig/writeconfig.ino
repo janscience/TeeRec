@@ -69,7 +69,7 @@ RTClockMenu datetime_menu(config, rtclock);
 ConfigurationMenu configuration_menu(config, sdcard);
 SDCardMenu sdcard_menu(config, sdcard);
 FirmwareMenu firmware_menu(config, sdcard);
-DiagnosticMenu diagnostic_menu(config, sdcard, 0, &rtclock);
+DiagnosticMenu diagnostic_menu(config, &rtclock);
 HelpAction help_act(config, "Help");
 
 Blink blink("status", LED_BUILTIN);
@@ -101,6 +101,7 @@ void setup() {
   sdcard.begin(0, DEDICATED_SPI, 40, &SPI1);
 #endif
   sdcard.check();
+  config.get();
   config.load();
   if (Serial)
     config.execute();
