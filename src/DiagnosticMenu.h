@@ -94,9 +94,10 @@ class DevicesAction : public Action {
 
   /* Initialize and add to configuration menu. */
   DevicesAction(Menu &menu, const char *name,
-		Device* dev0, Device* dev1=0,
-		Device* dev2=0, Device* dev3=0,
-		Device* dev4=0, Device* dev5=0);
+		Device* dev0, Device* dev1=0, Device* dev2=0,
+		Device* dev3=0, Device* dev4=0, Device* dev5=0,
+		Device* dev6=0, Device* dev7=0, Device* dev8=0,
+		Device* dev9=0, Device* dev10=0, Device* dev11=0);
 
   /* Print device infos. */
   virtual void write(Stream &stream=Serial, unsigned int roles=AllRoles,
@@ -110,7 +111,7 @@ class DevicesAction : public Action {
 
 protected:
 
-  static const size_t MaxDevices = 6;
+  static const size_t MaxDevices = 12;
   size_t NDevices;
   Device *Devices[MaxDevices];
   
@@ -123,7 +124,9 @@ public:
 
   DiagnosticMenu(Menu &menu,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
-		 Device* dev3=0, Device* dev4=0, Device* dev5=0);
+		 Device* dev3=0, Device* dev4=0, Device* dev5=0,
+		 Device* dev6=0, Device* dev7=0, Device* dev8=0,
+		 Device* dev9=0, Device* dev10=0, Device* dev11=0);
 
   /* Update CPU speed. */
   void updateCPUSpeed();

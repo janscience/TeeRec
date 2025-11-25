@@ -237,9 +237,10 @@ void PSRAMTestAction::execute(Stream &stream) {
 
 
 DevicesAction::DevicesAction(Menu &menu, const char *name,
-			     Device* dev0, Device* dev1,
-			     Device* dev2, Device* dev3,
-			     Device* dev4, Device* dev5) :
+			     Device* dev0, Device* dev1, Device* dev2,
+			     Device* dev3, Device* dev4, Device* dev5,
+			     Device* dev6, Device* dev7, Device* dev8,
+			     Device* dev9, Device* dev10, Device* dev11) :
   Action(menu, name, ReportRoles) {
   if (dev0 != 0)
     Devices[NDevices++] = dev0;
@@ -253,6 +254,18 @@ DevicesAction::DevicesAction(Menu &menu, const char *name,
     Devices[NDevices++] = dev4;
   if (dev5 != 0)
     Devices[NDevices++] = dev5;
+  if (dev6 != 0)
+    Devices[NDevices++] = dev6;
+  if (dev7 != 0)
+    Devices[NDevices++] = dev7;
+  if (dev8 != 0)
+    Devices[NDevices++] = dev8;
+  if (dev9 != 0)
+    Devices[NDevices++] = dev9;
+  if (dev10 != 0)
+    Devices[NDevices++] = dev10;
+  if (dev11 != 0)
+    Devices[NDevices++] = dev11;
 }
 
 
@@ -301,16 +314,18 @@ Device *DevicesAction::device(size_t index) {
 
 
 DiagnosticMenu::DiagnosticMenu(Menu &menu,
-			       Device* dev0, Device* dev1,
-			       Device* dev2, Device* dev3,
-			       Device* dev4, Device* dev5) :
+			       Device* dev0, Device* dev1, Device* dev2,
+			       Device* dev3, Device* dev4, Device* dev5,
+			       Device* dev6, Device* dev7, Device* dev8,
+			       Device* dev9, Device* dev10, Device* dev11) :
   Menu(menu, "Diagnostics", StreamInput),
   TeensyInfoAct(*this, "Teensy info"),
   EEPROMHexdumpAct(*this, "EEPROM memory content"),
   EEPROMClearAct(*this, "Clear EEPROM memory"),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
-  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5) {
+  DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5,
+	     dev6, dev7, dev8, dev9, dev10, dev11) {
   if (dev0 == 0)
     DevicesAct.disable();
 }
