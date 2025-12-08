@@ -262,38 +262,71 @@ bool remove_file(SDClass &sdc, const char *path, const char *fname,
 
 
 int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
-		     bool associated, bool remove, Stream &stream) {
+		     bool associated, const char *alt_suffix, bool remove, Stream &stream) {
   if (!checkAvailability(stream))
     return 0;
   
   SdFile file;
   FsFile dir = sdfs.open(path);
   if (!dir) {
-    stream.printf("Folder \"%s\" does not exist on %s SD card.\n", path, Name);
+    stream.printf("Folder \"%s\" does not exist on %sSD card.\n", path, Name);
     return 0;
   }
   stream.printf("Clean directory on %sSD card:\n", Name);
   if (remove)
-    stream.printf("Erase small files in \"%s\"/:\n", path);
+    stream.printf("Erase small files in \"%s/\":\n", path);
   else
     stream.printf("Move small files in \"%s/\" to trash/:\n", path);
   // 1. number of small and large files:
+  int n_zero = 0;
   int n_small = 0;
+  int n_alt = 0;
   int n_large = 0;
   while (file.openNext(&dir, O_RDONLY)) {
     char fname[64];
     file.getName(fname, 64);
-    if (!file.isDir() && file.fileSize() < min_size &&
-	strcmp(fname + max(0U, strlen(fname) - strlen(suffix)), suffix) == 0)
-      n_small++;
+    if (!file.isDir() && file.fileSize() < min_size) {
+      if (strlen(suffix) > 0 && strcmp(fname + max(0U, strlen(fname) - strlen(suffix)), suffix) == 0)
+	n_small++;
+      else if (strlen(alt_suffix) > 0 && strcmp(fname + max(0U, strlen(fname) - strlen(alt_suffix)), alt_suffix) == 0)
+	n_alt++;
+      else if (strlen(fname) == 0)
+	n_zero++;
+  }
     else
       n_large++;
   }
   dir.close();
   int n_removed = 0;
-  if (n_small == 0)
+  const char *rm_suffix = suffix;
+  if (n_zero == 1) {
+    // remove single file with zero size and no name:
+    dir = sdfs.open(path);
+    while (file.openNext(&dir, O_RDWR)) {
+      char fname[64];
+      file.getName(fname, 64);
+      if (!file.isDir() && file.fileSize() < min_size &&
+	  strlen(fname) == 0) {
+	bool r = file.remove();
+	if (r) {
+	  stream.printf("  erased zero file in \"%s/\"\n", path);
+	  n_removed++;
+	}
+	else
+	  stream.printf("  failed to erase zero file in \"%s/\"\n",
+			path);
+	break;
+      }
+    }
+    dir.close();
+  }
+  else if (n_small == 0 && n_alt == 0)
     stream.print("  no small files found.\n");
   else {
+    if (n_small == 0 && n_alt > 0) {
+      n_small = n_alt;
+      rm_suffix = alt_suffix;
+    }
     // 2. names of small files:
     char file_names[n_small][64];
     int k = 0;
@@ -302,7 +335,7 @@ int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
       char fname[64];
       file.getName(fname, 64);
       if (!file.isDir() && file.fileSize() < min_size &&
-	  strcmp(fname + max(0U, strlen(fname) - strlen(suffix)), suffix) == 0)
+	  strcmp(fname + max(0U, strlen(fname) - strlen(rm_suffix)), rm_suffix) == 0)
 	file.getName(file_names[k++], 64);
     }
     dir.close();
@@ -326,7 +359,7 @@ int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
 	n_large++;
     }
     dir.close();
-    if (associated) {
+    if (associated && rm_suffix == suffix) {
       // 5. number of associated files:
       stream.println("Check for associated files");
       dir = sdfs.open(path);
@@ -337,7 +370,7 @@ int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
 	for (int k=0; k<n_small; k++) {
 	  char sname[64];
 	  strcpy(sname, file_names[k]);
-	  sname[max(0U, strlen(sname) - strlen(suffix))] = '\0';
+	  sname[max(0U, strlen(sname) - strlen(rm_suffix))] = '\0';
 	  if (strncmp(fname, sname, strlen(sname)) == 0)
 	    n_assoc++;
 	}
@@ -355,13 +388,13 @@ int SDCard::cleanDir(const char *path, uint64_t min_size, const char *suffix,
 	  for (int k=0; k<n_small; k++) {
 	    char sname[64];
 	    strcpy(sname, file_names[k]);
-	    sname[max(0U, strlen(sname) - strlen(suffix))] = '\0';
+	    sname[max(0U, strlen(sname) - strlen(rm_suffix))] = '\0';
 	    if (strncmp(fname, sname, strlen(sname)) == 0)
 	      file.getName(more_file_names[j++], 64);
 	  }
 	}
 	dir.close();
-	// 7. move/remove small files:
+	// 7. move/remove associated files:
 	dir = sdfs.open(path);
 	for (k=0; k<n_assoc; k++) {
 	  if (remove_file(*this, path, more_file_names[k],
