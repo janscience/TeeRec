@@ -618,7 +618,7 @@ float ControlPCM186x::gainDecibel(OUTPUT_CHANNELS adc) {
 float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float level) {
   // check level:
   if (level < -12.0) {
-    Serial.printf("ControlPCM186x: invalid level %g < 12dB\n", level);
+    Serial.printf("ControlPCM186x: invalid level %g < -12dB\n", level);
     return NAN;
   }
   if (level > 40.0) {
