@@ -245,6 +245,7 @@ protected:
   static const char *PolarityStrings[2];
   static const char *LowpassStrings[2];
   static const char *OnOffStrings[2];
+  float MaxAmplmV;
   char GainStr[8];
   
 };

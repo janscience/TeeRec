@@ -124,7 +124,11 @@ ControlTLV320::ControlTLV320(TwoWire &wire, uint8_t address,
   Bits(BIT32),
   NChannels(0),
   Bus(bus),
-  GainStr("")
+  MaxAmplmV(1650.0),
+  PGAGain(1.0),
+  VolumeGain(1.0),
+  PGAGainStr("0dB"),
+  VolumeStr("0dB")
 {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
@@ -486,9 +490,10 @@ float ControlTLV320::setGainDecibel(uint8_t channel, float level) {
   else {
     Serial.printf("ERROR in ControlTLV320::setGainDecibel(): invalid channel %u >= 4\n", channel);
   }
-  snprintf(GainStr, 8, "%ddB", igain);
-  GainStr[7] = '\0';
-  add("Gain", GainStr);
+  PGAGain = gainFromDecibel(float(igain));
+  snprintf(PGAGainStr, 8, "%ddB", igain);
+  PGAGainStr[7] = '\0';
+  add("PGAGain", PGAGainStr);
   return float(igain);
 }
 
@@ -516,7 +521,7 @@ float ControlTLV320::setGainDecibel(InputTDM &tdm, float level) {
   for (uint8_t channel=0; channel<4; channel++)
     clevel = setGainDecibel(channel, level);
   if (!isnan(clevel)) {
-    tdm.setGain(1650.0/gainFromDecibel(clevel));
+    tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
     return clevel;
   }
   return NAN;
@@ -533,10 +538,42 @@ float ControlTLV320::setGain(InputTDM &tdm, float gain) {
   for (uint8_t channel=0; channel<4; channel++)
     cgain = setGain(channel, gain);
   if (!isnan(cgain)) {
-    tdm.setGain(1650.0/cgain);
+    tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
     return cgain;
   }
   return NAN;
+}
+
+  
+float ControlTLV320::volumeDecibel() {
+  unsigned int val = read(TLV320_DSP_CFG1_REG);
+  float level = 0.5*val - 100.5;
+  return level;
+}
+		    
+
+float ControlTLV320::setVolumeDecibel(InputTDM &tdm, float level) {
+  // gang volume control across channels:
+  unsigned int val = read(TLV320_DSP_CFG1_REG);
+  val |= 0x80;    // DVOL_GANG
+  if (!write(TLV320_DSP_CFG1_REG, val))
+    return NAN;
+  // set digital volume:
+  if (level > 27.0)
+    level = 27.0;
+  if (level < -100.0)
+    val = 0;
+  else
+    val = int(2.0*(level + 100.5));
+  if (!write(TLV320_CH1_CFG2_REG, val))
+    return NAN;
+  level = 0.5*val - 100.5;
+  VolumeGain = gainFromDecibel(level);
+  snprintf(VolumeStr, 8, "%.1fdB", level);
+  VolumeStr[7] = '\0';
+  add("Volume", PGAGainStr);
+  tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
+  return level;
 }
 
 

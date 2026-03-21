@@ -71,8 +71,9 @@ public:
   // the raw data (normalized to one) to result in the unit().
   float gain() const { return Gain/PreGain; };
 
-  // Set the gain of the recorded data. This is the factor needed to
-  // normalize the raw integer data to a range of one.
+  // Set the gain of the recorded data. Multiplying the
+  // raw integer data normalized to a range of one with this factor
+  // results in data values measured in unit().
   // The gain is also passed on to all consumers.
   virtual void setGain(float gain);
 

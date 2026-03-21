@@ -148,7 +148,8 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   PGALinked(false),
   NChannels(0),
   Bus(bus),
-  GainStr("") {
+  MaxAmplmV(1650.0),
+  GainStr("0dB") {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = false;
   setDeviceType("input");
@@ -633,7 +634,7 @@ float ControlPCM186x::gainDecibel() {
 float ControlPCM186x::setGainDecibel(InputTDM &tdm, float level) {
   level = setGainDecibel(ADCLR, level);
   if (!isnan(level)) {
-    tdm.setGain(1650.0/gainFromDecibel(level));
+    tdm.setGain(MaxAmplmV/gainFromDecibel(level));
     return level;
   }
   return NAN;
@@ -648,7 +649,7 @@ float ControlPCM186x::gain() {
 float ControlPCM186x::setGain(InputTDM &tdm, float gain) {
   gain = setGain(ADCLR, gain);
   if (!isnan(gain)) {
-    tdm.setGain(1650.0/gain);
+    tdm.setGain(MaxAmplmV/gain);
     return gain;
   }
   return NAN;

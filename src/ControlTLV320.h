@@ -149,10 +149,10 @@ public:
   /* Return the gain set for all channels in dB. */
   float gainDecibel();
 
-  /* Set gain of all channels to gain in dB,
+  /* Set gain of all channels to level in dB,
      between 0 and 42dB in steps of 1dB.
      Pass the actually set gain on to tdm and return it. */
-  float setGainDecibel(InputTDM &tdm, float gain);
+  float setGainDecibel(InputTDM &tdm, float level);
   
   /* Return the gain set for all channels as a factor. */
   float gain();
@@ -161,6 +161,14 @@ public:
      between 1 and 100.
      Pass the actually set gain on to tdm and return it. */
   float setGain(InputTDM &tdm, float gain);
+  
+  /* Return the digital volume set for all channels in dB. */
+  float volumeDecibel();
+
+  /* Set volume of all channels to gain in dB,
+     between -100 and 27dB in steps of 0.5dB.
+     Return the actually set gain and pass it on to tdm. */
+  float setVolumeDecibel(InputTDM &tdm, float level);
 
   /* If smooth then smoothly ramp to new gains. */
   bool setSmoothGainChange(bool smooth=true);
@@ -209,7 +217,11 @@ protected:
 
   static const char *LowpassStrings[3];
   static const char *OnOffStrings[2];
-  char GainStr[8];
+  float MaxAmplmV;
+  float PGAGain;
+  float VolumeGain;
+  char PGAGainStr[8];
+  char VolumeStr[8];
   
 };
 
