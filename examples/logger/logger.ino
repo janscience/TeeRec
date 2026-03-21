@@ -235,7 +235,8 @@ void setupPCM(InputTDM &tdm, ControlPCM186x &pcm, bool offs) {
     return;
   }
   pcm.setRate(tdm, aisettings.rate());
-  pcm.setupTDM(tdm, CHANNELS, offs);
+  pcm.setupChannels(CHANNELS);
+  pcm.setupTDM(tdm, offs);
   pcm.setSmoothGainChange(false);
   pcm.setGainDecibel(tdm, aisettings.gainDecibel());
   pcm.setFilters(ControlPCM186x::FIR, false);

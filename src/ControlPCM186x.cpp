@@ -149,6 +149,8 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   NChannels(0),
   Bus(bus),
   GainStr("") {
+  for (uint8_t c=0; c<4; c++)
+    UseChannel[c] = false;
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("PCM186x");
@@ -263,6 +265,100 @@ ControlPCM186x::INPUT_CHANNELS ControlPCM186x::channel(OUTPUT_CHANNELS adc) {
 }
 
 
+bool ControlPCM186x::setupChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
+				  POLARITY polarity) {
+  // check and set channel:
+  uint8_t val = 0;
+  if (adc == ADC1L || adc == ADC2L) {
+    if (channel & CH1L)
+      val |= 0x01;
+    else if (channel & CH2L)
+      val |= 0x02;
+    else if (channel & CH3L)
+      val |= 0x04;
+    else if (channel & CH4L)
+      val |= 0x08;
+    else {
+      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxL %0x2\n", channel, adc);
+      return false;
+    }
+  }
+  else if (adc == ADC1R || adc == ADC2R) {
+    if (channel & CH1R)
+      val |= 0x01;
+    else if (channel & CH2R)
+      val |= 0x02;
+    else if (channel & CH3R)
+      val |= 0x04;
+    else if (channel & CH4R)
+      val |= 0x08;
+    else {
+      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxR %0x2\n", channel, adc);
+      return false;
+    }
+  }
+  // set bit 6 and 7:
+  val += 0x40;    // RSV bit 6 always write 1
+  if (polarity == INVERTED)
+    val += 0x80;  // POL bit 7
+  // set input channel for adc:
+  int chan = 0;
+  if (adc == ADC1L) {
+    if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
+      return false;
+    chan = 0;
+  }
+  else if (adc == ADC1R) {
+    if (!write(PCM186x_ADC1R_INPUT_SEL_REG, val))
+      return false;
+    chan = 1;
+  }
+  else if (adc == ADC2L) {
+    if (!write(PCM186x_ADC2L_INPUT_SEL_REG, val))
+      return false;
+    chan = 2;
+  }
+  else if (adc == ADC2R) {
+    if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
+      return false;
+    chan = 3;
+  }
+  add("Polarity", PolarityStrings[polarity]);
+  if (!UseChannel[chan])
+    NChannels++;
+  UseChannel[chan] = true;
+  return true;
+}
+
+
+bool ControlPCM186x::setupChannels(INPUT_CHANNELS channel1,
+				   INPUT_CHANNELS channel2,
+				   POLARITY polarity) {
+  if (!setupChannel(ADC1L, channel1, polarity))
+    return false;
+  if (!setupChannel(ADC1R, channel2, polarity))
+    return false;
+  return true;
+}
+
+
+bool ControlPCM186x::setupChannels(INPUT_CHANNELS channel1,
+				   INPUT_CHANNELS channel2,
+				   INPUT_CHANNELS channel3,
+				   INPUT_CHANNELS channel4,
+				   POLARITY polarity) {
+  if (!setupChannel(ADC1L, channel1, polarity))
+    return false;
+  if (!setupChannel(ADC1R, channel2, polarity))
+    return false;
+  if (!setupChannel(ADC2L, channel3, polarity))
+    return false;
+  if (!setupChannel(ADC2R, channel4, polarity))
+    return false;
+  return true;
+}
+
+
 const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
   INPUT_CHANNELS chan = channel(adc);
   if (chan == CH1L)
@@ -338,30 +434,7 @@ void ControlPCM186x::channelsStr(char *chans, size_t nchans, bool swaplr,
 }
 
 
-bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      POLARITY polarity) {
-  uint8_t fmt = 0x00;  // I2S
-  DATA_BITS bits = BIT24;
-  uint8_t val = fmt;   // FMT
-  val |= bits << 2;    // TX_WLEN
-  val |= bits << 6;    // RX_WLEN
-  if (!write(PCM186x_I2S_FMT_REG, val))
-    return false;
-  if (!setChannel(ADC1L, channel1, polarity))
-    return false;
-  if (!setChannel(ADC1R, channel2, polarity))
-    return false;
-  NChannels = 2;
-  return true;  
-}
-
-
-bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      INPUT_CHANNELS channel3,
-			      INPUT_CHANNELS channel4,
-			      POLARITY polarity) {
+bool ControlPCM186x::setupI2S() {
   // data format:
   uint8_t fmt = 0x00;   // I2S
   DATA_BITS bits = BIT24;
@@ -371,26 +444,18 @@ bool ControlPCM186x::setupI2S(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_FMT_REG, fval))
     return false;
   // enable DOUT2 on GPIO0:
-  unsigned int val = read(PCM186x_GPIO_FUNC_1_REG);
-  val &= ~0x07;
-  val |= 0x05;
-  if (!write(PCM186x_GPIO_FUNC_1_REG, val))
-    return false;
-  // input channels:
-  if (!setChannel(ADC1L, channel1, polarity))
-    return false;
-  if (!setChannel(ADC1R, channel2, polarity))
-    return false;
-  if (!setChannel(ADC2L, channel3, polarity))
-    return false;
-  if (!setChannel(ADC2R, channel4, polarity))
-    return false;
-  NChannels = 4;
+  if (UseChannel[2] || UseChannel[3]) {
+    unsigned int val = read(PCM186x_GPIO_FUNC_1_REG);
+    val &= ~0x07;
+    val |= 0x05;
+    if (!write(PCM186x_GPIO_FUNC_1_REG, val))
+      return false;
+  }
   return true;  
 }
 
 
-void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
+void ControlPCM186x::updateTDMChannelStr(InputTDM &tdm) {
   char cs[InputTDM::MaxChannels];
   char tdmcs[InputTDM::MaxChannels];
   tdm.channelsStr(tdmcs, InputTDM::MaxChannels);
@@ -428,11 +493,9 @@ void ControlPCM186x::setTDMChannelStr(InputTDM &tdm) {
 }
 
 
-bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      bool offs, POLARITY polarity) {
+bool ControlPCM186x::setupTDM(bool offs) {
   // data format:
-  uint8_t fmt = 0x03;   // TDM
+  uint8_t fmt = 0x03;  // TDM
   DATA_BITS bits = BIT32;
   uint8_t val = fmt;   // FMT
   val |= bits << 2;    // TX_WLEN
@@ -441,148 +504,27 @@ bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
   if (!write(PCM186x_I2S_FMT_REG, val))
     return false;
   // number of ADCs:
-  val = 0x00;        // TDM_OSEL: 2 channel TDM
+  if (NChannels == 4)
+    val = 0x01;        // TDM_OSEL: 4 channel TDM
+  else
+    val = 0x00;        // TDM_OSEL: 2 channel TDM
   if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
       return false;
   val = offs ? 0x80 : 0x00; // TX_TDM_OFFSET
   if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
-  // input channels:
-  if (!setChannel(ADC1L, channel1, polarity))
-    return false;
-  if (!setChannel(ADC1R, channel2, polarity))
-    return false;
-  NChannels = 2;
   return true;  
 }
 
 
-bool ControlPCM186x::setupTDM(InputTDM &tdm,
-			      INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      bool offs, POLARITY polarity) {
-  if (setupTDM(channel1, channel2, offs, polarity)) {
-    if (offs)
-      tdm.setNChannels(Bus, tdm.nchannels(Bus) + 2);
-    else
-      tdm.setNChannels(Bus, 2);
+bool ControlPCM186x::setupTDM(InputTDM &tdm, bool offs) {
+  if (setupTDM(offs)) {
     tdm.setResolution(32);
-    setTDMChannelStr(tdm);
+    tdm.addNChannels(Bus, NChannels);
+    updateTDMChannelStr(tdm);
     return true;
   }
   return false;
-}
-
-
-bool ControlPCM186x::setupTDM(INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      INPUT_CHANNELS channel3,
-			      INPUT_CHANNELS channel4,
-			      bool offs, POLARITY polarity) {
-  // data format:
-  uint8_t fmt = 0x03;   // TDM
-  DATA_BITS bits = BIT32;
-  uint8_t val = fmt;   // FMT
-  val |= bits << 2;    // TX_WLEN
-  val |= 0x10;         // TDM_LRCK_MODE
-  val |= bits << 6;    // RX_WLEN
-  if (!write(PCM186x_I2S_FMT_REG, val))
-    return false;
-  // number of ADCs:
-  val = 0x01;           // TDM_OSEL: 4 channel TDM
-  if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
-      return false;
-  val = offs ? 0x80 : 0x00; // TX_TDM_OFFSET
-  if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
-    return false;
-  // input channels:
-  if (!setChannel(ADC1L, channel1, polarity))
-    return false;
-  if (!setChannel(ADC1R, channel2, polarity))
-    return false;
-  if (!setChannel(ADC2L, channel3, polarity))
-    return false;
-  if (!setChannel(ADC2R, channel4, polarity))
-    return false;
-  NChannels = 4;
-  return true;  
-}
-
-
-bool ControlPCM186x::setupTDM(InputTDM &tdm,
-			      INPUT_CHANNELS channel1,
-			      INPUT_CHANNELS channel2,
-			      INPUT_CHANNELS channel3,
-			      INPUT_CHANNELS channel4,
-			      bool offs, POLARITY polarity) {
-  if (setupTDM(channel1, channel2, channel3, channel4, offs, polarity)) {
-    if (offs)
-      tdm.setNChannels(Bus, tdm.nchannels(Bus) + 4);
-    else
-      tdm.setNChannels(Bus, 4);
-    tdm.setResolution(32);
-    setTDMChannelStr(tdm);
-    return true;
-  }
-  return false;
-}
-
-
-bool ControlPCM186x::setChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
-				POLARITY polarity) {
-  // check and set channel:
-  uint8_t val = 0;
-  if (adc == ADC1L || adc == ADC2L) {
-    if (channel & CH1L)
-      val |= 0x01;
-    else if (channel & CH2L)
-      val |= 0x02;
-    else if (channel & CH3L)
-      val |= 0x04;
-    else if (channel & CH4L)
-      val |= 0x08;
-    else {
-      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxL %0x2\n", channel, adc);
-      return false;
-    }
-  }
-  else if (adc == ADC1R || adc == ADC2R) {
-    if (channel & CH1R)
-      val |= 0x01;
-    else if (channel & CH2R)
-      val |= 0x02;
-    else if (channel & CH3R)
-      val |= 0x04;
-    else if (channel & CH4R)
-      val |= 0x08;
-    else {
-      Serial.printf("ControlPCM186x: invalid channel %02x for ADCxR %0x2\n", channel, adc);
-      return false;
-    }
-  }
-  // set bit 6 and 7:
-  val += 0x40;    // RSV bit 6 always write 1
-  if (polarity == INVERTED)
-    val += 0x80;  // POL bit 7
-  // set input channel for adc:
-  if (adc == ADC1L) {
-    if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
-      return false;
-  }
-  else if (adc == ADC1R) {
-    if (!write(PCM186x_ADC1R_INPUT_SEL_REG, val))
-      return false;
-  }
-  else if (adc == ADC2L) {
-    if (!write(PCM186x_ADC2L_INPUT_SEL_REG, val))
-      return false;
-  }
-  else if (adc == ADC2R) {
-    if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
-      return false;
-  }
-  add("Polarity", PolarityStrings[polarity]);
-  return true;
 }
 
 
@@ -779,11 +721,19 @@ bool ControlPCM186x::powerdown() {
   val |= 0x04;    // set PWRDN
   if (!write(PCM186x_PWRDN_CTRL_REG, val))
     return false;
+  CurrentPage = 10;
+  for (uint8_t c=0; c<4; c++)
+    UseChannel[c] = false;
+  NChannels = 0;
   return true;
 }
 
 
 bool ControlPCM186x::powerup() {
+  CurrentPage = 10;
+  for (uint8_t c=0; c<4; c++)
+    UseChannel[c] = false;
+  NChannels = 0;
   unsigned int val = read(PCM186x_PWRDN_CTRL_REG);
   val &= ~0xF8;   // clear reserved bits
   val |= 0x70;    // write reserved bits

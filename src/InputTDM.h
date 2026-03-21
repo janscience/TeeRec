@@ -50,17 +50,21 @@ class InputTDM : public Input {
   // Return total number of channels multiplexed into the buffer.
   uint8_t nchannels() const { return NChannels; };
   
-  // Set number of channels to nchannels.
+  // Set number of channels of the first TDM bus to nchannels.
   virtual void setNChannels(uint8_t nchannels);
-  
-  // Set number of channels of the TDM bus to nchannels.
-  void setNChannels(TDM_BUS bus, uint8_t nchannels);
 
   // Return number of channels recorded from the given TDM bus.
   uint8_t nchannels(TDM_BUS bus) const { return NChans[bus]; };
   
+  // Set number of channels of the TDM bus to nchannels.
+  void setNChannels(TDM_BUS bus, uint8_t nchannels);
+  
+  // Increment number of channels of the TDM bus by nchannels.
+  void addNChannels(TDM_BUS bus, uint8_t nchannels);
+  
   // Return in chans of size nchans the string with the channels
   // in the order they are multiplexed into the buffer.
+  // This channel string neds to be set before via setChannelsStr().
   virtual void channelsStr(char *chans, size_t nchans) const;
   
   // Set string identifying channel pins.

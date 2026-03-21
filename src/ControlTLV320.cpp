@@ -3,7 +3,7 @@
 
 const uint32_t ControlTLV320::SamplingRates[ControlTLV320::MaxSamplingRates] =
   {8000, 16000, 24000, 32000, 48000, 96000, 192000, 384000, 768000};
-const uint8_t ControlTLV320::BitBytes[4] = {2, 3, 3, 4};
+const uint8_t ControlTLV320::BitBits[4] = {16, 20, 24, 32};
 
 const char *ControlTLV320::LowpassStrings[3] = {"linear", "low latency", "ultra-low latency"};
 const char *ControlTLV320::OnOffStrings[2] = {"off", "on"};
@@ -121,7 +121,8 @@ ControlTLV320::ControlTLV320(TwoWire &wire, uint8_t address,
   I2CAddress(address),
   CurrentPage(10),
   Rate(0),
-  Bits(BIT16),
+  Bits(BIT32),
+  NChannels(0),
   Bus(bus),
   GainStr("")
 {
@@ -196,7 +197,12 @@ void ControlTLV320::setRate(InputTDM &tdm, uint32_t rate) {
     break;
   };
 }
-							     
+
+
+void ControlTLV320::setResolution(DATA_BITS bits) {
+  Bits = bits;
+}
+
 
 const char *ControlTLV320::channelStr(uint8_t channel) {
   if (channel == 0 && UseChannel[channel] > 0) {
@@ -230,18 +236,12 @@ const char *ControlTLV320::channelStr(uint8_t channel) {
 
 void ControlTLV320::channelsStr(char *chans, size_t nchans,
 				const char *prefix) {
-  // number of channels:
-  uint8_t num_chans = 0;
-  for (uint8_t c=0; c<4; c++) {
-    if (UseChannel[c] > 0)
-      num_chans++;
-  }
   // prepare channel string:
   *chans = '\0';
   size_t n = 6;      // strlen of a single channel name plus comma
   if (prefix != 0)
     n += strlen(prefix);
-  n *= num_chans;
+  n *= NChannels;
   if (n >= nchans)
     Serial.printf("ERROR in ControlTLV320::channelsStr(): size of chans (%d) too small for %d characters!\n", nchans, n);
   uint8_t i_chan = 0;
@@ -251,7 +251,7 @@ void ControlTLV320::channelsStr(char *chans, size_t nchans,
       if (prefix != 0)
 	strcat(chans, prefix);
       strcat(chans, channelStr(c));
-      if (i_chan < num_chans)
+      if (i_chan < NChannels)
 	strcat(chans, ",");
     }
   }
@@ -308,13 +308,15 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
     slot = offs;
     for (uint8_t c=0; c<4; c++) {
       if (UseChannel[c] > 0)
-	slot += BitBytes[Bits];
+	slot++;
     }
   }
   val = 0;
   val = slot & 0x3F;
   if (!write(TLV320_ASI_CH1_REG + channel, val))
     return false;
+  if (UseChannel[channel] == 0)
+    NChannels++;
   UseChannel[channel] = (source == DIFFERENTIAL_INPUT ? 2 : 1);
   return true;
 }
@@ -331,7 +333,7 @@ bool ControlTLV320::setupChannels(uint8_t n_chans, SOURCE source,
   for (uint8_t c=0; c<n_chans; c++) {
     setupChannel(c, source, impedance, coupling, slot, offs, dre);
     if (slot >= 0)
-      slot += BitBytes[Bits];
+      slot++;
   }
   return true;
 }
@@ -349,7 +351,7 @@ bool ControlTLV320::setupI2S() {
 }
 
 
-void ControlTLV320::setTDMChannelStr(InputTDM &tdm) {
+void ControlTLV320::updateTDMChannelStr(InputTDM &tdm) {
   char cs[InputTDM::MaxChannels];
   char tdmcs[InputTDM::MaxChannels];
   tdm.channelsStr(tdmcs, InputTDM::MaxChannels);
@@ -387,7 +389,7 @@ void ControlTLV320::setTDMChannelStr(InputTDM &tdm) {
 }
 
 
-bool ControlTLV320::setupTDM(InputTDM &tdm, bool offs) {
+bool ControlTLV320::setupTDM(InputTDM &tdm) {
   // data format:
   uint8_t fmt = 0x00;  // TDM
   uint8_t val = 0;
@@ -396,17 +398,9 @@ bool ControlTLV320::setupTDM(InputTDM &tdm, bool offs) {
   if (!write(TLV320_ASI_CFG0_REG, val))
     return false;
   // configure TDM:
-  int num_chans = 0;
-  for (uint8_t c=0; c<4; c++) {
-    if (UseChannel[c] > 0)
-      num_chans++;
-  }
-  if (offs)
-    tdm.setNChannels(Bus, tdm.nchannels(Bus) + num_chans);
-  else
-    tdm.setNChannels(Bus, num_chans);
-  tdm.setResolution(32);
-  setTDMChannelStr(tdm);
+  tdm.setResolution(BitBits[Bits]);
+  tdm.addNChannels(Bus, NChannels);
+  updateTDMChannelStr(tdm);
   return setActive();
 }
 
@@ -604,6 +598,7 @@ bool ControlTLV320::powerdown() {
   CurrentPage = 10;
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
+  NChannels = 0;
   return true;
 }
 
@@ -616,6 +611,7 @@ bool ControlTLV320::powerup() {
   CurrentPage = 10;
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
+  NChannels = 0;
   val = 0;
   val |= 0x01;    // set SLEEP_ENZ
   if (!write(TLV320_SLEEP_CFG_REG, val))

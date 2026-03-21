@@ -79,6 +79,19 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
     NChannels += NChans[k];
 }
 
+  
+void InputTDM::addNChannels(TDM_BUS bus, uint8_t nchannels) {
+  if (NChans[bus] + nchannels > 256/Bits) {
+    Serial.printf("InputTDM::setNChannels() -> too many channels=%u.\n", nchannels);
+    nchannels = 0;
+  }
+  if (nchannels == 0)
+    return;
+  NChans[bus] += nchannels;
+  NChannels += nchannels;
+  TDMUse |= (1 << bus);
+}
+
 
 void InputTDM::channelsStr(char *chans, size_t nchans) const {
   if (strlen(Channels) >= nchans)

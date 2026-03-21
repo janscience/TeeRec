@@ -25,6 +25,7 @@ public:
 
   static const size_t MaxSamplingRates = 9;
   static const uint32_t SamplingRates[MaxSamplingRates];
+  static const uint8_t BitBits[4];
   
   enum DATA_BITS : uint8_t {
     BIT16,
@@ -71,7 +72,7 @@ public:
      and address (one of TLV320_I2C_ADDR*). */
   ControlTLV320(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
 
-  /* Communicate with TLV chip using wire, address (0x4A or 0x4B),
+  /* Communicate with TLV chip using wire, address (one of TLV320_I2C_ADDR*),
      and TDM bus. */
   ControlTLV320(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1,
 		InputTDM::TDM_BUS bus=InputTDM::TDM1);
@@ -80,11 +81,12 @@ public:
      You need to initialize I2C by calling `Wire.begin()` before. */
   bool begin();
   
-  /* Initialize TLV320 with address (0x4A or 0x4B) on default I2C bus.
+  /* Initialize TLV320 with address (one of TLV320_I2C_ADDR*)
+     on default I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
   bool begin(uint8_t address);
 
-  /* Initialize TLV320 with address (0x4A or 0x4B) on I2C bus.
+  /* Initialize TLV320 with address (one of TLV320_I2C_ADDR*) on I2C bus.
      You need to initialize I2C by calling `wire.begin()` before. */
   bool begin(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1);
   
@@ -116,10 +118,9 @@ public:
      Get the recorded data with AudioInputI2S */
   bool setupI2S();
   
-  /* Setup TDM output for the specified two input channels.
-     If offset, shift the recorded data by two slots.
-     Set resolution, number and identifiers of channels of tdm accordingly. */
-  bool setupTDM(InputTDM &tdm, bool offs=false);
+  /* Setup TDM output.
+     Call this after specifying sampling rate, resolution, and channels. */
+  bool setupTDM(InputTDM &tdm);
 
   /* The TDM bus on which this TLV320 chip transmits data. */
   InputTDM::TDM_BUS TDMBus() const { return Bus; };
@@ -194,7 +195,7 @@ protected:
 
   float readCoefficient(uint8_t address);
 
-  void setTDMChannelStr(InputTDM &tdm);
+  void updateTDMChannelStr(InputTDM &tdm);
   
   TwoWire *I2CBus;
   uint8_t I2CAddress;
@@ -202,10 +203,10 @@ protected:
   uint32_t Rate;
   DATA_BITS Bits;
   uint8_t UseChannel[4];  // 0: unused, 1: single ended, 2: differential
+  int NChannels;
   InputTDM::TDM_BUS Bus;
   static const int WriteDelay = 1;
 
-  static const uint8_t BitBytes[4];
   static const char *LowpassStrings[3];
   static const char *OnOffStrings[2];
   char GainStr[8];
