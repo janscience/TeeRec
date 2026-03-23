@@ -155,6 +155,7 @@ bool ControlTLV320::begin() {
     return false;
 
   // setup slave mode with auto PLL:
+  /* this is all default:
   unsigned int val = read(TLV320_MST_CFG0_REG);
   val &= ~0x08;  // FS_MODE: rate is multiple of 48kHz 
   val &= ~0x20;  // AUTO_MODE_PLL_DIS: PLL enabled 
@@ -162,6 +163,7 @@ bool ControlTLV320::begin() {
   val &= ~0x80;  // MST_SLV_CFG: slave mode
   if (!write(TLV320_MST_CFG0_REG, val))
     return false;
+  */
 
   Available = true;
   return true;
@@ -282,13 +284,7 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
       Serial.printf("ERROR in ControlTLV320::setupChannel(): invalid channel %d\n", channel);
       return false;
   }
-  /*
-  // enable input:
-  unsigned int val = read(TLV320_IN_CH_EN_REG);
-  val |= 0x80 >> channel;
-  if (!write(TLV320_IN_CH_EN_REG, val))
-    return false;
-  */
+  /* TODO: ???
   // disable GPO on channel pin:
   if (!write(TLV320_GPO_CFG0_REG + channel, 0x00))
     return false;
@@ -300,6 +296,7 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
     if (!write(TLV320_GPI_CFG0_REG + channel/2, val))
       return false;
   }
+  */
   // select DRE:
   if (dre) {
     val = read(TLV320_DSP_CFG1_REG);
@@ -328,13 +325,6 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
   val = slot & 0x3F;
   if (!write(TLV320_ASI_CH1_REG + channel, val))
     return false;
-  /*
-  // enable output:
-  val = read(TLV320_ASI_OUT_CH_EN_REG);
-  val |= 0x80 >> channel;
-  if (!write(TLV320_ASI_OUT_CH_EN_REG, val))
-    return false;
-  */
   if (UseChannel[channel] == 0)
     NChannels++;
   UseChannel[channel] = (source == DIFFERENTIAL_INPUT ? 2 : 1);
@@ -363,9 +353,18 @@ bool ControlTLV320::setupI2S() {
   // data format:
   uint8_t fmt = 0x01;  // I2S
   uint8_t val = 0;
+  //val &= ~0x01;        // TX_FILL, set for shared TDM bus!
   val |= fmt << 6;     // ASI_FORMAT
   val |= Bits << 4;    // ASI_WLEN
+  if (Rate > 75000)
+    val |= 0x02;       // TX_EDGE, see page 4 in sbaa383c.pdf
   if (!write(TLV320_ASI_CFG0_REG, val))
+    return false;
+  // TODO: only for the one chip directly connected to host:
+  val = 0;
+  val |= 0x20;         // TX_KEEPER: Bus keeper is always enabled
+  val |= 0x80;         // TX_LSB: Transmit the LSB for the first half cycle and Hi-Z for the second half cycle 
+  if (!write(TLV320_ASI_CFG1_REG, val))
     return false;
   return setActive();  
 }
@@ -409,20 +408,36 @@ void ControlTLV320::updateTDMChannelStr(InputTDM &tdm) {
 }
 
 
-bool ControlTLV320::setupTDM(InputTDM &tdm) {
+bool ControlTLV320::setupTDM() {
   // data format:
   uint8_t fmt = 0x00;  // TDM
   uint8_t val = 0;
-  val &= ~0x01;        // TX_FILL
+  //val &= ~0x01;        // TX_FILL, set for shared TDM bus!
   val |= fmt << 6;     // ASI_FORMAT
   val |= Bits << 4;    // ASI_WLEN
+  if (Rate > 75000)
+    val |= 0x02;       // TX_EDGE, see page 4 in sbaa383c.pdf
   if (!write(TLV320_ASI_CFG0_REG, val))
+    return false;
+  // TODO: only for the one chip directly connected to host:
+  val = 0;
+  val |= 0x20;         // TX_KEEPER: Bus keeper is always enabled
+  val |= 0x80;         // TX_LSB: Transmit the LSB for the first half cycle and Hi-Z for the second half cycle 
+  if (!write(TLV320_ASI_CFG1_REG, val))
+    return false;
+  // TODO: conifgure channels here?!?
+  return setActive();
+}
+
+
+bool ControlTLV320::setupTDM(InputTDM &tdm) {
+  if (!setupTDM())
     return false;
   // configure TDM:
   tdm.setResolution(BitBits[Bits]);
   tdm.addNChannels(Bus, NChannels);
   updateTDMChannelStr(tdm);
-  return setActive();
+  return true;
 }
 
 
@@ -436,13 +451,11 @@ bool ControlTLV320::setActive() {
   }
   if (!write(TLV320_IN_CH_EN_REG, val))
     return false;
-  // enable output channels:
+  // enable output channels and put unused channels into tristate mode:
   if (!write(TLV320_ASI_OUT_CH_EN_REG, val))
     return false;
   // power up:
-  val = read(TLV320_PWR_CFG_REG);
-  val &= ~0x03;   // clear reserved bits
-  val |= 0x60;    // power up ADC, PDM, and PLL
+  val = 0x60;    // power up ADC, PDM, and PLL
   if (!write(TLV320_PWR_CFG_REG, val))
     return false;
   return true;
@@ -668,16 +681,10 @@ bool ControlTLV320::powerup() {
   NChannels = 0;
   val = 0;
   val |= 0x01;    // set SLEEP_ENZ
-  if (!write(TLV320_SLEEP_CFG_REG, val))
-    return false;
-  delay(2);
   val |= 0x80;    // set AREG_SELECT to internal 1.8V supply
   if (!write(TLV320_SLEEP_CFG_REG, val))
     return false;
   delay(10);
-  val = 0;        // disable all channels
-  if (!write(TLV320_IN_CH_EN_REG, val))
-    return false;
   return true;
 }
 

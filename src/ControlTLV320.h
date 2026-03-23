@@ -120,6 +120,10 @@ public:
   
   /* Setup TDM output.
      Call this after specifying sampling rate, resolution, and channels. */
+  bool setupTDM();
+  
+  /* Setup TDM output and notify tdm.
+     Call this after specifying sampling rate, resolution, and channels. */
   bool setupTDM(InputTDM &tdm);
 
   /* The TDM bus on which this TLV320 chip transmits data. */
