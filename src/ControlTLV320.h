@@ -23,7 +23,7 @@ class ControlTLV320 : public Device {
   
 public:
 
-  static const size_t MaxSamplingRates = 9;
+  static const size_t MaxSamplingRates = 7;
   static const uint32_t SamplingRates[MaxSamplingRates];
   static const uint8_t BitBits[4];
   
@@ -91,7 +91,7 @@ public:
   bool begin(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1);
   
   /* Set sampling rate per channel in Hertz. */
-  void setRate(InputTDM &tdm, uint32_t rate);
+  bool setRate(InputTDM &tdm, uint32_t rate);
 
   /* Set resolution. Call before seting up channels. */
   void setResolution(DATA_BITS bits);
@@ -105,14 +105,14 @@ public:
   void channelsStr(char *chans, size_t nchans, const char *prefix=0);
   
   /* Setup input channel as output channel. */
-  bool setupChannel(uint8_t channel, SOURCE source, IMPEDANCE impedance,
-		    COUPLING coupling, bool dre=false,
-		    int8_t slot=-1, uint8_t offs=0);
+  bool setupChannel(uint8_t channel, SOURCE source=DIFFERENTIAL_INPUT,
+		    IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
+		    bool dre=false, int8_t slot=-1, uint8_t offs=0);
   
   /* Setup input channels as output channels. */
-  bool setupChannels(uint8_t n_chans, SOURCE source, IMPEDANCE impedance,
-		     COUPLING coupling, bool dre=false,
-		     int8_t slot=-1, uint8_t offs=0);
+  bool setupChannels(uint8_t n_chans, SOURCE source=DIFFERENTIAL_INPUT,
+		     IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
+		     bool dre=false, int8_t slot=-1, uint8_t offs=0);
 
   /* Setup I2S output.
      Get the recorded data with AudioInputI2S */
@@ -186,6 +186,9 @@ public:
   /*! Switch back into active mode. */
   bool powerup();
 
+  /* Print channel configuration Serial. */
+  void printChannel(uint8_t channel);
+
   /* Print state (all status registers) to Serial. */
   void printState();
 
@@ -201,7 +204,7 @@ protected:
 
   bool setActive();
 
-  float readCoefficient(uint8_t address);
+  uint32_t readCoefficient(uint8_t address);
 
   void updateTDMChannelStr(InputTDM &tdm);
   

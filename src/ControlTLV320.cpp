@@ -2,7 +2,7 @@
 
 
 const uint32_t ControlTLV320::SamplingRates[ControlTLV320::MaxSamplingRates] =
-  {8000, 16000, 24000, 32000, 48000, 96000, 192000, 384000, 768000};
+  {8000, 16000, 24000, 32000, 48000, 96000, 192000};
 const uint8_t ControlTLV320::BitBits[4] = {16, 20, 24, 32};
 
 const char *ControlTLV320::LowpassStrings[3] = {"linear", "low latency", "ultra-low latency"};
@@ -100,7 +100,7 @@ const char *ControlTLV320::OnOffStrings[2] = {"off", "on"};
 // register addresses page 0x04, MSB is page, LSB is register:
 #define TLV320_MIX1_CH1_BYT1_REG 0x0408
 // ... many more ...
-#define TLV320_IIR_N0_BYT1_REG 0x0408
+#define TLV320_IIR_N0_BYT1_REG 0x0448
 // ... many more ...
 
 
@@ -180,7 +180,7 @@ bool ControlTLV320::begin(TwoWire &wire, uint8_t address) {
 }
 
 
-void ControlTLV320::setRate(InputTDM &tdm, uint32_t rate) {
+bool ControlTLV320::setRate(InputTDM &tdm, uint32_t rate) {
   Rate = rate;
   switch (rate) {
   case 8000:
@@ -193,11 +193,13 @@ void ControlTLV320::setRate(InputTDM &tdm, uint32_t rate) {
   case 384000:
   case 768000:
     tdm.setRate(rate);
+    return true;
     break;
   default:
     Serial.printf("WARNING in ControlTLV320::setRate(): invalid sampling rate of %dHz\n", rate);
     tdm.setRate(0);
     Rate = 0;
+    return false;
     break;
   };
 }
@@ -280,10 +282,17 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
       Serial.printf("ERROR in ControlTLV320::setupChannel(): invalid channel %d\n", channel);
       return false;
   }
-  // disaple GPO on channel pin:
+  /*
+  // enable input:
+  unsigned int val = read(TLV320_IN_CH_EN_REG);
+  val |= 0x80 >> channel;
+  if (!write(TLV320_IN_CH_EN_REG, val))
+    return false;
+  */
+  // disable GPO on channel pin:
   if (!write(TLV320_GPO_CFG0_REG + channel, 0x00))
     return false;
-  // disaple GPI on channel pin:
+  // disable GPI on channel pin:
   unsigned int val = 0x00;
   if (source == DIFFERENTIAL_INPUT) {
     val = read(TLV320_GPI_CFG0_REG + channel/2);
@@ -299,12 +308,12 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
   // configure channel:
   val = 0;
   if (dre)
-    val |= 0x01;          // DREEN
-  val |= impedance << 2;  // IMP
+    val |= 0x01;                  // DREEN
+  val |= (impedance & 0x03) << 2; // IMP
   if (coupling == DC_CPL)
-    val |= 0x10;          // DC
-  val |= source << 5;     // INSRC
-  val |= 0x80;            // INTYP: Line input
+    val |= 0x10;                  // DC
+  val |= (source & 0x03) << 5;    // INSRC
+  val |= 0x80;                    // INTYP: Line input
   if (!write(addr, val))
     return false;
   // configure channel output:
@@ -319,6 +328,13 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
   val = slot & 0x3F;
   if (!write(TLV320_ASI_CH1_REG + channel, val))
     return false;
+  /*
+  // enable output:
+  val = read(TLV320_ASI_OUT_CH_EN_REG);
+  val |= 0x80 >> channel;
+  if (!write(TLV320_ASI_OUT_CH_EN_REG, val))
+    return false;
+  */
   if (UseChannel[channel] == 0)
     NChannels++;
   UseChannel[channel] = (source == DIFFERENTIAL_INPUT ? 2 : 1);
@@ -335,7 +351,7 @@ bool ControlTLV320::setupChannels(uint8_t n_chans, SOURCE source,
     return false;
   }
   for (uint8_t c=0; c<n_chans; c++) {
-    setupChannel(c, source, impedance, coupling, slot, offs, dre);
+    setupChannel(c, source, impedance, coupling, dre, slot, offs);
     if (slot >= 0)
       slot++;
   }
@@ -397,6 +413,7 @@ bool ControlTLV320::setupTDM(InputTDM &tdm) {
   // data format:
   uint8_t fmt = 0x00;  // TDM
   uint8_t val = 0;
+  val &= ~0x01;        // TX_FILL
   val |= fmt << 6;     // ASI_FORMAT
   val |= Bits << 4;    // ASI_WLEN
   if (!write(TLV320_ASI_CFG0_REG, val))
@@ -470,7 +487,7 @@ float ControlTLV320::setGainDecibel(uint8_t channel, float level) {
     return NAN;
   }
   // set level:
-  int8_t igain = (int8_t)(level) << 2;
+  int8_t igain = (uint8_t)(level) << 2;
   if (channel == 0) {
     if (!write(TLV320_CH1_CFG1_REG, igain))
       return NAN;
@@ -665,19 +682,142 @@ bool ControlTLV320::powerup() {
 }
 
 
+void ControlTLV320::printChannel(uint8_t channel) {
+  uint8_t addr = 0;
+  if (channel == 0)
+    addr = TLV320_CH1_CFG0_REG;
+  else if (channel == 1)
+    addr = TLV320_CH2_CFG0_REG;
+  else if (channel == 2)
+    addr = TLV320_CH3_CFG0_REG;
+  else if (channel == 3)
+    addr = TLV320_CH4_CFG0_REG;
+  else {
+    Serial.printf("ERROR: invalid channel %d!\n", channel);
+    return;
+  }
+  unsigned int val = read(addr);
+  Serial.printf("CH%d_CFG0:\n", channel + 1);
+  Serial.print("  Input source: ");
+  unsigned int source = (val & 0x60) >> 5;
+  if (source == 0)
+    Serial.println("differential");
+  else if (source == 1)
+    Serial.println("single-ended");
+  else if (source == 2)
+    Serial.println("digital");
+  else
+    Serial.println("reserved");
+  Serial.print("  Coupling    : ");
+  if (val & 0x10)
+    Serial.println("DC");
+  else
+    Serial.println("AC");
+  Serial.print("  Impedance   : ");
+  unsigned int imp = (val & 0x0C) >> 2;
+  if (imp == 0)
+    Serial.println("2.5kOhm");
+  else if (imp == 1)
+    Serial.println("10kOhm");
+  else if (imp == 2)
+    Serial.println("20kOhm");
+  else
+    Serial.println("reserved");
+  Serial.print("  DRE and AGC : ");
+  if (val & 0x01)
+    Serial.println("enabled");
+  else
+    Serial.println("disabled");
+  Serial.print("  Input type  : ");
+  if (val & 0x80)
+    Serial.println("line input");
+  else
+    Serial.println("microphone");
+  // slot:
+  val = read(TLV320_ASI_CH1_REG + channel);
+  Serial.printf("  TDM slot    : %d\n", val & 0x3F);
+  Serial.print("  Output line : ");
+  if (val & 0x40)
+    Serial.println("secondary output (GPIO1 or GPOx)");
+  else
+    Serial.println("primary output (SDOUT)");  
+  // channel gain:
+  if (channel == 0)
+    addr = TLV320_CH1_CFG1_REG;
+  else if (channel == 1)
+    addr = TLV320_CH2_CFG1_REG;
+  else if (channel == 2)
+    addr = TLV320_CH3_CFG1_REG;
+  else if (channel == 3)
+    addr = TLV320_CH4_CFG1_REG;
+  val = read(addr);
+  Serial.print("  Gain        : ");
+  uint8_t gain = val >> 2;
+  if (gain <= 42)
+    Serial.printf("%6.1fdB\n", float(gain));
+  else
+    Serial.println("reserved");
+  // channel volume:
+  val = read(TLV320_DSP_CFG1_REG);
+  bool ganged = (val & 0x80);
+  if (ganged)    // channels ganged
+    addr = TLV320_CH1_CFG2_REG;
+  else if (channel == 0)
+    addr = TLV320_CH1_CFG2_REG;
+  else if (channel == 1)
+    addr = TLV320_CH2_CFG2_REG;
+  else if (channel == 2)
+    addr = TLV320_CH3_CFG2_REG;
+  else if (channel == 3)
+    addr = TLV320_CH4_CFG2_REG;
+  val = read(addr);
+  Serial.print("  Volume      : ");
+  Serial.printf("%6.1fdB", 0.5*val - 100.5);
+  if (ganged)
+    Serial.println(" (ganged)");
+  else
+    Serial.println();
+}
+
+
 void ControlTLV320::printState() {
+  for (uint8_t c=0; c<4; c++)
+    printChannel(c);
+  Serial.println("DSP_CFG0:");
+  unsigned int val = read(TLV320_DSP_CFG0_REG);
+  Serial.print("  Decimation filter: ");
+  unsigned int flt = (val & 0x30) >> 4;
+  if (flt == 0)
+    Serial.println("linear");
+  else if (flt == 1)
+    Serial.println("low latency");
+  else if (flt == 2)
+    Serial.println("ultra-low latency");
+  else if (flt == 3)
+    Serial.println("reserved");
+  Serial.print("  Highpass   filter: ");
+  flt = (val & 0x03);
+  if (flt == 0)
+    Serial.println("custom");
+  else if (flt == 1)
+    Serial.println("cutoff 0.00025*fs");
+  else if (flt == 2)
+    Serial.println("cutoff 0.002*fs");
+  else if (flt == 3)
+    Serial.println("cutoff 0.008*fs");
+  
   Serial.println("DEV_STS0:");
-  unsigned int val = read(TLV320_DEV_STS0_REG);
-  uint8_t b = 1;
+  val = read(TLV320_DEV_STS0_REG);
+  Serial.printf("  %02X", val);
+  uint8_t b = 0x80;
   for (uint8_t k=0; k<8; k++) {
     bool on = ((val & b) > 0);
     Serial.printf("  CH%d: %s\n", k + 1, OnOffStrings[on]);
-    b <<= 1;
+    b >>= 1;
   }
   
   Serial.print("DEV_STS1: ");
   val = read(TLV320_DEV_STS1_REG);
-  val &= 0xE0;
   val >>= 5;
   if (val == 4)
     Serial.println("sleep mode");
@@ -687,9 +827,37 @@ void ControlTLV320::printState() {
     Serial.println("active, at least one ADC or PDM channel turned on");
   else
     Serial.println("unknown");
+
+  Serial.println("ASI_CFG0:");
+  val = read(TLV320_ASI_CFG0_REG);
+  Serial.print("  protocol     : ");
+  uint8_t prot = (val >> 6) & 0x03;
+  if (prot == 0)
+    Serial.println("TDM");
+  else if (prot == 1)
+    Serial.println("I2S");
+  else if (prot == 2)
+    Serial.println("LJ");
+  else if (prot == 3)
+    Serial.println("reserved");
+  Serial.print("  word length  : ");
+  uint8_t wl = (val >> 4) & 0x03;
+  if (wl == 0)
+    Serial.println("16bit");
+  else if (wl == 1)
+    Serial.println("20bit");
+  else if (wl == 2)
+    Serial.println("24bit");
+  else if (wl == 3)
+    Serial.println("32bit");
+  Serial.print("  unused cycles: ");
+  if (val & 0x01)
+    Serial.println("Hi-Z");
+  else
+    Serial.println("zero");
   
   Serial.println("ASI_STS:");
-  Serial.print("  sampling rate: ");
+  Serial.print("  sampling rate      : ");
   val = read(TLV320_ASI_STS_REG);
   uint8_t rate = val & 0xF0;
   rate >>= 4;
@@ -759,34 +927,37 @@ void ControlTLV320::printDSPCoefficients() {
   const uint8_t n_iirs = 3;
   const char iir_names[n_iirs][4] = {"N0", "N1", "D1"};
 
+  Serial.println();
+  Serial.println("Biquad filters:");
   uint32_t addr = TLV320_BQ1_N0_BYT1_REG;
   for (uint8_t b=1; b<=6; b++) {
-    Serial.printf("Biquad filter %d:\n", b);
     for (uint8_t n=0; n<n_biquads; n++) {
       uint32_t val = readCoefficient(addr);
-      Serial.printf("  BQ%d_%s: %08X", b, biquad_names[n], val);
+      Serial.printf("  BQ%2d_%s: %08X", b, biquad_names[n], val);
       addr += 4;
     }
+    Serial.println();
   }
 
   addr = TLV320_BQ7_N0_BYT1_REG;
   for (uint8_t b=8; b<=12; b++) {
-    Serial.printf("Biquad filter %d:\n", b);
     for (uint8_t n=0; n<n_biquads; n++) {
       uint32_t val = readCoefficient(addr);
-      Serial.printf("  BQ%d_%s: %08X", b, biquad_names[n], val);
+      Serial.printf("  BQ%2d_%s: %08X", b, biquad_names[n], val);
       addr += 4;
     }
+    Serial.println();
   }
 
+  Serial.println("Mixer:");
   addr = TLV320_MIX1_CH1_BYT1_REG;
   for (uint8_t m=1; m<=4; m++) {
-    Serial.printf("Mixer %d:\n", m);
     for (uint8_t c=1; c<=4; c++) {
       uint32_t val = readCoefficient(addr);
       Serial.printf("  MIX%d_CH%d: %08X", m, c, val);
       addr += 4;
     }
+    Serial.println();
   }
 
   addr = TLV320_IIR_N0_BYT1_REG;
@@ -796,20 +967,21 @@ void ControlTLV320::printDSPCoefficients() {
     Serial.printf("  IIR_%s: %08X", iir_names[i], val);
     addr += 4;
   }
+  Serial.println();
 }
 
 
-float ControlTLV320::readCoefficient(uint8_t address) {
+uint32_t ControlTLV320::readCoefficient(uint8_t address) {
   uint32_t frac = 0;
   unsigned int val;
-  val = read(address);  // bit[31:24]
-  frac |= val << 24;
-  val = read(address);  // bit[23:16]
-  frac |= val << 16;
-  val = read(address);  // bit[15:8]
-  frac |= val << 8;
-  val = read(address);  // bit[7:0]
-  frac |= val;
+  val = read(address++);  // bit[31:24]
+  frac |= (val & 0xFF) << 24;
+  val = read(address++);  // bit[23:16]
+  frac |= (val & 0xFF) << 16;
+  val = read(address++);  // bit[15:8]
+  frac |= (val & 0xFF) << 8;
+  val = read(address++);  // bit[7:0]
+  frac |= (val & 0xFF);
   return frac;
 }
 
