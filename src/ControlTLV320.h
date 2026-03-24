@@ -229,6 +229,7 @@ protected:
   float VolumeGain;
   char PGAGainStr[8];
   char VolumeStr[8];
+  char HighpassStr[8];
   
 };
 

@@ -128,13 +128,19 @@ ControlTLV320::ControlTLV320(TwoWire &wire, uint8_t address,
   PGAGain(1.0),
   VolumeGain(1.0),
   PGAGainStr("0dB"),
-  VolumeStr("0dB")
+  VolumeStr("0dB"),
+  HighpassStr("0Hz")
 {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("TLV320");
+  add("Lowpass", LowpassStrings[0]);
+  add("Highpass", HighpassStr);
+  add("PGAGain", PGAGainStr);
+  add("Volume", VolumeStr);
+  add("Smooth gain change", OnOffStrings[0]);
   // check I2C device presence:
   wire.begin();
   I2CBus->beginTransmission(I2CAddress);
@@ -406,7 +412,7 @@ bool ControlTLV320::setupTDM() {
   //val &= ~0x01;        // TX_FILL, set for shared TDM bus!
   val |= fmt << 6;     // ASI_FORMAT
   val |= Bits << 4;    // ASI_WLEN
-  if (Rate > 75000)
+  if (Rate > 75000)    // does not matter for 96kHz?
     val |= 0x02;       // TX_EDGE, see page 4 in sbaa383c.pdf
   if (!write(TLV320_ASI_CFG0_REG, val))
     return false;
@@ -510,11 +516,11 @@ float ControlTLV320::setGainDecibel(uint8_t channel, float level) {
   else {
     Serial.printf("ERROR in ControlTLV320::setGainDecibel(): invalid channel %u >= 4\n", channel);
   }
-  PGAGain = gainFromDecibel(float(igain));
-  snprintf(PGAGainStr, 8, "%ddB", igain);
+  level = float(igain >> 2);
+  PGAGain = gainFromDecibel(level);
+  snprintf(PGAGainStr, 8, "%.0fdB", level);
   PGAGainStr[7] = '\0';
-  add("PGAGain", PGAGainStr);
-  return float(igain);
+  return level;
 }
 
 
@@ -591,7 +597,6 @@ float ControlTLV320::setVolumeDecibel(InputTDM &tdm, float level) {
   VolumeGain = gainFromDecibel(level);
   snprintf(VolumeStr, 8, "%.1fdB", level);
   VolumeStr[7] = '\0';
-  add("Volume", PGAGainStr);
   tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
   return level;
 }
@@ -604,7 +609,6 @@ bool ControlTLV320::setSmoothGainChange(bool smooth) {
     val |= 0x10;    // DISABLE_SOFT_STEP
   if (!write(TLV320_DSP_CFG1_REG, val))
     return false;
-  add("Smooth gain change", OnOffStrings[smooth]);
   return true;
 }
 
@@ -617,10 +621,8 @@ bool ControlTLV320::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
   val |= highpass;
   if (!write(TLV320_DSP_CFG0_REG, val))
     return false;
-  add("Lowpass", LowpassStrings[lowpass]);
-  char hs[10];
   if (highpass == 0)
-    strcpy(hs, "custom");
+    strcpy(HighpassStr, "custom");
   else {
     if (Rate < 1.0)
       Serial.println("ERROR in ControlTLV320::setFilters(): setRate() should be called before setFilters()");
@@ -631,10 +633,9 @@ bool ControlTLV320::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
       fac = 0.002;
     else if (highpass == HIGH_HP)
       fac = 0.008;
-    snprintf(hs, 10, "%.1fkHz", 1000*fac*Rate);
-    hs[9] = '\0';
+    snprintf(HighpassStr, 8, "%.1fHz", fac*Rate);
+    HighpassStr[7] = '\0';
   }
-  add("Highpass", hs);
   return true;
 }
 

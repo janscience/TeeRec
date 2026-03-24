@@ -155,6 +155,11 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("PCM186x");
+  add("Polarity", PolarityStrings[NON_INVERTED]);
+  add("Gain", GainStr);
+  add("Smooth gain change", OnOffStrings[0]);
+  add("Lowpass", LowpassStrings[0]);
+  add("Highpass", OnOffStrings[0]);
   // check I2C device presence:
   wire.begin();
   I2CBus->beginTransmission(I2CAddress);
@@ -324,7 +329,6 @@ bool ControlPCM186x::setupChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
       return false;
     chan = 3;
   }
-  add("Polarity", PolarityStrings[polarity]);
   if (!UseChannel[chan])
     NChannels++;
   UseChannel[chan] = true;
@@ -608,7 +612,6 @@ float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float level) {
   }
   snprintf(GainStr, 8, "%.1fdB", 0.5*igain);
   GainStr[7] = '\0';
-  add("Gain", GainStr);
   return 0.5*igain;
 }
 
@@ -663,7 +666,6 @@ bool ControlPCM186x::setSmoothGainChange(bool smooth) {
     val |= 0x80;    // SMOOTH
   if (!write(PCM186x_PGA_CONTROL_REG, val))
     return false;
-  add("Smooth gain change", OnOffStrings[smooth]);
   return true;
 }
 
@@ -677,8 +679,6 @@ bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
     val |= 0x01;    // HPF_EN
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
-  add("Lowpass", LowpassStrings[lowpass]);
-  add("Highpass", OnOffStrings[highpass]);
   return true;
 }
 
