@@ -107,12 +107,12 @@ public:
   /* Setup input channel as output channel. */
   bool setupChannel(uint8_t channel, SOURCE source=DIFFERENTIAL_INPUT,
 		    IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
-		    bool dre=false, int8_t slot=-1, uint8_t offs=0);
+		    int8_t slot=-1, uint8_t offs=0);
   
   /* Setup input channels as output channels. */
   bool setupChannels(uint8_t n_chans, SOURCE source=DIFFERENTIAL_INPUT,
 		     IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
-		     bool dre=false, int8_t slot=-1, uint8_t offs=0);
+		     int8_t slot=-1, uint8_t offs=0);
 
   /* Setup I2S output.
      Get the recorded data with AudioInputI2S */

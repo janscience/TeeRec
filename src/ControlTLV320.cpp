@@ -267,8 +267,7 @@ void ControlTLV320::channelsStr(char *chans, size_t nchans,
 
 
 bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
-				 IMPEDANCE impedance,
-				 COUPLING coupling, bool dre,
+				 IMPEDANCE impedance, COUPLING coupling,
 				 int8_t slot, uint8_t offs) {
   // check and set channel:
   uint8_t addr = 0;
@@ -296,18 +295,9 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
     if (!write(TLV320_GPI_CFG0_REG + channel/2, val))
       return false;
   }
-  // select DRE:
-  if (dre) {
-    val = read(TLV320_DSP_CFG1_REG);
-    val &= ~0x04;         // clear DRE_AGC_SEL (default)
-    if (!write(TLV320_DSP_CFG1_REG, val))
-      return false;
-  }
   */
   // configure channel:
   unsigned int val = 0;
-  if (dre)
-    val |= 0x01;                  // DREEN
   val |= (impedance & 0x03) << 2; // IMP
   if (coupling == DC_CPL)
     val |= 0x10;                  // DC
@@ -335,15 +325,14 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
 
 
 bool ControlTLV320::setupChannels(uint8_t n_chans, SOURCE source,
-				 IMPEDANCE impedance,
-				 COUPLING coupling, bool dre,
+				 IMPEDANCE impedance, COUPLING coupling,
 				 int8_t slot, uint8_t offs) {
   if (n_chans > 4) {
     Serial.printf("ERROR in ControlTLV320::setupChannels(): too many channels %d requested.\n", n_chans);
     return false;
   }
   for (uint8_t c=0; c<n_chans; c++) {
-    setupChannel(c, source, impedance, coupling, dre, slot, offs);
+    setupChannel(c, source, impedance, coupling, slot, offs);
     if (slot >= 0)
       slot++;
   }
@@ -427,7 +416,6 @@ bool ControlTLV320::setupTDM() {
   val |= 0x80;         // TX_LSB: Transmit the LSB for the first half cycle and Hi-Z for the second half cycle 
   if (!write(TLV320_ASI_CFG1_REG, val))
     return false;
-  // TODO: conifgure channels here?!?
   return setActive();
 }
 
@@ -678,22 +666,18 @@ bool ControlTLV320::powerup() {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   NChannels = 0;
-  /* TODO: not really needed!
   unsigned int val = 0x01;  // software reset
   if (!write(TLV320_SW_RESET_REG, val))
     return false;
-  */
-  unsigned int val = 0;
+  val = 0;
   val |= 0x01;    // set SLEEP_ENZ
   val |= 0x80;    // set AREG_SELECT to internal 1.8V supply
   if (!write(TLV320_SLEEP_CFG_REG, val))
     return false;
   delay(10);
-  /* TODO:
   val = 0x00;     // disable BIQUAD_CFG
   if (!write(TLV320_DSP_CFG1_REG, val))
     return false;
-  */
   return true;
 }
 
