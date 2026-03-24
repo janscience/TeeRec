@@ -296,14 +296,16 @@ bool ControlTLV320::setupChannel(uint8_t channel, SOURCE source,
     if (!write(TLV320_GPI_CFG0_REG + channel/2, val))
       return false;
   }
-  */
   // select DRE:
   if (dre) {
     val = read(TLV320_DSP_CFG1_REG);
-    val &= ~0x04;         // clear DRE_AGC_SEL
+    val &= ~0x04;         // clear DRE_AGC_SEL (default)
+    if (!write(TLV320_DSP_CFG1_REG, val))
+      return false;
   }
+  */
   // configure channel:
-  val = 0;
+  unsigned int val = 0;
   if (dre)
     val |= 0x01;                  // DREEN
   val |= (impedance & 0x03) << 2; // IMP
@@ -576,7 +578,7 @@ float ControlTLV320::setGain(InputTDM &tdm, float gain) {
 
   
 float ControlTLV320::volumeDecibel() {
-  unsigned int val = read(TLV320_DSP_CFG1_REG);
+  unsigned int val = read(TLV320_CH1_CFG2_REG);
   float level = 0.5*val - 100.5;
   return level;
 }
@@ -671,20 +673,27 @@ bool ControlTLV320::powerdown() {
 
 
 bool ControlTLV320::powerup() {
-  unsigned int val = 0x01;  // software reset
-  if (!write(TLV320_SW_RESET_REG, val))
-    return false;
   Rate = 0;
   CurrentPage = 10;
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   NChannels = 0;
-  val = 0;
+  /* TODO: not really needed!
+  unsigned int val = 0x01;  // software reset
+  if (!write(TLV320_SW_RESET_REG, val))
+    return false;
+  */
+  unsigned int val = 0;
   val |= 0x01;    // set SLEEP_ENZ
   val |= 0x80;    // set AREG_SELECT to internal 1.8V supply
   if (!write(TLV320_SLEEP_CFG_REG, val))
     return false;
   delay(10);
+  /* TODO:
+  val = 0x00;     // disable BIQUAD_CFG
+  if (!write(TLV320_DSP_CFG1_REG, val))
+    return false;
+  */
   return true;
 }
 
@@ -812,6 +821,16 @@ void ControlTLV320::printState() {
     Serial.println("cutoff 0.002*fs");
   else if (flt == 3)
     Serial.println("cutoff 0.008*fs");
+  Serial.print("  Summation mode   : ");
+  flt = (val & 0x30) >> 2;
+  if (flt == 0)
+    Serial.println("disabled");
+  else if (flt == 1)
+    Serial.println("2-channel");
+  else if (flt == 2)
+    Serial.println("4-channel");
+  else if (flt == 3)
+    Serial.println("reserved");
   
   Serial.println("DEV_STS0:");
   val = read(TLV320_DEV_STS0_REG);
@@ -979,17 +998,19 @@ void ControlTLV320::printDSPCoefficients() {
 
 
 uint32_t ControlTLV320::readCoefficient(uint8_t address) {
-  uint32_t frac = 0;
+  uint32_t uval = 0;
   unsigned int val;
   val = read(address++);  // bit[31:24]
-  frac |= (val & 0xFF) << 24;
+  uval |= (val & 0xFF) << 24;
   val = read(address++);  // bit[23:16]
-  frac |= (val & 0xFF) << 16;
+  uval |= (val & 0xFF) << 16;
   val = read(address++);  // bit[15:8]
-  frac |= (val & 0xFF) << 8;
+  uval |= (val & 0xFF) << 8;
   val = read(address++);  // bit[7:0]
-  frac |= (val & 0xFF);
-  return frac;
+  uval |= (val & 0xFF);
+  // bit 31 is sign bit. divide 1 by bit 0-30
+  // 0x80000000 -> 1.0 , 0x7FFFFFFF -> 0.9999999995
+  return uval;
 }
 
 
