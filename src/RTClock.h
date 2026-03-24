@@ -40,6 +40,13 @@ class RTClock : public Device {
   // If not print message to stream.
   bool check(Stream &stream=Serial);
 
+  // Check time and return as time_t.
+  time_t checkTime(int year, int month, int day, int hour, int min, int sec,
+		   bool check=true);
+
+  // Parse datetime string (YYYY-MM-DDThh:mm:ss) into time_t.
+  time_t parseTimeStr(char *datetime);
+
   // Set real-time clock to time t.
   virtual void set(time_t t);
   

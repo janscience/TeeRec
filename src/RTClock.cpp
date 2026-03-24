@@ -35,38 +35,34 @@ bool RTClock::check(Stream &stream) {
 }
 
 
-void RTClock::set(time_t t) {
-  setTime(t);
-  Teensy3Clock.set(t);
-}
-
-
-bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
-		  bool from_start, bool check) {
+time_t RTClock::checkTime(int year, int month, int day,
+			  int hour, int min, int sec,
+			  bool check) {
+  time_t t = 0;
   if (check) {
     if (year < 2020) {
       Serial.printf("Invalid year %d.\n", year);
-      return false;
+      return t;
     }
     if (month < 1 || month > 12) {
       Serial.printf("Invalid month %d.\n", month);
-      return false;
+      return t;
     }
     if (day < 1 || day > 31) {
       Serial.printf("Invalid day %d.\n", day);
-      return false;
+      return t;
     }
     if (hour < 0 || hour > 23) {
       Serial.printf("Invalid hour %d.\n", hour);
-      return false;
+      return t;
     }
     if (min < 0 || min > 59) {
       Serial.printf("Invalid minute %d.\n", min);
-      return false;
+      return t;
     }
     if (sec < 0 || sec > 59) {
       Serial.printf("Invalid second %d.\n", sec);
-      return false;
+      return t;
     }
   }
   // set time:
@@ -77,15 +73,11 @@ bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
   tm.Hour = hour;
   tm.Minute = min;
   tm.Second = sec;
-  time_t t = makeTime(tm);
-  if (from_start)
-    t += millis()/1000;
-  set(t);
-  return true;
+  return makeTime(tm);
 }
 
 
-bool RTClock::set(char *datetime, bool from_start) {
+time_t RTClock::parseTimeStr(char *datetime) {
   // parse date-time string YYYY-MM-DDThh:mm:ss
   int sepdt[6] = {4, 7, 10, 13, 16, 19};
   int nelements = 6;
@@ -140,7 +132,36 @@ bool RTClock::set(char *datetime, bool from_start) {
   int hour = atoi(&datetime[11]);
   int min = atoi(&datetime[14]);
   int sec = atoi(&datetime[17]);
-  return set(year, month, day, hour, min, sec, from_start, true);
+  return checkTime(year, month, day, hour, min, sec, true);
+}
+
+
+void RTClock::set(time_t t) {
+  setTime(t);
+  Teensy3Clock.set(t);
+}
+
+
+bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
+		  bool from_start, bool check) {
+  time_t t = checkTime(year, month, day, hour, min, sec, check);
+  if (t == 0)
+    return false;
+  if (from_start)
+    t += millis()/1000;
+  set(t);
+  return true;
+}
+
+
+bool RTClock::set(char *datetime, bool from_start) {
+  time_t t = parseTimeStr(datetime);
+  if (t == 0)
+    return false;
+  if (from_start)
+    t += millis()/1000;
+  set(t);
+  return true;
 }
 
 
