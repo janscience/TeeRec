@@ -191,7 +191,7 @@ bool parseDateStr(const char *date, tmElements_t &tm) {
 }
 
 
-bool RTClock::parseDateTimeStr(char *datetime, tmElements_t &tm) {
+bool RTClock::parseDateTimeStr(const char *datetime, tmElements_t &tm) {
   // init with current time:
   time_t t = now();
   breakTime(t, tm);

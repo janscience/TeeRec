@@ -53,7 +53,7 @@ class RTClock : public Device {
 
   // Parse date-time string (YYYY-MM-DDThh:mm:ss) into tm.
   // Missing components are filled up with current time.
-  bool parseDateTimeStr(char *datetime, tmElements_t &tm);
+  bool parseDateTimeStr(const char *datetime, tmElements_t &tm);
 
   // Set real-time clock to time t.
   virtual void set(time_t t);
