@@ -83,7 +83,7 @@ bool parseTimeStr(const char *time, tmElements_t &tm) {
   unsigned int vk = 0;
   int values[3] = {-1, 0, 0};
   unsigned int n = 0;
-  bool invalid = false;
+  bool success = true;
   for (unsigned int k=0; k <= strlen(time); k++) {
     if (k == strlen(time) || time[k] == ':') {
       vstr[vk] = '\0';
@@ -93,38 +93,43 @@ bool parseTimeStr(const char *time, tmElements_t &tm) {
     }
     else if (isdigit(time[k]))
       vstr[vk++] = time[k];
-    else
-      invalid = true;
+    else {
+      values[n] = -1;
+      success = false;
+    }
   }
-  if (invalid) {
+  if (!success)
     Serial.printf("invalid characters in time string \"%s\"!\n", time);
-    return false;
-  }
   if (n == 0) {
-    Serial.printf("invalid time string \"%s\"!\n", time);
-    return false;
+    if (success)
+      Serial.printf("invalid time string \"%s\"!\n", time);
+    success = false;
   }
   int hour = values[0];
   int min = values[1];
   int sec = values[2];
-  // check:
+  // check and set:
   if (hour < 0 || hour > 23) {
-    Serial.printf("invalid hour %d in time string \"%s\"!\n", hour, time);
-    return false;
+    if (success)
+      Serial.printf("invalid hour %d in time string \"%s\"!\n", hour, time);
+    success = false;
   }
   if (min < 0 || min > 59) {
-    Serial.printf("Invalid minute %d in time string \"%s\"!\n", min, time);
-    return false;
+    if (success)
+      Serial.printf("Invalid minute %d in time string \"%s\"!\n", min, time);
+    success = false;
   }
   if (sec < 0 || sec > 59) {
-    Serial.printf("Invalid second %d in time string \"%s\"!\n", sec, time);
-    return false;
+    if (success)
+      Serial.printf("Invalid second %d in time string \"%s\"!\n", sec, time);
+    success = false;
   }
-  // set:
-  tm.Hour = hour;
-  tm.Minute = min;
-  tm.Second = sec;
-  return true;
+  if (success) {
+    tm.Hour = hour;
+    tm.Minute = min;
+    tm.Second = sec;
+  }
+  return success;
 }
 
 
@@ -132,9 +137,9 @@ bool parseDateStr(const char *date, tmElements_t &tm) {
   // parse:
   char vstr[8] = "";
   unsigned int vk = 0;
-  int values[3] = {0, 0, 0};
+  int values[3] = {-1, -1, -1};
   unsigned int n = 0;
-  bool invalid = false;
+  bool success = true;
   for (unsigned int k=0; k <= strlen(date); k++) {
     if (k == strlen(date) || date[k] == '-' || date[k] == 'T') {
       vstr[vk] = '\0';
@@ -147,39 +152,42 @@ bool parseDateStr(const char *date, tmElements_t &tm) {
     else if (isdigit(date[k]))
       vstr[vk++] = date[k];
     else
-      invalid = true;
+      success = false;
   }
-  if (invalid) {
+  if (!success)
     Serial.printf("invalid characters in date string \"%s\"!\n", date);
-    return false;
-  }
   if (n != 3) {
-    Serial.printf("invalid date string \"%s\"!\n", date);
-    return false;
+    if (success)
+      Serial.printf("invalid date string \"%s\"!\n", date);
+    success = false;
   }
   int year = values[0];
   int month = values[1];
   int day = values[2];
-  if (year < 100)
+  if (year >= 0 && year < 100)
     year += 2000;
-  // check:
+  // check and set:
   if (year < 2020) {
-    Serial.printf("invalid year %d in date string \"%s\"!\n", year, date);
-    return false;
+    if (success)
+      Serial.printf("invalid year %d in date string \"%s\"!\n", year, date);
+    success = false;
   }
   if (month < 1 || month > 12) {
-    Serial.printf("Invalid month %d in date string \"%s\"!\n", month, date);
-    return false;
+    if (success)
+      Serial.printf("Invalid month %d in date string \"%s\"!\n", month, date);
+    success = false;
   }
   if (day < 1 || day > 31) {
-    Serial.printf("Invalid day %d in date string \"%s\"!\n", day, date);
-    return false;
+    if (success)
+      Serial.printf("Invalid day %d in date string \"%s\"!\n", day, date);
+    success = false;
   }
-  // set:
-  tm.Year = year - 1970;
-  tm.Month = month;
-  tm.Day = day;
-  return true;
+  if (success) {
+    tm.Year = year - 1970;
+    tm.Month = month;
+    tm.Day = day;
+  }
+  return success;
 }
 
 
@@ -196,10 +204,10 @@ bool RTClock::parseDateTimeStr(char *datetime, tmElements_t &tm) {
       return parseTimeStr(datetime, tm);
   }
   else {
-    if (parseDateStr(datetime, tm))
-      return parseTimeStr(tp + 1, tm);
-    else
-      return false;
+    bool rd = parseDateStr(datetime, tm);
+    bool rt = parseTimeStr(tp + 1, tm);
+    if (rd && rt)
+      return true;
   }
   return false;
 }
