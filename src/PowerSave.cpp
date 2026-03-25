@@ -6,15 +6,8 @@
 
 #include "usb_dev.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-    extern void start_usb_pll(void);
-#ifdef __cplusplus
-}
-#endif
-
 FASTRUN void start_usb_pll( void ) {
+    /* from https://github.com/duff2013/Snooze/blob/master/src/hal/TEENSY_40/SnoozeUSBSerial.cpp */
     while ( 1 ) {
         uint32_t n = CCM_ANALOG_PLL_USB1;
         if ( n & CCM_ANALOG_PLL_USB1_DIV_SELECT ) {
