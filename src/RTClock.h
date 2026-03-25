@@ -24,6 +24,13 @@
 class SDCard;
 
 
+// Parse time string (hh:mm:ss or hh:mm) into tm.
+bool parseTimeStr(const char *time, tmElements_t &tm);
+
+// Parse date string (YYYY-MM-DD) into tm. Also stops parsing at 'T'.
+bool parseDateStr(const char *date, tmElements_t &tm);
+
+
 class RTClock : public Device {
 
  public:
@@ -44,8 +51,9 @@ class RTClock : public Device {
   time_t checkTime(int year, int month, int day, int hour, int min, int sec,
 		   bool check=true);
 
-  // Parse datetime string (YYYY-MM-DDThh:mm:ss) into time_t.
-  time_t parseTimeStr(char *datetime);
+  // Parse date-time string (YYYY-MM-DDThh:mm:ss) into tm.
+  // Missing components are filled up with current time.
+  bool parseDateTimeStr(char *datetime, tmElements_t &tm);
 
   // Set real-time clock to time t.
   virtual void set(time_t t);
@@ -58,7 +66,7 @@ class RTClock : public Device {
   bool set(int year, int month, int day, int hour, int min, int sec,
 	   bool from_start=false, bool check=true);
 
-  // Set real-time clock to datetime string (YYYY-MM-DDThh:mm:ss).
+  // Set real-time clock to date-time string (YYYY-MM-DDThh:mm:ss).
   // If from_start is true, the time the sketch is already running is
   // added to datetime.
   // Return true if the time was successfully set.

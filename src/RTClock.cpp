@@ -77,62 +77,131 @@ time_t RTClock::checkTime(int year, int month, int day,
 }
 
 
-time_t RTClock::parseTimeStr(char *datetime) {
+bool parseTimeStr(const char *time, tmElements_t &tm) {
+  // parse:
+  char vstr[8] = "";
+  unsigned int vk = 0;
+  int values[3] = {-1, 0, 0};
+  unsigned int n = 0;
+  bool invalid = false;
+  for (unsigned int k=0; k <= strlen(time); k++) {
+    if (k == strlen(time) || time[k] == ':') {
+      vstr[vk] = '\0';
+      if (strlen(vstr) > 0)
+	values[n++] = atoi(vstr);
+      vk = 0;
+    }
+    else if (isdigit(time[k]))
+      vstr[vk++] = time[k];
+    else
+      invalid = true;
+  }
+  if (invalid) {
+    Serial.printf("invalid characters in time string \"%s\"!\n", time);
+    return false;
+  }
+  if (n == 0) {
+    Serial.printf("invalid time string \"%s\"!\n", time);
+    return false;
+  }
+  int hour = values[0];
+  int min = values[1];
+  int sec = values[2];
+  // check:
+  if (hour < 0 || hour > 23) {
+    Serial.printf("invalid hour %d in time string \"%s\"!\n", hour, time);
+    return false;
+  }
+  if (min < 0 || min > 59) {
+    Serial.printf("Invalid minute %d in time string \"%s\"!\n", min, time);
+    return false;
+  }
+  if (sec < 0 || sec > 59) {
+    Serial.printf("Invalid second %d in time string \"%s\"!\n", sec, time);
+    return false;
+  }
+  // set:
+  tm.Hour = hour;
+  tm.Minute = min;
+  tm.Second = sec;
+  return true;
+}
+
+
+bool parseDateStr(const char *date, tmElements_t &tm) {
+  // parse:
+  char vstr[8] = "";
+  unsigned int vk = 0;
+  int values[3] = {0, 0, 0};
+  unsigned int n = 0;
+  bool invalid = false;
+  for (unsigned int k=0; k <= strlen(date); k++) {
+    if (k == strlen(date) || date[k] == '-' || date[k] == 'T') {
+      vstr[vk] = '\0';
+      if (strlen(vstr) > 0)
+	values[n++] = atoi(vstr);
+      vk = 0;
+      if (date[k] == 'T')
+	break;
+    }
+    else if (isdigit(date[k]))
+      vstr[vk++] = date[k];
+    else
+      invalid = true;
+  }
+  if (invalid) {
+    Serial.printf("invalid characters in date string \"%s\"!\n", date);
+    return false;
+  }
+  if (n != 3) {
+    Serial.printf("invalid date string \"%s\"!\n", date);
+    return false;
+  }
+  int year = values[0];
+  int month = values[1];
+  int day = values[2];
+  if (year < 100)
+    year += 2000;
+  // check:
+  if (year < 2020) {
+    Serial.printf("invalid year %d in date string \"%s\"!\n", year, date);
+    return false;
+  }
+  if (month < 1 || month > 12) {
+    Serial.printf("Invalid month %d in date string \"%s\"!\n", month, date);
+    return false;
+  }
+  if (day < 1 || day > 31) {
+    Serial.printf("Invalid day %d in date string \"%s\"!\n", day, date);
+    return false;
+  }
+  // set:
+  tm.Year = year - 1970;
+  tm.Month = month;
+  tm.Day = day;
+  return true;
+}
+
+
+bool RTClock::parseDateTimeStr(char *datetime, tmElements_t &tm) {
+  // init with current time:
+  time_t t = now();
+  breakTime(t, tm);
   // parse date-time string YYYY-MM-DDThh:mm:ss
-  int sepdt[6] = {4, 7, 10, 13, 16, 19};
-  int nelements = 6;
-  datetime[19] = '\0';
-  for (int k=0; k<6; k++) {
-    if (datetime[sepdt[k]] != '-' &&
-	datetime[sepdt[k]] != 'T' &&
-	datetime[sepdt[k]] != ':' &&
-	datetime[sepdt[k]] != '\0') {
-      nelements = k;
-      break;
-    }
+  char *tp = strchr(datetime, 'T');
+  if (tp == NULL) {
+    if (strchr(datetime, '-') != NULL)
+      return parseDateStr(datetime, tm);
+    else
+      return parseTimeStr(datetime, tm);
   }
-  if (nelements < 6) {
-    if (nelements == 3) {
-      // valid date string, add current time:
-      char times[10];
-      time(times);
-      datetime[sepdt[2]] = 'T';
-      strcpy(datetime + sepdt[2] + 1, times);
-    }
-    else {
-      // parse time string hh:mm:ss
-      int sept[3] = {2, 5, 8};
-      nelements = 3;
-      for (int k=0; k<3; k++) {
-	if (datetime[sept[k]] != ':' &&
-	    datetime[sept[k]] != '\0') {
-	  nelements = k;
-	  break;
-	}
-      }
-      if (nelements == 3) {
-	// valid time string, add current date:
-	char dates[32];
-	date(dates);
-	dates[sepdt[2]] = 'T';
-	strcpy(dates + sepdt[2] + 1, datetime);
-	strcpy(datetime, dates);
-      }
-      else {
-	Serial.printf("String \"%s\" is not a valid date-time string.\n", datetime);
-	return false;
-      }
-    }
+  else {
+    if (parseDateStr(datetime, tm))
+      return parseTimeStr(tp + 1, tm);
+    else
+      return false;
   }
-  for (int k=0; k<6; k++)
-    datetime[sepdt[k]] = '\0';
-  int year = atoi(datetime);
-  int month = atoi(&datetime[5]);
-  int day = atoi(&datetime[8]);
-  int hour = atoi(&datetime[11]);
-  int min = atoi(&datetime[14]);
-  int sec = atoi(&datetime[17]);
-  return checkTime(year, month, day, hour, min, sec, true);
+  return false;
 }
 
 
@@ -155,9 +224,10 @@ bool RTClock::set(int year, int month, int day, int hour, int min, int sec,
 
 
 bool RTClock::set(char *datetime, bool from_start) {
-  time_t t = parseTimeStr(datetime);
-  if (t == 0)
+  tmElements_t tm;
+  if (!parseDateTimeStr(datetime, tm))
     return false;
+  time_t t = makeTime(tm);
   if (from_start)
     t += millis()/1000;
   set(t);
