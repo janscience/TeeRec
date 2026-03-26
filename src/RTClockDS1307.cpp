@@ -30,6 +30,7 @@ bool RTClockDS1307::begin() {
       }
     }
     setSyncProvider(RTC.get);
+    GetTime = RTC.get;
     return true;
   }
   return false;

@@ -9,11 +9,13 @@ time_t getTeensyRTCTime() {
 
 
 RTClock::RTClock() :
-  Device() {
+  Device(),
+  GetTime(0) {
   setDeviceType("clock");
   setInternBus();
   setChip("Teensy-RTC");
   setSyncProvider(getTeensyRTCTime);
+  GetTime = getTeensyRTCTime;
   Available = true;
 }
 
@@ -210,6 +212,18 @@ bool RTClock::parseDateTimeStr(const char *datetime, tmElements_t &tm) {
       return true;
   }
   return false;
+}
+
+
+time_t RTClock::get() {
+  if (GetTime == 0)
+    return now();
+  return GetTime();
+}
+
+
+void RTClock::sync() {
+  setTime(get());
 }
 
 

@@ -55,10 +55,16 @@ class RTClock : public Device {
   // Missing components are filled up with current time.
   bool parseDateTimeStr(const char *datetime, tmElements_t &tm);
 
-  // Set real-time clock to time t.
+  // Get real-time clock time directly.
+  time_t get();
+
+  // Set system time from real-time clock.
+  void sync();
+
+  // Set system and real-time clock to time t.
   virtual void set(time_t t);
   
-  // Set real-time clock to the given time.
+  // Set system and real-time clock to the given time.
   // If from_start is true, the time the sketch is already running is
   // added to the specified time.
   // If check, then check if the given time is valid.
@@ -66,17 +72,17 @@ class RTClock : public Device {
   bool set(int year, int month, int day, int hour, int min, int sec,
 	   bool from_start=false, bool check=true);
 
-  // Set real-time clock to date-time string (YYYY-MM-DDThh:mm:ss).
+  // Set system and real-time clock to date-time string (YYYY-MM-DDThh:mm:ss).
   // If from_start is true, the time the sketch is already running is
   // added to datetime.
   // Return true if the time was successfully set.
   bool set(char *datetime, bool from_start=false);
 
-  // Set real-time clock interactively from streams.
+  // Set system and real-time clock interactively from streams.
   // Return true if the time was successfully set.
   bool set(Stream &instream=Serial, Stream &outstream=Serial);
 
-  // Set the current time from a file path on the sdcard.
+  // Set system and real-time clock from a file path on the sdcard.
   // If the file was found and the time set, the file is deleted.
   // If from_start is true, the time the sketch is already running is
   // added to the time found in the file to account for start-up delays.
@@ -126,6 +132,10 @@ class RTClock : public Device {
   // message on stream.
   virtual void write(Stream &stream=Serial, size_t indent=0,
 		     size_t indent_incr=4) const;
+
+protected:
+
+  getExternalTime GetTime;
 
 };
 
