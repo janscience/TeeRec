@@ -113,12 +113,12 @@ protected:
   // Set the unique identifier of the chip.
   void setIdentifier(const char *identifier);
 
-  // If key already exists, the set value of this key.
+  // If key already exists, then set value of this key.
   // Otherwise, add a new key-value pair to the device's metadata.
   // The strings are not copied, only pointers are stored.
   // Make sure to pass in static strings.
   // Return the index of the set or added key-value pair.
-  // If nothing was added, return -1.
+  // If nothing was set or added, return -1.
   int add(const char *key, const char *value);
 
   // Set value of key-value pair at index.

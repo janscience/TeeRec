@@ -157,9 +157,9 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   setChip("PCM186x");
   add("Polarity", PolarityStrings[NON_INVERTED]);
   add("Gain", GainStr);
-  add("Smooth gain change", OnOffStrings[0]);
+  add("Smooth gain change", OnOffStrings[1]);
   add("Lowpass", LowpassStrings[0]);
-  add("Highpass", OnOffStrings[0]);
+  add("Highpass", OnOffStrings[1]);
   // check I2C device presence:
   wire.begin();
   I2CBus->beginTransmission(I2CAddress);
@@ -174,26 +174,8 @@ bool ControlPCM186x::begin() {
     return false;
   
   // power up:
-  uint8_t val = 0x70;
-  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+  if (!powerup())
     return false;
-
-  // setup clocks for BCK input slave PLL mode
-  // (section 9.3.9.4.4 in data sheet):
-  val = 0x01;           // CLKDET_EN enabled
-  val += 0x02;          // DSP1_CLK_SRC = PLL
-  val += 0x04;          // DSP2_CLK_SRC = PLL
-  val += 0x08;          // ADC_CLK_SRC = PLL
-  val += 0x00;          // MST_MODE = slave
-  val += 0x20;          // MST_SCK_SRC = PLL
-  if (!write(PCM186x_CLK_MODE_REG, val))
-    return false;
-  
-  // enable filters:
-  // PCM186x_DSP_CTRL_REG 0x71  plus page 1 registers?
-
-  // disable micbias:
-  // PCM186x_MIC_BIAS_CTRL_REG  0x0315
   
   Available = true;
   return true;
@@ -304,9 +286,9 @@ bool ControlPCM186x::setupChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
     }
   }
   // set bit 6 and 7:
-  val += 0x40;    // RSV bit 6 always write 1
+  val |= 0x40;    // RSV bit 6 always write 1
   if (polarity == INVERTED)
-    val += 0x80;  // POL bit 7
+    val |= 0x80;  // POL bit 7
   // set input channel for adc:
   int chan = 0;
   if (adc == ADC1L) {
@@ -332,6 +314,7 @@ bool ControlPCM186x::setupChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
   if (!UseChannel[chan])
     NChannels++;
   UseChannel[chan] = true;
+  setValue("Polarity", PolarityStrings[polarity]);
   return true;
 }
 
@@ -666,6 +649,7 @@ bool ControlPCM186x::setSmoothGainChange(bool smooth) {
     val |= 0x80;    // SMOOTH
   if (!write(PCM186x_PGA_CONTROL_REG, val))
     return false;
+  setValue("Smooth gain change", OnOffStrings[smooth]);
   return true;
 }
 
@@ -679,6 +663,8 @@ bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
     val |= 0x01;    // HPF_EN
   if (!write(PCM186x_DSP_CTRL_REG, val))
     return false;
+  setValue("Lowpass", LowpassStrings[lowpass]);
+  setValue("Highpass", OnOffStrings[highpass]);
   return true;
 }
 
@@ -716,12 +702,14 @@ bool ControlPCM186x::setMicBias(bool power, bool bypass) {
 
 
 bool ControlPCM186x::powerdown() {
-  unsigned int val = read(PCM186x_PWRDN_CTRL_REG);
-  val &= ~0xF8;   // clear reserved bits
-  val |= 0x70;    // write reserved bits
-  val |= 0x04;    // set PWRDN
+  unsigned int val = 0; // clear PWRDN
+  val |= 0x70;          // write reserved bits
+  val |= 0x04;          // set PWRDN
+  val |= 0x02;          // set SLEEP
+  val |= 0x01;          // set STBY
   if (!write(PCM186x_PWRDN_CTRL_REG, val))
     return false;
+  
   CurrentPage = 10;
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = false;
@@ -735,11 +723,22 @@ bool ControlPCM186x::powerup() {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = false;
   NChannels = 0;
-  unsigned int val = read(PCM186x_PWRDN_CTRL_REG);
-  val &= ~0xF8;   // clear reserved bits
-  val |= 0x70;    // write reserved bits
-  val &= ~0x04;   // clear PWRDN
+  
+  unsigned int val = 0; // clear PWRDN
+  val |= 0x70;          // write reserved bits
   if (!write(PCM186x_PWRDN_CTRL_REG, val))
+    return false;
+
+  // setup clocks for BCK input slave PLL mode
+  // (section 9.3.9.4.4 in data sheet):
+  val = 0;
+  val |= 0x01;          // CLKDET_EN enabled
+  val |= 0x02;          // DSP1_CLK_SRC = PLL
+  val |= 0x04;          // DSP2_CLK_SRC = PLL
+  val |= 0x08;          // ADC_CLK_SRC = PLL
+  val &= ~0x10;         // MST_MODE = slave
+  val |= 0x20;          // MST_SCK_SRC = PLL
+  if (!write(PCM186x_CLK_MODE_REG, val))
     return false;
   return true;
 }

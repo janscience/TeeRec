@@ -667,15 +667,18 @@ bool ControlTLV320::powerup() {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   NChannels = 0;
+  
   unsigned int val = 0x01;  // software reset
   if (!write(TLV320_SW_RESET_REG, val))
     return false;
+  
   val = 0;
   val |= 0x01;    // set SLEEP_ENZ
   val |= 0x80;    // set AREG_SELECT to internal 1.8V supply
   if (!write(TLV320_SLEEP_CFG_REG, val))
     return false;
   delay(10);
+  
   val = 0x00;     // disable BIQUAD_CFG
   if (!write(TLV320_DSP_CFG1_REG, val))
     return false;
