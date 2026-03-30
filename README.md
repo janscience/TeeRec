@@ -68,7 +68,7 @@ via the `TeeRec.h` header.
 - [InputTDM](src/InputTDM.h): Streaming TDM data into a single cyclic buffer.
 - [Device](src/Device.h): General device infos.
 - [ControlPCM186x](src/ControlPCM1865.h): Control a TI PCM186x chip.
-- [ControlTLV320](src/ControlTLV320.h): Control a TI TLV320ADC chip.
+- [ControlTLV320ADC](src/ControlTLV320ADC.h): Control a TI TLV320ADC chip.
 
 ### Storage on SD card
 

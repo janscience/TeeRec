@@ -1,10 +1,10 @@
 /*
-  ControlTLV320 - Control a TI TLV320 chip.
+  ControlTLV320ADC - Control a TI TLV320ADC chip.
   Created by Jan Benda, March 20th, 2026.
 */
 
-#ifndef ControlTLV320_h
-#define ControlTLV320_h
+#ifndef ControlTLV320ADC_h
+#define ControlTLV320ADC_h
 
 
 #include <Arduino.h>
@@ -19,7 +19,7 @@
 #define TLV320_I2C_ADDR4     0x4F
 
 
-class ControlTLV320 : public Device {
+class ControlTLV320ADC : public Device {
   
 public:
 
@@ -66,16 +66,16 @@ public:
   
 
   /* Do not initialize TLV320 yet. */
-  ControlTLV320();
+  ControlTLV320ADC();
 
   /* Communicate with TLV chip using defaut I2C bus
      and address (one of TLV320_I2C_ADDR*). */
-  ControlTLV320(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
+  ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
 
   /* Communicate with TLV chip using wire, address (one of TLV320_I2C_ADDR*),
      and TDM bus. */
-  ControlTLV320(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1,
-		InputTDM::TDM_BUS bus=InputTDM::TDM1);
+  ControlTLV320ADC(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1,
+		   InputTDM::TDM_BUS bus=InputTDM::TDM1);
 
   /* Initialize TLV320 with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
