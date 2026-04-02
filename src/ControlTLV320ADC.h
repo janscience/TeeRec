@@ -222,6 +222,7 @@ protected:
   InputTDM::TDM_BUS Bus;
   static const int WriteDelay = 1;
 
+  static const char *SourceStrings[3];
   static const char *LowpassStrings[3];
   static const char *OnOffStrings[2];
   float MaxAmplmV;

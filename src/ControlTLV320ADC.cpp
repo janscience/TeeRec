@@ -5,6 +5,7 @@ const uint32_t ControlTLV320ADC::SamplingRates[ControlTLV320ADC::MaxSamplingRate
   {8000, 16000, 24000, 32000, 48000, 96000, 192000};
 const uint8_t ControlTLV320ADC::BitBits[4] = {16, 20, 24, 32};
 
+const char *ControlTLV320ADC::SourceStrings[3] = {"differential", "single ended", "digital"};
 const char *ControlTLV320ADC::LowpassStrings[3] = {"linear", "low latency", "ultra-low latency"};
 const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 
@@ -124,7 +125,8 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   Bits(BIT32),
   NChannels(0),
   Bus(bus),
-  MaxAmplmV(1650.0),
+  //MaxAmplmV(0.5*3300.0),
+  MaxAmplmV(0.5*2750.0),
   PGAGain(1.0),
   VolumeGain(1.0),
   PGAGainStr("0dB"),
@@ -136,6 +138,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("TLV320");
+  add("Source", SourceStrings[0]);
   add("Lowpass", LowpassStrings[0]);
   add("Highpass", HighpassStr);
   add("PGAGain", PGAGainStr);
@@ -326,6 +329,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, SOURCE source,
   if (UseChannel[channel] == 0)
     NChannels++;
   UseChannel[channel] = (source == DIFFERENTIAL_INPUT ? 2 : 1);
+  setValue("Source", SourceStrings[source]);
   return true;
 }
 
@@ -609,6 +613,7 @@ bool ControlTLV320ADC::setSmoothGainChange(bool smooth) {
     val |= 0x10;    // DISABLE_SOFT_STEP
   if (!write(TLV320_DSP_CFG1_REG, val))
     return false;
+  setValue("Smooth gain change", OnOffStrings[smooth]);
   return true;
 }
 
@@ -621,6 +626,7 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
   val |= highpass;
   if (!write(TLV320_DSP_CFG0_REG, val))
     return false;
+  setValue("Lowpass", LowpassStrings[lowpass]);
   if (highpass == 0)
     strcpy(HighpassStr, "custom");
   else {
