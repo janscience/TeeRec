@@ -85,6 +85,7 @@ void InputADCSettings::setReference(ADC_REFERENCE ref) {
 
 
 void InputADCSettings::configure(Input *input) const {
+  InputSettings::configure(input);
   InputADC *adc = static_cast<InputADC *>(input);
   if (adc == 0)
     return;
@@ -98,6 +99,7 @@ void InputADCSettings::configure(Input *input) const {
 
 
 void InputADCSettings::setConfiguration(const Input *input) {
+  InputSettings::setConfiguration(input);
   const InputADC *adc = static_cast<const InputADC *>(input);
   if (adc == 0)
     return;

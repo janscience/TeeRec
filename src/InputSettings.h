@@ -9,9 +9,7 @@
 
 
 #include <MicroConfig.h>
-
-
-class Input;
+#include <Input.h>
 
 
 class InputSettings : public Menu {
@@ -19,10 +17,12 @@ class InputSettings : public Menu {
 public:
 
   // Constructor. Sets configuration name to "ADC".
-  InputSettings(Menu &menu, uint32_t rate=0, float pregain=1);
+  InputSettings(Menu &menu, uint32_t rate=0, float pregain=1,
+		Input::SOURCE source=Input::SINGLE_ENDED);
   
   // Constructor. Sets configuration name.
-  InputSettings(const char *name, uint32_t rate=0, float pregain=1);
+  InputSettings(const char *name, uint32_t rate=0, float pregain=1,
+		Input::SOURCE source=Input::SINGLE_ENDED);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };
@@ -41,6 +41,12 @@ public:
   // This is the fixed gain of a first amplification stage.
   void setPreGain(float pregain);
 
+  // Return channel source.
+  Input::SOURCE source() const { return Source.enumValue(); };
+  
+  // Set the channel source.
+  void setSource(Input::SOURCE source);
+
   // Apply settings on input.
   // Default implementation sets the sampling rate.
   virtual void configure(Input *input) const;
@@ -53,6 +59,7 @@ public:
 protected:
 
   NumberParameter<uint32_t> Rate;
+  EnumParameter<Input::SOURCE> Source;
   NumberParameter<float> PreGain;
   
 };

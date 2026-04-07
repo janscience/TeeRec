@@ -21,6 +21,7 @@ InputTDM *InputTDM::TDM = 0;
 InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
   Input(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
   TDM = this;
+  setSource(SINGLE_ENDED);
   setDataResolution(16);
   Bits = 32;
   Rate = 0;
@@ -180,6 +181,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  resolution: %dbits\n", Bits);
   stream.printf("  nchannels:  %d\n", NChannels);
   stream.printf("  channels:   %s\n", Channels);
+  stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
   stream.printf("  swap l/r:   %d\n", SwapLR);

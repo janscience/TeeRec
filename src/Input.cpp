@@ -2,10 +2,33 @@
 #include <Input.h>
 
 
+const char *Input::SourceStrings[MaxSource] = {
+  "differential", "single ended", "digital" };
+
+const Input::SOURCE Input::SourceEnums[MaxSource] = {
+  DIFFERENTIAL, SINGLE_ENDED, DIGITAL };
+
+
 Input::Input(volatile sample_t *buffer, size_t nbuffer, size_t dmabuffer) :
   DataBuffer(buffer, nbuffer, dmabuffer),
   Running(false),
-  StartTime(0) {
+  StartTime(0),
+  Source(SINGLE_ENDED) {
+}
+
+
+Input::SOURCE Input::source() const {
+  return Source;
+}
+
+
+const char* Input::sourceStr() const {
+  return SourceStrings[Source];
+}
+
+
+void Input::setSource(Input::SOURCE source) {
+  Source = source;
 }
 
 

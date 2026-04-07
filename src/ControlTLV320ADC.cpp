@@ -5,7 +5,6 @@ const uint32_t ControlTLV320ADC::SamplingRates[ControlTLV320ADC::MaxSamplingRate
   {8000, 16000, 24000, 32000, 48000, 96000, 192000};
 const uint8_t ControlTLV320ADC::BitBits[4] = {16, 20, 24, 32};
 
-const char *ControlTLV320ADC::SourceStrings[3] = {"differential", "single ended", "digital"};
 const char *ControlTLV320ADC::LowpassStrings[3] = {"linear", "low latency", "ultra-low latency"};
 const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 
@@ -123,6 +122,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   CurrentPage(10),
   Rate(0),
   Bits(BIT32),
+  Source(Input::DIFFERENTIAL),
   NChannels(0),
   Bus(bus),
   //MaxAmplmV(0.5*3300.0),
@@ -138,7 +138,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   setDeviceType("input");
   setI2CBus(wire, address);
   setChip("TLV320");
-  add("Source", SourceStrings[0]);
+  add("Source", Input::SourceStrings[Source]);
   add("Lowpass", LowpassStrings[0]);
   add("Highpass", HighpassStr);
   add("PGAGain", PGAGainStr);
@@ -275,7 +275,7 @@ void ControlTLV320ADC::channelsStr(char *chans, size_t nchans,
 }
 
 
-bool ControlTLV320ADC::setupChannel(uint8_t channel, SOURCE source,
+bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
 				    IMPEDANCE impedance, COUPLING coupling,
 				    int8_t slot, uint8_t offs) {
   // check and set channel:
@@ -298,7 +298,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, SOURCE source,
     return false;
   // disable GPI on channel pin:
   unsigned int val = 0x00;
-  if (source == DIFFERENTIAL_INPUT) {
+  if (source == DIFFERENTIAL) {
     val = read(TLV320_GPI_CFG0_REG + channel/2);
     val &= ~(0x07) << 4*(channel % 2);
     if (!write(TLV320_GPI_CFG0_REG + channel/2, val))
@@ -328,13 +328,14 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, SOURCE source,
     return false;
   if (UseChannel[channel] == 0)
     NChannels++;
-  UseChannel[channel] = (source == DIFFERENTIAL_INPUT ? 2 : 1);
-  setValue("Source", SourceStrings[source]);
+  UseChannel[channel] = (source == Input::DIFFERENTIAL ? 2 : 1);
+  setValue("Source", Input::SourceStrings[source]);
+  Source = source;
   return true;
 }
 
 
-bool ControlTLV320ADC::setupChannels(uint8_t n_chans, SOURCE source,
+bool ControlTLV320ADC::setupChannels(uint8_t n_chans, Input::SOURCE source,
 				     IMPEDANCE impedance, COUPLING coupling,
 				     int8_t slot, uint8_t offs) {
   if (n_chans > 4) {
@@ -435,6 +436,7 @@ bool ControlTLV320ADC::setupTDM(InputTDM &tdm) {
     return false;
   // configure TDM:
   tdm.setResolution(BitBits[Bits]);
+  tdm.setSource(Source);
   tdm.addNChannels(Bus, NChannels);
   updateTDMChannelStr(tdm);
   return true;
@@ -663,6 +665,7 @@ bool ControlTLV320ADC::powerdown() {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   NChannels = 0;
+  Source = Input::DIFFERENTIAL;
   return true;
 }
 
@@ -673,6 +676,7 @@ bool ControlTLV320ADC::powerup() {
   for (uint8_t c=0; c<4; c++)
     UseChannel[c] = 0;
   NChannels = 0;
+  Source = Input::DIFFERENTIAL;
   
   unsigned int val = 0x01;  // software reset
   if (!write(TLV320_SW_RESET_REG, val))
@@ -710,12 +714,8 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
   Serial.printf("CH%d_CFG0:\n", channel + 1);
   Serial.print("  Input source: ");
   unsigned int source = (val & 0x60) >> 5;
-  if (source == 0)
-    Serial.println("differential");
-  else if (source == 1)
-    Serial.println("single-ended");
-  else if (source == 2)
-    Serial.println("digital");
+  if (source < 3)
+    Serial.println(Input::SourceStrings[source]);
   else
     Serial.println("reserved");
   Serial.print("  Coupling    : ");

@@ -17,6 +17,16 @@ class Input : public DataBuffer {
   
   static const size_t MajorSize = 256;
 
+  enum SOURCE : uint8_t {
+    DIFFERENTIAL,
+    SINGLE_ENDED,
+    DIGITAL
+  };
+  
+  static const size_t MaxSource = 3;
+  static const char *SourceStrings[MaxSource];
+  static const SOURCE SourceEnums[MaxSource];
+
   // Initialize and pass a buffer that has been created with the
   // DATA_BUFFER macro.
   Input(volatile sample_t *buffer, size_t nbuffer, size_t dmabuffer=0);
@@ -27,6 +37,15 @@ class Input : public DataBuffer {
   
   // Clear the channel configuration.
   virtual void clearChannels() = 0;
+
+  // Return channel source.
+  SOURCE source() const;
+
+  // Return channel source as a string.
+  const char* sourceStr() const;
+  
+  // Set the channel source.
+  void setSource(SOURCE source);
 
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
@@ -64,6 +83,7 @@ protected:
   
   bool Running;
   mutable uint32_t StartTime;
+  SOURCE Source;
   
 };
 

@@ -1,3 +1,4 @@
+
 /*
   InputTDM - Streaming TDM data into a single cyclic buffer.
   Created by Jan Benda, July 4th, 2023.
@@ -20,7 +21,6 @@
 
 
 #include <Arduino.h>
-#include <ADC.h>
 #include <DMAChannel.h>
 #include <Input.h>
 

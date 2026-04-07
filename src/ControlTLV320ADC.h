@@ -34,12 +34,6 @@ public:
     BIT32
   };
 
-  enum SOURCE : uint8_t {
-    DIFFERENTIAL_INPUT,
-    SINGLE_ENDED_INPUT,
-    DIGITAL_INPUT
-  };
-
   enum IMPEDANCE : uint8_t {
     IMP_025,   // 2.5kOhm
     IMP_100,   // 10kOhm
@@ -105,12 +99,12 @@ public:
   void channelsStr(char *chans, size_t nchans, const char *prefix=0);
   
   /* Setup input channel as output channel. */
-  bool setupChannel(uint8_t channel, SOURCE source=DIFFERENTIAL_INPUT,
+  bool setupChannel(uint8_t channel, Input::SOURCE source=Input::DIFFERENTIAL,
 		    IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
 		    int8_t slot=-1, uint8_t offs=0);
   
   /* Setup input channels as output channels. */
-  bool setupChannels(uint8_t n_chans, SOURCE source=DIFFERENTIAL_INPUT,
+  bool setupChannels(uint8_t n_chans, Input::SOURCE source=Input::DIFFERENTIAL,
 		     IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
 		     int8_t slot=-1, uint8_t offs=0);
 
@@ -217,12 +211,12 @@ protected:
   uint8_t CurrentPage;
   uint32_t Rate;
   DATA_BITS Bits;
+  Input::SOURCE Source;
   uint8_t UseChannel[4];  // 0: unused, 1: single ended, 2: differential
   int NChannels;
   InputTDM::TDM_BUS Bus;
   static const int WriteDelay = 1;
 
-  static const char *SourceStrings[3];
   static const char *LowpassStrings[3];
   static const char *OnOffStrings[2];
   float MaxAmplmV;

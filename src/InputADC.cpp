@@ -120,6 +120,7 @@ InputADC::InputADC(volatile sample_t *buffer, size_t nbuffer,
   setDeviceType("input");
   setInternBus();
   setChip("ADC");
+  setSource(SINGLE_ENDED);
   Available = true;
   for (uint8_t adc=0; adc<2; adc++) {
     NChans[adc] = 0;
@@ -529,6 +530,7 @@ void InputADC::report(Stream &stream) {
   stream.printf("  conversion: %s\n", conversionSpeedStr());
   stream.printf("  sampling:   %s\n", samplingSpeedStr());
   stream.printf("  reference:  %s\n", referenceStr());
+  stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
   stream.printf("  ADC0:       %s\n", chans0);

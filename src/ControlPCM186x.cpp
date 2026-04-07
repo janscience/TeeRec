@@ -508,6 +508,7 @@ bool ControlPCM186x::setupTDM(bool offs) {
 bool ControlPCM186x::setupTDM(InputTDM &tdm, bool offs) {
   if (setupTDM(offs)) {
     tdm.setResolution(32);
+    tdm.setSource(Input::SINGLE_ENDED);
     tdm.addNChannels(Bus, NChannels);
     updateTDMChannelStr(tdm);
     return true;
