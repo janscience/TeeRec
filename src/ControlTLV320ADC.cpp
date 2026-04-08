@@ -125,8 +125,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   Source(Input::DIFFERENTIAL),
   NChannels(0),
   Bus(bus),
-  //MaxAmplmV(0.5*3300.0),
-  MaxAmplmV(0.5*2750.0),
+  MaxAmplmV(2750.0),
   PGAGain(1.0),
   VolumeGain(1.0),
   PGAGainStr("0dB"),
@@ -331,6 +330,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   UseChannel[channel] = (source == Input::DIFFERENTIAL ? 2 : 1);
   setValue("Source", Input::SourceStrings[source]);
   Source = source;
+  MaxAmplmV = source == Input::DIFFERENTIAL ? 2750.0 : 0.5*2750.0;
   return true;
 }
 
@@ -666,6 +666,11 @@ bool ControlTLV320ADC::powerdown() {
     UseChannel[c] = 0;
   NChannels = 0;
   Source = Input::DIFFERENTIAL;
+  MaxAmplmV = 2750.0;
+  PGAGain = 1.0;
+  VolumeGain = 1.0;
+  strcpy(PGAGainStr, "0dB");
+  strcpy(VolumeStr, "0dB");
   return true;
 }
 
@@ -677,6 +682,11 @@ bool ControlTLV320ADC::powerup() {
     UseChannel[c] = 0;
   NChannels = 0;
   Source = Input::DIFFERENTIAL;
+  MaxAmplmV = 2750.0;
+  PGAGain = 1.0;
+  VolumeGain = 1.0;
+  strcpy(PGAGainStr, "0dB");
+  strcpy(VolumeStr, "0dB");
   
   unsigned int val = 0x01;  // software reset
   if (!write(TLV320_SW_RESET_REG, val))
