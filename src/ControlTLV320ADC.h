@@ -57,7 +57,18 @@ public:
     LOW_LATENCY,
     ULTRALOW_LATENCY
   };
-  
+
+  enum BIAS : uint8_t {
+    BIAS_VREF,
+    BIAS_VREF11,
+    BIAS_AVDD
+  };
+
+  enum FULLSCALE : uint8_t {
+    FULLSCALE_275,
+    FULLSCALE_250,
+    FULLSCALE_137
+  };
 
   /* Do not initialize TLV320 yet. */
   ControlTLV320ADC();
@@ -107,6 +118,10 @@ public:
   bool setupChannels(uint8_t n_chans, Input::SOURCE source=Input::DIFFERENTIAL,
 		     IMPEDANCE impedance=IMP_025, COUPLING coupling=AC_CPL,
 		     int8_t slot=-1, uint8_t offs=0);
+
+  /* Set (microphone) bias voltage and fullscale reference VREF.
+     Call this before setupI2S() or setupTDM(). */
+  bool setBias(BIAS bias=BIAS_VREF, FULLSCALE fullscale=FULLSCALE_275);
 
   /* Setup I2S output.
      Get the recorded data with AudioInputI2S */
@@ -215,6 +230,7 @@ protected:
   uint8_t UseChannel[4];  // 0: unused, 1: single ended, 2: differential
   int NChannels;
   InputTDM::TDM_BUS Bus;
+  bool UseBias;
   static const int WriteDelay = 1;
 
   static const char *LowpassStrings[3];

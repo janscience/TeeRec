@@ -125,6 +125,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   Source(Input::DIFFERENTIAL),
   NChannels(0),
   Bus(bus),
+  UseBias(false),
   MaxAmplmV(2750.0),
   PGAGain(1.0),
   VolumeGain(1.0),
@@ -458,8 +459,24 @@ bool ControlTLV320ADC::setActive() {
     return false;
   // power up:
   val = 0x60;    // power up ADC, PDM, and PLL
+  if (UseBias)
+    val |= 0x80;
   if (!write(TLV320_PWR_CFG_REG, val))
     return false;
+  return true;
+}
+
+
+bool ControlTLV320ADC::setBias(BIAS bias, FULLSCALE fullscale) {
+  uint8_t val = 0;
+  val |= fullscale & 0x03;
+  if (bias == BIAS_VREF11)
+    val |= 0x10;
+  else if (bias == BIAS_AVDD)
+    val |= 0x60;
+  if (!write(TLV320_BIAS_CFG_REG, val))
+    return false;
+  UseBias = true;
   return true;
 }
 
@@ -666,6 +683,7 @@ bool ControlTLV320ADC::powerdown() {
     UseChannel[c] = 0;
   NChannels = 0;
   Source = Input::DIFFERENTIAL;
+  UseBias = false;
   MaxAmplmV = 2750.0;
   PGAGain = 1.0;
   VolumeGain = 1.0;
@@ -682,6 +700,7 @@ bool ControlTLV320ADC::powerup() {
     UseChannel[c] = 0;
   NChannels = 0;
   Source = Input::DIFFERENTIAL;
+  UseBias = false;
   MaxAmplmV = 2750.0;
   PGAGain = 1.0;
   VolumeGain = 1.0;
