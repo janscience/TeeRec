@@ -5,6 +5,7 @@ const uint32_t ControlTLV320ADC::SamplingRates[ControlTLV320ADC::MaxSamplingRate
   {8000, 16000, 24000, 32000, 48000, 96000, 192000};
 const uint8_t ControlTLV320ADC::BitBits[4] = {16, 20, 24, 32};
 
+const char *ControlTLV320ADC::ImpedanceStrings[4] = {"2.5k", "10k", "20k", "reserved"};
 const char *ControlTLV320ADC::LowpassStrings[3] = {"linear", "low latency", "ultra-low latency"};
 const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 
@@ -139,6 +140,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   setI2CBus(wire, address);
   setChip("TLV320");
   add("Source", Input::SourceStrings[Source]);
+  add("Impedance", ImpedanceStrings[0]);
   add("Lowpass", LowpassStrings[0]);
   add("Highpass", HighpassStr);
   add("PGAGain", PGAGainStr);
@@ -307,9 +309,12 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   */
   // configure channel:
   unsigned int val = 0;
-  val |= (impedance & 0x03) << 2; // IMP
-  if (coupling == DC_CPL)
+  if (coupling == DC_CPL) {
     val |= 0x10;                  // DC
+    if (impedance == IMP_025)
+      impedance = IMP_100;
+  }
+  val |= (impedance & 0x03) << 2; // IMP
   val |= (source & 0x03) << 5;    // INSRC
   val |= 0x80;                    // INTYP: Line input
   if (!write(addr, val))
@@ -329,6 +334,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   if (UseChannel[channel] == 0)
     NChannels++;
   UseChannel[channel] = (source == Input::DIFFERENTIAL ? 2 : 1);
+  setValue("Impedance", ImpedanceStrings[impedance]);
   setValue("Source", Input::SourceStrings[source]);
   Source = source;
   MaxAmplmV = source == Input::DIFFERENTIAL ? 2750.0 : 0.5*2750.0;
@@ -754,14 +760,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
     Serial.println("AC");
   Serial.print("  Impedance   : ");
   unsigned int imp = (val & 0x0C) >> 2;
-  if (imp == 0)
-    Serial.println("2.5kOhm");
-  else if (imp == 1)
-    Serial.println("10kOhm");
-  else if (imp == 2)
-    Serial.println("20kOhm");
-  else
-    Serial.println("reserved");
+  Serial.println(ImpedanceStrings[imp]);
   Serial.print("  DRE and AGC : ");
   if (val & 0x01)
     Serial.println("enabled");
