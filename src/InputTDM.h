@@ -121,10 +121,11 @@ protected:
   volatile size_t DMACounter[2];  // total count of TDMBuffer segments
   volatile size_t DataHead[2];    // current index for each TDM bus for writing. Only used in isr.
 
-  void TDMISR(uint8_t tdm);
-  static void ISR0();
+  // Transfer 32bit data from DMA buffer.
+  void TDMISR32Bit(uint8_t tdm);
+  static void ISR32Bit0();
 #if defined(__IMXRT1062__)
-  static void ISR1();
+  static void ISR32Bit1();
 #endif
   
   uint8_t DownSample;

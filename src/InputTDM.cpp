@@ -7,10 +7,10 @@
 #if defined(KINETISK) || defined(__IMXRT1062__)
 
 // DMA buffer for 256 TDM frames:
-#define TDM_FRAME_SIZE  8
+#define TDM_FRAME_SIZE_32BIT  8
 #define TDM_FRAMES  256
 DMAMEM __attribute__((aligned(32)))
-static uint32_t TDMBuffer[2][TDM_FRAMES*TDM_FRAME_SIZE];
+static uint32_t TDMBuffer32Bit[2][TDM_FRAMES*TDM_FRAME_SIZE_32BIT];
 
 DMAChannel InputTDM::DMA[2];
 
@@ -18,7 +18,7 @@ InputTDM *InputTDM::TDM = 0;
 
 
 InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
-  Input(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
+  Input(buffer, nbuffer, TDM_FRAME_SIZE_32BIT*TDM_FRAMES/2) {
   TDM = this;
   setSource(SINGLE_ENDED);
   setDataResolution(16);
@@ -457,11 +457,11 @@ void InputTDM::start() {
       DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
       DMA[bus].TCD->NBYTES_MLNO = 4;
       DMA[bus].TCD->SLAST = 0;
-      DMA[bus].TCD->DADDR = TDMBuffer[bus];
+      DMA[bus].TCD->DADDR = TDMBuffer32Bit[bus];
       DMA[bus].TCD->DOFF = 4;
-      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
-      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer[bus]);
-      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer32Bit[bus]) / 4;
+      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer32Bit[bus]);
+      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer32Bit[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(DMAMUX_SOURCE_I2S0_RX);
 
@@ -484,11 +484,11 @@ void InputTDM::start() {
       DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
       DMA[bus].TCD->NBYTES_MLNO = 4;
       DMA[bus].TCD->SLAST = 0;
-      DMA[bus].TCD->DADDR = TDMBuffer[bus];
+      DMA[bus].TCD->DADDR = TDMBuffer32Bit[bus];
       DMA[bus].TCD->DOFF = 4;
-      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
-      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer[bus]);
-      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer[bus]) / 4;
+      DMA[bus].TCD->CITER_ELINKNO = sizeof(TDMBuffer32Bit[bus]) / 4;
+      DMA[bus].TCD->DLASTSGA = -sizeof(TDMBuffer32Bit[bus]);
+      DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer32Bit[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
 
@@ -502,7 +502,7 @@ void InputTDM::start() {
       }
 #endif
 #if defined(__IMXRT1062__)
-      DMA[bus].attachInterrupt(bus==TDM1?ISR0:ISR1);
+      DMA[bus].attachInterrupt(bus==TDM1?ISR32Bit0:ISR32Bit1);
 #else
       DMA[bus].attachInterrupt(ISR0);
 #endif
@@ -577,26 +577,26 @@ void InputTDM::stop() {
 }
 
 
-void InputTDM::TDMISR(uint8_t bus) {
+void InputTDM::TDMISR32Bit(uint8_t bus) {
   uint32_t daddr = (uint32_t)(DMA[bus].TCD->DADDR);
   DMA[bus].clearInterrupt();
   
   const uint32_t *src;
-  if (daddr < (uint32_t)TDMBuffer[bus] + sizeof(TDMBuffer[bus]) / 2) {
+  if (daddr < (uint32_t)TDMBuffer32Bit[bus] + sizeof(TDMBuffer32Bit[bus]) / 2) {
     // DMA is receiving to the first half of the buffer
     // need to remove data from the second half
-    src = &TDMBuffer[bus][TDM_FRAMES*TDM_FRAME_SIZE/2];
+    src = &TDMBuffer32Bit[bus][TDM_FRAMES*TDM_FRAME_SIZE_32BIT/2];
   } else {
     // DMA is receiving to the second half of the buffer
     // need to remove data from the first half
-    src = &TDMBuffer[bus][0];
+    src = &TDMBuffer32Bit[bus][0];
   }
 
   if (DataHead[bus] >= NBuffer)
     DataHead[bus] -= NBuffer;
 
 #if IMXRT_CACHE_ENABLED >= 1
-  arm_dcache_delete((void*)src, sizeof(TDMBuffer[bus]) / 2);
+  arm_dcache_delete((void*)src, sizeof(TDMBuffer32Bit[bus]) / 2);
 #endif
   // copy from src into cyclic buffer:
   unsigned int nchannels = NChans[bus];
@@ -640,14 +640,14 @@ void InputTDM::TDMISR(uint8_t bus) {
 }
 
 
-void InputTDM::ISR0() {
-  TDM->TDMISR(TDM1);
+void InputTDM::ISR32Bit0() {
+  TDM->TDMISR32Bit(TDM1);
 }
 
 
 #if defined(__IMXRT1062__)
-void InputTDM::ISR1() {
-  TDM->TDMISR(TDM2);
+void InputTDM::ISR32Bit1() {
+  TDM->TDMISR32Bit(TDM2);
 }
 #endif
 
