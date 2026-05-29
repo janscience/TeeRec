@@ -17,7 +17,6 @@ DMAChannel InputTDM::DMA[2];
 InputTDM *InputTDM::TDM = 0;
 
 
-
 InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
   Input(buffer, nbuffer, TDM_FRAME_SIZE*TDM_FRAMES/2) {
   TDM = this;
@@ -33,6 +32,8 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
     NChans[bus] = 0;
     DMACounter[bus] = 0;
     DataHead[bus] = 0;
+    for (uint8_t c=0; c<MaxChanMap; c++)
+      ChanMap[bus][c] = c;
   }
   TDMUse = 0;
   setGain(1000.0);
@@ -505,6 +506,16 @@ void InputTDM::start() {
 #else
       DMA[bus].attachInterrupt(ISR0);
 #endif
+      // init mapping of channels:
+      for (uint8_t c=0; c < NChans[bus]; c++)
+	ChanMap[bus][c] = c;
+      if (SwapLR) {
+	for (uint8_t c=0; c < NChans[bus]; c+=2) {
+	  uint8_t sc = ChanMap[bus][c];
+	  ChanMap[bus][c] = ChanMap[bus][c + 1];
+	  ChanMap[bus][c + 1] = sc;
+	}
+      }
     }
   }
   
@@ -558,6 +569,10 @@ void InputTDM::stop() {
   */
 #endif
   TDMUse = 0;
+  for (int bus=0; bus < 2; bus++) {
+    for (uint8_t c=0; c<MaxChanMap; c++)
+      ChanMap[bus][c] = c;
+  }
   Input::stop();
 }
 
@@ -588,12 +603,16 @@ void InputTDM::TDMISR(uint8_t bus) {
   sample_t buffer[nchannels];
   for (unsigned int i=0; i < TDM_FRAMES/2/DownSample; i++) {
     const sample_t *slot = (const sample_t *)src;
+    const uint8_t *chanmap = ChanMap[bus];
     for (unsigned int c=0; c < nchannels; c++) {
-      slot++;
+      slot++;  // only copy most significant word
+      /*
       unsigned int ci = c;
       if (SwapLR)
 	ci += c%2 > 0 ? -1 : +1;
       buffer[ci] = *slot++;
+      */
+      buffer[*chanmap++] = *slot++;
     }
     memcpy((void *)&Buffer[DataHead[bus]], (void *)buffer, sizeof(buffer));
     DataHead[bus] += NChannels;

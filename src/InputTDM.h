@@ -134,6 +134,8 @@ protected:
 
   uint8_t TDMUse;
   uint8_t NChans[2];
+  static const size_t MaxChanMap = 32;
+  uint8_t ChanMap[2][MaxChanMap];
   
 };
 
