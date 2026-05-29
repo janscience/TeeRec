@@ -28,8 +28,10 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
   DownSample = 1;
   SwapLR = false;
   Channels[0] = '\0';
-  for (int bus=0; bus<2; bus++) {
+  for (uint8_t bus=0; bus<2; bus++) {
     NChans[bus] = 0;
+    DataPins[bus] = 0;
+    NDataPins[bus] = 0;
     DMACounter[bus] = 0;
     DataHead[bus] = 0;
     for (uint8_t c=0; c<MaxChanMap; c++)
@@ -70,15 +72,19 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
   }
   if (nchannels == 0) {
     NChans[bus] = 0;
+    DataPins[bus] = 0;
+    NDataPins[bus] = 0;
     TDMUse &= ~(1 << bus);
   }
   else {
     NChans[bus] = nchannels;
+    DataPins[bus] = TDM_PIN_A;
+    NDataPins[bus] = 1;
     TDMUse |= (1 << bus);
   }
   NChannels = 0;
-  for (int k=0; k<2; k++)
-    NChannels += NChans[k];
+  for (uint8_t bus=0; bus<2; bus++)
+    NChannels += NChans[bus];
 }
 
   
@@ -90,6 +96,8 @@ void InputTDM::addNChannels(TDM_BUS bus, uint8_t nchannels) {
   if (nchannels == 0)
     return;
   NChans[bus] += nchannels;
+  DataPins[bus] = TDM_PIN_A;
+  NDataPins[bus] = 1;
   NChannels += nchannels;
   TDMUse |= (1 << bus);
 }
@@ -113,17 +121,22 @@ void InputTDM::setChannelsStr(const char *cs) {
 
 void InputTDM::clearChannels(TDM_BUS bus) {
   NChans[bus] = 0;
+  DataPins[bus] = 0;
+  NDataPins[bus] = 0;
   TDMUse &= ~(1 << bus);
   NChannels = 0;
-  for (int k=0; k<2; k++)
-    NChannels += NChans[k];
+  for (uint8_t bus=0; bus<2; bus++)
+    NChannels += NChans[bus];
 }
 
 
 void InputTDM::clearChannels() {
   NChannels = 0;
-  for (int k=0; k<2; k++)
-    NChans[k] = 0;
+  for (uint8_t bus=0; bus<2; bus++) {
+    NChans[bus] = 0;
+    DataPins[bus] = 0;
+    NDataPins[bus] = 0;
+  }
   TDMUse = 0;
   Channels[0] = '\0';
   SwapLR = false;
@@ -182,6 +195,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  resolution: %dbits\n", Bits);
   stream.printf("  nchannels:  %d\n", NChannels);
   stream.printf("  channels:   %s\n", Channels);
+  stream.printf("  npins:      %d\n", NDataPins[0] + NDataPins[1]);
   stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
@@ -442,7 +456,7 @@ void InputTDM::start() {
              // (they also might want to know about Rate)
   
   // this is begin() from input_tdm.cpp of the Audio library
-  for (int bus=0; bus < 2; bus++) {
+  for (uint8_t bus=0; bus<2; bus++) {
     if (TDMUse & (1 << bus)) {
       DataHead[bus] = 0;
       DMACounter[bus] = 0;
@@ -452,6 +466,7 @@ void InputTDM::start() {
       // TODO: should we set & clear the I2S_RCSR_SR bit here?
 #if defined(KINETISK)
       CORE_PIN13_CONFIG = PORT_PCR_MUX(4); // pin 13, PTC5, I2S0_RXD0
+      NDataPins[bus] = 1;
       DMA[bus].TCD->SADDR = &I2S0_RDR0;
       DMA[bus].TCD->SOFF = 0;
       DMA[bus].TCD->ATTR = DMA_TCD_ATTR_SSIZE(2) | DMA_TCD_ATTR_DSIZE(2);
@@ -471,13 +486,16 @@ void InputTDM::start() {
 #elif defined(__IMXRT1062__)
       // receive data pin:
       if (bus == TDM1) {
+	NDataPins[bus] = 0;
 	CORE_PIN8_CONFIG  = 3;  // RX_DATA0
 	IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
+	NDataPins[bus] = 1;
 	DMA[bus].TCD->SADDR = &I2S1_RDR0;
       }
       else if (bus == TDM2) {
 	CORE_PIN5_CONFIG = 2;  // 2:RX_DATA0
 	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
+	NDataPins[bus] = 1;
 	DMA[bus].TCD->SADDR = &I2S2_RDR0;
       }
       DMA[bus].TCD->SOFF = 0;
@@ -524,7 +542,7 @@ void InputTDM::start() {
     DataHead[TDM2] = NChans[TDM1];
 #endif
   
-  for (int bus=0; bus < 2; bus++) {
+  for (uint8_t bus=0; bus<2; bus++) {
     if (TDMUse & (1 << bus))
       DMA[bus].enable();
   }
@@ -535,7 +553,7 @@ void InputTDM::start() {
 
 
 void InputTDM::stop() {
-  for (int bus=0; bus < 2; bus++) {
+  for (uint8_t bus=0; bus<2; bus++) {
     if (TDMUse & (1 << bus)) {
       DMA[bus].disable();
       DMA[bus].detachInterrupt();
@@ -569,10 +587,6 @@ void InputTDM::stop() {
   */
 #endif
   TDMUse = 0;
-  for (int bus=0; bus < 2; bus++) {
-    for (uint8_t c=0; c<MaxChanMap; c++)
-      ChanMap[bus][c] = c;
-  }
   Input::stop();
 }
 
@@ -599,12 +613,13 @@ void InputTDM::TDMISR32Bit(uint8_t bus) {
   arm_dcache_delete((void*)src, sizeof(TDMBuffer32Bit[bus]) / 2);
 #endif
   // copy from src into cyclic buffer:
-  unsigned int nchannels = NChans[bus];
+  uint8_t nchannels = NChans[bus];
+  uint8_t npins = NDataPins[bus];
   sample_t buffer[nchannels];
-  for (unsigned int i=0; i < TDM_FRAMES/2/DownSample; i++) {
+  for (size_t i=0; i < TDM_FRAMES/2/DownSample/npins; i++) {
     const sample_t *slot = (const sample_t *)src;
     const uint8_t *chanmap = ChanMap[bus];
-    for (unsigned int c=0; c < nchannels; c++) {
+    for (uint8_t c=0; c < nchannels; c++) {
       slot++;  // only copy most significant word
       /*
       unsigned int ci = c;
@@ -620,7 +635,7 @@ void InputTDM::TDMISR32Bit(uint8_t bus) {
       DataHead[bus] -= NBuffer;
     // next frames:
     for (unsigned int j=0; j < DownSample; j++)
-      src += 8;
+      src += 8*npins;
   }
   DMACounter[bus]++;
 #if defined(__IMXRT1062__)

@@ -36,6 +36,13 @@ class InputTDM : public Input {
 #endif
   };
   
+  enum TDM_DATA_PIN {
+    TDM_PIN_A = 1,
+    TDM_PIN_B = 2,
+    TDM_PIN_C = 4,
+    TDM_PIN_D = 8
+  };
+  
   InputTDM(volatile sample_t *buffer, size_t nbuffer);
 
   static InputTDM *TDM;
@@ -135,6 +142,8 @@ protected:
 
   uint8_t TDMUse;
   uint8_t NChans[2];
+  uint8_t DataPins[2];
+  uint8_t NDataPins[2];
   static const size_t MaxChanMap = 32;
   uint8_t ChanMap[2][MaxChanMap];
   
