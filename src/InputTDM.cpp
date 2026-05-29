@@ -89,15 +89,23 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
 
   
 void InputTDM::addNChannels(TDM_BUS bus, uint8_t nchannels) {
-  if (NChans[bus] + nchannels > 256/Bits) {
-    Serial.printf("InputTDM::setNChannels() -> too many channels=%u.\n", nchannels);
+  addNChannels(bus, TDM_PIN_A, nchannels);
+}
+
+  
+void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA_PIN pin, uint8_t nchannels) {
+  uint8_t npins = NDataPins[bus];
+  if ((DataPins[bus] & pin) == 0)
+    npins++;
+  if (NChans[bus] + nchannels > npins*256/Bits) {
+    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %x.\n", nchannels, bus, pin);
     nchannels = 0;
   }
   if (nchannels == 0)
     return;
   NChans[bus] += nchannels;
-  DataPins[bus] = TDM_PIN_A;
-  NDataPins[bus] = 1;
+  DataPins[bus] |= pin;
+  NDataPins[bus] = npins;
   NChannels += nchannels;
   TDMUse |= (1 << bus);
 }
@@ -167,7 +175,7 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
     NChannels = 0;
     return false;
   }
-  if ( NBuffer < TDM_FRAMES*8 ) {
+  if (NBuffer < TDM_FRAMES*8) {
     stream.printf("ERROR: no buffer allocated or buffer too small. NBuffer=%d\n", NBuffer);
     Rate = 0;
     NChannels = 0;
@@ -176,12 +184,29 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
   if (bufferTime() < 0.1)
     stream.printf("WARNING: buffer time %.0fms should be larger than 100ms!\n",
 		  1000.0*bufferTime());
-  if ( NChannels < 1 ) {
+  if (NChannels < 1) {
     stream.println("ERROR: no channels specified.");
     Rate = 0;
     NChannels = 0;
     return false;
   }
+#if defined(KINETISK)
+  if (DataPins[TDM1] != TDM_PIN_A) {
+    stream.printf("ERROR: only one data pin on TDM bus supported! Got %02x.\n",
+		  DataPins[TDM1]);
+    Rate = 0;
+    NChannels = 0;
+    return false;
+  }
+#elif defined(__IMXRT1062__)
+  if (DataPins[TDM2] != 0 && DataPins[TDM2] != TDM_PIN_A) {
+    stream.printf("ERROR: only one data pin on TDM2 bus supported! Got %02x.\n",
+		  DataPins[TDM2]);
+    Rate = 0;
+    NChannels = 0;
+    return false;
+  }
+#endif
   return true;
 }
 
@@ -328,9 +353,13 @@ void InputTDM::begin(Stream &stream) {
   CORE_PIN11_CONFIG = PORT_PCR_MUX(6); // pin 11, PTC6, I2S0_MCLK - 22.5 MHz
 
 #elif defined(__IMXRT1062__)
+
+  // TODO: put in reveiver and transmitter masks!
+  // see config_tdm here:
+  // https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/output_tdm.cpp
+    
   if (TDMUse & (1 << TDM1)) {
     CCM_CCGR5 |= CCM_CCGR5_SAI1(CCM_CCGR_ON);
-
     // if either transmitter or receiver is enabled, do nothing
     if (I2S1_TCSR & I2S_TCSR_TE) return;
     if (I2S1_RCSR & I2S_RCSR_RE) return;
@@ -483,16 +512,37 @@ void InputTDM::start() {
       // enable receive RE and bit clock BCE:
       I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
       I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
+      DMA[bus].attachInterrupt(ISR32Bit0);
 #elif defined(__IMXRT1062__)
       // receive data pin:
       if (bus == TDM1) {
+	// multi data pin setup from
+	// https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/input_tdm.cpp
 	NDataPins[bus] = 0;
-	CORE_PIN8_CONFIG  = 3;  // RX_DATA0
-	IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
-	NDataPins[bus] = 1;
+	if (DataPins[bus] & TDM_PIN_D) {
+	  CORE_PIN32_CONFIG = 3; // 1:RX_DATA3
+	  IOMUXC_SAI1_RX_DATA3_SELECT_INPUT = 1;
+	  NDataPins[bus]++;
+	}
+	if (DataPins[bus] & TDM_PIN_C) {
+	  CORE_PIN9_CONFIG = 3;  // 1:RX_DATA2
+	  IOMUXC_SAI1_RX_DATA2_SELECT_INPUT = 1;
+	  NDataPins[bus]++;
+	}
+	if (DataPins[bus] & TDM_PIN_B) {
+	  CORE_PIN6_CONFIG = 3;  // 1:RX_DATA1
+	  IOMUXC_SAI1_RX_DATA1_SELECT_INPUT = 1;
+	  NDataPins[bus]++;
+	}
+	if (DataPins[bus] & TDM_PIN_A) {
+	  CORE_PIN8_CONFIG = 3;  // 1:RX_DATA0
+	  IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
+	  NDataPins[bus]++;
+	}
 	DMA[bus].TCD->SADDR = &I2S1_RDR0;
       }
       else if (bus == TDM2) {
+	// TODO
 	CORE_PIN5_CONFIG = 2;  // 2:RX_DATA0
 	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
 	NDataPins[bus] = 1;
@@ -509,6 +559,10 @@ void InputTDM::start() {
       DMA[bus].TCD->BITER_ELINKNO = sizeof(TDMBuffer32Bit[bus]) / 4;
       DMA[bus].TCD->CSR = DMA_TCD_CSR_INTHALF | DMA_TCD_CSR_INTMAJOR;
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
+      DMA[bus].attachInterrupt(bus==TDM1?ISR32Bit0:ISR32Bit1);
+
+      // TODO: zapDMA()?
+      //https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/output_tdm.cpp
 
       // enable RX RE and bit clock BCE:
       if (bus == TDM1) {
@@ -519,11 +573,13 @@ void InputTDM::start() {
 	I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
       }
 #endif
+      /*
 #if defined(__IMXRT1062__)
       DMA[bus].attachInterrupt(bus==TDM1?ISR32Bit0:ISR32Bit1);
 #else
-      DMA[bus].attachInterrupt(ISR0);
+      DMA[bus].attachInterrupt(ISR32Bit0);
 #endif
+      */
       // init mapping of channels:
       for (uint8_t c=0; c < NChans[bus]; c++)
 	ChanMap[bus][c] = c;
@@ -533,6 +589,10 @@ void InputTDM::start() {
 	  ChanMap[bus][c] = ChanMap[bus][c + 1];
 	  ChanMap[bus][c + 1] = sc;
 	}
+      }
+      if (NDataPins[bus] > 1) {
+	// figure out the right channel mapping!
+	// 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
       }
     }
   }
@@ -586,7 +646,6 @@ void InputTDM::stop() {
   }
   */
 #endif
-  TDMUse = 0;
   Input::stop();
 }
 
