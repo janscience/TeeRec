@@ -126,10 +126,8 @@ public:
 
   /* Return the input channels set for each output channel
      as a string in chans with maximum nchans characters.
-     If swaplr then left and right channels are swapped.
-     If provided, prepend prefix to each channel. */
-  void channelsStr(char *chans, size_t nchans, bool swaplr=false,
-		   const char *prefix=0);
+     Reverse order in blocks of nreverse channels. */
+  void channelsStr(char *chans, size_t nchans, uint8_t nreverse=1);
   
   /* Setup I2S output for the specified four input channels.
      If output channels 3 and 4 areused make them available as DOUT2 via GPIO0.

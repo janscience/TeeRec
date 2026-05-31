@@ -254,24 +254,41 @@ const char *ControlTLV320ADC::channelStr(uint8_t channel) {
 
 
 void ControlTLV320ADC::channelsStr(char *chans, size_t nchans,
-				   const char *prefix) {
-  // prepare channel string:
+				   uint8_t nreverse) {
   *chans = '\0';
-  size_t n = 6;      // strlen of a single channel name plus comma
-  if (prefix != 0)
-    n += strlen(prefix);
+  // prepare channel list:
+  uint8_t channel[4] = {0, 1, 2, 3};  
+  if (nreverse > 1) {
+    for (uint8_t c=0; c < 4; c+=nreverse) {
+      for (uint8_t i=0; i < nreverse/2; i++) {
+	uint8_t ic = channel[c + i];
+	channel[c + i] = channel[c + nreverse - 1 - i];
+	channel[c + nreverse - 1 - i] = ic;
+      }
+    }
+  }
+  // TDM bus name and chip number:
+  uint8_t cn = 0;
+  if (I2CAddress == TLV320_I2C_ADDR2)
+    cn = 1;
+  else if (I2CAddress == TLV320_I2C_ADDR3)
+    cn = 2;
+  else if (I2CAddress == TLV320_I2C_ADDR4)
+    cn = 3;
+  char prefix[16];
+  sprintf(prefix, "T%dC%d-", Bus, cn);
+  // size of resulting string:
+  size_t n = 7;      // strlen of a single channel name plus comma
   n *= NChannels;
   if (n >= nchans)
-    Serial.printf("ERROR in ControlTLV320ADC::channelsStr(): size of chans (%d) too small for %d characters!\n", nchans, n);
-  uint8_t i_chan = 0;
-  for (uint8_t c=0; c<4; c++) {
-    if (UseChannel[c] > 0) {
-      i_chan++;
-      if (prefix != 0)
-	strcat(chans, prefix);
-      strcat(chans, channelStr(c));
-      if (i_chan < NChannels)
+    Serial.printf("ERROR in ControlTLV320ADC::channels(): size of chans (%d) too small for %d characters!\n", nchans, n);
+  // generate channel names:
+  for (uint8_t c=0; c < 4; c++) {
+    if (UseChannel[channel[c]] > 0) {
+      if (strlen(chans) > 0)
 	strcat(chans, ",");
+      strcat(chans, prefix);
+      strcat(chans, channelStr(channel[c]));
     }
   }
 }
@@ -381,38 +398,13 @@ bool ControlTLV320ADC::setupI2S() {
 
 void ControlTLV320ADC::updateTDMChannelStr(InputTDM &tdm) {
   char cs[InputTDM::MaxChannels];
-  char tdmcs[InputTDM::MaxChannels];
-  tdm.channelsStr(tdmcs, InputTDM::MaxChannels);
-  if (strlen(tdmcs) > 0) {
-    // already channels in tdm.channelsStr(), need to add prefix:
-    bool prefix = true;
-    int chipnum = 0;
-    char *cp = cs;
-    for (const char *sp=tdmcs; *sp != '\0'; sp++) {
-      if (prefix) {
-	if (*(sp+1) != '-') {
-	  *(cp++) = '1';
-	  *(cp++) = '-';
-	  chipnum = 1;
-	}
-	else
-	  chipnum = *(sp) - '0';
-      }
-      *(cp++) = *sp;
-      prefix = false;
-      if (*sp == ',')
-	prefix = true;
-    }
-    *(cp++) = '\0';
-    char ps[6];
-    snprintf(ps, 6, "%d-", ++chipnum);
-    char ccs[InputTDM::MaxChannels/2];
-    channelsStr(ccs, InputTDM::MaxChannels/2, ps);
+  tdm.channelsStr(cs, InputTDM::MaxChannels);
+  size_t n = strlen(cs);
+  if (n > 0) {
     strcat(cs, ",");
-    strcat(cs, ccs);
+    n++;
   }
-  else
-    channelsStr(cs, InputTDM::MaxChannels);
+  channelsStr(cs + n, InputTDM::MaxChannels - n, tdm.reverse());
   tdm.setChannelsStr(cs);
 }
 

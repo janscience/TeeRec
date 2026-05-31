@@ -106,8 +106,8 @@ public:
 
   /* Return the input channels set for each output channel
      as a string in chans with maximum nchans characters.
-     If provided, prepend prefix to each channel. */
-  void channelsStr(char *chans, size_t nchans, const char *prefix=0);
+     Reverse order in blocks of nreverse channels. */
+  void channelsStr(char *chans, size_t nchans, uint8_t nreverse=1);
   
   /* Setup input channel as output channel. */
   bool setupChannel(uint8_t channel, Input::SOURCE source=Input::DIFFERENTIAL,

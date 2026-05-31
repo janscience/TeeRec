@@ -26,7 +26,7 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
   Rate = 0;
   NChannels = 0;
   DownSample = 1;
-  SwapLR = false;
+  NReverse = 1;
   Channels[0] = '\0';
   for (uint8_t bus=0; bus<2; bus++) {
     NChans[bus] = 0;
@@ -34,8 +34,10 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
     NDataPins[bus] = 0;
     DMACounter[bus] = 0;
     DataHead[bus] = 0;
-    for (uint8_t c=0; c<MaxChanMap; c++)
+    for (uint8_t c=0; c<MaxChanMap; c++) {
       ChanMap[bus][c] = c;
+      UserChanMap[bus][c] = 0xff;
+    }
   }
   TDMUse = 0;
   setGain(1000.0);
@@ -147,17 +149,46 @@ void InputTDM::clearChannels() {
   }
   TDMUse = 0;
   Channels[0] = '\0';
-  SwapLR = false;
+  NReverse = 1;
+}
+
+
+void InputTDM::setChannelMapping(TDM_BUS bus, uint8_t *chanmap,
+				 uint8_t nchans) {
+  uint8_t c = 0;
+  for (; (c<nchans) && (c<MaxChanMap); c++)
+    UserChanMap[bus][c] = chanmap[c];
+  for (; c<MaxChanMap; c++)
+    UserChanMap[bus][c] = 0xff;
+}
+
+
+void InputTDM::clearChannelMapping(TDM_BUS bus) {
+  for (uint8_t c=0; c<MaxChanMap; c++)
+    UserChanMap[bus][c] = 0xff;
+}
+
+
+void InputTDM::clearChannelMapping() {
+  for (uint8_t bus=0; bus<2; bus++) {
+    for (uint8_t c=0; c<MaxChanMap; c++)
+      UserChanMap[bus][c] = 0xff;
+  }
+}
+
+
+void InputTDM::setReverse(uint8_t n) {
+  NReverse = n > 1 ? n : 1;
 }
 
 
 bool InputTDM::swapLR() const {
-  return SwapLR;
+  return NReverse == 2;
 }
 
 
 void InputTDM::setSwapLR(bool swap) {
-  SwapLR = swap;
+  setReverse(2);
 }
 
 
@@ -189,6 +220,25 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
     Rate = 0;
     NChannels = 0;
     return false;
+  }
+  for (uint8_t bus=0; bus<2; bus++) {
+    if (UserChanMap[bus][0] != 0xff) {
+      for (uint8_t c=0; (c<NChans[bus]) && (c<MaxChanMap); c++) {
+	if (UserChanMap[bus][c] == 0xff) {
+	  stream.printf("ERROR: user-defined channel mapping on TDM%d does not match number of channels %d at channel %d!\n", bus, NChans[bus], c);
+	  Rate = 0;
+	  NChannels = 0;
+	  return false;
+	}
+      }
+      if ((NChans[bus] < MaxChanMap) &&
+	  (UserChanMap[bus][NChans[bus]] != 0xff)) {
+	stream.printf("ERROR: user-defined channel mapping on TDM%d exceeds number of channels %d!\n", bus, NChans[bus]);
+	Rate = 0;
+	NChannels = 0;
+	return false;
+      }
+    }
   }
 #if defined(KINETISK)
   if (DataPins[TDM1] != TDM_PIN_A) {
@@ -224,7 +274,18 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
-  stream.printf("  swap l/r:   %d\n", SwapLR);
+  stream.printf("  nreverse:   %d\n", NReverse);
+  for (uint8_t bus=0; bus<2; bus++) {
+    if (NChans[bus] > 0) {
+      stream.printf("   mapping:    TDM%d", bus);
+      for (uint8_t c=0; c < NChans[bus]; c++) {
+	if (c > 0)
+	  stream.print(", ");
+	stream.printf("%2d", ChanMap[bus][c]);
+      }
+      stream.println();
+    }
+  }
   if (bt < 1.0)
     stream.printf("  buffer:     %.0fms (%d samples)\n", 1000.0*bt, nbuffer());
   else
@@ -581,18 +642,33 @@ void InputTDM::start() {
 #endif
       */
       // init mapping of channels:
-      for (uint8_t c=0; c < NChans[bus]; c++)
-	ChanMap[bus][c] = c;
-      if (SwapLR) {
-	for (uint8_t c=0; c < NChans[bus]; c+=2) {
-	  uint8_t sc = ChanMap[bus][c];
-	  ChanMap[bus][c] = ChanMap[bus][c + 1];
-	  ChanMap[bus][c + 1] = sc;
+      if (UserChanMap[bus][0] == 0xff) {
+	for (uint8_t c=0; c < NChans[bus]; c++)
+	  ChanMap[bus][c] = c;
+	// disentangle DMA buffer from multiple data pins:
+	if (NDataPins[bus] > 1) {
+	  // figure out the right channel mapping!
+	  // 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
 	}
       }
-      if (NDataPins[bus] > 1) {
-	// figure out the right channel mapping!
-	// 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
+      else {
+	for (uint8_t c=0; c < NChans[bus]; c++) {
+	  if (UserChanMap[bus][c] == 0xff) {
+	    Serial.println("ERROR! Invalid user-defined channel mapping!");
+	    return;
+	  }
+	  ChanMap[bus][c] = UserChanMap[bus][c];
+	}
+      }
+      // reverse blocks of channels:
+      if (NReverse > 1) {
+	for (uint8_t c=0; c < NChans[bus]; c+=NReverse) {
+	  for (uint8_t i=0; i < NReverse/2; i++) {
+	    uint8_t sc = ChanMap[bus][c + i];
+	    ChanMap[bus][c + i] = ChanMap[bus][c + NReverse - 1 - i];
+	    ChanMap[bus][c + NReverse - 1 - i] = sc;
+	  }
+	}
       }
     }
   }
@@ -680,12 +756,6 @@ void InputTDM::TDMISR32Bit(uint8_t bus) {
     const uint8_t *chanmap = ChanMap[bus];
     for (uint8_t c=0; c < nchannels; c++) {
       slot++;  // only copy most significant word
-      /*
-      unsigned int ci = c;
-      if (SwapLR)
-	ci += c%2 > 0 ? -1 : +1;
-      buffer[ci] = *slot++;
-      */
       buffer[*chanmap++] = *slot++;
     }
     memcpy((void *)&Buffer[DataHead[bus]], (void *)buffer, sizeof(buffer));

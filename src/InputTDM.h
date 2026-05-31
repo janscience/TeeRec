@@ -90,10 +90,27 @@ class InputTDM : public Input {
   // Clear the channel configuration of all TDM buses.
   virtual void clearChannels();
 
+  // Map slots from DMA buffer to channels in the buffer.
+  void setChannelMapping(TDM_BUS bus, uint8_t *chanmap, uint8_t nchans);
+
+  // Clear user defined channel mapping of specified TDM bus.
+  void clearChannelMapping(TDM_BUS bus);
+
+  // Clear all user defined channel mappings.
+  void clearChannelMapping();
+
+  // Number of channels being reversed in their order.
+  uint8_t reverse() const { return NReverse; };
+
+  // Set number of channels to be reversed.
+  void setReverse(uint8_t n);
+
   // Swap left/right channels.
+  // True if number of reversed channels is two.
   bool swapLR() const;
 
   // Set whether to swap left/right channels.
+  // Calls setReverse(2).
   void setSwapLR(bool swap=true);
 
   // Return DMA counter for specified TDM bus.
@@ -142,7 +159,7 @@ protected:
 #endif
   
   uint8_t DownSample;
-  bool SwapLR;
+  uint8_t NReverse;
 
   char Channels[MaxChannels];
 
@@ -152,6 +169,7 @@ protected:
   uint8_t NDataPins[2];
   static const size_t MaxChanMap = 32;
   uint8_t ChanMap[2][MaxChanMap];
+  uint8_t UserChanMap[2][MaxChanMap];
   
 };
 
