@@ -130,17 +130,20 @@ const char *ControlPCM186x::OnOffStrings[2] = {"off", "on"};
 
 
 ControlPCM186x::ControlPCM186x() :
-  ControlPCM186x(Wire, PCM186x_I2C_ADDR1, InputTDM::TDM1) {
+  ControlPCM186x(Wire, PCM186x_I2C_ADDR1,
+		 InputTDM::TDM1, InputTDM::TDM_PIN_A) {
 }
 
 
-ControlPCM186x::ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus) :
-  ControlPCM186x(Wire, address, bus) {
+ControlPCM186x::ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus,
+			       InputTDM::TDM_DATA pin) :
+  ControlPCM186x(Wire, address, bus, pin) {
 }
 
 
 ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
-			       InputTDM::TDM_BUS bus) :
+			       InputTDM::TDM_BUS bus,
+			       InputTDM::TDM_DATA pin) :
   Device(),
   I2CBus(&wire),
   I2CAddress(address),
@@ -148,6 +151,7 @@ ControlPCM186x::ControlPCM186x(TwoWire &wire, uint8_t address,
   PGALinked(false),
   NChannels(0),
   Bus(bus),
+  Pin(pin),
   MaxAmplmV(1650.0),
   GainStr("0dB") {
   for (uint8_t c=0; c<4; c++)
@@ -386,7 +390,7 @@ void ControlPCM186x::channelsStr(char *chans, size_t nchans, uint8_t nreverse) {
   // TDM bus name and chip number:
   uint8_t cn = I2CAddress == PCM186x_I2C_ADDR1 ? 0 : 1;
   char prefix[16];
-  sprintf(prefix, "T%dC%d-", Bus, cn);
+  sprintf(prefix, "T%dD%dC%d-", Bus, Pin, cn);
   // size of resulting string:
   size_t n = 7;      // strlen of a single channel name plus comma
   n *= NChannels;
@@ -464,7 +468,7 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm, bool offs) {
   if (setupTDM(offs)) {
     tdm.setResolution(32);
     tdm.setSource(Input::SINGLE_ENDED);
-    tdm.addNChannels(Bus, NChannels);
+    tdm.addNChannels(Bus, Pin, NChannels);
     updateTDMChannelStr(tdm);
     return true;
   }

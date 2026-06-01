@@ -36,11 +36,13 @@ class InputTDM : public Input {
 #endif
   };
   
-  enum TDM_DATA_PIN {
-    TDM_PIN_A = 1,
-    TDM_PIN_B = 2,
-    TDM_PIN_C = 4,
-    TDM_PIN_D = 8
+  enum TDM_DATA {
+    TDM_PIN_A = 0,
+#if defined(__IMXRT1062__)
+    TDM_PIN_B = 1,   // Teensy 4: pin 6
+    TDM_PIN_C = 2,   // Teensy 4: pin 9
+    TDM_PIN_D = 3    // Teensy 4: pin 32
+#endif
   };
   
   InputTDM(volatile sample_t *buffer, size_t nbuffer);
@@ -64,16 +66,12 @@ class InputTDM : public Input {
   // Return number of channels recorded from the given TDM bus.
   uint8_t nchannels(TDM_BUS bus) const { return NChans[bus]; };
   
-  // Set number of channels of the TDM bus using the first
+  // Set number of channels of the TDM bus using
   // data pin to nchannels.
-  void setNChannels(TDM_BUS bus, uint8_t nchannels);
+  void setNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels);
   
   // Increment number of channels of the TDM bus using data pin by nchannels.
-  void addNChannels(TDM_BUS bus, TDM_DATA_PIN pin, uint8_t nchannels);
-  
-  // Increment number of channels of the TDM bus using the first
-  // data pin by nchannels.
-  void addNChannels(TDM_BUS bus, uint8_t nchannels);
+  void addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels);
   
   // Return in chans of size nchans the string with the channels
   // in the order they are multiplexed into the buffer.

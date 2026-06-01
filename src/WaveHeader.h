@@ -162,7 +162,7 @@ protected:
   ListChunk Info;
   InfoChunk<4> Bits;
   InfoChunk<4> DataBits;
-  InfoChunk<256> Channels;
+  InfoChunk<512> Channels;
   InfoChunk<4> Averaging;
   InfoChunk<32> Conversion;
   InfoChunk<32> Sampling;

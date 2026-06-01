@@ -77,13 +77,16 @@ public:
   ControlPCM186x();
 
   /* Communicate with PCM chip using defaut I2C bus
-     and address (one of PCM186x_I2C_ADDR*). */
-  ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
+     and address (one of PCM186x_I2C_ADDR*).
+     TDM data go on pin on bus. */
+  ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1,
+		 InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
 
   /* Communicate with PCM chip using wire, address (one of PCM186x_I2C_ADDR*),
-     and TDM bus. */
+     TDM bus and pin. */
   ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1,
-		 InputTDM::TDM_BUS bus=InputTDM::TDM1);
+		 InputTDM::TDM_BUS bus=InputTDM::TDM1,
+		 InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
   
   /* Initialize PCM186x with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
@@ -150,6 +153,9 @@ public:
 
   /* The TDM bus on which this PCM186x chip transmits data. */
   InputTDM::TDM_BUS TDMBus() const { return Bus; };
+
+  /* The TDM data pin on which this PCM186x chip transmits data. */
+  InputTDM::TDM_DATA TDMPin() const { return Pin; };
 
   /* Convert a gain factor to gain level in decibel. */
   float gainToDecibel(float gain);
@@ -238,6 +244,7 @@ protected:
   bool UseChannel[4];
   int NChannels;
   InputTDM::TDM_BUS Bus;
+  InputTDM::TDM_DATA Pin;
   static const int WriteDelay = 1;
 
   static const char *PolarityStrings[2];

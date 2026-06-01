@@ -106,17 +106,20 @@ const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 
 
 ControlTLV320ADC::ControlTLV320ADC() :
-  ControlTLV320ADC(Wire, TLV320_I2C_ADDR1, InputTDM::TDM1) {
+  ControlTLV320ADC(Wire, TLV320_I2C_ADDR1,
+		   InputTDM::TDM1, InputTDM::TDM_PIN_A) {
 }
 
 
-ControlTLV320ADC::ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus) :
-  ControlTLV320ADC(Wire, address, bus) {
+ControlTLV320ADC::ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus,
+				   InputTDM::TDM_DATA pin) :
+  ControlTLV320ADC(Wire, address, bus, pin) {
 }
 
 
 ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
-				   InputTDM::TDM_BUS bus) :
+				   InputTDM::TDM_BUS bus,
+				   InputTDM::TDM_DATA pin) :
   Device(),
   I2CBus(&wire),
   I2CAddress(address),
@@ -126,6 +129,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   Source(Input::DIFFERENTIAL),
   NChannels(0),
   Bus(bus),
+  Pin(pin),
   UseBias(false),
   MaxAmplmV(2750.0),
   PGAGain(1.0),
@@ -276,7 +280,7 @@ void ControlTLV320ADC::channelsStr(char *chans, size_t nchans,
   else if (I2CAddress == TLV320_I2C_ADDR4)
     cn = 3;
   char prefix[16];
-  sprintf(prefix, "T%dC%d-", Bus, cn);
+  sprintf(prefix, "T%dD%dC%d-", Bus, Pin, cn);
   // size of resulting string:
   size_t n = 7;      // strlen of a single channel name plus comma
   n *= NChannels;
@@ -436,7 +440,7 @@ bool ControlTLV320ADC::setupTDM(InputTDM &tdm) {
   // configure TDM:
   tdm.setResolution(BitBits[Bits]);
   tdm.setSource(Source);
-  tdm.addNChannels(Bus, NChannels);
+  tdm.addNChannels(Bus, Pin, NChannels);
   updateTDMChannelStr(tdm);
   return true;
 }

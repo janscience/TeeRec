@@ -74,13 +74,16 @@ public:
   ControlTLV320ADC();
 
   /* Communicate with TLV chip using defaut I2C bus
-     and address (one of TLV320_I2C_ADDR*). */
-  ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1);
+     and address (one of TLV320_I2C_ADDR*).
+     TDM data go on pin on bus. */
+  ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1,
+		   InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
 
   /* Communicate with TLV chip using wire, address (one of TLV320_I2C_ADDR*),
-     and TDM bus. */
+     TDM bus and pin. */
   ControlTLV320ADC(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1,
-		   InputTDM::TDM_BUS bus=InputTDM::TDM1);
+		   InputTDM::TDM_BUS bus=InputTDM::TDM1,
+		   InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
 
   /* Initialize TLV320 with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
@@ -137,6 +140,9 @@ public:
 
   /* The TDM bus on which this TLV320 chip transmits data. */
   InputTDM::TDM_BUS TDMBus() const { return Bus; };
+
+  /* The TDM data pin on which this TLV320 chip transmits data. */
+  InputTDM::TDM_DATA TDMPin() const { return Pin; };
 
   /* Convert a gain factor to gain level in decibel. */
   float gainToDecibel(float gain);
@@ -230,6 +236,7 @@ protected:
   uint8_t UseChannel[4];  // 0: unused, 1: single ended, 2: differential
   int NChannels;
   InputTDM::TDM_BUS Bus;
+  InputTDM::TDM_DATA Pin;
   bool UseBias;
   static const int WriteDelay = 1;
 

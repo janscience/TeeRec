@@ -63,11 +63,11 @@ void InputTDM::downSample(uint8_t n) {
 
   
 void InputTDM::setNChannels(uint8_t nchannels) {
-  setNChannels(TDM1, nchannels);
+  setNChannels(TDM1, TDM_PIN_A, nchannels);
 }
 
   
-void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
+void InputTDM::setNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
   if (nchannels > 256/Bits) {
     Serial.printf("InputTDM::setNChannels() -> too many channels=%u.\n", nchannels);
     nchannels = 0;
@@ -80,7 +80,7 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
   }
   else {
     NChans[bus] = nchannels;
-    DataPins[bus] = TDM_PIN_A;
+    DataPins[bus] = 1 << pin;
     NDataPins[bus] = 1;
     TDMUse |= (1 << bus);
   }
@@ -90,23 +90,19 @@ void InputTDM::setNChannels(TDM_BUS bus, uint8_t nchannels) {
 }
 
   
-void InputTDM::addNChannels(TDM_BUS bus, uint8_t nchannels) {
-  addNChannels(bus, TDM_PIN_A, nchannels);
-}
-
-  
-void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA_PIN pin, uint8_t nchannels) {
+void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
+  uint8_t pin_mask = 1 << pin;
   uint8_t npins = NDataPins[bus];
-  if ((DataPins[bus] & pin) == 0)
+  if ((DataPins[bus] & pin_mask) == 0)
     npins++;
   if (NChans[bus] + nchannels > npins*256/Bits) {
-    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %x.\n", nchannels, bus, pin);
+    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %d.\n", nchannels, bus, pin);
     nchannels = 0;
   }
   if (nchannels == 0)
     return;
   NChans[bus] += nchannels;
-  DataPins[bus] |= pin;
+  DataPins[bus] |= pin_mask;
   NDataPins[bus] = npins;
   NChannels += nchannels;
   TDMUse |= (1 << bus);
@@ -241,7 +237,7 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
     }
   }
 #if defined(KINETISK)
-  if (DataPins[TDM1] != TDM_PIN_A) {
+  if (DataPins[TDM1] != 1 << TDM_PIN_A) {
     stream.printf("ERROR: only one data pin on TDM bus supported! Got %02x.\n",
 		  DataPins[TDM1]);
     Rate = 0;
@@ -249,7 +245,7 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
     return false;
   }
 #elif defined(__IMXRT1062__)
-  if (DataPins[TDM2] != 0 && DataPins[TDM2] != TDM_PIN_A) {
+  if (DataPins[TDM2] != 0 && DataPins[TDM2] != 1 << TDM_PIN_A) {
     stream.printf("ERROR: only one data pin on TDM2 bus supported! Got %02x.\n",
 		  DataPins[TDM2]);
     Rate = 0;
@@ -580,22 +576,22 @@ void InputTDM::start() {
 	// multi data pin setup from
 	// https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/input_tdm.cpp
 	NDataPins[bus] = 0;
-	if (DataPins[bus] & TDM_PIN_D) {
+	if (DataPins[bus] & (1 << TDM_PIN_D)) {
 	  CORE_PIN32_CONFIG = 3; // 1:RX_DATA3
 	  IOMUXC_SAI1_RX_DATA3_SELECT_INPUT = 1;
 	  NDataPins[bus]++;
 	}
-	if (DataPins[bus] & TDM_PIN_C) {
+	if (DataPins[bus] & (1 << TDM_PIN_C)) {
 	  CORE_PIN9_CONFIG = 3;  // 1:RX_DATA2
 	  IOMUXC_SAI1_RX_DATA2_SELECT_INPUT = 1;
 	  NDataPins[bus]++;
 	}
-	if (DataPins[bus] & TDM_PIN_B) {
+	if (DataPins[bus] & (1 << TDM_PIN_B)) {
 	  CORE_PIN6_CONFIG = 3;  // 1:RX_DATA1
 	  IOMUXC_SAI1_RX_DATA1_SELECT_INPUT = 1;
 	  NDataPins[bus]++;
 	}
-	if (DataPins[bus] & TDM_PIN_A) {
+	if (DataPins[bus] & (1 << TDM_PIN_A)) {
 	  CORE_PIN8_CONFIG = 3;  // 1:RX_DATA0
 	  IOMUXC_SAI1_RX_DATA0_SELECT_INPUT = 2;
 	  NDataPins[bus]++;
@@ -603,7 +599,6 @@ void InputTDM::start() {
 	DMA[bus].TCD->SADDR = &I2S1_RDR0;
       }
       else if (bus == TDM2) {
-	// TODO
 	CORE_PIN5_CONFIG = 2;  // 2:RX_DATA0
 	IOMUXC_SAI2_RX_DATA0_SELECT_INPUT = 0;
 	NDataPins[bus] = 1;
@@ -643,15 +638,17 @@ void InputTDM::start() {
       */
       // init mapping of channels:
       if (UserChanMap[bus][0] == 0xff) {
-	for (uint8_t c=0; c < NChans[bus]; c++)
-	  ChanMap[bus][c] = c;
 	// disentangle DMA buffer from multiple data pins:
-	if (NDataPins[bus] > 1) {
-	  // figure out the right channel mapping!
-	  // 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
+	// figure out the right channel mapping!
+	// 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
+	uint8_t c=0;
+	for (uint8_t p=0; p < NDataPins[bus]; p++) {
+	  for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
+	    ChanMap[bus][c++] = p + k;
 	}
       }
       else {
+	// take user-supplied channel mapping:
 	for (uint8_t c=0; c < NChans[bus]; c++) {
 	  if (UserChanMap[bus][c] == 0xff) {
 	    Serial.println("ERROR! Invalid user-defined channel mapping!");
@@ -755,7 +752,7 @@ void InputTDM::TDMISR32Bit(uint8_t bus) {
     const sample_t *slot = (const sample_t *)src;
     const uint8_t *chanmap = ChanMap[bus];
     for (uint8_t c=0; c < nchannels; c++) {
-      slot++;  // only copy most significant word
+      slot++;  // skip least significant word
       buffer[*chanmap++] = *slot++;
     }
     memcpy((void *)&Buffer[DataHead[bus]], (void *)buffer, sizeof(buffer));
