@@ -326,8 +326,11 @@ void InputTDM::begin(Stream &stream) {
   }
   
   // the following is config_tdm() from output_tdm.cpp of the Audio library
-  // merged with the setI2SFreq() function of Frank B from the Teensy forum.
+  // merged with the setI2SFreq() function of Frank B from the Teensy forum
+  // and with the config_tdm() from https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/output_tdm.cpp for handling multiple data pins of the TDM bus.
+  
 #if defined(KINETISK)
+  
   typedef struct {
     uint8_t mult;
     uint16_t div;
@@ -410,12 +413,23 @@ void InputTDM::begin(Stream &stream) {
   CORE_PIN11_CONFIG = PORT_PCR_MUX(6); // pin 11, PTC6, I2S0_MCLK - 22.5 MHz
 
 #elif defined(__IMXRT1062__)
+  
+  uint32_t txPinMask = 1;
+  uint32_t rxPinMask = 1;
 
-  // TODO: put in reveiver and transmitter masks!
-  // see config_tdm here:
-  // https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/output_tdm.cpp
-    
   if (TDMUse & (1 << TDM1)) {
+    // retrieve existing pin mask values:
+    txPinMask = (I2S1_TCR3 / I2S_TCR3_TCE) & 0x0F;
+    rxPinMask = (I2S1_RCR3 / I2S_RCR3_RCE) & 0x0F;
+    //Serial.printf("txPinMask %04x\n", txPinMask);
+    //Serial.printf("rxPinMask %04x\n", rxPinMask);
+    // create updated masks, if needed:
+    rxPinMask |= DataPins[TDM1];
+    //Serial.printf("rx new    %04x\n", rxPinMask);
+    // maybe just:
+    // rxPinMask = DataPins[TDM1];
+    // because this is called only once.
+    
     CCM_CCGR5 |= CCM_CCGR5_SAI1(CCM_CCGR_ON);
     // if either transmitter or receiver is enabled, do nothing
     if (I2S1_TCSR & I2S_TCSR_TE) return;
@@ -466,28 +480,31 @@ void InputTDM::begin(Stream &stream) {
       | CCM_CS1CDR_SAI1_CLK_PODF(n2 - 1); // &0x3f
 
     IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL_MASK))
-      | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	//Select MCLK
+      | (IOMUXC_GPR_GPR1_SAI1_MCLK_DIR | IOMUXC_GPR_GPR1_SAI1_MCLK1_SEL(0));	// select MCLK
 
     // configure transmitter
     int tsync = 1;
     int rsync = 0;
+    int frame_size = 8; // 8 32-bit words per frame
 
     I2S1_TMR = 0;
     I2S1_TCR1 = I2S_TCR1_RFW(4);
     I2S1_TCR2 = I2S_TCR2_SYNC(tsync) | I2S_TCR2_BCP | I2S_TCR2_MSEL(1)
       | I2S_TCR2_BCD | I2S_TCR2_DIV(0);
-    I2S1_TCR3 = I2S_TCR3_TCE;
-    I2S1_TCR4 = I2S_TCR4_FRSZ(7) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
-      | I2S_TCR4_FSE | I2S_TCR4_FSD;
+    I2S1_TCR3 = I2S_TCR3_TCE * txPinMask;
+    I2S1_TCR4 = I2S_TCR4_FRSZ(frame_size - 1) | I2S_TCR4_SYWD(0) | I2S_TCR4_MF
+      | I2S_TCR4_FSE | I2S_TCR4_FSD |
+      (txPinMask > 0x01 ? I2S_TCR4_FCOMB_ENABLED_ON_WRITES : 0);
     I2S1_TCR5 = I2S_TCR5_WNW(31) | I2S_TCR5_W0W(31) | I2S_TCR5_FBT(31);
 
     I2S1_RMR = 0;
     I2S1_RCR1 = I2S_RCR1_RFW(4);
     I2S1_RCR2 = I2S_RCR2_SYNC(rsync) | I2S_TCR2_BCP | I2S_RCR2_MSEL(1)
       | I2S_RCR2_BCD | I2S_RCR2_DIV(0);
-    I2S1_RCR3 = I2S_RCR3_RCE;
-    I2S1_RCR4 = I2S_RCR4_FRSZ(7) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
-      | I2S_RCR4_FSE | I2S_RCR4_FSD;
+    I2S1_RCR3 = I2S_RCR3_RCE * rxPinMask;
+    I2S1_RCR4 = I2S_RCR4_FRSZ(frame_size - 1) | I2S_RCR4_SYWD(0) | I2S_RCR4_MF
+      | I2S_RCR4_FSE | I2S_RCR4_FSD |
+      (rxPinMask > 0x01 ? I2S_RCR4_FCOMB_ENABLED_ON_READS : 0);
     I2S1_RCR5 = I2S_RCR5_WNW(31) | I2S_RCR5_W0W(31) | I2S_RCR5_FBT(31);
 
     CORE_PIN23_CONFIG = 3;  // MCLK              on pin 23
@@ -500,11 +517,11 @@ void InputTDM::begin(Stream &stream) {
       | CCM_CSCMR1_SAI2_CLK_SEL(2); // &0x03 // (0,1,2): PLL3PFD0, PLL5, PLL4
 
     CCM_CS2CDR = (CCM_CS2CDR & ~(CCM_CS2CDR_SAI2_CLK_PRED_MASK | CCM_CS2CDR_SAI2_CLK_PODF_MASK))
-      | CCM_CS2CDR_SAI2_CLK_PRED(n1-1) // &0x07
+      | CCM_CS2CDR_SAI2_CLK_PRED(n1-1)  // &0x07
       | CCM_CS2CDR_SAI2_CLK_PODF(n2-1); // &0x3f
 
     IOMUXC_GPR_GPR1 = (IOMUXC_GPR_GPR1 & ~(IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL_MASK))
-      | (IOMUXC_GPR_GPR1_SAI2_MCLK_DIR | IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL(0));	//Select MCLK
+      | (IOMUXC_GPR_GPR1_SAI2_MCLK_DIR | IOMUXC_GPR_GPR1_SAI2_MCLK3_SEL(0));	// select MCLK
 
     // configure transmitter
     int tsync = 0;
@@ -533,6 +550,7 @@ void InputTDM::begin(Stream &stream) {
     CORE_PIN4_CONFIG  = 2;  // TX_BCLK         on pin 4
     CORE_PIN3_CONFIG  = 2;  // TX_SYNC (LRCLK) on pin 3
   }
+
 #endif
 }
 
@@ -570,7 +588,9 @@ void InputTDM::start() {
       I2S0_RCSR |= I2S_RCSR_RE | I2S_RCSR_BCE | I2S_RCSR_FRDE | I2S_RCSR_FR;
       I2S0_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE; // TX clock enable, because sync'd to TX
       DMA[bus].attachInterrupt(ISR32Bit0);
+
 #elif defined(__IMXRT1062__)
+
       // receive data pin:
       if (bus == TDM1) {
 	// multi data pin setup from
@@ -617,7 +637,7 @@ void InputTDM::start() {
       DMA[bus].triggerAtHardwareEvent(bus==TDM1?DMAMUX_SOURCE_SAI1_RX:DMAMUX_SOURCE_SAI2_RX);
       DMA[bus].attachInterrupt(bus==TDM1?ISR32Bit0:ISR32Bit1);
 
-      // TODO: zapDMA()?
+      // TODO: zapDMA()? probably not, because we enable the DMAs only at the very end.
       //https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/output_tdm.cpp
 
       // enable RX RE and bit clock BCE:
