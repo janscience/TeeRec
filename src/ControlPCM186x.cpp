@@ -466,9 +466,17 @@ bool ControlPCM186x::setupTDM(bool offs) {
 
 bool ControlPCM186x::setupTDM(InputTDM &tdm, bool offs) {
   if (setupTDM(offs)) {
+    OUTPUT_CHANNELS out_channel[4] = {ADC1L, ADC1R, ADC2L, ADC2R};  
+    const char *chan_strs[4];
+    uint8_t j=0;
+    for (uint8_t k=0; k<4; k++) {
+      const char *sp = channelStr(out_channel[k]);
+      if (strcmp(sp, "NONE") != 0)
+	chan_strs[j++] = sp;
+    }
     tdm.setResolution(32);
     tdm.setSource(Input::SINGLE_ENDED);
-    tdm.addNChannels(Bus, Pin, NChannels);
+    tdm.addNChannels(Bus, Pin, NChannels, chan_strs);
     updateTDMChannelStr(tdm);
     return true;
   }

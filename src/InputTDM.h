@@ -88,7 +88,8 @@ class InputTDM : public Input {
   void setNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels);
   
   // Increment number of channels of the TDM bus using data pin by nchannels.
-  void addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels);
+  void addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels,
+		    const char *chan_strs[]);
   
   // Return in chans of size nchans the string with the channels
   // in the order they are multiplexed into the buffer.
@@ -183,6 +184,9 @@ protected:
   uint8_t DataPins[2];
   uint8_t NDataPins[2];
   static const size_t MaxChanMap = 32;
+  const char *ChanStrs[2][MaxChanMap];
+  TDM_DATA ChanPins[2][MaxChanMap];  // TODO: not needed?
+  uint8_t ChanChips[2][MaxChanMap];
   uint8_t ChanMap[2][MaxChanMap];
   uint8_t UserChanMap[2][MaxChanMap];
   

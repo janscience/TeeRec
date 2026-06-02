@@ -437,10 +437,18 @@ bool ControlTLV320ADC::setupTDM() {
 bool ControlTLV320ADC::setupTDM(InputTDM &tdm) {
   if (!setupTDM())
     return false;
+  const char *chan_strs[4];
+  uint8_t j=0;
+  for (uint8_t c=0; c<4; c++) {
+    if (UseChannel[c] > 0) {
+      const char *sp = channelStr(c);
+      chan_strs[j++] = sp;
+    }
+  }
   // configure TDM:
   tdm.setResolution(BitBits[Bits]);
   tdm.setSource(Source);
-  tdm.addNChannels(Bus, Pin, NChannels);
+  tdm.addNChannels(Bus, Pin, NChannels, chan_strs);
   updateTDMChannelStr(tdm);
   return true;
 }

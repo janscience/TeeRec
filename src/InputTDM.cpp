@@ -35,6 +35,9 @@ InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
     DMACounter[bus] = 0;
     DataHead[bus] = 0;
     for (uint8_t c=0; c<MaxChanMap; c++) {
+      ChanStrs[bus][c] = 0;
+      ChanPins[bus][c] = TDM_PIN_A;
+      ChanChips[bus][c] = 0;
       ChanMap[bus][c] = c;
       UserChanMap[bus][c] = 0xff;
     }
@@ -90,7 +93,8 @@ void InputTDM::setNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
 }
 
   
-void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
+void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels,
+			    const char *chan_strs[]) {
   uint8_t pin_mask = 1 << pin;
   uint8_t npins = NDataPins[bus];
   if ((DataPins[bus] & pin_mask) == 0)
@@ -101,6 +105,12 @@ void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
   }
   if (nchannels == 0)
     return;
+  uint8_t chip = NChans[bus] > 0 ? ChanPins[bus][NChans[bus] - 1] + 1 : 0;
+  for (uint8_t c=0; c<nchannels; c++) {
+    ChanStrs[bus][NChans[bus] + c] = chan_strs[c];
+    ChanPins[bus][NChans[bus] + c] = pin;
+    ChanChips[bus][NChans[bus] + c] = chip;
+  }
   NChans[bus] += nchannels;
   DataPins[bus] |= pin_mask;
   NDataPins[bus] = npins;
@@ -559,8 +569,13 @@ void InputTDM::start() {
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
   
+  int8_t chan_str_map[2][MaxChanMap];
+  
   // this is begin() from input_tdm.cpp of the Audio library
   for (uint8_t bus=0; bus<2; bus++) {
+    for (uint8_t c=0; c < MaxChanMap; c++)
+      chan_str_map[2][c] = -1;
+    
     if (TDMUse & (1 << bus)) {
       DataHead[bus] = 0;
       DMACounter[bus] = 0;
@@ -649,13 +664,7 @@ void InputTDM::start() {
 	I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
       }
 #endif
-      /*
-#if defined(__IMXRT1062__)
-      DMA[bus].attachInterrupt(bus==TDM1?ISR32Bit0:ISR32Bit1);
-#else
-      DMA[bus].attachInterrupt(ISR32Bit0);
-#endif
-      */
+      
       // init mapping of channels:
       if (UserChanMap[bus][0] == 0xff) {
 	// disentangle DMA buffer from multiple data pins:
@@ -687,8 +696,20 @@ void InputTDM::start() {
 	  }
 	}
       }
+      // mapping for channel strings:
+      // TODO: this is not right yet!
+      uint8_t c=0;
+      for (uint8_t p=0; p < NDataPins[bus]; p++) {
+	for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
+	  chan_str_map[bus][p + k] = c++;
+      }
+      for (uint8_t k=0; k < NChans[bus]; k++)
+	chan_str_map[bus][k] = ChanMap[bus][chan_str_map[bus][k]];
     }
   }
+
+  // create channel string:
+  // TODO use chan_str_map to assemble string from ChanStrs
   
 #if defined(__IMXRT1062__)
   if (TDMUse == 3)
