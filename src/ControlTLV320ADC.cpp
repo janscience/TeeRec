@@ -257,47 +257,6 @@ const char *ControlTLV320ADC::channelStr(uint8_t channel) {
 }
 
 
-void ControlTLV320ADC::channelsStr(char *chans, size_t nchans,
-				   uint8_t nreverse) {
-  *chans = '\0';
-  // prepare channel list:
-  uint8_t channel[4] = {0, 1, 2, 3};  
-  if (nreverse > 1) {
-    for (uint8_t c=0; c < 4; c+=nreverse) {
-      for (uint8_t i=0; i < nreverse/2; i++) {
-	uint8_t ic = channel[c + i];
-	channel[c + i] = channel[c + nreverse - 1 - i];
-	channel[c + nreverse - 1 - i] = ic;
-      }
-    }
-  }
-  // TDM bus name and chip number:
-  uint8_t cn = 0;
-  if (I2CAddress == TLV320_I2C_ADDR2)
-    cn = 1;
-  else if (I2CAddress == TLV320_I2C_ADDR3)
-    cn = 2;
-  else if (I2CAddress == TLV320_I2C_ADDR4)
-    cn = 3;
-  char prefix[16];
-  sprintf(prefix, "T%dD%dC%d-", Bus, Pin, cn);
-  // size of resulting string:
-  size_t n = 7;      // strlen of a single channel name plus comma
-  n *= NChannels;
-  if (n >= nchans)
-    Serial.printf("ERROR in ControlTLV320ADC::channels(): size of chans (%d) too small for %d characters!\n", nchans, n);
-  // generate channel names:
-  for (uint8_t c=0; c < 4; c++) {
-    if (UseChannel[channel[c]] > 0) {
-      if (strlen(chans) > 0)
-	strcat(chans, ",");
-      strcat(chans, prefix);
-      strcat(chans, channelStr(channel[c]));
-    }
-  }
-}
-
-
 bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
 				    IMPEDANCE impedance, COUPLING coupling,
 				    int8_t slot, uint8_t offs) {
@@ -400,19 +359,6 @@ bool ControlTLV320ADC::setupI2S() {
 }
 
 
-void ControlTLV320ADC::updateTDMChannelStr(InputTDM &tdm) {
-  char cs[InputTDM::MaxChannels];
-  tdm.channelsStr(cs, InputTDM::MaxChannels);
-  size_t n = strlen(cs);
-  if (n > 0) {
-    strcat(cs, ",");
-    n++;
-  }
-  channelsStr(cs + n, InputTDM::MaxChannels - n, tdm.reverse());
-  tdm.setChannelsStr(cs);
-}
-
-
 bool ControlTLV320ADC::setupTDM() {
   // data format:
   uint8_t fmt = 0x00;  // TDM
@@ -449,7 +395,6 @@ bool ControlTLV320ADC::setupTDM(InputTDM &tdm) {
   tdm.setResolution(BitBits[Bits]);
   tdm.setSource(Source);
   tdm.addNChannels(Bus, Pin, NChannels, chan_strs);
-  updateTDMChannelStr(tdm);
   return true;
 }
 

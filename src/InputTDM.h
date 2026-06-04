@@ -185,7 +185,7 @@ protected:
   uint8_t NDataPins[2];
   static const size_t MaxChanMap = 32;
   const char *ChanStrs[2][MaxChanMap];
-  TDM_DATA ChanPins[2][MaxChanMap];  // TODO: not needed?
+  TDM_DATA ChanPins[2][MaxChanMap];
   uint8_t ChanChips[2][MaxChanMap];
   uint8_t ChanMap[2][MaxChanMap];
   uint8_t UserChanMap[2][MaxChanMap];

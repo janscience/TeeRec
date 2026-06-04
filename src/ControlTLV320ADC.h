@@ -106,11 +106,6 @@ public:
 
   /* Return the input channel as a string. */
   const char *channelStr(uint8_t channel);
-
-  /* Return the input channels set for each output channel
-     as a string in chans with maximum nchans characters.
-     Reverse order in blocks of nreverse channels. */
-  void channelsStr(char *chans, size_t nchans, uint8_t nreverse=1);
   
   /* Setup input channel as output channel. */
   bool setupChannel(uint8_t channel, Input::SOURCE source=Input::DIFFERENTIAL,
@@ -224,8 +219,6 @@ protected:
   bool setActive();
 
   uint32_t readCoefficient(uint8_t address);
-
-  void updateTDMChannelStr(InputTDM &tdm);
   
   TwoWire *I2CBus;
   uint8_t I2CAddress;

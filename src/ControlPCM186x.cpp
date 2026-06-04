@@ -374,38 +374,6 @@ const char *ControlPCM186x::channelStr(OUTPUT_CHANNELS adc) {
 }
 
 
-void ControlPCM186x::channelsStr(char *chans, size_t nchans, uint8_t nreverse) {
-  *chans = '\0';
-  // prepare channel list:
-  OUTPUT_CHANNELS out_channel[4] = {ADC1L, ADC1R, ADC2L, ADC2R};  
-  if (nreverse > 1) {
-    for (uint8_t c=0; c < 4; c+=nreverse) {
-      for (uint8_t i=0; i < nreverse/2; i++) {
-	OUTPUT_CHANNELS ic = out_channel[c + i];
-	out_channel[c + i] = out_channel[c + nreverse - 1 - i];
-	out_channel[c + nreverse - 1 - i] = ic;
-      }
-    }
-  }
-  // TDM bus name and chip number:
-  uint8_t cn = I2CAddress == PCM186x_I2C_ADDR1 ? 0 : 1;
-  char prefix[16];
-  sprintf(prefix, "T%dD%dC%d-", Bus, Pin, cn);
-  // size of resulting string:
-  size_t n = 7;      // strlen of a single channel name plus comma
-  n *= NChannels;
-  if (n >= nchans)
-    Serial.printf("ERROR in ControlPCM186x::channels(): size of chans (%d) too small for %d characters!\n", nchans, n);
-  // generate channel names:
-  for (uint8_t c=0; c < NChannels; c++) {
-    if (c > 0)
-      strcat(chans, ",");
-    strcat(chans, prefix);
-    strcat(chans, channelStr(out_channel[c]));
-  }
-}
-
-
 bool ControlPCM186x::setupI2S() {
   // data format:
   uint8_t fmt = 0x00;   // I2S
@@ -424,19 +392,6 @@ bool ControlPCM186x::setupI2S() {
       return false;
   }
   return true;  
-}
-
-
-void ControlPCM186x::updateTDMChannelStr(InputTDM &tdm) {
-  char cs[InputTDM::MaxChannels];
-  tdm.channelsStr(cs, InputTDM::MaxChannels);
-  size_t n = strlen(cs);
-  if (n > 0) {
-    strcat(cs, ",");
-    n++;
-  }
-  channelsStr(cs + n, InputTDM::MaxChannels - n, tdm.reverse());
-  tdm.setChannelsStr(cs);
 }
 
 
@@ -477,7 +432,6 @@ bool ControlPCM186x::setupTDM(InputTDM &tdm, bool offs) {
     tdm.setResolution(32);
     tdm.setSource(Input::SINGLE_ENDED);
     tdm.addNChannels(Bus, Pin, NChannels, chan_strs);
-    updateTDMChannelStr(tdm);
     return true;
   }
   return false;

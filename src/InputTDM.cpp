@@ -283,7 +283,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  nreverse:   %d\n", NReverse);
   for (uint8_t bus=0; bus<2; bus++) {
     if (NChans[bus] > 0) {
-      stream.printf("   mapping:    TDM%d", bus);
+      stream.printf("  mapping:    TDM%d", bus);
       for (uint8_t c=0; c < NChans[bus]; c++) {
 	if (c > 0)
 	  stream.print(", ");
@@ -568,14 +568,87 @@ void InputTDM::begin(Stream &stream) {
 void InputTDM::start() {
   reset();   // resets the buffer and consumers
              // (they also might want to know about Rate)
-  
+
+  // channel mapping and channel strings:
+  Channels[0] = '\0';
   int8_t chan_str_map[2][MaxChanMap];
-  
-  // this is begin() from input_tdm.cpp of the Audio library
   for (uint8_t bus=0; bus<2; bus++) {
     for (uint8_t c=0; c < MaxChanMap; c++)
       chan_str_map[2][c] = -1;
-    
+    if (TDMUse & (1 << bus)) {
+      // init mapping of channels:
+      if (UserChanMap[bus][0] == 0xff) {
+	// disentangle DMA buffer from multiple data pins:
+	// figure out the right channel mapping!
+	// 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
+	uint8_t c=0;
+	for (uint8_t p=0; p < NDataPins[bus]; p++) {
+	  for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
+	    ChanMap[bus][c++] = p + k;
+	}
+      }
+      else {
+	// take user-supplied channel mapping:
+	for (uint8_t c=0; c < NChans[bus]; c++) {
+	  if (UserChanMap[bus][c] == 0xff) {
+	    Serial.println("ERROR! Invalid user-defined channel mapping!");
+	    return;
+	  }
+	  ChanMap[bus][c] = UserChanMap[bus][c];
+	}
+      }
+      // reverse blocks of channels:
+      if (NReverse > 1) {
+	for (uint8_t c=0; c < NChans[bus]; c+=NReverse) {
+	  for (uint8_t i=0; i < NReverse/2; i++) {
+	    uint8_t sc = ChanMap[bus][c + i];
+	    ChanMap[bus][c + i] = ChanMap[bus][c + NReverse - 1 - i];
+	    ChanMap[bus][c + NReverse - 1 - i] = sc;
+	  }
+	}
+      }
+      // mapping for channel strings:
+      // TODO: this might not be right yet, but works for single data pins!
+      uint8_t c=0;
+      for (uint8_t p=0; p < NDataPins[bus]; p++) {
+	for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
+	  chan_str_map[bus][p + k] = c++;
+      }
+      // prefix for channel strings indicating TDM bus:
+      char prefix[8] = "";
+      if (TDMUse == 3)
+	sprintf(prefix, "%d", bus);
+      // do we have several chips and need to indicate them?
+      bool chips = false;
+      for (uint8_t j=1; j < NChans[bus]; j++) {
+	if (ChanChips[bus][j] != ChanChips[bus][0]) {
+	  chips = true;
+	  break;
+	}
+      }
+      // generate channel string:
+      bool chips_id = chips && (NDataPins[bus] == 1) && (TDMUse == 3);
+      for (uint8_t k=0; k < NChans[bus]; k++) {
+        if (strlen(Channels) + 16 >= MaxChannels)
+	  break;
+	uint8_t c = ChanMap[bus][chan_str_map[bus][k]];
+	if (strlen(Channels) > 0)
+	  strcat(Channels, ",");
+	size_t ncs = strlen(Channels);
+	strcat(Channels, prefix);
+	if (NDataPins[bus] > 1 || chips_id)
+	  sprintf(Channels + strlen(Channels), "%c", 'A' + ChanPins[bus][c]);
+	if (chips)
+	  sprintf(Channels + strlen(Channels), "%d", ChanChips[bus][c]);
+	if (strlen(Channels) > ncs)
+	  strcat(Channels, "-");
+	strcat(Channels, ChanStrs[bus][c]);
+      }
+    }
+  }
+  
+  // this is begin() from input_tdm.cpp of the Audio library
+  for (uint8_t bus=0; bus<2; bus++) {
     if (TDMUse & (1 << bus)) {
       DataHead[bus] = 0;
       DMACounter[bus] = 0;
@@ -664,52 +737,8 @@ void InputTDM::start() {
 	I2S2_TCSR |= I2S_TCSR_TE | I2S_TCSR_BCE;
       }
 #endif
-      
-      // init mapping of channels:
-      if (UserChanMap[bus][0] == 0xff) {
-	// disentangle DMA buffer from multiple data pins:
-	// figure out the right channel mapping!
-	// 0,2,4,6 1,3,5,7 or 0,4,8,12  1,5,9,13  2,6,10,14  3,7,11,15
-	uint8_t c=0;
-	for (uint8_t p=0; p < NDataPins[bus]; p++) {
-	  for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
-	    ChanMap[bus][c++] = p + k;
-	}
-      }
-      else {
-	// take user-supplied channel mapping:
-	for (uint8_t c=0; c < NChans[bus]; c++) {
-	  if (UserChanMap[bus][c] == 0xff) {
-	    Serial.println("ERROR! Invalid user-defined channel mapping!");
-	    return;
-	  }
-	  ChanMap[bus][c] = UserChanMap[bus][c];
-	}
-      }
-      // reverse blocks of channels:
-      if (NReverse > 1) {
-	for (uint8_t c=0; c < NChans[bus]; c+=NReverse) {
-	  for (uint8_t i=0; i < NReverse/2; i++) {
-	    uint8_t sc = ChanMap[bus][c + i];
-	    ChanMap[bus][c + i] = ChanMap[bus][c + NReverse - 1 - i];
-	    ChanMap[bus][c + NReverse - 1 - i] = sc;
-	  }
-	}
-      }
-      // mapping for channel strings:
-      // TODO: this is not right yet!
-      uint8_t c=0;
-      for (uint8_t p=0; p < NDataPins[bus]; p++) {
-	for (uint8_t k=0; k < NChans[bus]; k+=NDataPins[bus])
-	  chan_str_map[bus][p + k] = c++;
-      }
-      for (uint8_t k=0; k < NChans[bus]; k++)
-	chan_str_map[bus][k] = ChanMap[bus][chan_str_map[bus][k]];
     }
   }
-
-  // create channel string:
-  // TODO use chan_str_map to assemble string from ChanStrs
   
 #if defined(__IMXRT1062__)
   if (TDMUse == 3)

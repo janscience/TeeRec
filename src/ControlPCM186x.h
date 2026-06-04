@@ -126,11 +126,6 @@ public:
   /* Return the input channel set for output channel adc
      as a string. */
   const char *channelStr(OUTPUT_CHANNELS adc);
-
-  /* Return the input channels set for each output channel
-     as a string in chans with maximum nchans characters.
-     Reverse order in blocks of nreverse channels. */
-  void channelsStr(char *chans, size_t nchans, uint8_t nreverse=1);
   
   /* Setup I2S output for the specified four input channels.
      If output channels 3 and 4 areused make them available as DOUT2 via GPIO0.
@@ -234,8 +229,6 @@ protected:
   uint8_t goToPage(uint8_t page);
 
   float readCoefficient(uint8_t address);
-
-  void updateTDMChannelStr(InputTDM &tdm);
 
   TwoWire *I2CBus;
   uint8_t I2CAddress;
