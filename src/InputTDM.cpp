@@ -72,7 +72,7 @@ void InputTDM::setNChannels(uint8_t nchannels) {
   
 void InputTDM::setNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels) {
   if (nchannels > 256/Bits) {
-    Serial.printf("InputTDM::setNChannels() -> too many channels=%u.\n", nchannels);
+    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %u.\n", nchannels, bus, pin);
     nchannels = 0;
   }
   if (nchannels == 0) {
@@ -100,7 +100,7 @@ void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels,
   if ((DataPins[bus] & pin_mask) == 0)
     npins++;
   if (NChans[bus] + nchannels > npins*256/Bits) {
-    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %d.\n", nchannels, bus, pin);
+    Serial.printf("InputTDM::addNChannels() -> too many channels=%u on TDM bus %u at data pin %u.\n", nchannels, bus, pin);
     nchannels = 0;
   }
   if (nchannels == 0)
@@ -286,8 +286,8 @@ void InputTDM::report(Stream &stream) {
       stream.printf("  mapping:    TDM%d", bus);
       for (uint8_t c=0; c < NChans[bus]; c++) {
 	if (c > 0)
-	  stream.print(", ");
-	stream.printf("%d", ChanMap[bus][c]);
+	  stream.print(",");
+	stream.printf(" %d", ChanMap[bus][c]);
       }
       stream.println();
     }
