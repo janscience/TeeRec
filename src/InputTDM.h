@@ -1,6 +1,6 @@
 
 /*
-  InputTDM - Streaming TDM data into a single cyclic buffer.
+  InputTDM - Streaming TDM data from both TDM bus and multiple TDM data pins into a single cyclic buffer.
   Created by Jan Benda, July 4th, 2023.
   Heavily based on input_tdm.h of the Teensy Audio library.
 
@@ -14,6 +14,8 @@
   detector](https://forum.pjrc.com/threads/38988-Bat-detector) and the
   [Teensy
   Batdetector](https://github.com/CorBer/teensy_batdetector/releases/tag/v1.6).
+  Multiple TDM data pin support is based on
+  https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/input_tdm.cpp .
 */
 
 #ifndef InputTDM_h
@@ -54,11 +56,11 @@ class InputTDM : public Input {
   };
   
   enum TDM_DATA {
-    TDM_PIN_A = 0,
+    DATA_A = 0,
 #if defined(__IMXRT1062__)
-    TDM_PIN_B = 1,   // Teensy 4: pin 6
-    TDM_PIN_C = 2,   // Teensy 4: pin 9
-    TDM_PIN_D = 3    // Teensy 4: pin 32
+    DATA_B = 1,   // Teensy 4: pin 6
+    DATA_C = 2,   // Teensy 4: pin 9
+    DATA_D = 3    // Teensy 4: pin 32
 #endif
   };
   

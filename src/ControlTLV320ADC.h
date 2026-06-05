@@ -77,13 +77,13 @@ public:
      and address (one of TLV320_I2C_ADDR*).
      TDM data go on pin on bus. */
   ControlTLV320ADC(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1,
-		   InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
+		   InputTDM::TDM_DATA pin=InputTDM::DATA_A);
 
   /* Communicate with TLV chip using wire, address (one of TLV320_I2C_ADDR*),
      TDM bus and pin. */
   ControlTLV320ADC(TwoWire &wire, uint8_t address=TLV320_I2C_ADDR1,
 		   InputTDM::TDM_BUS bus=InputTDM::TDM1,
-		   InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
+		   InputTDM::TDM_DATA pin=InputTDM::DATA_A);
 
   /* Initialize TLV320 with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */

@@ -107,7 +107,7 @@ const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 
 ControlTLV320ADC::ControlTLV320ADC() :
   ControlTLV320ADC(Wire, TLV320_I2C_ADDR1,
-		   InputTDM::TDM1, InputTDM::TDM_PIN_A) {
+		   InputTDM::TDM1, InputTDM::DATA_A) {
 }
 
 

@@ -131,7 +131,7 @@ const char *ControlPCM186x::OnOffStrings[2] = {"off", "on"};
 
 ControlPCM186x::ControlPCM186x() :
   ControlPCM186x(Wire, PCM186x_I2C_ADDR1,
-		 InputTDM::TDM1, InputTDM::TDM_PIN_A) {
+		 InputTDM::TDM1, InputTDM::DATA_A) {
 }
 
 

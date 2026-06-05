@@ -4,6 +4,27 @@
 
 Libraries for recording analog input data on [Teensy](https://www.pjrc.com/teensy/) 3.2/3.5/3.6/4.0/4.1 microcontrollers.
 
+## Features
+
+- Multiplexed acquisition from multiple channels, from one or both
+  ADCs or TDM streams, as well as from single or multiple TDM data pins.
+- Flexible producer/consumer data model based on a single multiplexed circular buffer.
+- Recordings with arbitrary sampling rates.
+- Continuous storing of recorded data as signed 16bit wave files on SD cards.
+- Detailed metadata in wave file header: sampling rate, number of
+  channels and pin IDs, bit resolution, gain, date and time, Teensy board
+  version, and its unique MAC address.
+- Filenames based on date and/or time of the real-time-clock or incremental.
+- Analysis chain on top of data buffer.
+- Audio monitor.
+- Display recorded data on a monitor.
+- Generate test signals.
+- React to push buttons.
+- Feedback by blinking the LED.
+
+For slow acquisition of environmental sensor readings see [ESensors
+library](https://github.com/janscience/ESensors).
+
 Recording from the Teensy's internal ADCs
 ([InputADC](src/InputADC.h)) is based on Pedro Villanueva's
 [ADC](https://github.com/pedvide/ADC) library, Paul Stoffregen's
@@ -18,30 +39,10 @@ Volkmer](https://github.com/SebastianVol/EOD-Logger/blob/master/eodlogger_2chann
 (multiplexing).
 
 Recording a TDM data stream ([InputTDM](src/InputTDM.h)) is based on
-the [Teensy Audio library](https://github.com/PaulStoffregen/Audio)
-and the setI2SFreq() function introduced by Frank B on the [Teensy
-forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-change-the-sample-rate/page4).
-
-## Features
-
-- Flexible producer/consumer data model based on a single multiplexed circular buffer.
-- Multiplexed acquisition from multiple channels, from one or both
-  ADCs or TDM streams.
-- Conversion of data to signed 16bit for direct storage into wave files.
-- Continuous storing of recorded data as wave files on SD cards.
-- Detailed metadata in wave file header: sampling rate, number of
-  channels and pin IDs, bit resolution, gain, date and time, Teensy board
-  version, and its unique MAC address.
-- Filenames based on date and/or time of the real-time-clock or incremental.
-- Analysis chain on top of data buffer.
-- Audio monitor.
-- Display recorded data on a monitor.
-- Generate test signals.
-- React to push buttons.
-- Feedback by blinking the LED.
-
-For slow acquisition of environmental sensor readings see [ESensors
-library](https://github.com/janscience/ESensors).
+the [Teensy Audio library](https://github.com/PaulStoffregen/Audio),
+the setI2SFreq() function introduced by Frank B on the [Teensy
+forum](https://forum.pjrc.com/threads/38753-Discussion-about-a-simple-way-to-change-the-sample-rate/page4), and multiple TDM data pin support is based on
+the [Audio library fork by Jonathan Oakley](https://github.com/h4yn0nnym0u5e/Audio/blob/feature/multi-TDM/input_tdm.cpp).
 
 
 ## Documentation

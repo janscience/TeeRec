@@ -80,13 +80,13 @@ public:
      and address (one of PCM186x_I2C_ADDR*).
      TDM data go on pin on bus. */
   ControlPCM186x(uint8_t address, InputTDM::TDM_BUS bus=InputTDM::TDM1,
-		 InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
+		 InputTDM::TDM_DATA pin=InputTDM::DATA_A);
 
   /* Communicate with PCM chip using wire, address (one of PCM186x_I2C_ADDR*),
      TDM bus and pin. */
   ControlPCM186x(TwoWire &wire, uint8_t address=PCM186x_I2C_ADDR1,
 		 InputTDM::TDM_BUS bus=InputTDM::TDM1,
-		 InputTDM::TDM_DATA pin=InputTDM::TDM_PIN_A);
+		 InputTDM::TDM_DATA pin=InputTDM::DATA_A);
   
   /* Initialize PCM186x with already provided address and I2C bus.
      You need to initialize I2C by calling `Wire.begin()` before. */
