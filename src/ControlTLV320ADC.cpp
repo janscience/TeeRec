@@ -676,6 +676,10 @@ bool ControlTLV320ADC::powerup() {
   val = 0x00;     // disable BIQUAD_CFG
   if (!write(TLV320_DSP_CFG1_REG, val))
     return false;
+
+  I2CBus->beginTransmission(I2CAddress);
+  Available = (I2CBus->endTransmission() == 0);
+  
   return true;
 }
 

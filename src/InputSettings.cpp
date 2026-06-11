@@ -7,7 +7,7 @@ InputSettings::InputSettings(Menu &menu, uint32_t rate, float pregain,
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Source(*this, "Source", source, Input::SourceEnums, Input::SourceStrings,
 	 Input::MaxSource, Admin),
-  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin) {
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.3f", 0, 0, Admin) {
   Source.disable();
   PreGain.disable();
 }
