@@ -160,7 +160,7 @@ class InputTDM : public Input {
   virtual void stop();
 
   // Maximum size of channel descriptor string.
-  static const size_t MaxChannels = 256;
+  static const size_t MaxChannels = 512;
 
   
 protected:

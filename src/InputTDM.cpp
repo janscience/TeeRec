@@ -6,9 +6,9 @@
 
 #if defined(KINETISK) || defined(__IMXRT1062__)
 
-// DMA buffer for 256 TDM frames:
+// DMA buffer:
 #define TDM_FRAME_SIZE_32BIT  8
-#define TDM_FRAMES  256
+#define TDM_FRAMES  512
 DMAMEM __attribute__((aligned(32)))
 static uint32_t TDMBuffer32Bit[2][TDM_FRAMES*TDM_FRAME_SIZE_32BIT];
 
@@ -107,11 +107,11 @@ void InputTDM::addNChannels(TDM_BUS bus, TDM_DATA pin, uint8_t nchannels,
     return;
   uint8_t chip = NChans[bus] > 0 && ChanPins[bus][NChans[bus] - 1] == pin? ChanChips[bus][NChans[bus] - 1] + 1 : 0;
   for (uint8_t c=0; c<nchannels; c++) {
-    ChanStrs[bus][NChans[bus] + c] = chan_strs[c];
-    ChanPins[bus][NChans[bus] + c] = pin;
-    ChanChips[bus][NChans[bus] + c] = chip;
+    ChanStrs[bus][NChans[bus]] = chan_strs[c];
+    ChanPins[bus][NChans[bus]] = pin;
+    ChanChips[bus][NChans[bus]] = chip;
+    NChans[bus]++;
   }
-  NChans[bus] += nchannels;
   DataPins[bus] |= pin_mask;
   NDataPins[bus] = npins;
   NChannels += nchannels;

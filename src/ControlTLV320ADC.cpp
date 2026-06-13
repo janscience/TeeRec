@@ -142,7 +142,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
     UseChannel[c] = 0;
   setDeviceType("input");
   setI2CBus(wire, address);
-  setChip("TLV320");
+  setChip("TLV320ADC");
   add("Source", Input::SourceStrings[Source]);
   add("Impedance", ImpedanceStrings[0]);
   add("Lowpass", LowpassStrings[0]);
@@ -436,6 +436,19 @@ bool ControlTLV320ADC::setBias(BIAS bias, FULLSCALE fullscale) {
 }
 
 
+void ControlTLV320ADC::setGainUnit(InputTDM &tdm) {
+  float gain = MaxAmplmV/PGAGain/VolumeGain;
+  if (gain > 1500) {
+    tdm.setGain(0.001*gain);
+    tdm.setUnit("V");
+  }
+  else {
+    tdm.setGain(gain);
+    tdm.setUnit("mV");
+  }
+}
+
+
 float ControlTLV320ADC::gainToDecibel(float gain) {
   return 20.0*log10(gain);
 }
@@ -525,7 +538,7 @@ float ControlTLV320ADC::setGainDecibel(InputTDM &tdm, float level) {
   for (uint8_t channel=0; channel<4; channel++)
     clevel = setGainDecibel(channel, level);
   if (!isnan(clevel)) {
-    tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
+    setGainUnit(tdm);
     return clevel;
   }
   return NAN;
@@ -542,7 +555,7 @@ float ControlTLV320ADC::setGain(InputTDM &tdm, float gain) {
   for (uint8_t channel=0; channel<4; channel++)
     cgain = setGain(channel, gain);
   if (!isnan(cgain)) {
-    tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
+    setGainUnit(tdm);
     return cgain;
   }
   return NAN;
@@ -575,7 +588,7 @@ float ControlTLV320ADC::setVolumeDecibel(InputTDM &tdm, float level) {
   VolumeGain = gainFromDecibel(level);
   snprintf(VolumeStr, 8, "%.1fdB", level);
   VolumeStr[7] = '\0';
-  tdm.setGain(MaxAmplmV/PGAGain/VolumeGain);
+  setGainUnit(tdm);
   return level;
 }
 

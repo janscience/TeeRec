@@ -211,6 +211,8 @@ public:
 
   
 protected:
+
+  void setGainUnit(InputTDM &tdm);
     
   unsigned int read(uint16_t address);
   bool write(uint16_t address, uint8_t val);
