@@ -160,7 +160,7 @@ class InputTDM : public Input {
   virtual void stop();
 
   // Maximum size of channel descriptor string.
-  static const size_t MaxChannels = 512;
+  static const size_t MaxChannelStr = 512;
 
   
 protected:
@@ -179,7 +179,7 @@ protected:
   uint8_t DownSample;
   uint8_t NReverse;
 
-  char Channels[MaxChannels];
+  char Channels[MaxChannelStr];
 
   uint8_t TDMUse;
   uint8_t NChans[2];

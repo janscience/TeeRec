@@ -128,10 +128,10 @@ void InputTDM::channelsStr(char *chans, size_t nchans) const {
 
   
 void InputTDM::setChannelsStr(const char *cs) {
-  if (strlen(cs) >= MaxChannels)
-    Serial.printf("ERROR in InputTDM::setChannelsStr(): strlen of cs (%d) too large for %d characters!\n", strlen(cs), MaxChannels);
-  strncpy(Channels, cs, MaxChannels);
-  Channels[MaxChannels - 1] = '\0';
+  if (strlen(cs) >= MaxChannelStr)
+    Serial.printf("ERROR in InputTDM::setChannelsStr(): strlen of cs (%d) too large for %d characters!\n", strlen(cs), MaxChannelStr);
+  strncpy(Channels, cs, MaxChannelStr);
+  Channels[MaxChannelStr - 1] = '\0';
 }
 
 
@@ -622,7 +622,7 @@ void InputTDM::start() {
       // generate channel string:
       bool chips_id = chips && (NDataPins[bus] == 1) && (TDMUse == 3);
       for (uint8_t k=0; k < NChans[bus]; k++) {
-        if (strlen(Channels) + 16 >= MaxChannels)
+        if (strlen(Channels) + 16 >= MaxChannelStr)
 	  break;
 	uint8_t c = chan_map[k];
 	if (ChanStrs[bus][c] == 0)
