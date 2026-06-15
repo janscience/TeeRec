@@ -41,6 +41,12 @@ public:
   // This is the fixed gain of a first amplification stage.
   void setPreGain(float pregain);
 
+  // Set format string for displaying pregain.
+  void setPreGainFormat(const char *format);
+
+  // Provide a list of valid pregain.
+  void setPreGainSelection(const float *selection, size_t n);
+
   // Return channel source.
   Input::SOURCE source() const { return Source.enumValue(); };
   
