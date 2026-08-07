@@ -18,7 +18,8 @@ public:
   // Constructor. Sets configuration name to "ADC".
   InputTDMSettings(Menu &menu, uint32_t rate=0, int nchannels=16,
 		   float gain=0, float pregain=1,
-		   Input::SOURCE source=Input::SINGLE_ENDED);
+		   Input::SOURCE source=Input::SINGLE_ENDED,
+		   size_t nsource=Input::MaxSource);
 
   // Return number of channels.
   // The number of channels is set from the configuration file

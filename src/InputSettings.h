@@ -18,7 +18,8 @@ public:
 
   // Constructor. Sets configuration name to "ADC".
   InputSettings(Menu &menu, uint32_t rate=0, float pregain=1,
-		Input::SOURCE source=Input::SINGLE_ENDED);
+		Input::SOURCE source=Input::SINGLE_ENDED,
+		size_t nsource=Input::MaxSource);
   
   // Constructor. Sets configuration name.
   InputSettings(const char *name, uint32_t rate=0, float pregain=1,
@@ -52,6 +53,9 @@ public:
   
   // Set the channel source.
   void setSource(Input::SOURCE source);
+  
+  // Set maximum number of channel source selections.
+  void setSourceNSelection(size_t n);
 
   // Apply settings on input.
   // Default implementation sets the sampling rate.

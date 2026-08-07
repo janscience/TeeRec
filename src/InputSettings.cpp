@@ -2,11 +2,11 @@
 
 
 InputSettings::InputSettings(Menu &menu, uint32_t rate, float pregain,
-			     Input::SOURCE source) :
+			     Input::SOURCE source, size_t nsource) :
   Menu(menu, "ADC"),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Source(*this, "Source", source, Input::SourceEnums, Input::SourceStrings,
-	 Input::MaxSource, Admin),
+	 nsource, Admin),
   PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin) {
   Source.disable();
   PreGain.disable();
@@ -52,6 +52,11 @@ void InputSettings::setPreGainSelection(const float *selection, size_t n) {
 
 void InputSettings::setSource(Input::SOURCE source) {
   Source.setEnumValue(source);
+}
+
+
+void InputSettings::setSourceNSelection(size_t nsource) {
+  Source.setNSelection(nsource);
 }
 
 
