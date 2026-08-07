@@ -224,8 +224,8 @@ public:
   
 protected:
     
-  unsigned int read(uint16_t address);
-  bool write(uint16_t address, uint8_t val);
+  unsigned int readPCM(uint16_t address);
+  bool writePCM(uint16_t address, uint8_t val);
   uint8_t goToPage(uint8_t page);
 
   float readCoefficient(uint8_t address);

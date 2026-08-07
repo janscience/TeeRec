@@ -214,8 +214,8 @@ protected:
 
   void setGainUnit(InputTDM &tdm);
     
-  unsigned int read(uint16_t address);
-  bool write(uint16_t address, uint8_t val);
+  unsigned int readTLV(uint16_t address);
+  bool writeTLV(uint16_t address, uint8_t val);
   uint8_t goToPage(uint8_t page);
 
   bool setActive();

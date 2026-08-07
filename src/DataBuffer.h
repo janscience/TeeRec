@@ -55,8 +55,11 @@ public:
   // Return used resolution of data buffer in bits per sample (max 16 bits).
   uint8_t dataResolution() const { return DataBits; };
 
-  // Set used resolution of data buffer in bits per sample (max 16 bits).
+  // Set resolution of data buffer in bits per sample (max 16 bits).
   virtual void setDataResolution(uint8_t bits);
+  
+  // Set resolution of data buffer to the resolution of the data acquisition.
+  virtual void setDataResolution();
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate; };

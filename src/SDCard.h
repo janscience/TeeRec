@@ -23,6 +23,7 @@ class SDCard : public SDClass {
   virtual ~SDCard();
 
   // The name of the SD card, as passed to the constructor.
+  virtual const char *name() { return Name; };  // overrides FS::name()
   const char *name() const { return Name; };
 
 #ifdef BUILTIN_SDCARD
@@ -147,6 +148,7 @@ class SDCard : public SDClass {
   // Format the SD card, but keep the specified (small) file.
   // Progress is reported on stream.
   // If erase_card, flash erase all data first.
+  using SDClass::format;
   void format(const char *path=0, bool erase_card=false,
 	      Stream &stream=Serial);
 

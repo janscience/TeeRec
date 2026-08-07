@@ -81,7 +81,8 @@ class Device {
   virtual void report(Stream &stream=Serial);
 
   /* Write the device's chip and all the key-value pairs to stream (if available()). */
-  virtual void write(Stream &stream=Serial, size_t indent=0, size_t indent_incr=4) const;
+  virtual void write(Stream &stream=Serial, size_t indent=0,
+		     size_t indent_incr=4) const;
 
   
 protected:

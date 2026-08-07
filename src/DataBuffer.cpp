@@ -39,6 +39,11 @@ void DataBuffer::setDataResolution(uint8_t bits) {
 }
 
 
+void DataBuffer::setDataResolution() {
+  DataBits = Bits;
+}
+
+
 float DataBuffer::bufferTime() const {
   return float(NBuffer/NChannels)/Rate;
 }

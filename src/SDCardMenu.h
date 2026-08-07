@@ -124,7 +124,7 @@ class SDCleanRecordingsAction : public SDCardAction {
   void setMinSize(uint64_t min_size);
   void setSuffix(const char *suffix);
   void setAltSuffix(const char *alt_suffix);
-  void set(uint64_t min_size, const char *suffix="", const char *alt_suffix="", bool remove=true);
+  void setParams(uint64_t min_size, const char *suffix="", const char *alt_suffix="", bool remove=true);
 
  protected:
 

@@ -171,12 +171,12 @@ bool ControlTLV320ADC::begin() {
 
   // setup slave mode with auto PLL:
   /* this is all default:
-  unsigned int val = read(TLV320_MST_CFG0_REG);
+  unsigned int val = readTLV(TLV320_MST_CFG0_REG);
   val &= ~0x08;  // FS_MODE: rate is multiple of 48kHz 
   val &= ~0x20;  // AUTO_MODE_PLL_DIS: PLL enabled 
   val &= ~0x40;  // AUTO_CLK_CFG: auto clock configuration enabled
   val &= ~0x80;  // MST_SLV_CFG: slave mode
-  if (!write(TLV320_MST_CFG0_REG, val))
+  if (!writeTLV(TLV320_MST_CFG0_REG, val))
     return false;
   */
 
@@ -276,14 +276,14 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   }
   /* TODO: ???
   // disable GPO on channel pin:
-  if (!write(TLV320_GPO_CFG0_REG + channel, 0x00))
+  if (!writeTLV(TLV320_GPO_CFG0_REG + channel, 0x00))
     return false;
   // disable GPI on channel pin:
   unsigned int val = 0x00;
   if (source == DIFFERENTIAL) {
-    val = read(TLV320_GPI_CFG0_REG + channel/2);
+    val = readTLV(TLV320_GPI_CFG0_REG + channel/2);
     val &= ~(0x07) << 4*(channel % 2);
-    if (!write(TLV320_GPI_CFG0_REG + channel/2, val))
+    if (!writeTLV(TLV320_GPI_CFG0_REG + channel/2, val))
       return false;
   }
   */
@@ -297,7 +297,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   val |= (impedance & 0x03) << 2; // IMP
   val |= (source & 0x03) << 5;    // INSRC
   val |= 0x80;                    // INTYP: Line input
-  if (!write(addr, val))
+  if (!writeTLV(addr, val))
     return false;
   // configure channel output:
   if (slot < 0) {
@@ -309,7 +309,7 @@ bool ControlTLV320ADC::setupChannel(uint8_t channel, Input::SOURCE source,
   }
   val = 0;
   val = slot & 0x3F;
-  if (!write(TLV320_ASI_CH1_REG + channel, val))
+  if (!writeTLV(TLV320_ASI_CH1_REG + channel, val))
     return false;
   if (UseChannel[channel] == 0)
     NChannels++;
@@ -347,13 +347,13 @@ bool ControlTLV320ADC::setupI2S() {
   val |= Bits << 4;    // ASI_WLEN
   if (Rate > 75000)
     val |= 0x02;       // TX_EDGE, see page 4 in sbaa383c.pdf
-  if (!write(TLV320_ASI_CFG0_REG, val))
+  if (!writeTLV(TLV320_ASI_CFG0_REG, val))
     return false;
   // TODO: only for the one chip directly connected to host:
   val = 0;
   val |= 0x20;         // TX_KEEPER: Bus keeper is always enabled
   val |= 0x80;         // TX_LSB: Transmit the LSB for the first half cycle and Hi-Z for the second half cycle 
-  if (!write(TLV320_ASI_CFG1_REG, val))
+  if (!writeTLV(TLV320_ASI_CFG1_REG, val))
     return false;
   return setActive();  
 }
@@ -368,13 +368,13 @@ bool ControlTLV320ADC::setupTDM() {
   val |= Bits << 4;    // ASI_WLEN
   if (Rate > 75000)    // does not matter for 96kHz?
     val |= 0x02;       // TX_EDGE, see page 4 in sbaa383c.pdf
-  if (!write(TLV320_ASI_CFG0_REG, val))
+  if (!writeTLV(TLV320_ASI_CFG0_REG, val))
     return false;
   // TODO: only for the one chip directly connected to host:
   val = 0;
   val |= 0x20;         // TX_KEEPER: Bus keeper is always enabled
   val |= 0x80;         // TX_LSB: Transmit the LSB for the first half cycle and Hi-Z for the second half cycle 
-  if (!write(TLV320_ASI_CFG1_REG, val))
+  if (!writeTLV(TLV320_ASI_CFG1_REG, val))
     return false;
   return setActive();
 }
@@ -407,16 +407,16 @@ bool ControlTLV320ADC::setActive() {
       val |= 0x80 >> c;
     }
   }
-  if (!write(TLV320_IN_CH_EN_REG, val))
+  if (!writeTLV(TLV320_IN_CH_EN_REG, val))
     return false;
   // enable output channels and put unused channels into tristate mode:
-  if (!write(TLV320_ASI_OUT_CH_EN_REG, val))
+  if (!writeTLV(TLV320_ASI_OUT_CH_EN_REG, val))
     return false;
   // power up:
   val = 0x60;    // power up ADC, PDM, and PLL
   if (UseBias)
     val |= 0x80;
-  if (!write(TLV320_PWR_CFG_REG, val))
+  if (!writeTLV(TLV320_PWR_CFG_REG, val))
     return false;
   return true;
 }
@@ -429,7 +429,7 @@ bool ControlTLV320ADC::setBias(BIAS bias, FULLSCALE fullscale) {
     val |= 0x10;
   else if (bias == BIAS_AVDD)
     val |= 0x60;
-  if (!write(TLV320_BIAS_CFG_REG, val))
+  if (!writeTLV(TLV320_BIAS_CFG_REG, val))
     return false;
   UseBias = true;
   return true;
@@ -462,13 +462,13 @@ float ControlTLV320ADC::gainFromDecibel(float level) {
 float ControlTLV320ADC::gainDecibel(uint8_t channel) {
   int8_t igain = 100;
   if (channel == 0)
-    igain = read(TLV320_CH1_CFG1_REG) >> 2;
+    igain = readTLV(TLV320_CH1_CFG1_REG) >> 2;
   else if (channel == 1)
-    igain = read(TLV320_CH2_CFG1_REG) >> 2;
+    igain = readTLV(TLV320_CH2_CFG1_REG) >> 2;
   else if (channel == 2)
-    igain = read(TLV320_CH3_CFG1_REG) >> 2;
+    igain = readTLV(TLV320_CH3_CFG1_REG) >> 2;
   else if (channel == 3)
-    igain = read(TLV320_CH4_CFG1_REG) >> 2;
+    igain = readTLV(TLV320_CH4_CFG1_REG) >> 2;
   if (igain > 42)
     return -999.0;
   float gainv = (float)igain;
@@ -489,19 +489,19 @@ float ControlTLV320ADC::setGainDecibel(uint8_t channel, float level) {
   // set level:
   int8_t igain = (uint8_t)(level) << 2;
   if (channel == 0) {
-    if (!write(TLV320_CH1_CFG1_REG, igain))
+    if (!writeTLV(TLV320_CH1_CFG1_REG, igain))
       return NAN;
   }
   else if (channel == 1) {
-    if (!write(TLV320_CH2_CFG1_REG, igain))
+    if (!writeTLV(TLV320_CH2_CFG1_REG, igain))
       return NAN;
   }
   else if (channel == 2) {
-    if (!write(TLV320_CH3_CFG1_REG, igain))
+    if (!writeTLV(TLV320_CH3_CFG1_REG, igain))
       return NAN;
   }
   else if (channel == 3) {
-    if (!write(TLV320_CH4_CFG1_REG, igain))
+    if (!writeTLV(TLV320_CH4_CFG1_REG, igain))
       return NAN;
   }
   else {
@@ -563,7 +563,7 @@ float ControlTLV320ADC::setGain(InputTDM &tdm, float gain) {
 
   
 float ControlTLV320ADC::volumeDecibel() {
-  unsigned int val = read(TLV320_CH1_CFG2_REG);
+  unsigned int val = readTLV(TLV320_CH1_CFG2_REG);
   float level = 0.5*val - 100.5;
   return level;
 }
@@ -571,9 +571,9 @@ float ControlTLV320ADC::volumeDecibel() {
 
 float ControlTLV320ADC::setVolumeDecibel(InputTDM &tdm, float level) {
   // gang volume control across channels:
-  unsigned int val = read(TLV320_DSP_CFG1_REG);
+  unsigned int val = readTLV(TLV320_DSP_CFG1_REG);
   val |= 0x80;    // DVOL_GANG
-  if (!write(TLV320_DSP_CFG1_REG, val))
+  if (!writeTLV(TLV320_DSP_CFG1_REG, val))
     return NAN;
   // set digital volume:
   if (level > 27.0)
@@ -582,7 +582,7 @@ float ControlTLV320ADC::setVolumeDecibel(InputTDM &tdm, float level) {
     val = 0;
   else
     val = int(2.0*(level + 100.5));
-  if (!write(TLV320_CH1_CFG2_REG, val))
+  if (!writeTLV(TLV320_CH1_CFG2_REG, val))
     return NAN;
   level = 0.5*val - 100.5;
   VolumeGain = gainFromDecibel(level);
@@ -594,11 +594,11 @@ float ControlTLV320ADC::setVolumeDecibel(InputTDM &tdm, float level) {
 
 
 bool ControlTLV320ADC::setSmoothGainChange(bool smooth) {
-  unsigned int val = read(TLV320_DSP_CFG1_REG);
+  unsigned int val = readTLV(TLV320_DSP_CFG1_REG);
   val &= ~0x10;
   if (!smooth)
     val |= 0x10;    // DISABLE_SOFT_STEP
-  if (!write(TLV320_DSP_CFG1_REG, val))
+  if (!writeTLV(TLV320_DSP_CFG1_REG, val))
     return false;
   setValue("Smooth gain change", OnOffStrings[smooth]);
   return true;
@@ -606,12 +606,12 @@ bool ControlTLV320ADC::setSmoothGainChange(bool smooth) {
 
 
 bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
-  unsigned int val = read(TLV320_DSP_CFG0_REG);
+  unsigned int val = readTLV(TLV320_DSP_CFG0_REG);
   val &= ~0x30;
   val |= lowpass << 4;
   val &= ~0x03;
   val |= highpass;
-  if (!write(TLV320_DSP_CFG0_REG, val))
+  if (!writeTLV(TLV320_DSP_CFG0_REG, val))
     return false;
   setValue("Lowpass", LowpassStrings[lowpass]);
   if (highpass == 0)
@@ -634,15 +634,15 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
 
 
 bool ControlTLV320ADC::powerdown() {
-  unsigned int val = read(TLV320_PWR_CFG_REG);
+  unsigned int val = readTLV(TLV320_PWR_CFG_REG);
   val &= ~0x03;   // clear reserved bits
   val &= ~0xE0;   // clear MICBIAS, ADC, PDM, PLL
-  if (!write(TLV320_PWR_CFG_REG, val))
+  if (!writeTLV(TLV320_PWR_CFG_REG, val))
     return false;
 
   val = 0;
   val &= ~0x01;   // clear SLEEP_ENZ
-  if (!write(TLV320_SLEEP_CFG_REG, val))
+  if (!writeTLV(TLV320_SLEEP_CFG_REG, val))
     return false;
 
   Rate = 0;
@@ -676,18 +676,18 @@ bool ControlTLV320ADC::powerup() {
   strcpy(VolumeStr, "0dB");
   
   unsigned int val = 0x01;  // software reset
-  if (!write(TLV320_SW_RESET_REG, val))
+  if (!writeTLV(TLV320_SW_RESET_REG, val))
     return false;
   
   val = 0;
   val |= 0x01;    // set SLEEP_ENZ
   val |= 0x80;    // set AREG_SELECT to internal 1.8V supply
-  if (!write(TLV320_SLEEP_CFG_REG, val))
+  if (!writeTLV(TLV320_SLEEP_CFG_REG, val))
     return false;
   delay(10);
   
   val = 0x00;     // disable BIQUAD_CFG
-  if (!write(TLV320_DSP_CFG1_REG, val))
+  if (!writeTLV(TLV320_DSP_CFG1_REG, val))
     return false;
 
   I2CBus->beginTransmission(I2CAddress);
@@ -711,7 +711,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
     Serial.printf("ERROR: invalid channel %d!\n", channel);
     return;
   }
-  unsigned int val = read(addr);
+  unsigned int val = readTLV(addr);
   Serial.printf("CH%d_CFG0:\n", channel + 1);
   Serial.print("  Input source: ");
   unsigned int source = (val & 0x60) >> 5;
@@ -738,7 +738,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
   else
     Serial.println("microphone");
   // slot:
-  val = read(TLV320_ASI_CH1_REG + channel);
+  val = readTLV(TLV320_ASI_CH1_REG + channel);
   Serial.printf("  TDM slot    : %d\n", val & 0x3F);
   Serial.print("  Output line : ");
   if (val & 0x40)
@@ -754,7 +754,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
     addr = TLV320_CH3_CFG1_REG;
   else if (channel == 3)
     addr = TLV320_CH4_CFG1_REG;
-  val = read(addr);
+  val = readTLV(addr);
   Serial.print("  Gain        : ");
   uint8_t gain = val >> 2;
   if (gain <= 42)
@@ -762,7 +762,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
   else
     Serial.println("reserved");
   // channel volume:
-  val = read(TLV320_DSP_CFG1_REG);
+  val = readTLV(TLV320_DSP_CFG1_REG);
   bool ganged = (val & 0x80);
   if (ganged)    // channels ganged
     addr = TLV320_CH1_CFG2_REG;
@@ -774,7 +774,7 @@ void ControlTLV320ADC::printChannel(uint8_t channel) {
     addr = TLV320_CH3_CFG2_REG;
   else if (channel == 3)
     addr = TLV320_CH4_CFG2_REG;
-  val = read(addr);
+  val = readTLV(addr);
   Serial.print("  Volume      : ");
   Serial.printf("%6.1fdB", 0.5*val - 100.5);
   if (ganged)
@@ -788,7 +788,7 @@ void ControlTLV320ADC::printState() {
   for (uint8_t c=0; c<4; c++)
     printChannel(c);
   Serial.println("DSP_CFG0:");
-  unsigned int val = read(TLV320_DSP_CFG0_REG);
+  unsigned int val = readTLV(TLV320_DSP_CFG0_REG);
   Serial.print("  Decimation filter: ");
   unsigned int flt = (val & 0x30) >> 4;
   if (flt == 0)
@@ -821,7 +821,7 @@ void ControlTLV320ADC::printState() {
     Serial.println("reserved");
   
   Serial.println("DEV_STS0:");
-  val = read(TLV320_DEV_STS0_REG);
+  val = readTLV(TLV320_DEV_STS0_REG);
   Serial.printf("  %02X", val);
   uint8_t b = 0x80;
   for (uint8_t k=0; k<8; k++) {
@@ -831,7 +831,7 @@ void ControlTLV320ADC::printState() {
   }
   
   Serial.print("DEV_STS1: ");
-  val = read(TLV320_DEV_STS1_REG);
+  val = readTLV(TLV320_DEV_STS1_REG);
   val >>= 5;
   if (val == 4)
     Serial.println("sleep mode");
@@ -843,7 +843,7 @@ void ControlTLV320ADC::printState() {
     Serial.println("unknown");
 
   Serial.println("ASI_CFG0:");
-  val = read(TLV320_ASI_CFG0_REG);
+  val = readTLV(TLV320_ASI_CFG0_REG);
   Serial.print("  protocol     : ");
   uint8_t prot = (val >> 6) & 0x03;
   if (prot == 0)
@@ -872,7 +872,7 @@ void ControlTLV320ADC::printState() {
   
   Serial.println("ASI_STS:");
   Serial.print("  sampling rate      : ");
-  val = read(TLV320_ASI_STS_REG);
+  val = readTLV(TLV320_ASI_STS_REG);
   uint8_t rate = val & 0xF0;
   rate >>= 4;
   if (rate == 0)
@@ -988,13 +988,13 @@ void ControlTLV320ADC::printDSPCoefficients() {
 uint32_t ControlTLV320ADC::readCoefficient(uint8_t address) {
   uint32_t uval = 0;
   unsigned int val;
-  val = read(address++);  // bit[31:24]
+  val = readTLV(address++);  // bit[31:24]
   uval |= (val & 0xFF) << 24;
-  val = read(address++);  // bit[23:16]
+  val = readTLV(address++);  // bit[23:16]
   uval |= (val & 0xFF) << 16;
-  val = read(address++);  // bit[15:8]
+  val = readTLV(address++);  // bit[15:8]
   uval |= (val & 0xFF) << 8;
-  val = read(address++);  // bit[7:0]
+  val = readTLV(address++);  // bit[7:0]
   uval |= (val & 0xFF);
   // bit 31 is sign bit. divide 1 by bit 0-30
   // 0x80000000 -> 1.0 , 0x7FFFFFFF -> 0.9999999995
@@ -1002,7 +1002,7 @@ uint32_t ControlTLV320ADC::readCoefficient(uint8_t address) {
 }
 
 
-unsigned int ControlTLV320ADC::read(uint16_t address) {
+unsigned int ControlTLV320ADC::readTLV(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
   uint8_t result;
@@ -1011,7 +1011,7 @@ unsigned int ControlTLV320ADC::read(uint16_t address) {
     result = goToPage(page);
     if (result != 0) {
 #ifdef DEBUG
-      Serial.printf("ControlTLV320ADC: read() failed to go to page %02x, error = %02x\n", page, result);
+      Serial.printf("ControlTLV320ADC: readTLV() failed to go to page %02x, error = %02x\n", page, result);
 #endif
       return 0x0100;
     }
@@ -1022,23 +1022,23 @@ unsigned int ControlTLV320ADC::read(uint16_t address) {
   result = I2CBus->endTransmission(false);
   if (result != 0) {
 #ifdef DEBUG
-    Serial.printf("ControlTLV320ADC: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
+    Serial.printf("ControlTLV320ADC: readTLV() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
 #endif
     return 0x0200 + result;
   }
   if (I2CBus->requestFrom(I2CAddress, (uint8_t)1) < 1) {
-    Serial.printf("ControlTLV320ADC: empty read() on page %02x reg %02x\n", page, reg);
+    Serial.printf("ControlTLV320ADC: empty readTLV() on page %02x reg %02x\n", page, reg);
     return 0x0400;
   }
   int val = I2CBus->read();
 #ifdef DEBUG
-    Serial.printf("ControlTLV320ADC: read page %02x, reg %02x, val %02x\n", page, reg, val);
+    Serial.printf("ControlTLV320ADC: readTLV page %02x, reg %02x, val %02x\n", page, reg, val);
 #endif
   return val;
 }
 
 
-bool ControlTLV320ADC::write(uint16_t address, uint8_t val) {
+bool ControlTLV320ADC::writeTLV(uint16_t address, uint8_t val) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
   uint8_t result;
@@ -1051,7 +1051,7 @@ bool ControlTLV320ADC::write(uint16_t address, uint8_t val) {
     result = goToPage(page);
     if (result != 0) {
 #ifdef DEBUG
-      Serial.printf("ControlTLV320ADC: write() failed to go to page %02x, error = %02x\n", page, result);
+      Serial.printf("ControlTLV320ADC: writeTLV() failed to go to page %02x, error = %02x\n", page, result);
 #endif
       return false;
     }
@@ -1065,7 +1065,7 @@ bool ControlTLV320ADC::write(uint16_t address, uint8_t val) {
   result = I2CBus->endTransmission();
   if (result != 0) {
 #ifdef DEBUG
-    Serial.printf("ControlTLV320ADC: write() failed, error = %02x\n", result);
+    Serial.printf("ControlTLV320ADC: writeTLV() failed, error = %02x\n", result);
 #endif
     return false;
   }

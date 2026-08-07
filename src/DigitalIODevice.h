@@ -29,6 +29,8 @@ class DigitalIODevice: public Device {
   // and set member variable Available to true).
   DigitalIODevice();
 
+  using Device::write;
+
   // Set mode (INPUT, INPUT_PULLUP, INPUT_PULLDOWN, OUTPUT, OUTPUT_OPENDRAIN)
   // for pin.
   // If inverted, then invert the meaning of LOW and HIGH for this pin.

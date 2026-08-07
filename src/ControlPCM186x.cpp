@@ -222,13 +222,13 @@ void ControlPCM186x::setRate(InputTDM &tdm, uint32_t rate) {
 ControlPCM186x::INPUT_CHANNELS ControlPCM186x::channel(OUTPUT_CHANNELS adc) {
   int ichan = 0x0100;
   if (adc == ADC1L)
-    ichan = read(PCM186x_ADC1L_INPUT_SEL_REG);
+    ichan = readPCM(PCM186x_ADC1L_INPUT_SEL_REG);
   else if (adc == ADC1R)
-    ichan = read(PCM186x_ADC1R_INPUT_SEL_REG);
+    ichan = readPCM(PCM186x_ADC1R_INPUT_SEL_REG);
   else if (adc == ADC2L)
-    ichan = read(PCM186x_ADC2L_INPUT_SEL_REG);
+    ichan = readPCM(PCM186x_ADC2L_INPUT_SEL_REG);
   else if (adc == ADC2R)
-    ichan = read(PCM186x_ADC2R_INPUT_SEL_REG);
+    ichan = readPCM(PCM186x_ADC2R_INPUT_SEL_REG);
   if (ichan > 0x00ff)
     return CHNONE;
   ichan &= 0x0f;
@@ -296,22 +296,22 @@ bool ControlPCM186x::setupChannel(OUTPUT_CHANNELS adc, INPUT_CHANNELS channel,
   // set input channel for adc:
   int chan = 0;
   if (adc == ADC1L) {
-    if (!write(PCM186x_ADC1L_INPUT_SEL_REG, val))
+    if (!writePCM(PCM186x_ADC1L_INPUT_SEL_REG, val))
       return false;
     chan = 0;
   }
   else if (adc == ADC1R) {
-    if (!write(PCM186x_ADC1R_INPUT_SEL_REG, val))
+    if (!writePCM(PCM186x_ADC1R_INPUT_SEL_REG, val))
       return false;
     chan = 1;
   }
   else if (adc == ADC2L) {
-    if (!write(PCM186x_ADC2L_INPUT_SEL_REG, val))
+    if (!writePCM(PCM186x_ADC2L_INPUT_SEL_REG, val))
       return false;
     chan = 2;
   }
   else if (adc == ADC2R) {
-    if (!write(PCM186x_ADC2R_INPUT_SEL_REG, val))
+    if (!writePCM(PCM186x_ADC2R_INPUT_SEL_REG, val))
       return false;
     chan = 3;
   }
@@ -381,14 +381,14 @@ bool ControlPCM186x::setupI2S() {
   uint8_t fval = fmt;   // FMT
   fval |= bits << 2;    // TX_WLEN
   fval |= bits << 6;    // RX_WLEN
-  if (!write(PCM186x_I2S_FMT_REG, fval))
+  if (!writePCM(PCM186x_I2S_FMT_REG, fval))
     return false;
   // enable DOUT2 on GPIO0:
   if (UseChannel[2] || UseChannel[3]) {
-    unsigned int val = read(PCM186x_GPIO_FUNC_1_REG);
+    unsigned int val = readPCM(PCM186x_GPIO_FUNC_1_REG);
     val &= ~0x07;
     val |= 0x05;
-    if (!write(PCM186x_GPIO_FUNC_1_REG, val))
+    if (!writePCM(PCM186x_GPIO_FUNC_1_REG, val))
       return false;
   }
   return true;  
@@ -403,17 +403,17 @@ bool ControlPCM186x::setupTDM(bool offs) {
   val |= bits << 2;    // TX_WLEN
   val |= 0x10;         // TDM_LRCK_MODE
   val |= bits << 6;    // RX_WLEN
-  if (!write(PCM186x_I2S_FMT_REG, val))
+  if (!writePCM(PCM186x_I2S_FMT_REG, val))
     return false;
   // number of ADCs:
   if (NChannels == 4)
     val = 0x01;        // TDM_OSEL: 4 channel TDM
   else
     val = 0x00;        // TDM_OSEL: 2 channel TDM
-  if (!write(PCM186x_I2S_TDM_OSEL_REG, val))
+  if (!writePCM(PCM186x_I2S_TDM_OSEL_REG, val))
       return false;
   val = offs ? 0x80 : 0x00; // TX_TDM_OFFSET
-  if (!write(PCM186x_I2S_TX_OFFSET_REG, val))
+  if (!writePCM(PCM186x_I2S_TX_OFFSET_REG, val))
     return false;
   return true;  
 }
@@ -451,13 +451,13 @@ float ControlPCM186x::gainFromDecibel(float level) {
 float ControlPCM186x::gainDecibel(OUTPUT_CHANNELS adc) {
   int igain = 0x0100;
   if (adc == ADC1L)
-    igain = read(PCM186x_PGA_CH1L_REG);
+    igain = readPCM(PCM186x_PGA_CH1L_REG);
   else if (adc == ADC1R)
-    igain = read(PCM186x_PGA_CH1R_REG);
+    igain = readPCM(PCM186x_PGA_CH1R_REG);
   else if (adc == ADC2L)
-    igain = read(PCM186x_PGA_CH2L_REG);
+    igain = readPCM(PCM186x_PGA_CH2L_REG);
   else if (adc == ADC2R)
-    igain = read(PCM186x_PGA_CH2R_REG);
+    igain = readPCM(PCM186x_PGA_CH2R_REG);
   if (igain > 0x00ff)
     return -999.0;
   // TODO: also check for mute!
@@ -481,37 +481,37 @@ float ControlPCM186x::setGainDecibel(OUTPUT_CHANNELS adc, float level) {
   int8_t igain = (int8_t)(2*level);
   if (adc == ADCLR) {
     if (!PGALinked) {
-      unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+      unsigned int val = readPCM(PCM186x_PGA_CONTROL_REG);
       val |= 0x40;
-      if (!write(PCM186x_PGA_CONTROL_REG, val))
+      if (!writePCM(PCM186x_PGA_CONTROL_REG, val))
 	return NAN;
       PGALinked = true;
     }
-    if (!write(PCM186x_PGA_CH1L_REG, igain))
+    if (!writePCM(PCM186x_PGA_CH1L_REG, igain))
       return NAN;
   }
   else {
     if (PGALinked) {
-      unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+      unsigned int val = readPCM(PCM186x_PGA_CONTROL_REG);
       val &= ~0x40;
-      if (!write(PCM186x_PGA_CONTROL_REG, val))
+      if (!writePCM(PCM186x_PGA_CONTROL_REG, val))
 	return NAN;
       PGALinked = false;
     }
     if (adc & ADC1L) {
-      if (!write(PCM186x_PGA_CH1L_REG, igain))
+      if (!writePCM(PCM186x_PGA_CH1L_REG, igain))
 	return NAN;
     }
     if (adc & ADC1R) {
-      if (!write(PCM186x_PGA_CH1R_REG, igain))
+      if (!writePCM(PCM186x_PGA_CH1R_REG, igain))
 	return NAN;
     }
     if (adc & ADC2L) {
-      if (!write(PCM186x_PGA_CH2L_REG, igain))
+      if (!writePCM(PCM186x_PGA_CH2L_REG, igain))
 	return NAN;
     }
     if (adc & ADC2R) {
-      if (!write(PCM186x_PGA_CH2R_REG, igain))
+      if (!writePCM(PCM186x_PGA_CH2R_REG, igain))
 	return NAN;
     }
   }
@@ -565,11 +565,11 @@ float ControlPCM186x::setGain(InputTDM &tdm, float gain) {
 
 
 bool ControlPCM186x::setSmoothGainChange(bool smooth) {
-  unsigned int val = read(PCM186x_PGA_CONTROL_REG);
+  unsigned int val = readPCM(PCM186x_PGA_CONTROL_REG);
   val &= ~0x80;
   if (smooth)
     val |= 0x80;    // SMOOTH
-  if (!write(PCM186x_PGA_CONTROL_REG, val))
+  if (!writePCM(PCM186x_PGA_CONTROL_REG, val))
     return false;
   setValue("Smooth gain change", OnOffStrings[smooth]);
   return true;
@@ -577,13 +577,13 @@ bool ControlPCM186x::setSmoothGainChange(bool smooth) {
 
 
 bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
-  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  unsigned int val = readPCM(PCM186x_DSP_CTRL_REG);
   val &= ~0x20;
   if (lowpass == IIR)
     val |= 0x02;    // FLT
   if (highpass)
     val |= 0x01;    // HPF_EN
-  if (!write(PCM186x_DSP_CTRL_REG, val))
+  if (!writePCM(PCM186x_DSP_CTRL_REG, val))
     return false;
   setValue("Lowpass", LowpassStrings[lowpass]);
   setValue("Highpass", OnOffStrings[highpass]);
@@ -592,32 +592,32 @@ bool ControlPCM186x::setFilters(LOWPASS lowpass, bool highpass) {
 
 
 bool ControlPCM186x::mute(OUTPUT_CHANNELS adcs) {
-  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  unsigned int val = readPCM(PCM186x_DSP_CTRL_REG);
   val |= adcs;    // MUTE_CHX_Y
-  if (!write(PCM186x_DSP_CTRL_REG, val))
+  if (!writePCM(PCM186x_DSP_CTRL_REG, val))
     return false;
   return true;
 }
 
 
 bool ControlPCM186x::unmute(OUTPUT_CHANNELS adcs) {
-  unsigned int val = read(PCM186x_DSP_CTRL_REG);
+  unsigned int val = readPCM(PCM186x_DSP_CTRL_REG);
   val &= ~0x0f;
   val &= ~adcs;    // MUTE_CHX_Y
-  if (!write(PCM186x_DSP_CTRL_REG, val))
+  if (!writePCM(PCM186x_DSP_CTRL_REG, val))
     return false;
   return true;
 }
 
 
 bool ControlPCM186x::setMicBias(bool power, bool bypass) {
-  unsigned int val = read(PCM186x_MIC_BIAS_CTRL_REG);
+  unsigned int val = readPCM(PCM186x_MIC_BIAS_CTRL_REG);
   val &= ~0x11;
   if (power)
     val |= 0x01;    // PDZ
   if (bypass)
     val |= 0x10;    // TERM
-  if (!write(PCM186x_MIC_BIAS_CTRL_REG, val))
+  if (!writePCM(PCM186x_MIC_BIAS_CTRL_REG, val))
     return false;
   return true;
 }
@@ -629,7 +629,7 @@ bool ControlPCM186x::powerdown() {
   val |= 0x04;          // set PWRDN
   val |= 0x02;          // set SLEEP
   val |= 0x01;          // set STBY
-  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+  if (!writePCM(PCM186x_PWRDN_CTRL_REG, val))
     return false;
   
   CurrentPage = 10;
@@ -648,7 +648,7 @@ bool ControlPCM186x::powerup() {
   
   unsigned int val = 0; // clear PWRDN
   val |= 0x70;          // write reserved bits
-  if (!write(PCM186x_PWRDN_CTRL_REG, val))
+  if (!writePCM(PCM186x_PWRDN_CTRL_REG, val))
     return false;
 
   // setup clocks for BCK input slave PLL mode
@@ -660,7 +660,7 @@ bool ControlPCM186x::powerup() {
   val |= 0x08;          // ADC_CLK_SRC = PLL
   val &= ~0x10;         // MST_MODE = slave
   val |= 0x20;          // MST_SCK_SRC = PLL
-  if (!write(PCM186x_CLK_MODE_REG, val))
+  if (!writePCM(PCM186x_CLK_MODE_REG, val))
     return false;
   return true;
 }
@@ -668,7 +668,7 @@ bool ControlPCM186x::powerup() {
 
 void ControlPCM186x::printState() {
   Serial.print("DEV_STAT: ");
-  unsigned int val = read(PCM186x_DEV_STAT_REG);
+  unsigned int val = readPCM(PCM186x_DEV_STAT_REG);
   val &= 0x0F;
   if (val == 0)
     Serial.println("power down");
@@ -690,7 +690,7 @@ void ControlPCM186x::printState() {
     Serial.println("reserved");
 
   Serial.print("FS_INFO: ");
-  val = read(PCM186x_FS_INFO_REG);
+  val = readPCM(PCM186x_FS_INFO_REG);
   val &= 0x07;
   if (val == 0)
     Serial.println("out of range (low) or LRCK halt");
@@ -709,7 +709,7 @@ void ControlPCM186x::printState() {
   else
     Serial.println("invalid sampling frequency");
 
-  val = read(PCM186x_CURRENT_RATIO_REG);
+  val = readPCM(PCM186x_CURRENT_RATIO_REG);
   Serial.print("SCK_RATIO: ");
   unsigned int ratio = val & 0x07;
   if (ratio == 0)
@@ -749,7 +749,7 @@ void ControlPCM186x::printState() {
     Serial.println("invalid BCK ratio or LRCK halt");
 
   Serial.print("CLK_ERROR_STAT: ");
-  val = read(PCM186x_CLK_ERROR_STAT_REG);
+  val = readPCM(PCM186x_CLK_ERROR_STAT_REG);
   if ((val & 0x01) > 0)
     Serial.print("SCK error ");
   if ((val & 0x02) > 0)
@@ -765,7 +765,7 @@ void ControlPCM186x::printState() {
   Serial.println();
 
   Serial.print("POWER_STAT: ");
-  val = read(PCM186x_POWER_STAT_REG);
+  val = readPCM(PCM186x_POWER_STAT_REG);
   if ((val & 0x01) == 0)
     Serial.print("bad or missing LDO ");
   if ((val & 0x02) == 0)
@@ -775,20 +775,20 @@ void ControlPCM186x::printState() {
   Serial.println();
 
   int8_t ival;
-  ival = read(PCM186x_PGA_CH1L_REG);
+  ival = readPCM(PCM186x_PGA_CH1L_REG);
   Serial.printf("PGA_CH1L: %5.1fdB\n", float(ival)/2);
-  ival = read(PCM186x_PGA_CH1R_REG);
+  ival = readPCM(PCM186x_PGA_CH1R_REG);
   Serial.printf("PGA_CH1R: %5.1fdB\n", float(ival)/2);
-  ival = read(PCM186x_PGA_CH2L_REG);
+  ival = readPCM(PCM186x_PGA_CH2L_REG);
   Serial.printf("PGA_CH2L: %5.1fdB\n", float(ival)/2);
-  ival = read(PCM186x_PGA_CH2R_REG);
+  ival = readPCM(PCM186x_PGA_CH2R_REG);
   Serial.printf("PGA_CH2R: %5.1fdB\n", float(ival)/2);
 }
 
 
 void ControlPCM186x::printRegisters() {
   for (uint8_t reg=0x01; reg<0x80; reg++) {
-    uint8_t val = read(reg);
+    uint8_t val = readPCM(reg);
     Serial.printf("%02x %02x\n", reg, val);
   }
 }
@@ -845,34 +845,34 @@ float ControlPCM186x::readCoefficient(uint8_t address) {
   }
   val = 0;
   for (int n=0; n < 10 && val == 0; n++) {
-    val = read(0x0101);
+    val = readPCM(0x0101);
     delay(1);
   }
-  write(0x0102, address); // memory address for reading/writing coefficient
-  write(0x0101, 0x02);    // bit 0 request=1/check=0 write, bit 1 request=1/check=0 read
+  writePCM(0x0102, address); // memory address for reading/writing coefficient
+  writePCM(0x0101, 0x02);    // bit 0 request=1/check=0 write, bit 1 request=1/check=0 read
   val = 0x02;             // check progress in reading
   for (int n=0; n < 10 && val == 0x02; n++) {
-    val = read(0x0101);
+    val = readPCM(0x0101);
     delay(1);
   }
-  val = read(0x0108);  // bit[23:16]
+  val = readPCM(0x0108);  // bit[23:16]
   coeff = (val & 0xf0) >> 4;
   frac = (val & 0x0f) << 16;
-  val = read(0x0109);  // bit[15:8]
+  val = readPCM(0x0109);  // bit[15:8]
   frac |= val << 8;
-  val = read(0x010A);  // bit[7:0]
+  val = readPCM(0x010A);  // bit[7:0]
   frac |= val;
   //Serial.printf("%d  %d\n", coeff, frac);
   coeff += frac/float(1 << 20);   // TODO: fix this!!!
   return coeff;
-  // read(0x010B);  // read data from 24-bit memory, bit 7
+  // readPCM(0x010B);  // read data from 24-bit memory, bit 7
 
   // write: 0x0104 bit[23:16], 0x0105 bit[15:8], 0x0106 bit[7:0],
   // 0x0107 bit 7 "write data to 24-bit memory"
 }
 
 
-unsigned int ControlPCM186x::read(uint16_t address) {
+unsigned int ControlPCM186x::readPCM(uint16_t address) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
   uint8_t result;
@@ -884,7 +884,7 @@ unsigned int ControlPCM186x::read(uint16_t address) {
     result = goToPage(page);
     if (result != 0) {
 #ifdef DEBUG
-      Serial.printf("ControlPCM186x: read() failed to go to page %02x, error = %02x\n", page, result);
+      Serial.printf("ControlPCM186x: readPCM() failed to go to page %02x, error = %02x\n", page, result);
 #endif
       return 0x0100;
     }
@@ -895,12 +895,12 @@ unsigned int ControlPCM186x::read(uint16_t address) {
   result = I2CBus->endTransmission(false);
   if (result != 0) {
 #ifdef DEBUG
-    Serial.printf("ControlPCM186x: read() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
+    Serial.printf("ControlPCM186x: readPCM() failed to write reg %02x on page %02x, error = %02x\n", reg, page, result);
 #endif
     return 0x0200 + result;
   }
   if (I2CBus->requestFrom(I2CAddress, (uint8_t)1) < 1) {
-    Serial.printf("ControlPCM186x: empty read() on page %02x reg %02x\n", page, reg);
+    Serial.printf("ControlPCM186x: empty readPCM() on page %02x reg %02x\n", page, reg);
     return 0x0400;
   }
   int val = I2CBus->read();
@@ -911,7 +911,7 @@ unsigned int ControlPCM186x::read(uint16_t address) {
 }
 
 
-bool ControlPCM186x::write(uint16_t address, uint8_t val) {
+bool ControlPCM186x::writePCM(uint16_t address, uint8_t val) {
   uint8_t reg = (uint8_t) (address & 0xFF);
   uint8_t page = (uint8_t) ((address >> 8) & 0xFF);
   uint8_t result;
@@ -927,7 +927,7 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
     result = goToPage(page);
     if (result != 0) {
 #ifdef DEBUG
-      Serial.printf("ControlPCM186x: write() failed to go to page %02x, error = %02x\n", page, result);
+      Serial.printf("ControlPCM186x: writePCM() failed to go to page %02x, error = %02x\n", page, result);
 #endif
       return false;
     }
@@ -941,7 +941,7 @@ bool ControlPCM186x::write(uint16_t address, uint8_t val) {
   result = I2CBus->endTransmission();
   if (result != 0) {
 #ifdef DEBUG
-    Serial.printf("ControlPCM186x: write() failed, error = %02x\n", result);
+    Serial.printf("ControlPCM186x: writePCM() failed, error = %02x\n", result);
 #endif
     return false;
   }

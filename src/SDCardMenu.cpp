@@ -134,7 +134,7 @@ void SDCleanRecordingsAction::setAltSuffix(const char *alt_suffix) {
   AltSuffix = alt_suffix;
 }
 
-void SDCleanRecordingsAction::set(uint64_t min_size, const char *suffix,
+void SDCleanRecordingsAction::setParams(uint64_t min_size, const char *suffix,
 				  const char *alt_suffix, bool remove) {
   setMinSize(min_size);
   setSuffix(suffix);

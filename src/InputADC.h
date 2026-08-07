@@ -350,7 +350,7 @@ private:
   
   // Set used resolution of data buffer in bits per sample based on
   // requested resolution and scaling.
-  void setDataResolution();
+  virtual void setDataResolution();
   
 };
 
