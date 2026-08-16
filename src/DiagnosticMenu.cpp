@@ -1,4 +1,3 @@
-#include <EEPROM.h>
 #include <TeensyBoard.h>
 #include <Device.h>
 #include <DiagnosticMenu.h>
@@ -9,10 +8,12 @@ extern "C" uint8_t external_psram_size;
 #endif
 
 
-TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
+TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name,
+				   Storage &storage) :
   InfoAction(menu, name),
+  Store(&storage),
   EEPROMLength("") {
-  snprintf(EEPROMLength, 16, "%ubytes", EEPROM.length());
+  snprintf(EEPROMLength, 16, "%ubytes", Store->length());
   add("Board", teensyBoard());
   add("CPU speed", teensySpeedStr());
   add("Serial number", teensySN());
@@ -23,54 +24,6 @@ TeensyInfoAction::TeensyInfoAction(Menu &menu, const char *name) :
 
 void TeensyInfoAction::update() {
   setValue("CPU speed", teensySpeedStr());
-}
-
-
-EEPROMHexdumpAction::EEPROMHexdumpAction(Menu &menu, const char *name) : 
-  Action(menu, name) {
-}
-
-
-void EEPROMHexdumpAction::execute(Stream &stream) {
-  unsigned int i=0;
-  while (i < EEPROM.length()) {
-    stream.printf("%04x  ", i);
-    for (unsigned int j=0; j < 2; j++) {
-      for (unsigned int k=0; k < 8; k++) {
-	if (i + 8*j + k < EEPROM.length())
-	  stream.printf("%02x ", EEPROM.read(i + 8*j + k));
-	else
-	  stream.print("   ");
-      }
-      stream.print(" ");
-    }
-    stream.printf("|");
-    for (unsigned int j=0; j < 16 && i < EEPROM.length(); j++) {
-      uint8_t c = EEPROM.read(i);
-      if (c < 0x20 || c >= 0x7f)
-	c = '.';
-      stream.printf("%c", c);
-      i++;
-    }
-    stream.print("|\n");
-  }
-  stream.println();
-}
-
-
-EEPROMClearAction::EEPROMClearAction(Menu &menu, const char *name) : 
-  Action(menu, name) {
-}
-
-
-void EEPROMClearAction::execute(Stream &stream) {
-  if (Action::yesno("Do you really want to clear the full EEPROM memory?", false, echo(), stream)) {
-    for (unsigned int i=0; i < EEPROM.length(); i++)
-      EEPROM.update(i, 0xff);
-    stream.printf("Wrote 0xFF to all %u EEPROM memory cells.\n",
-		  EEPROM.length());
-    stream.println();
-  }
 }
 
 
@@ -313,15 +266,13 @@ Device *DevicesAction::device(size_t index) {
 }
 
 
-DiagnosticMenu::DiagnosticMenu(Menu &menu,
+DiagnosticMenu::DiagnosticMenu(Menu &menu, Storage &storage,
 			       Device* dev0, Device* dev1, Device* dev2,
 			       Device* dev3, Device* dev4, Device* dev5,
 			       Device* dev6, Device* dev7, Device* dev8,
 			       Device* dev9, Device* dev10, Device* dev11) :
   Menu(menu, "Diagnostics", StreamInput),
-  TeensyInfoAct(*this, "Teensy info"),
-  EEPROMHexdumpAct(*this, "EEPROM memory content"),
-  EEPROMClearAct(*this, "Clear EEPROM memory"),
+  TeensyInfoAct(*this, "Teensy info", storage),
   PSRAMInfoAct(*this, "PSRAM memory info"),
   PSRAMTestAct(*this, "PSRAM memory test"),
   DevicesAct(*this, "Input devices", dev0, dev1, dev2, dev3, dev4, dev5,

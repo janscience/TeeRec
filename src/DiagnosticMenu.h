@@ -18,38 +18,15 @@ class TeensyInfoAction : public InfoAction {
  public:
 
   /* Initialize and add to configuration menu. */
-  TeensyInfoAction(Menu &menu, const char *name);
+  TeensyInfoAction(Menu &menu, const char *name, Storage &storage);
   
   /* Update CPU speed. */
   void update();
 
  protected:
 
+  Storage *Store;
   char EEPROMLength[16];
-};
-
-
-class EEPROMHexdumpAction : public Action {
-
- public:
-
-  /* Initialize and add to configuration menu. */
-  EEPROMHexdumpAction(Menu &menu, const char *name);
-
-  /* Hexdump of EEPROM memory. */
-  virtual void execute(Stream &stream=Serial);
-};
-
-
-class EEPROMClearAction : public Action {
-
- public:
-
-  /* Initialize and add to configuration menu. */
-  EEPROMClearAction(Menu &menu, const char *name);
-  
-  /* Write 0xFF to all EEPROM memory. */
-  virtual void execute(Stream &stream=Serial);
 };
 
 
@@ -122,7 +99,7 @@ class DiagnosticMenu : public Menu {
 
 public:
 
-  DiagnosticMenu(Menu &menu,
+  DiagnosticMenu(Menu &menu, Storage &storage,
 		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
 		 Device* dev3=0, Device* dev4=0, Device* dev5=0,
 		 Device* dev6=0, Device* dev7=0, Device* dev8=0,
@@ -132,8 +109,6 @@ public:
   void updateCPUSpeed();
 
   TeensyInfoAction TeensyInfoAct;
-  EEPROMHexdumpAction EEPROMHexdumpAct;
-  EEPROMClearAction EEPROMClearAct;
   PSRAMInfoAction PSRAMInfoAct;
   PSRAMTestAction PSRAMTestAct;
   DevicesAction DevicesAct;
