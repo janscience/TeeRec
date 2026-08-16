@@ -19,7 +19,8 @@ public:
   InputTDMSettings(Menu &menu, uint32_t rate=0, int nchannels=16,
 		   float gain=0, float pregain=1,
 		   Input::SOURCE source=Input::SINGLE_ENDED,
-		   size_t nsource=Input::MaxSource);
+		   size_t nsource=Input::MaxSource,
+		   bool reverse=true);
 
   // Return number of channels.
   // The number of channels is set from the configuration file
@@ -39,11 +40,18 @@ public:
   // manually to appropriate Control instances.
   void setGainDecibel(float gain);
 
+  /* Whether order of input pins should be reversed. */
+  bool reverseInputs() const { return ReverseInputs.enumValue(); };
+
+  /* Set whether order of input pins should be reversed. */
+  void setReverseInputs(bool reverse);
+
     
 protected:
 
   NumberParameter<uint8_t> NChannels;
   NumberParameter<float> Gain;
+  BoolParameter ReverseInputs;
   
 };
 
