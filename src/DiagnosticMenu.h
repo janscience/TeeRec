@@ -105,6 +105,12 @@ public:
 		 Device* dev6=0, Device* dev7=0, Device* dev8=0,
 		 Device* dev9=0, Device* dev10=0, Device* dev11=0);
 
+  DiagnosticMenu(Menu &menu,
+		 Device* dev0=0, Device* dev1=0, Device* dev2=0,
+		 Device* dev3=0, Device* dev4=0, Device* dev5=0,
+		 Device* dev6=0, Device* dev7=0, Device* dev8=0,
+		 Device* dev9=0, Device* dev10=0, Device* dev11=0);
+
   /* Update CPU speed. */
   void updateCPUSpeed();
 

@@ -282,6 +282,16 @@ DiagnosticMenu::DiagnosticMenu(Menu &menu, Storage &storage,
 }
 
 
+DiagnosticMenu::DiagnosticMenu(Menu &menu,
+			       Device* dev0, Device* dev1, Device* dev2,
+			       Device* dev3, Device* dev4, Device* dev5,
+			       Device* dev6, Device* dev7, Device* dev8,
+			       Device* dev9, Device* dev10, Device* dev11) :
+  DiagnosticMenu(menu, EEPROMStorage, dev0, dev1, dev2, dev3, dev4, dev5,
+		 dev6, dev7, dev8, dev9, dev10, dev11) {
+}
+
+
 void DiagnosticMenu::updateCPUSpeed() {
   TeensyInfoAct.update();
 }
