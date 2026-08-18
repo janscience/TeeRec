@@ -148,8 +148,8 @@ class Blink {
   // setTiming(). After this one-time multiple blink, the blinking
   // pattern provided by setSingle(), setDouble(), setTriple(),
   // setMultiple(), set() or setDelayed() is resumed.
-  void blinkMultiple(int n, uint32_t intervalms, uint32_t onms,
-		     uint32_t offms, bool reset=true);
+  void blinkMultiple(int n, uint32_t intervalms=0, uint32_t onms=0,
+		     uint32_t offms=0, bool reset=true);
 
   
   // detailed level (requires update() to be called regularly):
