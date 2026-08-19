@@ -636,10 +636,13 @@ void InputTDM::start() {
       }
       // generate channel string:
       bool chips_id = chips && (NDataPins[bus] == 1) && (TDMUse == 3);
+      uint8_t chan_map_rev[MaxChanMap];
+      for (uint8_t c=0; c < NChans[bus]; c++)
+	chan_map_rev[chan_map[c]] = c;
       for (uint8_t k=0; k < NChans[bus]; k++) {
         if (strlen(Channels) + 16 >= MaxChannelStr)
 	  break;
-	uint8_t c = chan_map[k];
+	uint8_t c = chan_map_rev[k];
 	if (ChanStrs[bus][c] == 0)
 	  continue;
 	if (strlen(Channels) > 0)
