@@ -18,15 +18,16 @@ InputTDM *InputTDM::TDM = 0;
 
 
 InputTDM::InputTDM(volatile sample_t *buffer, size_t nbuffer) :
-  Input(buffer, nbuffer, TDM_FRAME_SIZE_32BIT*TDM_FRAMES/2) {
+  Input(buffer, nbuffer, TDM_FRAME_SIZE_32BIT*TDM_FRAMES/2),
+  DownSample(1),
+  NReverse(1),
+  NRoll(0) {
   TDM = this;
   setSource(SINGLE_ENDED);
   setDataResolution(16);
   Bits = 32;
   Rate = 0;
   NChannels = 0;
-  DownSample = 1;
-  NReverse = 1;
   Channels[0] = '\0';
   for (uint8_t bus=0; bus<2; bus++) {
     NChans[bus] = 0;
@@ -183,6 +184,11 @@ void InputTDM::clearChannelMapping() {
 }
 
 
+void InputTDM::setRoll(int8_t n) {
+  NRoll = n;
+}
+
+
 void InputTDM::setReverse(uint8_t n) {
   NReverse = n > 1 ? n : 1;
 }
@@ -280,6 +286,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
+  stream.printf("  nroll:      %d\n", NRoll);
   stream.printf("  nreverse:   %d\n", NReverse);
   for (uint8_t bus=0; bus<2; bus++) {
     if (NChans[bus] > 0) {
@@ -588,6 +595,14 @@ void InputTDM::start() {
 	  }
 	  chan_map[c] = UserChanMap[bus][c];
 	}
+      }
+      // roll channel order:
+      if (NRoll != 0) {
+	uint8_t chan_map_orig[MaxChanMap];
+	for (uint8_t c=0; c < NChans[bus]; c++)
+	  chan_map_orig[c] = chan_map[c];
+	for (uint8_t c=0; c < NChans[bus]; c++)
+	  chan_map[c] = chan_map_orig[(c + NRoll + NChans[bus])%NChans[bus]];
       }
       // reverse blocks of channels:
       if (NReverse > 1) {

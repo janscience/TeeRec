@@ -117,10 +117,20 @@ class InputTDM : public Input {
   // Clear all user defined channel mappings.
   void clearChannelMapping();
 
-  // Number of channels being reversed in their order.
+  // Number of positions the channel mapping is shifted.
+  uint8_t roll() const { return NRoll; };
+
+  // Roll the channel mapping by N.
+  // E.g. if n=2 and we have 8 channels, then the channel order is
+  // 2, 3, 4, 5, 6, 7, 0, 1
+  void setRoll(int8_t n);
+
+  // Size of blocks of channels being reversed in their order.
   uint8_t reverse() const { return NReverse; };
 
-  // Set number of channels to be reversed.
+  // Set blocks of channels to be reversed.
+  // E.g. if n=4, then the channel order is
+  // 3, 2, 1, 0, 7, 6, 5, 4, 11, 10, 9, 8, ...
   void setReverse(uint8_t n);
 
   // Swap left/right channels.
@@ -178,6 +188,7 @@ protected:
   
   uint8_t DownSample;
   uint8_t NReverse;
+  int8_t NRoll;
 
   char Channels[MaxChannelStr];
 
