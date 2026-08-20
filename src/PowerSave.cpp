@@ -77,3 +77,15 @@ void shutdown_pins() {
   */
 }
 
+
+void shutdown_teensy() {
+#if defined(__IMXRT1062__)
+  // from defragster on https://forum.pjrc.com/index.php?threads/on-off-pin-on-teensy-4-1.73346/:
+  SNVS_LPCR |= SNVS_LPCR_TOP; // Setting the SNVS_LPCR_TOP bit of the SNVS_LPCR register enables power off on the i.MX6SX
+  asm volatile ("dsb");       // Data Synchronization Barrier - ensure that the subsequent ISB instruction is executed only after the write to the MPU Control Register is completed
+  while (1) asm ("wfi");      // Wait For Interrupt
+#endif
+}
+
+
+

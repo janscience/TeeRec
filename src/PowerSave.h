@@ -6,6 +6,10 @@
 #ifndef PowerSave_h
 #define PowerSave_h
 
+/* Shutdown, i.e. power off Teensy. Need to reconnect power to reboot.
+   Available for Teensy 4.x only. */
+void shutdown_teensy();
+
 /* Shutdown USB driver. */
 void shutdown_usb();
 
