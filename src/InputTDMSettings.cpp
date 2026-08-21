@@ -28,3 +28,9 @@ void InputTDMSettings::setReverseInputs(bool reverse) {
   ReverseInputs.setBoolValue(reverse);
 }
 
+
+void InputTDMSettings::transmit(Storage &storage) {
+  Rate.transmit(storage);
+  Gain.transmit(storage);
+}
+

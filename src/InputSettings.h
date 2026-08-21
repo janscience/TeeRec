@@ -65,7 +65,7 @@ public:
   // Default implementation transfers the sampling rate.
   virtual void setConfiguration(const Input *input);
 
-    
+
 protected:
 
   NumberParameter<uint32_t> Rate;
