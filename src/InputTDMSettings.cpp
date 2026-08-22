@@ -29,8 +29,9 @@ void InputTDMSettings::setReverseInputs(bool reverse) {
 }
 
 
-void InputTDMSettings::transmit(Storage &storage) {
+void InputTDMSettings::transmitSync(Storage &storage, Stream &stream) const {
   Rate.transmit(storage);
   Gain.transmit(storage);
+  storage.put(1, false);
 }
 

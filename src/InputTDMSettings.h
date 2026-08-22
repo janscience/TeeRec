@@ -46,10 +46,8 @@ public:
   /* Set whether order of input pins should be reversed. */
   void setReverseInputs(bool reverse);
 
-  using Menu::transmit;
-
   /* Transmit Rate and Gain via storage. */
-  void transmit(Storage &storage);
+  void transmitSync(Storage &storage, Stream &stream=Serial) const;
 
     
 protected:
