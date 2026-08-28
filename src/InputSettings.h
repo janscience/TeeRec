@@ -19,11 +19,13 @@ public:
   // Constructor. Sets configuration name to "ADC".
   InputSettings(Menu &menu, uint32_t rate=0, float pregain=1,
 		Input::SOURCE source=Input::SINGLE_ENDED,
-		size_t nsource=Input::MaxSource);
+		size_t nsource=Input::MaxSource,
+		float highpass=0.0);
   
   // Constructor. Sets configuration name.
   InputSettings(const char *name, uint32_t rate=0, float pregain=1,
-		Input::SOURCE source=Input::SINGLE_ENDED);
+		Input::SOURCE source=Input::SINGLE_ENDED,
+		float highpass=0.0);
 
   // Return sampling rate per channel in Hertz.
   uint32_t rate() const { return Rate.value(); };
@@ -57,6 +59,15 @@ public:
   // Set maximum number of channel source selections.
   void setSourceNSelection(size_t n);
 
+  // Return cutoff frequency of high-pass filter in Hertz.
+  float highpass() const { return Highpass.value(); };
+  
+  // Set cutoff frequency of highpass filter in Hertz.
+  void setHighpass(float cutoff);
+
+  // Provide a list of valid cutoff frequencies for the highpass filter in Hertz.
+  void setHighpassSelection(const float *selection, size_t n);
+
   // Apply settings on input.
   // Default implementation sets the sampling rate.
   virtual void configure(Input *input) const;
@@ -71,6 +82,7 @@ protected:
   NumberParameter<uint32_t> Rate;
   EnumParameter<Input::SOURCE> Source;
   NumberParameter<float> PreGain;
+  NumberParameter<float> Highpass;
   
 };
 

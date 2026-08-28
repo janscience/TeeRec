@@ -2,26 +2,31 @@
 
 
 InputSettings::InputSettings(Menu &menu, uint32_t rate, float pregain,
-			     Input::SOURCE source, size_t nsource) :
+			     Input::SOURCE source, size_t nsource,
+			     float highpass) :
   Menu(menu, "ADC"),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Source(*this, "Source", source, Input::SourceEnums, Input::SourceStrings,
 	 nsource, Admin),
-  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin) {
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin),
+  Highpass(*this, "Highpass", highpass, 0.0, 100000.0, "%.1f", "Hz", "Hz") {
   Source.disable();
   PreGain.disable();
+  Highpass.disable();
 }
 
 
 InputSettings::InputSettings(const char *name, uint32_t rate, float pregain,
-			     Input::SOURCE source) :
+			     Input::SOURCE source, float highpass) :
   Menu(name),
   Rate(*this, "SamplingRate", rate, 1, 1000000, "%.1f", "Hz", "kHz"),
   Source(*this, "Source", source, Input::SourceEnums, Input::SourceStrings,
 	 Input::MaxSource, Admin),
-  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin) {
+  PreGain(*this, "Pregain", pregain, 0, 100000, "%.1f", 0, 0, Admin),
+  Highpass(*this, "Highpass", highpass, 0.0, 100000.0, "%.1f", "Hz", "Hz") {
   Source.disable();
   PreGain.disable();
+  Highpass.disable();
 }
 
 
@@ -60,12 +65,23 @@ void InputSettings::setSourceNSelection(size_t nsource) {
 }
 
 
+void setHighpass(float cutoff) {
+  Highpass.setValue(cutoff);
+}
+
+
+void setHighpassSelection(const float *selection, size_t n) {
+  Highpass.setSelection(selection, n);
+}
+
+
 void InputSettings::configure(Input *input) const {
   if (input == 0)
     return;
   input->setRate(rate());
   input->setSource(source());
   input->setPreGain(pregain());
+  input->setHighpass(highpass());
 }
 
 
@@ -75,4 +91,5 @@ void InputSettings::setConfiguration(const Input *input) {
   setRate(input->rate());
   setSource(input->source());
   setPreGain(input->pregain());
+  setHighpass(input->highpass());
 }
