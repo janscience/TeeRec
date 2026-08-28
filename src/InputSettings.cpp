@@ -65,12 +65,12 @@ void InputSettings::setSourceNSelection(size_t nsource) {
 }
 
 
-void setHighpass(float cutoff) {
+void InputSettings::setHighpass(float cutoff) {
   Highpass.setValue(cutoff);
 }
 
 
-void setHighpassSelection(const float *selection, size_t n) {
+void InputSettings::setHighpassSelection(const float *selection, size_t n) {
   Highpass.setSelection(selection, n);
 }
 
@@ -81,7 +81,6 @@ void InputSettings::configure(Input *input) const {
   input->setRate(rate());
   input->setSource(source());
   input->setPreGain(pregain());
-  input->setHighpass(highpass());
 }
 
 
@@ -91,5 +90,4 @@ void InputSettings::setConfiguration(const Input *input) {
   setRate(input->rate());
   setSource(input->source());
   setPreGain(input->pregain());
-  setHighpass(input->highpass());
 }

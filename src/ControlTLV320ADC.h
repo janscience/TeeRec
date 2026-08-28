@@ -46,7 +46,7 @@ public:
   };
 
   enum HIGHPASS : uint8_t {
-    CUSTOM,
+    CUSTOM_HP,
     LOW_HP,
     MED_HP,
     HIGH_HP
@@ -191,8 +191,11 @@ public:
       Highpass cutoff frequencies:
       LOW_HP: 0.00025*rate
       MED_HP: 0.002*rate
-      HIGH_HP: 0.008*rate */
-  bool setFilters(LOWPASS lowpass=LINEAR, HIGHPASS highpass=LOW_HP);
+      HIGH_HP: 0.008*rate
+      CUSTOM_HP: take cutoff frequency from cutoff.
+      Needs to be called *after* the sampling rate has been set. */
+  bool setFilters(LOWPASS lowpass=LINEAR, HIGHPASS highpass=LOW_HP,
+		  float cutoff=0.0);
 
   /*! Enter power down mode. */
   bool powerdown();

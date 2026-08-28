@@ -605,7 +605,8 @@ bool ControlTLV320ADC::setSmoothGainChange(bool smooth) {
 }
 
 
-bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
+bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass,
+				  float cutoff) {
   unsigned int val = readTLV(TLV320_DSP_CFG0_REG);
   val &= ~0x30;
   val |= lowpass << 4;
@@ -614,8 +615,11 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass) {
   if (!writeTLV(TLV320_DSP_CFG0_REG, val))
     return false;
   setValue("Lowpass", LowpassStrings[lowpass]);
-  if (highpass == 0)
-    strcpy(HighpassStr, "custom");
+  if (highpass == 0) {
+    // TODO programm highpass filter coefficients
+    snprintf(HighpassStr, 8, "%.1fHz", cutoff);
+    HighpassStr[7] = '\0';
+  }
   else {
     if (Rate < 1.0)
       Serial.println("ERROR in ControlTLV320ADC::setFilters(): setRate() should be called before setFilters()");
