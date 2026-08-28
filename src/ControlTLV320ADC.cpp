@@ -618,7 +618,7 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass,
     return false;
   setValue("Lowpass", LowpassStrings[lowpass]);
   if (highpass == 0) {
-    // TODO programm highpass filter coefficients
+    // TODO programm highpass filter coefficients, see page 33
     Highpass = 0.0;
   }
   else {
