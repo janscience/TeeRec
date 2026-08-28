@@ -276,6 +276,8 @@ bool InputTDM::check(uint8_t nchannels, Stream &stream) {
 void InputTDM::report(Stream &stream) {
   char gs[16];
   gainStr(gs, 16);
+  char hps[16];
+  sprintf(hps, "%.1fHz", highpass());
   float bt = bufferTime();
   stream.println("TDM settings:");
   stream.printf("  rate:       %.1fkHz\n", 0.001*Rate);
@@ -286,6 +288,7 @@ void InputTDM::report(Stream &stream) {
   stream.printf("  source:     %s\n", sourceStr());
   stream.printf("  pregain:    %g\n", pregain());
   stream.printf("  gain:       %s\n", gs);
+  stream.printf("  highpass:   %s\n", hps);
   stream.printf("  nroll:      %d\n", NRoll);
   stream.printf("  nreverse:   %d\n", NReverse);
   for (uint8_t bus=0; bus<2; bus++) {

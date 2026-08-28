@@ -47,6 +47,12 @@ class Input : public DataBuffer {
   // Set the channel source.
   void setSource(SOURCE source);
 
+  // Cutoff frequency of a highpass filter in Hertz.
+  float highpass() const;
+
+  // Set cutoff frequency of a highpass filter in Hertz.
+  void setHighpass(float cutoff);
+
   // Check validity of buffers and channels.
   // Returns true if everything is ok.
   // Otherwise print warnings on stream.
@@ -84,6 +90,7 @@ protected:
   bool Running;
   mutable uint32_t StartTime;
   SOURCE Source;
+  float Highpass;
   
 };
 

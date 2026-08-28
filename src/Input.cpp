@@ -13,7 +13,8 @@ Input::Input(volatile sample_t *buffer, size_t nbuffer, size_t dmabuffer) :
   DataBuffer(buffer, nbuffer, dmabuffer),
   Running(false),
   StartTime(0),
-  Source(SINGLE_ENDED) {
+  Source(SINGLE_ENDED),
+  Highpass(0.0) {
 }
 
 
@@ -29,6 +30,16 @@ const char* Input::sourceStr() const {
 
 void Input::setSource(Input::SOURCE source) {
   Source = source;
+}
+
+
+float Input::highpass() const {
+  return Highpass;
+}
+
+
+void Input::setHighpass(float cutoff) {
+  Highpass = cutoff;
 }
 
 

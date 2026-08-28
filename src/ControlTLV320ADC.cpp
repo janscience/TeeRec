@@ -134,6 +134,7 @@ ControlTLV320ADC::ControlTLV320ADC(TwoWire &wire, uint8_t address,
   MaxAmplmV(2750.0),
   PGAGain(1.0),
   VolumeGain(1.0),
+  Highpass(0.0),
   PGAGainStr("0dB"),
   VolumeStr("0dB"),
   HighpassStr("0Hz")
@@ -395,6 +396,7 @@ bool ControlTLV320ADC::setupTDM(InputTDM &tdm) {
   tdm.setResolution(BitBits[Bits]);
   tdm.setSource(Source);
   tdm.addNChannels(Bus, Pin, NChannels, chan_strs);
+  tdm.setHighpass(Highpass);
   return true;
 }
 
@@ -617,8 +619,7 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass,
   setValue("Lowpass", LowpassStrings[lowpass]);
   if (highpass == 0) {
     // TODO programm highpass filter coefficients
-    snprintf(HighpassStr, 8, "%.1fHz", cutoff);
-    HighpassStr[7] = '\0';
+    Highpass = 0.0;
   }
   else {
     if (Rate < 1.0)
@@ -630,9 +631,10 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass,
       fac = 0.002;
     else if (highpass == HIGH_HP)
       fac = 0.008;
-    snprintf(HighpassStr, 8, "%.1fHz", fac*Rate);
-    HighpassStr[7] = '\0';
+    Highpass = fac*Rate;
   }
+  snprintf(HighpassStr, 8, "%.1fHz", Highpass);
+  HighpassStr[7] = '\0';
   return true;
 }
 

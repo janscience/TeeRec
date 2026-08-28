@@ -244,6 +244,7 @@ protected:
   float MaxAmplmV;
   float PGAGain;
   float VolumeGain;
+  float Highpass;
   char PGAGainStr[8];
   char VolumeStr[8];
   char HighpassStr[8];
