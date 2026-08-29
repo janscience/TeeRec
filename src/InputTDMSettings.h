@@ -20,7 +20,7 @@ public:
 		   float gain=0, float pregain=1,
 		   Input::SOURCE source=Input::SINGLE_ENDED,
 		   size_t nsource=Input::MaxSource,
-		   bool reverse=true);
+		   float highpass=0.0, bool reverse=true);
 
   // Return number of channels.
   // The number of channels is set from the configuration file

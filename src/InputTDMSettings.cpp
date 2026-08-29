@@ -4,8 +4,9 @@
 InputTDMSettings::InputTDMSettings(Menu &menu, uint32_t rate,
 				   int nchannels, float gain,
 				   float pregain, Input::SOURCE source,
-				   size_t nsource, bool reverse) :
-  InputSettings(menu, rate, pregain, source, nsource),
+				   size_t nsource, float highpass,
+				   bool reverse) :
+  InputSettings(menu, rate, pregain, source, nsource, highpass),
   NChannels(*this, "NChannels", nchannels, 1, 128, "%hu", 0, 0, Admin),
   Gain(*this, "Gain", gain, "%.1f", "dB"),
   ReverseInputs(*this, "ReverseInputs", reverse, Admin) {

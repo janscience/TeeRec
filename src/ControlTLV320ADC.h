@@ -223,7 +223,8 @@ protected:
 
   bool setActive();
 
-  uint32_t readCoefficient(uint8_t address);
+  uint32_t readCoefficient(uint16_t address);
+  bool writeCoefficient(uint16_t address, float coef);
   
   TwoWire *I2CBus;
   uint8_t I2CAddress;

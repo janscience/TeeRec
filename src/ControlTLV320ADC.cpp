@@ -101,8 +101,21 @@ const char *ControlTLV320ADC::OnOffStrings[2] = {"off", "on"};
 // register addresses page 0x04, MSB is page, LSB is register:
 #define TLV320_MIX1_CH1_BYT1_REG 0x0408
 // ... many more ...
+
 #define TLV320_IIR_N0_BYT1_REG 0x0448
-// ... many more ...
+#define TLV320_IIR_N0_BYT2_REG 0x0449
+#define TLV320_IIR_N0_BYT3_REG 0x044A
+#define TLV320_IIR_N0_BYT4_REG 0x044B
+
+#define TLV320_IIR_N1_BYT1_REG 0x044C
+#define TLV320_IIR_N1_BYT2_REG 0x044D
+#define TLV320_IIR_N1_BYT3_REG 0x044E
+#define TLV320_IIR_N1_BYT4_REG 0x044F
+
+#define TLV320_IIR_D1_BYT1_REG 0x0450
+#define TLV320_IIR_D1_BYT2_REG 0x0451
+#define TLV320_IIR_D1_BYT3_REG 0x0452
+#define TLV320_IIR_D1_BYT4_REG 0x0453
 
 
 ControlTLV320ADC::ControlTLV320ADC() :
@@ -617,9 +630,25 @@ bool ControlTLV320ADC::setFilters(LOWPASS lowpass, HIGHPASS highpass,
   if (!writeTLV(TLV320_DSP_CFG0_REG, val))
     return false;
   setValue("Lowpass", LowpassStrings[lowpass]);
-  if (highpass == 0) {
-    // TODO programm highpass filter coefficients, see page 33
-    Highpass = 0.0;
+  if (highpass == CUSTOM_HP) {
+    if (cutoff > 0.5*Rate)
+      cutoff = 0.5*Rate;
+    // custom highpass filter coefficients, see page 33:
+    double theta = 6.28318530717959*cutoff/Rate;
+    double d1 = exp(-theta);
+    double n0 = (1.0 + d1)/2.0;
+    double n1 = -n0;
+    if (cutoff < 0.1) {
+      n0 = 1.0;
+      n1 = 0.0;
+      d1 = 0.0;
+    }
+    // H(z) = (n0 + n1/z)/(1 - d1/z)
+    // write coefficients:
+    writeCoefficient(TLV320_IIR_N0_BYT1_REG, n0);
+    writeCoefficient(TLV320_IIR_N1_BYT1_REG, n1);
+    writeCoefficient(TLV320_IIR_D1_BYT1_REG, d1);
+    Highpass = cutoff;
   }
   else {
     if (Rate < 1.0)
@@ -949,7 +978,7 @@ void ControlTLV320ADC::printDSPCoefficients() {
 
   Serial.println();
   Serial.println("Biquad filters:");
-  uint32_t addr = TLV320_BQ1_N0_BYT1_REG;
+  uint16_t addr = TLV320_BQ1_N0_BYT1_REG;
   for (uint8_t b=1; b<=6; b++) {
     for (uint8_t n=0; n<n_biquads; n++) {
       uint32_t val = readCoefficient(addr);
@@ -991,7 +1020,7 @@ void ControlTLV320ADC::printDSPCoefficients() {
 }
 
 
-uint32_t ControlTLV320ADC::readCoefficient(uint8_t address) {
+uint32_t ControlTLV320ADC::readCoefficient(uint16_t address) {
   uint32_t uval = 0;
   unsigned int val;
   val = readTLV(address++);  // bit[31:24]
@@ -1005,6 +1034,30 @@ uint32_t ControlTLV320ADC::readCoefficient(uint8_t address) {
   // bit 31 is sign bit. divide 1 by bit 0-30
   // 0x80000000 -> 1.0 , 0x7FFFFFFF -> 0.9999999995
   return uval;
+}
+
+
+bool ControlTLV320ADC::writeCoefficient(uint16_t address, float coef) {
+  double coef_val = round(coef*pow(2, 31));
+  uint32_t val = 0;
+  if (coef_val > 0) {
+    if (coef >= 1.0)
+      val = 0x7FFFFFFF;
+    else
+      val = static_cast<uint32_t>(coef_val);
+  }
+  else if (coef_val < 0) {
+    if (coef <= -1.0)
+      val = 0x80000000;
+    else
+      val = - static_cast<uint32_t>(-coef_val) + 1;
+  }
+  //Serial.printf("%g -> %08x\n", coef, val);
+  writeTLV(address++, (val >> 24) & 0xFF);
+  writeTLV(address++, (val >> 16) & 0xFF);
+  writeTLV(address++, (val >> 8) & 0xFF);
+  writeTLV(address++, (val) & 0xFF);
+  return true;
 }
 
 
