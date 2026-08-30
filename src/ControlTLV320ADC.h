@@ -65,9 +65,9 @@ public:
   };
 
   enum FULLSCALE : uint8_t {
-    FULLSCALE_275,
-    FULLSCALE_250,
-    FULLSCALE_137
+    FULLSCALE_275 = 0,
+    FULLSCALE_250 = 1,
+    FULLSCALE_137 = 2
   };
 
   /* Do not initialize TLV320 yet. */
